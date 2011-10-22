@@ -196,7 +196,7 @@ void CoralIOImporter::update(Attribute *attribute){
 	float timeVal = time->floatValueAt(0);
 	int timeIndex = int(timeVal);
 	if(timeIndex < cachedMatrixFrames && timeIndex >= 0){
-		float mod = fmod(timeVal, 1.0);
+		float mod = fmod(timeVal, 1.0f);
 		if(mod > 0.0){
 			std::vector<Imath::M44f> &prevMatrixValues = _cachedMatrixValues[timeIndex];
 			std::vector<Imath::M44f> &nextMatrixValues = _cachedMatrixValues[timeIndex + 1];

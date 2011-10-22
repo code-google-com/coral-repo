@@ -36,17 +36,6 @@ Numeric::Numeric():
 	_isArray(false),
 	_size(1){
 	
-	_intValues.resize(1);
-	_intValues[0] = 1;
-	
-	_floatValues.resize(1);
-	_floatValues[0] = 0.0;
-	
-	_vec3Values.resize(1);
-	_vec3Values[0] = Imath::V3f(0.0, 0.0, 0.0);
-	
-	_matrix44Values.resize(1);
-	
 	// giving first initial size of 1 to allow for defoult values to be there before the type is set.
 	_intValues.resize(1);
 	_intValues[0] = 0;
@@ -57,6 +46,9 @@ Numeric::Numeric():
 	_vec3Values.resize(1);
 	_vec3Values[0] = Imath::V3f(0.0, 0.0, 0.0);
 	
+	_quatValues.resize(1);
+	_quatValues[0] = Imath::Quatf();
+
 	_matrix44Values.resize(1);
 	_matrix44Values[0] = Imath::M44f();
 }
@@ -68,6 +60,7 @@ void Numeric::setFromOther(const Numeric &other){
 	_intValues = other._intValues;
 	_floatValues = other._floatValues;
 	_vec3Values = other._vec3Values;
+	_quatValues = other._quatValues;
 	_matrix44Values = other._matrix44Values;
 }
 
@@ -85,6 +78,7 @@ void Numeric::copyFromOther(Numeric *other){
 	_intValues = other->_intValues;
 	_floatValues = other->_floatValues;
 	_vec3Values = other->_vec3Values;
+	_quatValues = other->_quatValues;
 }
 
 Numeric::Type Numeric::type(){
@@ -123,6 +117,15 @@ void Numeric::setType(Numeric::Type type){
 		_size = _vec3Values.size();
 		_isArray = true;
 	}
+	else if(type == numericTypeQuat){
+			_quatValues.resize(1);
+			_size = 1;
+			_isArray = false;
+		}
+		else if(type == numericTypeQuatArray){
+			_size = _quatValues.size();
+			_isArray = true;
+		}
 	else if(type == numericTypeMatrix44){
 		_matrix44Values.resize(1);
 		_size = 1;
@@ -145,6 +148,9 @@ void Numeric::resize(unsigned int newSize){
 		else if(_type == numericTypeVec3 || _type == numericTypeVec3Array){
 			_vec3Values.resize(newSize);
 		}
+		else if(_type == numericTypeQuat || _type == numericTypeQuatArray){
+			_quatValues.resize(newSize);
+		}
 		else if(_type == numericTypeMatrix44 || _type == numericTypeMatrix44Array){
 			_matrix44Values.resize(newSize);
 		}
@@ -158,6 +164,7 @@ bool Numeric::isArrayType(Numeric::Type type){
 		type == numericTypeIntArray ||
 		type == numericTypeFloatArray ||
 		type == numericTypeVec3Array ||
+		type == numericTypeQuatArray ||
 		type == numericTypeMatrix44Array){
 		
 		arrayType = true;
@@ -181,6 +188,11 @@ void Numeric::setVec3ValueAt(unsigned int id, const Imath::V3f &value){
 		_vec3Values[id] = value;
 }
 
+void Numeric::setQuatValueAt(unsigned int id, const Imath::Quatf &value){
+	if(id < _quatValues.size())
+		_quatValues[id] = value;
+}
+
 void Numeric::setMatrix44ValueAt(unsigned int id, const Imath::M44f &value){
 	if(id < _matrix44Values.size())
 		_matrix44Values[id] = value;
@@ -196,6 +208,10 @@ const std::vector<float> &Numeric::floatValues(){
 
 const std::vector<Imath::V3f> &Numeric::vec3Values(){
 	return _vec3Values;
+}
+
+const std::vector<Imath::Quatf> &Numeric::quatValues(){
+	return _quatValues;
 }
 
 const std::vector<Imath::M44f> &Numeric::matrix44Values(){
@@ -238,6 +254,18 @@ Imath::V3f Numeric::vec3ValueAt(unsigned int id){
 	return Imath::V3f(0.0, 0.0, 0.0);
 }
 
+Imath::Quatf Numeric::quatValueAt(unsigned int id){
+	int size = _quatValues.size();
+	if(id < size){
+		return _quatValues[id];
+	}
+	else if(size > 0){
+		return _quatValues[size - 1];
+	}
+
+	return Imath::Quatf();
+}
+
 Imath::M44f Numeric::matrix44ValueAt(unsigned int id){
 	int size = _matrix44Values.size();
 	if(id < size){
@@ -263,6 +291,11 @@ void Numeric::setFloatValues(const std::vector<float> &values){
 void Numeric::setVec3Values(const std::vector<Imath::V3f> &values){
 	_vec3Values = values;
 	_size = _vec3Values.size();
+}
+
+void Numeric::setQuatValues(const std::vector<Imath::Quatf> &values){
+	_quatValues = values;
+	_size = _quatValues.size();
 }
 
 void Numeric::setMatrix44Values(const std::vector<Imath::M44f> &values){
@@ -324,6 +357,32 @@ std::string Numeric::asString(){
 					value += ",";
 				}
 				
+				if(i % 20 == 19)
+					value += "\n";
+			}
+		}
+		else if(_type == numericTypeQuat || _type == numericTypeQuatArray){
+			char buffer[sizeof(float)];
+			for(int i = 0; i < _quatValues.size(); ++i){
+				value += "(";
+				Imath::Quatf *quat = &_quatValues[i];
+
+				sprintf(buffer, "%f", quat->r);
+				value += std::string(buffer) + ",";
+
+				sprintf(buffer, "%f", quat->v.x);
+				value += std::string(buffer) + ",";
+
+				sprintf(buffer, "%f", quat->v.y);
+				value += std::string(buffer) + ",";
+
+				sprintf(buffer, "%f", quat->v.z);
+				value += std::string(buffer) + ")";
+
+				if(i < _quatValues.size() - 1){
+					value += ",";
+				}
+
 				if(i % 20 == 19)
 					value += "\n";
 			}
@@ -454,6 +513,30 @@ void Numeric::setFromString(const std::string &value){
 			}
 		
 			_size = _vec3Values.size();
+		}
+		else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
+			_quatValues.clear();
+
+			std::vector<std::string> values;
+			stringUtils::split(valuesStr, values, "),(");
+
+			for(int i = 0; i < values.size(); ++i){
+				std::string numericValuesStr = stringUtils::strip(values[i], "()");
+				std::vector<std::string> numericValues;
+				stringUtils::split(numericValuesStr, numericValues, ",");
+
+				if(numericValues.size() == 4){
+					float r = stringUtils::parseFloat(numericValues[0]);
+					float x = stringUtils::parseFloat(numericValues[1]);
+					float y = stringUtils::parseFloat(numericValues[2]);
+					float z = stringUtils::parseFloat(numericValues[3]);
+
+					Imath::V3f vec(r, x, y, z);
+					_quatValues.push_back(vec);
+				}
+			}
+
+			_size = _quatValues.size();
 		}
 		else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
 			_matrix44Values.clear();

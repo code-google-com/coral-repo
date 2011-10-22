@@ -81,6 +81,35 @@ private:
 	NumericAttribute *_z;
 };
 
+class QuatNode: public Node{
+public:
+	QuatNode(const std::string &name, Node *parent);
+
+	void update(Attribute *attribute);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+
+private:
+	NumericAttribute *_r;
+	NumericAttribute *_x;
+	NumericAttribute *_y;
+	NumericAttribute *_z;
+	NumericAttribute *_vector;
+};
+
+class QuatToFloats: public Node{
+public:
+	QuatToFloats(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+
+private:
+	NumericAttribute *_vector;
+	NumericAttribute *_r;
+	NumericAttribute *_x;
+	NumericAttribute *_y;
+	NumericAttribute *_z;
+};
+
 class Matrix44Node: public Node{
 public:
 	Matrix44Node(const std::string &name, Node *parent);
