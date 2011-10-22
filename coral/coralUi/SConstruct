@@ -1,0 +1,65 @@
+
+import sys
+import os
+import platform
+import sconsUtils
+
+sconsUtils.importBuildEnvs()
+
+coralPath = os.path.join(os.pardir, "coral")
+coralLib = None
+try:
+    Import("coralLib")
+except:
+    coralLib = SConscript(os.path.join(coralPath, "SConstruct"))
+
+if sys.platform.startswith("win"):
+    coralLib = coralLib[1]
+    
+buildMode = sconsUtils.getEnvVar("CORAL_BUILD_MODE")
+
+env = Environment(
+  CPPPATH = [
+    os.path.join(os.pardir),
+    sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH"),
+    sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"),
+    sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"),
+    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH")],
+  LIBS = [
+    coralLib,
+    sconsUtils.getEnvVar("CORAL_IMATH_LIB"),
+    sconsUtils.getEnvVar("CORAL_IMATH_IEX_LIB"),
+    sconsUtils.getEnvVar("CORAL_PYTHON_LIB"), 
+    sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB"),
+    sconsUtils.getEnvVar("CORAL_TBB_LIB")],
+  LIBPATH = [
+    coralPath,
+    sconsUtils.getEnvVar("CORAL_IMATH_LIBS_PATH"),
+    sconsUtils.getEnvVar("CORAL_PYTHON_LIBS_PATH"), 
+    sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
+    sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH")],
+  SHLIBPREFIX = "",
+  TARGET_ARCH = platform.machine())
+
+if sys.platform.startswith("linux"):
+    env.Append(LIBS = "glut")
+    
+elif sys.platform == "darwin":
+    env["SHLIBSUFFIX"] = ".so"
+    env["FRAMEWORKS"] = ["OpenGL"]
+    
+elif sys.platform.startswith("win"):
+    env.Append(CPPPATH = sconsUtils.getEnvVar("CORAL_OPENGL_INCLUDES_PATH"))
+    env.Append(LIBS = sconsUtils.getEnvVar("CORAL_OPENGL_LIB"))
+    env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_OPENGL_LIBS_PATH"))
+    env["SHLIBSUFFIX"] = ".pyd"
+    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj")
+    env["CCFLAGS"] = "-DCORAL_UI_COMPILE"
+    env["LINKFLAGS"] = ["/MANIFEST:NO"]
+
+target = env.SharedLibrary(
+            target = "_coralUi",
+            source = sconsUtils.findFiles("src", pattern = "*.cpp"),
+            OBJPREFIX = os.path.join("debug" + os.environ["CORAL_BUILD_FLAVOUR"] + buildMode, ""))
+
+Return("target")
