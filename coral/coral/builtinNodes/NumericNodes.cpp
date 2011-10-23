@@ -309,12 +309,6 @@ QuatNode::QuatNode(const std::string &name, Node* parent): Node(name, parent)
 	addAttributeSpecializationLink(_r, _x);
 	addAttributeSpecializationLink(_x, _y);
 	addAttributeSpecializationLink(_y, _z);
-
-	setAttributeDefaultSpecialization(_r, "Float");
-	setAttributeDefaultSpecialization(_x, "Float");
-	setAttributeDefaultSpecialization(_y, "Float");
-	setAttributeDefaultSpecialization(_z, "Float");
-	setAttributeDefaultSpecialization(_vector, "Quat");
 }
 
 void QuatNode::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
@@ -348,13 +342,13 @@ void QuatNode::updateSpecializationLink(Attribute *attributeA, Attribute *attrib
 	}
 }
 
-+void QuatNode::update(Attribute *attribute){
-+	Numeric *r = _r->value();
-+	Numeric *x = _x->value();
-+	Numeric *y = _y->value();
-+	Numeric *z = _z->value();
-+
-+	NumericAttribute *attrs[] = {_r,_x, _y, _z};
+void QuatNode::update(Attribute *attribute){
+	Numeric *r = _r->value();
+	Numeric *x = _x->value();
+	Numeric *y = _y->value();
+	Numeric *z = _z->value();
+
+	NumericAttribute *attrs[] = {_r,_x, _y, _z};
 	int minorSize = findMinorNumericSize(attrs, 4);
 	if(minorSize < 1)
 		minorSize = 1;

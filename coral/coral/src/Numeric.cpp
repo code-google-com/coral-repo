@@ -531,7 +531,7 @@ void Numeric::setFromString(const std::string &value){
 					float y = stringUtils::parseFloat(numericValues[2]);
 					float z = stringUtils::parseFloat(numericValues[3]);
 
-					Imath::V3f vec(r, x, y, z);
+					Imath::Quatf vec(r, x, y, z);
 					_quatValues.push_back(vec);
 				}
 			}
