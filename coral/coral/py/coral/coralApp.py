@@ -78,6 +78,7 @@ class CoralAppData:
     initializedNewNetworkObservers = ObserverCollector()
     generatingSaveScriptObservers = ObserverCollector()
     networkLoadedObservers = ObserverCollector()
+    nodeConnectionChangedObservers = ObserverCollector()
 
 def registeredNodeDescription(className):
     description = ""
@@ -183,6 +184,15 @@ def _notifyAddedAttributeObservers(parentNode, attributeAdded, input = False, ou
         observer.setData("input", input)
         observer.setData("output", output)
         observer.notify()
+
+def _notifyNodeConnectionChanged(node, attribute):
+    for observer in CoralAppData.nodeConnectionChangedObservers.observers(node.id()):
+        observer.setData("attributeId", attribute.id())
+        observer.notify()
+
+def addNodeConnectionChangedObserver(observer, node, callback):
+    CoralAppData.nodeConnectionChangedObservers.add(observer, subject = node.id())
+    observer.setNotificationCallback(callback)
 
 def addAddedNodeObserver(observer, callback):
     CoralAppData.addedNodeObservers.add(observer)
@@ -294,12 +304,6 @@ def logError(message):
 def logInfo(message):
     print "# info: " + (message)
 
-# def _generateUniqueName(name, parent):
-#     while parent.findObject(name):
-#         name = utils.increaseNameNumber(name)
-#     
-#     return name
-
 def _instantiateNode(className, name, parent):
     coralNodeClass = findNodeClass(className)
     
@@ -332,7 +336,6 @@ def createNode(className, name, parent):
     
     node = None
     if nodeClass:
-        #name = _generateUniqueName(name, parent)
         node = _instantiateNode(className, name, parent)
         
         if CoralAppData.appendToLastCreatedNodes:
@@ -349,7 +352,6 @@ def createAttribute(className, name, parent, input = False, output = False):
         attrClass = findAttributeClass(className)
         
         if attrClass:
-            #name = _generateUniqueName(name, parent)
             attr = attrClass(name, parent)
         
             attr._setIsInput(input)
@@ -444,6 +446,7 @@ def init():
     _coral.setCallback("node_addInputAttribute", _node_addInputAttribute)
     _coral.setCallback("node_addOutputAttribute", _node_addOutputAttribute)
     _coral.setCallback("node_deleteIt", _node_deleteIt)
+    _coral.setCallback("node_connectionChanged", _node_connectionChanged)
     _coral.setCallback("attribute_deleteIt", _attribute_deleteIt)
     _coral.setCallback("nestedObject_setName", _nestedobject_setName)
     _coral.setCallback("attribute_specialization", _attribute_specialization)
@@ -467,6 +470,9 @@ def _node_deleteIt(node):
 
 def _node_addOutputAttribute(parentNode, attributeAdded):
     _notifyAddedAttributeObservers(parentNode, attributeAdded, output = True)
+
+def _node_connectionChanged(node, attribute):
+    _notifyNodeConnectionChanged(node, attribute)
 
 def _node_addInputAttribute(parentNode, attributeAdded):
     _notifyAddedAttributeObservers(parentNode, attributeAdded, input = True)

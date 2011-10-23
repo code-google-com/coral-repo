@@ -30,6 +30,7 @@
 import weakref
 from PyQt4 import QtGui, QtCore
 
+from ... import coralApp
 from ...observer import Observer
 from ..nodeEditor import nodeEditor
 from .. import mainWindow
@@ -87,13 +88,22 @@ class NodeInspectorWidget(QtGui.QWidget):
                 return True
         
         return False
+    
+    def _nodeIsConnected(self, coralNode):
+        for attr in coralNode.attributes():
+            if attr.input():
+                return True
+            elif attr.outputs():
+                return True
         
+        return False
+    
     def _updatePresetCombo(self):
         coralNode = self._coralNode()
         
         presets = coralNode.specializationPresets()
         
-        if presets:
+        if len(presets) > 1:
             presetCombo = SpecializationPresetCombo(self)
             for preset in presets:
                 presetCombo._combo.addItem(preset)
@@ -103,7 +113,10 @@ class NodeInspectorWidget(QtGui.QWidget):
             
             self.layout().addWidget(presetCombo)
             self.connect(presetCombo._combo, QtCore.SIGNAL("currentIndexChanged(QString)"), self._presetComboChanged)
-    
+            
+            if self._nodeIsConnected(coralNode):
+                presetCombo._combo.setDisabled(True)
+            
     def build(self):
         coralNode = self.coralNode()
         
@@ -211,7 +224,9 @@ class NodeInspector(QtGui.QWidget):
         self._contentLayout = QtGui.QVBoxLayout(self._contentWidget)
         self._isLocked = False
         self._selectedNodesChangedObserver = Observer()
+        self._nodeConnectionChangedObserver = Observer()
         self._inspectorWidget = None
+        self._node = None
         
         self.setLayout(self._mainLayout)
         self.setWindowTitle("node inspector")
@@ -230,42 +245,59 @@ class NodeInspector(QtGui.QWidget):
         
         self._selectionChanged()
     
+    def _nodeConnectionChanged(self):
+        self.clear()
+        if self._node:
+            self._rebuild(self._node())
+    
     def clear(self):
         self._header._classNameLabel.setText("")
         if self._inspectorWidget:
             self._inspectorWidget.setParent(None)
             self._inspectorWidget = None
     
-    def _selectionChanged(self):
-        if self._isLocked:
-            return
-        
-        self.clear()
-        
-        nodes = nodeEditor.NodeEditor.selectedNodes()
-        
-        if nodes:
+    def _rebuild(self, node = None, attribute = None):
+        if node:
             inspectorWidgetClass = NodeInspectorWidget
-            node = nodes[0]
             
             className = node.className()
-            
+        
             if NodeInspector._inspectorWidgetClasses.has_key(className):
                 inspectorWidgetClass = NodeInspector._inspectorWidgetClasses[className]
-            
+        
             self._inspectorWidget = inspectorWidgetClass(node, self)
             self._inspectorWidget.setNameEditable(True)
             self._inspectorWidget.build()
             self._contentLayout.addWidget(self._inspectorWidget)
             self._header._classNameLabel.setText(node.className())
+        
+            coralApp.addNodeConnectionChangedObserver(self._nodeConnectionChangedObserver, node, self._nodeConnectionChanged)
+        
+        elif attribute:
+            self._inspectorWidget = ProxyAttributeInspectorWidget(attribute, self)
+            self._inspectorWidget.build()
+            self._contentLayout.addWidget(self._inspectorWidget)
+                
+    def _selectionChanged(self):
+        if self._isLocked:
+            return
+        
+        self.clear()
+        self._node = None
+        self._nodeConnectionChangedObserver = Observer()
+        
+        nodes = nodeEditor.NodeEditor.selectedNodes()
+        
+        if nodes:
+            node = nodes[0]
+            self._node = weakref.ref(node)
+            self._rebuild(node)
         else:
             attributes = nodeEditor.NodeEditor.selectedAttributes()
             
             if attributes:
                 attr = attributes[0]
-                self._inspectorWidget = ProxyAttributeInspectorWidget(attr, self)
-                self._inspectorWidget.build()
-                self._contentLayout.addWidget(self._inspectorWidget)
+                self._rebuild(attribute = attr)
         
     def lock(self, value):
         self._isLocked = value

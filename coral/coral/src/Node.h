@@ -101,6 +101,7 @@ public:
 	static void(*_addOutputAttributeCallback)(Node *self, Attribute *attribute);
 	static void(*_removeAttributeCallback)(Node *self, Attribute *attribute);
 	static void(*_deleteItCallback)(Node *self);
+	static void(*_connectionChangedCallback)(Node *self, Attribute *attribute);
 
 protected:
 	void setAttributeAffect(Attribute *source, Attribute *destination);
@@ -123,6 +124,7 @@ private:
 	std::string saveNodeConnectionsScript(Node *node);
 	void doUpdate(Attribute *attribute);
 	std::string attrsVectorToStr(const std::vector<Attribute*> &vec);
+	void _attributeConnectionChanged(Attribute *attribute);
 
 	std::vector<Attribute*> _outputAttributes;
 	std::vector<Attribute*> _inputAttributes;

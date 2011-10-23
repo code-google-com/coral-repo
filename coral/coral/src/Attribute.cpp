@@ -196,7 +196,7 @@ void Attribute::disconnectInput(){
 			dirty();
 			
 			if(parent()){
-				parent()->attributeConnectionChanged(this);
+				parent()->_attributeConnectionChanged(this);
 			}
 			
 			if(_disconnectInputCallback){
@@ -223,7 +223,7 @@ void Attribute::disconnectOutput(Attribute *attribute){
 			updateBranchSpecializations(error);
 			
 			if(parent()){
-				parent()->attributeConnectionChanged(this);
+				parent()->_attributeConnectionChanged(this);
 			}
 			
 			delete error;
@@ -422,11 +422,11 @@ bool Attribute::connectTo(Attribute *attribute, ErrorObject *errorObject){
 	bool success = updateBranchSpecializations(errorObject);
 	
 	if(parent()){
-		parent()->attributeConnectionChanged(this);
+		parent()->_attributeConnectionChanged(this);
 	}
 	
 	if(attribute->parent()){
-		attribute->parent()->attributeConnectionChanged(attribute);
+		attribute->parent()->_attributeConnectionChanged(attribute);
 	}
 	
 	if(_connectToCallback && !isDeleted())

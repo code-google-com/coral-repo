@@ -163,13 +163,13 @@ class NodeView(QtGui.QGraphicsView):
             self._panning = True
             
         QtGui.QGraphicsView.mousePressEvent(self, mouseEvent)
-    
+        
     def mouseMoveEvent(self, mouseEvent):
         if self._panning:
             center = self.mapToScene(self.viewport().rect().center())
             self.scene().setCenterPos(center)
             
-        return QtGui.QGraphicsView.mouseMoveEvent(self, mouseEvent)
+        QtGui.QGraphicsView.mouseMoveEvent(self, mouseEvent)
     
     def mouseReleaseEvent(self, mouseEvent):
         QtGui.QGraphicsView.mouseReleaseEvent(self, mouseEvent)

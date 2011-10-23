@@ -39,6 +39,7 @@ class CreateNode(Command):
         self.setArgString("className", "")
         self.setArgString("name", "")
         self.setArgString("parentNode", "")
+        self.setArgString("specializationPreset", "none")
         
     def doIt(self):
         className = self.argAsString("className")
@@ -52,6 +53,10 @@ class CreateNode(Command):
             newNode = coralApp.createNode(className, name, parentNode)
             
             if newNode:
+                specializationPreset = self.argAsString("specializationPreset")
+                if specializationPreset != "none":
+                    newNode.enableSpecializationPreset(specializationPreset)
+                
                 self.setResultString(newNode.fullName())
                 
         if newNode is None:

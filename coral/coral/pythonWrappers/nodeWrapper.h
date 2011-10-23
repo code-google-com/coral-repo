@@ -208,6 +208,13 @@ void node_addOutputAttributeCallback(Node *self, Attribute *attribute){
 	}
 }
 
+void node_connectionChangedCallback(Node *self, Attribute *attribute){
+	if(PythonDataCollector::hasCallback("node_connectionChanged")){
+		if(PythonDataCollector::hasPyObject(self->id()) && PythonDataCollector::hasPyObject(attribute->id()))
+			PythonDataCollector::findCallback("node_connectionChanged")(PythonDataCollector::findPyObject(self->id()), PythonDataCollector::findPyObject(attribute->id()));
+	}
+}
+
 boost::python::object node_findNode(Node &self, const std::string &name){
 	Node *node = self.findNode(name);
 	
@@ -362,6 +369,7 @@ void nodeWrapper(){
 	Node::_addOutputAttributeCallback = node_addOutputAttributeCallback;
 	Node::_removeAttributeCallback = node_removeAttributeCallback;
 	Node::_deleteItCallback = node_deleteItCallback;
+	Node::_connectionChangedCallback = node_connectionChangedCallback;
 }
 
 #endif

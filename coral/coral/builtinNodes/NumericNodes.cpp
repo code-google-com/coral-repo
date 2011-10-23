@@ -118,16 +118,16 @@ Vec3Node::Vec3Node(const std::string &name, Node* parent): Node(name, parent){
 	addAttributeSpecializationLink(_x, _y);
 	addAttributeSpecializationLink(_y, _z);
 	
-	// setSpecializationPreset("single", _x, "Float");
-	// setSpecializationPreset("single", _y, "Float");
-	// setSpecializationPreset("single", _z, "Float");
-	// setSpecializationPreset("single", _vector, "Vec3");
-	// 
-	// setSpecializationPreset("array", _x, "FloatArray");
-	// setSpecializationPreset("array", _y, "FloatArray");
-	// setSpecializationPreset("array", _z, "FloatArray");
-	// setSpecializationPreset("array", _vector, "Vec3Array");
-	// enableSpecializationPreset("single");
+	setSpecializationPreset("single", _x, "Float");
+	setSpecializationPreset("single", _y, "Float");
+	setSpecializationPreset("single", _z, "Float");
+	setSpecializationPreset("single", _vector, "Vec3");
+	
+	setSpecializationPreset("array", _x, "FloatArray");
+	setSpecializationPreset("array", _y, "FloatArray");
+	setSpecializationPreset("array", _z, "FloatArray");
+	setSpecializationPreset("array", _vector, "Vec3Array");
+	enableSpecializationPreset("single");
 }
 
 void Vec3Node::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){

@@ -43,6 +43,7 @@ void(*Node::_addInputAttributeCallback)(Node *self, Attribute *attribute) = 0;
 void(*Node::_addOutputAttributeCallback)(Node *self, Attribute *attribute) = 0;
 void(*Node::_removeAttributeCallback)(Node *self, Attribute *attribute) = 0;
 void(*Node::_deleteItCallback)(Node *self) = 0;
+void(*Node::_connectionChangedCallback)(Node *self, Attribute *attribute) = 0;
 
 namespace {
 
@@ -397,6 +398,7 @@ std::string Node::asScript(){
 	createNodeCmd.setName("CreateNode");
 	createNodeCmd.setArgString("className", className());
 	createNodeCmd.setArgString("name", name());
+	createNodeCmd.setArgString("specializationPreset", _specializationPreset);
 	
 	std::string parentNode;
 	if(parent()){
@@ -516,6 +518,14 @@ void Node::setName(const std::string &name){
 	NestedObject::setName(name);
 }
 
+void Node::_attributeConnectionChanged(Attribute *attribute){
+	attributeConnectionChanged(attribute);
+	
+	if(_connectionChangedCallback && !isDeleted()){
+		_connectionChangedCallback(this, attribute);
+	}
+}
+
 void Node::attributeConnectionChanged(Attribute *attribute){	
 }
 
@@ -592,29 +602,31 @@ std::string Node::enabledSpecializationPreset(){
 }
 
 void Node::enableSpecializationPreset(const std::string &preset){
-	_specializationPreset = preset;
-	std::vector<Attribute*> attrs = attributes();
-	
-	if(_specializationPresets.find(preset) != _specializationPresets.end()){
-		std::map<int, std::string> &attrsPreset = _specializationPresets[preset];
-		for(int i = 0; i < attrs.size(); ++i){
-			Attribute *attr = attrs[i];
-			int attrId = attr->id();
-			if(attrsPreset.find(attrId) != attrsPreset.end()){
-				std::string specialization = attrsPreset[attrId];
-				attr->setSpecializationOverride(specialization);
+	if(preset != _specializationPreset && _specializationPresets.find(preset) != _specializationPresets.end()){
+		_specializationPreset = preset;
+		std::vector<Attribute*> attrs = attributes();
+		
+		if(preset == "none"){
+			for(int i = 0; i < attrs.size(); ++i){
+				attrs[i]->removeSpecializationOverride();
 			}
 		}
-	}
-	else if(preset == "none"){
-		for(int i = 0; i < attrs.size(); ++i){
-			attrs[i]->removeSpecializationOverride();
+		else{
+			std::map<int, std::string> &attrsPreset = _specializationPresets[preset];
+			for(int i = 0; i < attrs.size(); ++i){
+				Attribute *attr = attrs[i];
+				int attrId = attr->id();
+				if(attrsPreset.find(attrId) != attrsPreset.end()){
+					std::string specialization = attrsPreset[attrId];
+					attr->setSpecializationOverride(specialization);
+				}
+			}
 		}
-	}
-	
-	if(_constructorDone){
-		for(int i = 0; i < attrs.size(); ++i){
-			attrs[i]->forceSpecializationUpdate();
+		
+		if(_constructorDone){
+			for(int i = 0; i < attrs.size(); ++i){
+				attrs[i]->forceSpecializationUpdate();
+			}
 		}
 	}
 }
