@@ -54,7 +54,7 @@ class NumericAttributeUi(AttributeUi):
         "Int": QtGui.QColor(255, 107, 109),
         "Float": QtGui.QColor(5, 247, 176),
         "Vec3": QtGui.QColor(0, 120, 255),
-        "Quat": QtGui.QColor(0, 120, 255),
+        "Quat": QtGui.QColor(0, 255, 0),
         "Matrix44": QtGui.QColor(179, 102, 255)
         }
         

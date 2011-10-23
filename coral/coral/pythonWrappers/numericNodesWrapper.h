@@ -166,6 +166,7 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Vec3ToFloats, Node>("Vec3ToFloats");
 	pythonWrapperUtils::pythonWrapper<QuatNode, Node>("QuatNode");
 	pythonWrapperUtils::pythonWrapper<QuatToFloats, Node>("QuatToFloats");
+	pythonWrapperUtils::pythonWrapper<QuatToAxisAngle, Node>("QuatToAxisAngle");
 	pythonWrapperUtils::pythonWrapper<Matrix44Node, Node>("Matrix44Node");
 	pythonWrapperUtils::pythonWrapper<ConstantArray, Node>("ConstantArray");
 	pythonWrapperUtils::pythonWrapper<ArraySize, Node>("ArraySize");
