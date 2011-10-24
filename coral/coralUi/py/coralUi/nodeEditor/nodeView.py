@@ -42,6 +42,8 @@ class NodeView(QtGui.QGraphicsView):
         self._zoom = 1.0
         self._currentNodeUi = None
         self._panning = False
+        self._currentCenterPoint = QtCore.QPointF()
+        self._lastPanPoint = QtCore.QPoint()
         
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setAcceptDrops(True)
@@ -55,7 +57,7 @@ class NodeView(QtGui.QGraphicsView):
         QtGui.QShortcut(QtGui.QKeySequence("Backspace"), self, self._deleteKey)
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+C"), self, self._copyKey)
         QtGui.QShortcut(QtGui.QKeySequence("Ctrl+V"), self, self._pasteKey)
-        
+    
     def _selectedNodesName(self):
         selectedNodes = self._selectedNodes()
         
@@ -99,7 +101,7 @@ class NodeView(QtGui.QGraphicsView):
                 nodeUi.setSelected(True)
             
             self.scene()._selectionChanged()
-                
+        
     def _deleteKey(self):
         nodesName = self._selectedNodesName()
         attributesName = self._selectedAttributesName()
@@ -157,27 +159,37 @@ class NodeView(QtGui.QGraphicsView):
         
         self.scene()._selectionChanged()
     
+    def getCenter(self):
+        return self._currentCenterPoint
+    
+    def setCenter(self, centerPoint):
+        self._currentCenterPoint = centerPoint
+        self.centerOn(self._currentCenterPoint);
+    
     def mousePressEvent(self, mouseEvent):
         if mouseEvent.modifiers() == QtCore.Qt.AltModifier:
-            self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag)
+            self._lastPanPoint = mouseEvent.pos()
+            self.setCursor(QtCore.Qt.ClosedHandCursor)
             self._panning = True
-            
-        QtGui.QGraphicsView.mousePressEvent(self, mouseEvent)
-        
+        else:
+            QtGui.QGraphicsView.mousePressEvent(self, mouseEvent)
+    
     def mouseMoveEvent(self, mouseEvent):
         if self._panning:
-            center = self.mapToScene(self.viewport().rect().center())
-            self.scene().setCenterPos(center)
+            delta = self.mapToScene(self._lastPanPoint) - self.mapToScene(mouseEvent.pos())
+            self._lastPanPoint = mouseEvent.pos()
             
-        QtGui.QGraphicsView.mouseMoveEvent(self, mouseEvent)
+            self.setCenter(self.getCenter() + delta)
+        else:
+            QtGui.QGraphicsView.mouseMoveEvent(self, mouseEvent)
     
     def mouseReleaseEvent(self, mouseEvent):
-        QtGui.QGraphicsView.mouseReleaseEvent(self, mouseEvent)
-        
-        if self.dragMode() == QtGui.QGraphicsView.ScrollHandDrag:
-            self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
-        
-        self._panning = False
+        if self._panning:
+            self.setCursor(QtCore.Qt.ArrowCursor)
+            self._lastPanPoint = QtCore.QPoint()
+            self._panning = False
+        else:
+            QtGui.QGraphicsView.mouseReleaseEvent(self, mouseEvent)
     
     def wheelEvent(self, event):
         if event.orientation() == QtCore.Qt.Vertical:

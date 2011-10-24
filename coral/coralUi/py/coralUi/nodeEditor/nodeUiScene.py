@@ -41,21 +41,24 @@ class NodeUiScene(QtGui.QGraphicsScene):
         self._gridPen = QtGui.QPen(self._backgroundColor.lighter(120))
         self._zoom = 1.0
         self._centerPos = QtCore.QPointF(0.0, 0.0)
-        
+        self._skypHelpEvent = False
+         
         self._gridPen.setWidth(1)
         
         self.setItemIndexMethod(QtGui.QGraphicsScene.NoIndex) # fixes bug with scene.removeItem()
         self.setBackgroundBrush(self._backgroundColor)
     
     def helpEvent(self, event):
-        items = self.items(event.scenePos())
-        for item in items:
-            if hasattr(item, "updateToolTip"):
-                item.updateToolTip()
-                break
+        if self._skypHelpEvent == False:
+            items = self.items(event.scenePos())
+            for item in items:
+                if hasattr(item, "updateToolTip"):
+                    item.updateToolTip()
+                    break
         
-        QtGui.QGraphicsScene.helpEvent(self, event)
-        
+            QtGui.QGraphicsScene.helpEvent(self, event)
+            self._skypHelpEvent = False
+            
     def mouseReleaseEvent(self, event):
         QtGui.QGraphicsScene.mouseReleaseEvent(self, event)
         

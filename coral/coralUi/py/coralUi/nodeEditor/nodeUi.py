@@ -76,6 +76,7 @@ class NodeUi(QtGui.QGraphicsWidget):
         
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+        self.setAcceptHoverEvents(True)
         
         self._label.setBrush(self.labelsColor())
         
@@ -83,6 +84,39 @@ class NodeUi(QtGui.QGraphicsWidget):
         self._shapePen.setWidthF(1.5)
         
         coralApp.addNameChangedObserver(self._nameChangedObserver, self.coralNode(), self._coralNodeNameChanged)
+    
+    def _magnify(self, factor):
+        font = self._label.font()
+        size = font.pointSizeF()
+        font.setPointSizeF(size * factor)
+        self._label.setFont(font)
+        self._spacerConstant = self._spacerConstant * factor
+        
+        for attr in self._attributeUis:
+            font = attr._label.font()
+            size = font.pointSizeF()
+            font.setPointSizeF(size * factor)
+            attr._label.setFont(font)
+            
+            attr._spacerConstant = attr._spacerConstant * factor
+            if attr._inputHook:
+                size = attr._inputHook._rect.size() * factor
+                attr._inputHook._rect.setSize(size)
+            elif attr._outputHook:
+                size = attr._outputHook._rect.size() * factor
+                attr._outputHook._rect.setSize(size)
+        
+        self.updateLayout()
+        
+    # def hoverEnterEvent(self, event):
+    #     factor = 1.0 / self.scene().zoom()
+    #     self._magnify(factor)
+    #     
+    #     self.scene()._skypHelpEvent = True
+    #     
+    # def hoverLeaveEvent(self, event):
+    #     factor = self.scene().zoom()
+    #     self._magnify(factor)
     
     def setAttributesProxyEnabled(self, value = True):
         self._attributesProxyEnabled = value

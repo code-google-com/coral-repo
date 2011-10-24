@@ -250,10 +250,9 @@ class AttributeUi(QtGui.QGraphicsWidget):
         elif self._inputHook:
             hookY = (height - self._inputHook.boundingRect().height()) / 2.0
             
-        inputHookWidth = 10
+        inputHookWidth = self._spacerConstant * 2.0
         if self._inputHook:
             self._inputHook.setPos(0.0, hookY)
-            #inputHookWidth = self._inputHook.boundingRect().width()
         
         self._label.setPos(inputHookWidth + self._spacerConstant, 0)
         

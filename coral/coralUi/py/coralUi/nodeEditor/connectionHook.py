@@ -42,6 +42,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
             
         QtGui.QGraphicsItem.__init__(self, parentItem)
         
+        self._parentNodeUi = weakref.ref(parentAttributeUi.parentNodeUi())
         self._parentAttributeUi = weakref.ref(parentAttributeUi)
         self._isInput = isInput
         self._isOutput = isOutput
@@ -52,6 +53,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
         self._draggingConnectionEndHook = None
         self._connections = []
         self._mixedColor = False
+        self._lastDropNode = None
         
         # TODO: optimize this by enabling it only when self._connections is filled
         self.setFlags(QtGui.QGraphicsItem.ItemSendsScenePositionChanges)
@@ -93,7 +95,10 @@ class ConnectionHook(QtGui.QGraphicsItem):
         
     def parentAttributeUi(self):
         return self._parentAttributeUi()
-        
+    
+    def parentNodeUi(self):
+        return self._parentNodeUi()
+    
     def setColor(self, color):
         self._color.setRgb(color.red(), color.green(), color.blue())
         self._brush.setColor(self._color)
@@ -158,7 +163,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
             else:
                 if QtGui.QToolTip.isVisible():
                     QtGui.QToolTip.hideText()
-            
+                
             self._draggingConnection.updateEndPos()
     
     def mouseReleaseEvent(self, event):

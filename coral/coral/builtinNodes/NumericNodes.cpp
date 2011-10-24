@@ -1758,7 +1758,27 @@ QuatToAxisAngle::QuatToAxisAngle(const std::string &name, Node *parent): Node(na
 
 void QuatToAxisAngle::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
 {
-	Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	if(specializationA.size() < specializationB.size()){
+		std::string specB = specializationB[0];
+		specializationB.resize(1);
+		if(stringUtils::endswith(specializationA[0], "Array")){
+			specializationB[0] = specB + "Array";
+		}
+		else{
+			specializationB[0] = specB;
+		}
+	}
+	else if(specializationB.size() < specializationA.size()){
+		std::string specA = specializationA[0];
+		specializationA.resize(1);
+		
+		if(stringUtils::endswith(specializationB[0], "Array")){
+			specializationA[0] = specA + "Array";
+		}
+		else{
+			specializationA[0] = specA;
+		}
+	}
 }
 
 void QuatToAxisAngle::update(Attribute *attribute)
