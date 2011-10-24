@@ -40,14 +40,16 @@ sconsUtils.importBuildEnvs()
 
 coralLib = SConscript(os.path.join("coral", "SConstruct"))
 coralUiLib = SConscript(os.path.join("coralUi", "SConstruct"), exports = {"coralLib": coralLib})
+imathLib = SConscript(os.path.join("imath", "SConstruct"))
 coralMaya = SConscript(os.path.join("coralMaya", "SConstruct"), exports = {"coralLib": coralLib})
 mayaPlugin = SConscript(os.path.join("coralMaya", "plugin", "SConstruct"), exports = {"coralLib": coralLib, "coralUiLib": coralUiLib, "coralMayaLib": coralMaya})
 
 def postBuildAction(target, source, env):
     coralLib = str(source[0])
     coralUiLib = str(source[1])
-    mayaPlugin = str(source[2])
-    coralMaya = str(source[3])
+    imathLib = str(source[2])
+    mayaPlugin = str(source[3])
+    coralMaya = str(source[4])
     
     buildDir = os.path.join("build", "coralMayaBuild")
     
@@ -57,6 +59,7 @@ def postBuildAction(target, source, env):
     shutil.copy(coralLib, os.path.join(buildDir, "coral"))
     shutil.copy(coralMaya, os.path.join(buildDir, "coralMaya"))
     shutil.copy(mayaPlugin, os.path.join(buildDir, "coralMaya"))
+    shutil.copy(imathLib, buildDir)
     
     shutil.copytree(os.path.join("coralUi", "py", "coralUi"), os.path.join(buildDir, "coral", "coralUi"))
     shutil.copy(coralUiLib, os.path.join(buildDir, "coral", "coralUi"))
@@ -72,5 +75,5 @@ def postBuildAction(target, source, env):
     for pycFile in pycFiles:
         os.remove(pycFile)
 
-posBuildTarget = Command("postBuildTarget", [coralLib[0], coralUiLib[0], mayaPlugin[0], coralMaya[0]], postBuildAction)
+posBuildTarget = Command("postBuildTarget", [coralLib[0], coralUiLib[0], imathLib[0], mayaPlugin[0], coralMaya[0]], postBuildAction)
 Default(posBuildTarget)

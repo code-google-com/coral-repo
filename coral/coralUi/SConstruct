@@ -55,7 +55,7 @@ elif sys.platform.startswith("win"):
     env["SHLIBSUFFIX"] = ".pyd"
     env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj /MP")
     env["CCFLAGS"] = "-DCORAL_UI_COMPILE"
-    env["LINKFLAGS"] = ["/MANIFEST:NO"]
+    env["LINKFLAGS"] = Split("/MANIFEST:NO OpenGL32.lib glu32.lib")
 
 target = env.SharedLibrary(
             target = "_coralUi",
