@@ -28,9 +28,11 @@
 
 #include "Vec3fWrapper.h"
 #include "Matrix44fWrapper.h"
+#include "QuatfWrapper.h"
 
 BOOST_PYTHON_MODULE(Imath)
 {
 	vec3fWrapper();
 	matrix44fWrapper();
+	quatfWrapper();
 }

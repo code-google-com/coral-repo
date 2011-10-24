@@ -81,6 +81,35 @@ private:
 	NumericAttribute *_z;
 };
 
+class QuatNode: public Node{
+public:
+	QuatNode(const std::string &name, Node *parent);
+
+	void update(Attribute *attribute);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+
+private:
+	NumericAttribute *_r;
+	NumericAttribute *_x;
+	NumericAttribute *_y;
+	NumericAttribute *_z;
+	NumericAttribute *_quat;
+};
+
+class QuatToFloats: public Node{
+public:
+	QuatToFloats(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+
+private:
+	NumericAttribute *_quat;
+	NumericAttribute *_r;
+	NumericAttribute *_x;
+	NumericAttribute *_y;
+	NumericAttribute *_z;
+};
+
 class Matrix44Node: public Node{
 public:
 	Matrix44Node(const std::string &name, Node *parent);
@@ -308,6 +337,19 @@ private:
 	NumericAttribute *_source;
 	NumericAttribute *_time;
 	NumericAttribute *_data;
+};
+
+class QuatToAxisAngle: public Node
+{
+public:
+	QuatToAxisAngle(const std::string &name, Node *parent);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_quat;
+	NumericAttribute *_axis;
+	NumericAttribute *_angle;
 };
 
 }

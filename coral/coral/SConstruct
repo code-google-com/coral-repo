@@ -35,7 +35,7 @@ elif sys.platform == "darwin":
     
 elif sys.platform.startswith("win"):
     env["SHLIBSUFFIX"] = ".pyd"
-    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj")
+    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj /MP")
     env["CCFLAGS"] = ["-DCORAL_COMPILE"]
     env["LINKFLAGS"] = ["/MANIFEST:NO"]
 

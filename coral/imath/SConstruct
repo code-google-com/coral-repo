@@ -32,7 +32,7 @@ if sys.platform == "darwin":
     env["SHLIBSUFFIX"] = ".so"
 elif sys.platform.startswith("win"):
     env["SHLIBSUFFIX"] = ".pyd"
-    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t")
+    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /MP")
     env["CCFLAGS"] = "-DBOOST_PYTHON_MAX_ARITY=16"
     env["LINKFLAGS"] = ["/MANIFEST:NO"]
 

@@ -69,6 +69,14 @@ int numeric_numericTypeVec3Array(){
 	return int(Numeric::numericTypeVec3Array);
 }
 
+int numeric_numericTypeQuat(){
+	return int(Numeric::numericTypeQuat);
+}
+
+int numeric_numericTypeQuatArray(){
+	return int(Numeric::numericTypeQuatArray);
+}
+
 int numeric_numericTypeMatrix44(){
 	return int(Numeric::numericTypeMatrix44);
 }
@@ -83,6 +91,10 @@ int numeric_type(Numeric &self){
 
 std::vector<Imath::V3f> numeric_vec3Values(Numeric &self){
 	return self.vec3Values();
+}
+
+std::vector<Imath::Quatf> numeric_quatValues(Numeric &self){
+	return self.quatValues();
 }
 
 std::vector<Imath::M44f> numeric_matrix44Values(Numeric &self){
@@ -111,14 +123,17 @@ void numericNodesWrapper(){
 		.def("setIntValueAt", &Numeric::setIntValueAt)
 		.def("setFloatValueAt", &Numeric::setFloatValueAt)
 		.def("setVec3ValueAt", &Numeric::setVec3ValueAt)
+		.def("setQuatValueAt", &Numeric::setQuatValueAt)
 		.def("setMatrix44ValueAt", &Numeric::setMatrix44ValueAt)
 		.def("intValues", numeric_intValues)
 		.def("floatValues", numeric_floatValues)
 		.def("vec3Values", numeric_vec3Values)
+		.def("quatValues", numeric_quatValues)
 		.def("matrix44Values", numeric_matrix44Values)
 		.def("intValueAt", &Numeric::intValueAt)
 		.def("floatValueAt", &Numeric::floatValueAt)
 		.def("vec3ValueAt", &Numeric::vec3ValueAt)
+		.def("quatValueAt", &Numeric::quatValueAt)
 		.def("matrix44ValueAt", &Numeric::matrix44ValueAt)
 		.def("setIntValues", &Numeric::setIntValues)
 		.def("setFloatValues", &Numeric::setFloatValues)
@@ -131,6 +146,8 @@ void numericNodesWrapper(){
 		.add_static_property("numericTypeFloatArray", numeric_numericTypeFloatArray)
 		.add_static_property("numericTypeVec3", numeric_numericTypeVec3)
 		.add_static_property("numericTypeVec3Array", numeric_numericTypeVec3Array)
+		.add_static_property("numericTypeQuat", numeric_numericTypeQuat)
+		.add_static_property("numericTypeQuatArray", numeric_numericTypeQuatArray)
 		.add_static_property("numericTypeMatrix44", numeric_numericTypeMatrix44)
 		.add_static_property("numericTypeMatrix44Array", numeric_numericTypeMatrix44Array)
 		.def("createUnwrapped", pythonWrapperUtils::createUnwrapped<Numeric>)
@@ -147,6 +164,9 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<DivNode, ArithmeticNode>("DivNode");
 	pythonWrapperUtils::pythonWrapper<Vec3Node, Node>("Vec3Node");
 	pythonWrapperUtils::pythonWrapper<Vec3ToFloats, Node>("Vec3ToFloats");
+	pythonWrapperUtils::pythonWrapper<QuatNode, Node>("QuatNode");
+	pythonWrapperUtils::pythonWrapper<QuatToFloats, Node>("QuatToFloats");
+	pythonWrapperUtils::pythonWrapper<QuatToAxisAngle, Node>("QuatToAxisAngle");
 	pythonWrapperUtils::pythonWrapper<Matrix44Node, Node>("Matrix44Node");
 	pythonWrapperUtils::pythonWrapper<ConstantArray, Node>("ConstantArray");
 	pythonWrapperUtils::pythonWrapper<ArraySize, Node>("ArraySize");

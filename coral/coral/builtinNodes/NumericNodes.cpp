@@ -271,6 +271,200 @@ void Vec3ToFloats::update(Attribute *attribute){
 	setAttributeIsClean(_z, true);
 }
 
+QuatNode::QuatNode(const std::string &name, Node* parent): Node(name, parent)
+{
+	_r = new NumericAttribute("r", this);
+	_x = new NumericAttribute("x", this);
+	_y = new NumericAttribute("y", this);
+	_z = new NumericAttribute("z", this);
+	_quat = new NumericAttribute("quaternion", this);
+
+	addInputAttribute(_r);
+	addInputAttribute(_x);
+	addInputAttribute(_y);
+	addInputAttribute(_z);
+	addOutputAttribute(_quat);
+
+	setAttributeAffect(_r, _quat);
+	setAttributeAffect(_x, _quat);
+	setAttributeAffect(_y, _quat);
+	setAttributeAffect(_z, _quat);
+
+	std::vector<std::string> rxyzSpecializations;
+	rxyzSpecializations.push_back("Float");
+	rxyzSpecializations.push_back("FloatArray");
+
+	std::vector<std::string> vectorSpecializations;
+	vectorSpecializations.push_back("Quat");
+	vectorSpecializations.push_back("QuatArray");
+
+
+	setAttributeAllowedSpecializations(_r, rxyzSpecializations);
+	setAttributeAllowedSpecializations(_x, rxyzSpecializations);
+	setAttributeAllowedSpecializations(_y, rxyzSpecializations);
+	setAttributeAllowedSpecializations(_z, rxyzSpecializations);
+	setAttributeAllowedSpecializations(_quat, vectorSpecializations);
+
+	addAttributeSpecializationLink(_r ,_quat);
+	addAttributeSpecializationLink(_r, _x);
+	addAttributeSpecializationLink(_x, _y);
+	addAttributeSpecializationLink(_y, _z);
+}
+
+void QuatNode::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _r && attributeB == _quat){
+		std::vector<std::string> vectorSpecializations = _quat->allowedSpecialization();
+		std::vector<std::string> xSpecializations = _r->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Float"){
+				specializationB.push_back(vectorSpecializations[0]);
+			}
+			else if(specializationA[0] == "FloatArray"){
+				specializationB.push_back(vectorSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Quat"){
+				specializationA.push_back(xSpecializations[0]);
+			}
+			else if(specializationB[0] == "QuatArray"){
+				specializationA.push_back(xSpecializations[1]);
+			}
+		}
+	}
+	else{
+		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	}
+}
+
+void QuatNode::update(Attribute *attribute){
+	Numeric *r = _r->value();
+	Numeric *x = _x->value();
+	Numeric *y = _y->value();
+	Numeric *z = _z->value();
+
+	NumericAttribute *attrs[] = {_r,_x, _y, _z};
+	int minorSize = findMinorNumericSize(attrs, 4);
+	if(minorSize < 1)
+		minorSize = 1;
+
+	std::vector<Imath::Quatf> outArray(minorSize);
+
+	for(int i = 0; i < minorSize; ++i){
+		Imath::Quatf *vec = &outArray[i];
+		vec->r = r->floatValueAt(i);
+		vec->v.x = x->floatValueAt(i);
+		vec->v.y = y->floatValueAt(i);
+		vec->v.z = z->floatValueAt(i);
+	}
+
+	_quat->outValue()->setQuatValues(outArray);
+}
+
+QuatToFloats::QuatToFloats(const std::string &name, Node* parent): Node(name, parent){
+	_quat = new NumericAttribute("quaternion", this);
+	_r = new NumericAttribute("r", this);
+	_x = new NumericAttribute("x", this);
+	_y = new NumericAttribute("y", this);
+	_z = new NumericAttribute("z", this);
+
+	addInputAttribute(_quat);
+	addOutputAttribute(_r);
+	addOutputAttribute(_x);
+	addOutputAttribute(_y);
+	addOutputAttribute(_z);
+
+	setAttributeAffect(_quat, _r);
+	setAttributeAffect(_quat, _x);
+	setAttributeAffect(_quat, _y);
+	setAttributeAffect(_quat, _z);
+
+	std::vector<std::string> vectorSpecializations;
+	vectorSpecializations.push_back("Quat");
+	vectorSpecializations.push_back("QuatArray");
+
+	std::vector<std::string> xyzSpecializations;
+	xyzSpecializations.push_back("Float");
+	xyzSpecializations.push_back("FloatArray");
+
+	setAttributeAllowedSpecializations(_quat, vectorSpecializations);
+
+	setAttributeAllowedSpecializations(_r, xyzSpecializations);
+	setAttributeAllowedSpecializations(_x, xyzSpecializations);
+	setAttributeAllowedSpecializations(_y, xyzSpecializations);
+	setAttributeAllowedSpecializations(_z, xyzSpecializations);
+
+	addAttributeSpecializationLink(_quat, _r);
+	addAttributeSpecializationLink(_r, _x);
+	addAttributeSpecializationLink(_x, _y);
+	addAttributeSpecializationLink(_y, _z);
+
+}
+
+void QuatToFloats::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _quat && attributeB == _r){
+		std::vector<std::string> vectorSpecializations = _quat->allowedSpecialization();
+		std::vector<std::string> xSpecializations = _r->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Quat"){
+				specializationB.push_back(xSpecializations[0]);
+			}
+			else if(specializationA[0] == "QuatArray"){
+				specializationB.push_back(xSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Float"){
+				specializationA.push_back(vectorSpecializations[0]);
+			}
+			else if(specializationB[0] == "FloatArray"){
+				specializationA.push_back(vectorSpecializations[1]);
+			}
+		}
+	}
+	else{
+		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	}
+}
+
+void QuatToFloats::update(Attribute *attribute){
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	int size = quatValues.size();
+
+	std::vector<float> rValues(size);
+	std::vector<float> xValues(size);
+	std::vector<float> yValues(size);
+	std::vector<float> zValues(size);
+
+	for(int i = 0; i < size; ++i){
+		const Imath::Quatf &vec = quatValues[i];
+		rValues[i] = vec.r;
+		xValues[i] = vec.v.x;
+		yValues[i] = vec.v.y;
+		zValues[i] = vec.v.z;
+	}
+
+	_r->outValue()->setFloatValues(rValues);
+	_x->outValue()->setFloatValues(xValues);
+	_y->outValue()->setFloatValues(yValues);
+	_z->outValue()->setFloatValues(zValues);
+
+	setAttributeIsClean(_r, true);
+	setAttributeIsClean(_x, true);
+	setAttributeIsClean(_y, true);
+	setAttributeIsClean(_z, true);
+}
+
 
 Matrix44Node::Matrix44Node(const std::string &name, Node* parent): Node(name, parent){	
 	_translateX = new NumericAttribute("translateX", this);
@@ -1527,6 +1721,65 @@ void GetSimulationResult::update(Attribute *attribute){
 	}
 	
 	_data->outValue()->setFromOther(_globalNumericStorage[sourceId]);
+}
+
+QuatToAxisAngle::QuatToAxisAngle(const std::string &name, Node *parent): Node(name, parent)
+{
+	_quat = new NumericAttribute("quat",this);
+	_axis = new NumericAttribute("axis",this);
+	_angle = new NumericAttribute("angle",this);
+
+	addInputAttribute(_quat);
+	addOutputAttribute(_axis);
+	addOutputAttribute(_angle);
+
+	setAttributeAffect(_quat, _axis);
+	setAttributeAffect(_quat, _angle);
+
+	std::vector<std::string> quatSpecializations;
+	quatSpecializations.push_back("Quat");
+	quatSpecializations.push_back("QuatArray");
+
+	std::vector<std::string> angleSpecializations;
+	angleSpecializations.push_back("Float");
+	angleSpecializations.push_back("FloatArray");
+
+	std::vector<std::string> axisSpecializations;
+	axisSpecializations.push_back("Vec3");
+	axisSpecializations.push_back("Vec3Array");
+
+	setAttributeAllowedSpecializations(_quat, quatSpecializations);
+	setAttributeAllowedSpecializations(_axis, axisSpecializations);
+	setAttributeAllowedSpecializations(_angle, angleSpecializations);
+
+	addAttributeSpecializationLink(_quat, _axis);
+	addAttributeSpecializationLink(_axis, _angle);
+}
+
+void QuatToAxisAngle::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
+{
+	Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+}
+
+void QuatToAxisAngle::update(Attribute *attribute)
+{
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	int size = quatValues.size();
+
+	std::vector<Imath::V3f> axisValues(size);
+	std::vector<float> angleValues(size);
+
+	for(int i = 0; i < size; ++i){
+		const Imath::Quatf &quat = quatValues[i];
+		axisValues[i] = quat.axis();
+		angleValues[i] =quat.angle();
+	}
+
+	_axis->outValue()->setVec3Values(axisValues);
+	_angle->outValue()->setFloatValues(angleValues);
+
+	setAttributeIsClean(_axis, true);
+	setAttributeIsClean(_angle, true);
 }
 
 

@@ -47,7 +47,7 @@ elif sys.platform == "darwin":
     
 elif sys.platform.startswith("win"):
     env["SHLIBSUFFIX"] = ".pyd"
-    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /DGLUT_BUILDING_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t ")
+    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /DGLUT_BUILDING_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /MP")
     env["LINKFLAGS"] = ["/MANIFEST:NO", "/INCREMENTAL:NO"]
     env["CCFLAGS"] = Split("-DCORAL_MAYA_COMPILE -DNT_PLUGIN -DREQUIRE_IOSTREAM")
     env.Append(CPPPATH = sconsUtils.getEnvVar("CORAL_OPENGL_INCLUDES_PATH"))

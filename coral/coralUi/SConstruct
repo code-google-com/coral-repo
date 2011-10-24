@@ -53,7 +53,7 @@ elif sys.platform.startswith("win"):
     env.Append(LIBS = sconsUtils.getEnvVar("CORAL_OPENGL_LIB"))
     env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_OPENGL_LIBS_PATH"))
     env["SHLIBSUFFIX"] = ".pyd"
-    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj")
+    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj /MP")
     env["CCFLAGS"] = "-DCORAL_UI_COMPILE"
     env["LINKFLAGS"] = ["/MANIFEST:NO"]
 
