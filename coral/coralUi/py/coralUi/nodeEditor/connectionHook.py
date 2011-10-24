@@ -34,6 +34,7 @@ from PyQt4 import QtGui, QtCore
 from ... import coralApp
 from ..._coral import ErrorObject
 import connection
+import nodeView
 
 class ConnectionHook(QtGui.QGraphicsItem):
     def __init__(self, parentAttributeUi, parentItem = None, isInput = False, isOutput = False):
@@ -55,7 +56,6 @@ class ConnectionHook(QtGui.QGraphicsItem):
         self._mixedColor = False
         self._lastDropNode = None
         
-        # TODO: optimize this by enabling it only when self._connections is filled
         self.setFlags(QtGui.QGraphicsItem.ItemSendsScenePositionChanges)
     
     def setMixedColor(self, value = True):
@@ -74,14 +74,17 @@ class ConnectionHook(QtGui.QGraphicsItem):
         
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemScenePositionHasChanged:
-            if self._isInput:
-                for conn in self._connections:
-                    conn.updateEndPos()
-            else:
-                for conn in self._connections:
-                    conn.updateStartPos()
+            self.updateWorldPos()
                     
         return value
+    
+    def updateWorldPos(self):
+        if self._isInput:
+            for conn in self._connections:
+                conn.updateEndPos()
+        else:
+            for conn in self._connections:
+                conn.updateStartPos()
     
     def addConnection(self, connection):
         self._connections.append(connection)
@@ -129,6 +132,18 @@ class ConnectionHook(QtGui.QGraphicsItem):
             self._draggingConnection.endHook().setPos(mousePos)
             self._draggingConnection.updateEndPos()
     
+    def _handleHover(self, item):
+        nodeHovered = None
+        
+        collidingItems = item.collidingItems(QtCore.Qt.IntersectsItemBoundingRect)
+        if collidingItems:
+            nodeHovered = collidingItems[0]
+
+        if nodeHovered:
+            nodeHovered.hoverEnterEvent(None)
+        elif nodeView.NodeView._lastHoveredItem:
+            nodeView.NodeView._lastHoveredItem.hoverLeaveEvent(None)
+    
     def mouseMoveEvent(self, event):
         if self._draggingConnection:
             connectionStartHook = self._draggingConnection.startHook()
@@ -140,6 +155,8 @@ class ConnectionHook(QtGui.QGraphicsItem):
             
             mousePos = self._draggingConnection.mapFromScene(event.scenePos())
             connectionEndHook.setPos(mousePos)
+            
+            self._handleHover(self._draggingConnection.endHook())
             
             endHook = self._draggingConnection.findClosestHook()
             

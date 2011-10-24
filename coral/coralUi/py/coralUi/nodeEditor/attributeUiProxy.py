@@ -31,6 +31,7 @@ import weakref
 from PyQt4 import QtGui, QtCore
 
 from connectionHook import ConnectionHook
+import nodeView
 
 class AttributeUiProxy(QtGui.QGraphicsWidget):
     def __init__(self, attributeUi):
@@ -43,6 +44,8 @@ class AttributeUiProxy(QtGui.QGraphicsWidget):
         self._outputHook = None
         self._label = QtGui.QGraphicsSimpleTextItem(self)
         self._spacerConstant = 5.0
+        self._currentMagnifyFactor = 0.0
+        self._zValue = self.zValue()
         
         hookColor = QtGui.QColor(100, 100, 100)
         if attributeUi.outputHook():
@@ -66,8 +69,54 @@ class AttributeUiProxy(QtGui.QGraphicsWidget):
         self._label.setText(attributeUi.coralAttribute().name())
         
         self._shapePen.setStyle(QtCore.Qt.NoPen)
+        self.setAcceptHoverEvents(True)
         
         self.updateLayout()
+    
+    def _magnifyAnimStep(self, frame):
+        step = frame / nodeView.NodeView._animSteps
+        invStep = 1.0 - step
+        
+        self.setScale((self.scale() * invStep) + ((1.0 * self._currentMagnifyFactor) * step))
+        
+        if self._inputHook:
+            self._inputHook.updateWorldPos()
+        elif self._outputHook:
+            self._outputHook.updateWorldPos()
+                
+        self.scene().update()
+        
+    def _magnify(self, factor):
+        self._currentMagnifyFactor = factor
+        timer = QtCore.QTimeLine(nodeView.NodeView._animSpeed, self)
+        timer.setFrameRange(0, nodeView.NodeView._animSteps)
+        
+        self.connect(timer, QtCore.SIGNAL("frameChanged(int)"), self._magnifyAnimStep);
+        
+        timer.start()
+    
+    def hoverEnterEvent(self, event):
+        if nodeView.NodeView._lastHoveredItem is not self:
+            if nodeView.NodeView._lastHoveredItem:
+                nodeView.NodeView._lastHoveredItem.hoverLeaveEvent(None)
+            
+            zoom = self.scene().zoom()
+            if zoom < 0.6:
+                factor =  0.7 / zoom
+                
+                self.setTransformOriginPoint(self.rect().center())
+                self._magnify(factor)
+                
+                nodeView.NodeView._lastHoveredItem = self
+                
+                self.setZValue(9999999)
+        
+    def hoverLeaveEvent(self, event):
+        if nodeView.NodeView._lastHoveredItem is self:
+            self._magnify(1.0)
+            
+            self.setZValue(self._zValue)
+            nodeView.NodeView._lastHoveredItem = None
     
     def deleteInputConnection(self):
         if self._inputHook:

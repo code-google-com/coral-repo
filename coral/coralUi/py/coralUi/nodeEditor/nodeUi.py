@@ -38,9 +38,9 @@ from nodeUiScene import NodeUiScene
 from connection import Connection
 from connectionHook import ConnectionHook
 from attributeUi import AttributeUi
+import nodeView
 
-
-class NodeUi(QtGui.QGraphicsWidget):
+class NodeUi(QtGui.QGraphicsWidget):    
     def __init__(self, coralNode):
         QtGui.QGraphicsWidget.__init__(self)
         
@@ -63,6 +63,8 @@ class NodeUi(QtGui.QGraphicsWidget):
         self._doubleClicked = False
         self._nodeViewWatching = None
         self._attributesProxyEnabled = False
+        self._zValue = self.zValue()
+        self._currentMagnifyFactor = 1.0
         
         parentNodeUi = self._addToParentScene(coralNode)
         if parentNodeUi:
@@ -85,38 +87,51 @@ class NodeUi(QtGui.QGraphicsWidget):
         
         coralApp.addNameChangedObserver(self._nameChangedObserver, self.coralNode(), self._coralNodeNameChanged)
     
-    def _magnify(self, factor):
-        font = self._label.font()
-        size = font.pointSizeF()
-        font.setPointSizeF(size * factor)
-        self._label.setFont(font)
-        self._spacerConstant = self._spacerConstant * factor
-        
-        for attr in self._attributeUis:
-            font = attr._label.font()
-            size = font.pointSizeF()
-            font.setPointSizeF(size * factor)
-            attr._label.setFont(font)
+    def _magnifyAnimStep(self, frame):
+            step = frame / nodeView.NodeView._animSteps
+            invStep = 1.0 - step
             
-            attr._spacerConstant = attr._spacerConstant * factor
-            if attr._inputHook:
-                size = attr._inputHook._rect.size() * factor
-                attr._inputHook._rect.setSize(size)
-            elif attr._outputHook:
-                size = attr._outputHook._rect.size() * factor
-                attr._outputHook._rect.setSize(size)
+            self.setScale((self.scale() * invStep) + ((1.0 * self._currentMagnifyFactor) * step))
+            
+            for attr in self._attributeUis:
+                if attr._inputHook:
+                    attr._inputHook.updateWorldPos()
+                if attr._outputHook:
+                    attr._outputHook.updateWorldPos()
+                    
+            self.scene().update()
         
-        self.updateLayout()
+    def _magnify(self, factor):
+        self._currentMagnifyFactor = factor
+        timer = QtCore.QTimeLine(nodeView.NodeView._animSpeed, self)
+        timer.setFrameRange(0, nodeView.NodeView._animSteps)
         
-    # def hoverEnterEvent(self, event):
-    #     factor = 1.0 / self.scene().zoom()
-    #     self._magnify(factor)
-    #     
-    #     self.scene()._skypHelpEvent = True
-    #     
-    # def hoverLeaveEvent(self, event):
-    #     factor = self.scene().zoom()
-    #     self._magnify(factor)
+        self.connect(timer, QtCore.SIGNAL("frameChanged(int)"), self._magnifyAnimStep);
+        
+        timer.start()
+    
+    def hoverEnterEvent(self, event):
+        if nodeView.NodeView._lastHoveredItem is not self:
+            if nodeView.NodeView._lastHoveredItem:
+                nodeView.NodeView._lastHoveredItem.hoverLeaveEvent(None)
+            
+            zoom = self.scene().zoom()
+            if zoom < 0.6:
+                factor =  0.7 / zoom
+                
+                self.setTransformOriginPoint(self.rect().center())
+                self._magnify(factor)
+                
+                nodeView.NodeView._lastHoveredItem = self
+                
+                self.setZValue(9999999)
+        
+    def hoverLeaveEvent(self, event):
+        if nodeView.NodeView._lastHoveredItem is self:
+            self._magnify(1.0)
+            
+            self.setZValue(self._zValue)
+            nodeView.NodeView._lastHoveredItem = None
     
     def setAttributesProxyEnabled(self, value = True):
         self._attributesProxyEnabled = value

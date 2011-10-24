@@ -62,6 +62,7 @@ class NodeEditor(QtGui.QWidget):
     _addedAttributeObserver = Observer()
     _collapsedNodeObserver = Observer()
     _generatingSaveScriptObserver = Observer()
+    _networkLoadedObserver = Observer()
     
     @staticmethod
     def _addInstance(nodeEditor):
@@ -197,6 +198,7 @@ class NodeEditor(QtGui.QWidget):
         coralApp.addAddedAttributeObserver(NodeEditor._addedAttributeObserver, NodeEditor._coralAddedAttributeCallback)
         coralApp.addCollapsedNodeObserver(NodeEditor._collapsedNodeObserver, NodeEditor._coralCollapsedNodeCallback)
         coralApp.addGeneratingSaveScriptObserver(NodeEditor._generatingSaveScriptObserver, NodeEditor._coralGeneratingSaveScriptCallback)
+        coralApp.addNetworkLoadedObserver(NodeEditor._networkLoadedObserver, NodeEditor._networkLoadedCallback)
         
         import nodeEditorCommands
         coralApp.loadPluginModule(nodeEditorCommands)
@@ -223,6 +225,10 @@ class NodeEditor(QtGui.QWidget):
                 saveScript += NodeEditor._saveNodeUiData(nodeUi)
     
         return saveScript
+    
+    @staticmethod
+    def _networkLoadedCallback():
+        NodeEditor.focusedInstance().nodeView().frameSceneContent()
     
     @staticmethod
     def _coralGeneratingSaveScriptCallback():

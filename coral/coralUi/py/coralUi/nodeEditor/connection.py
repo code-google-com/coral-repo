@@ -57,7 +57,7 @@ class Connection(QtGui.QGraphicsItem):
             
         self.updateStartPos()
         
-        self.setZValue(1000.0)
+        self.setZValue(-1.0)
     
     def setDashedPen(self, value = True):
         if value:

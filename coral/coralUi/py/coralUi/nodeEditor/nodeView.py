@@ -36,6 +36,10 @@ from .. import nodeBox
 import nodeEditor
 
 class NodeView(QtGui.QGraphicsView):
+    _lastHoveredItem = None
+    _animSpeed = 50.0
+    _animSteps = 50.0
+    
     def __init__(self, parent):
         QtGui.QGraphicsView.__init__(self, parent)
         
@@ -131,13 +135,26 @@ class NodeView(QtGui.QGraphicsView):
         self.setScene(nodeUi.containedScene())
         
         self.setZoom(nodeUi.containedScene().zoom())
-        self.centerOn(nodeUi.containedScene().centerPos())
+        
+        if nodeUi.containedScene()._firstTimeEntering:
+            nodeUi.containedScene().setCenterPos(nodeUi.containedScene().itemsBoundingRect().center())
+            nodeUi.containedScene()._firstTimeEntering = False
+        
+        newCenter = nodeUi.containedScene().centerPos()
+        self.centerOn(newCenter)
+        self._currentCenterPoint = newCenter
         
         nodeUi.containedScene().clearSelection()
         
         nodeUi.containedScene()._selectionChanged()
         
         self.emit(QtCore.SIGNAL("currentNodeUiChanged"))
+    
+    def frameSceneContent(self):
+        self.scene().setCenterPos(self.scene().itemsBoundingRect().center())
+        newCenter = self.scene().centerPos()
+        self.centerOn(newCenter)
+        self._currentCenterPoint = newCenter
         
     def dragMoveEvent(self, event):
         event.accept()
