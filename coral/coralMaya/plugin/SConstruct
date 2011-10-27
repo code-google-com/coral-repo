@@ -68,7 +68,7 @@ elif sys.platform.startswith("win"):
     env["SHLIBPREFIX"] = ""
     env["SHLIBSUFFIX"] = ".mll"
     env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t")
-    env["LINKFLAGS"] = Split("/MANIFEST:NO /INCREMENTAL:NO /export:initializePlugin /export:uninitializePlugin")
+    env["LINKFLAGS"] = Split("/MANIFEST:NO /INCREMENTAL:NO /export:initializePlugin /export:uninitializePlugin OpenGL32.lib glu32.lib")
     env["CCFLAGS"] = Split("-DWIN64 -DNDEBUG -D_WINDOWS -D_USRDLL -DNT_PLUGIN -DREQUIRE_IOSTREAM")
 
 
