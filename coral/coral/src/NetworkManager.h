@@ -43,21 +43,26 @@ class ErrorObject;
 
 //! In charge of managing lifetime and connections of each Object in the network.
 class CORAL_EXPORT NetworkManager{
-	friend class Object;
-	friend class Attribute;
-
 public:
 	static int objectCount();
 	static Object *findObjectById(int id);
 	static bool allowConnection(Attribute *sourceAttribute, Attribute *destinationAttribute, ErrorObject *errorObject);
 	static bool connect(Attribute *sourceAttribute, Attribute *destinationAttribute, ErrorObject *errorObject = 0);
 	static bool isCycle(Attribute *sourceAttribute, Attribute *destinationAttribute);
+	static void getDownstreamChain(Attribute *attribute, std::vector<Attribute*> &downstreamChain);
+	static void getUpstreamChain(Attribute *attribute, std::vector<Attribute*> &upstreamChain);
 	
 private:
+	friend class Object;
+	friend class Attribute;
+	
 	static int useNextAvailableId();
 	static void storeObject(int id, Object *object);
 	static void removeObject(int id);
-	
+	static void addEdge(Attribute *attributeA, Attribute *attributeB);
+	static void removeEdge(Attribute *attributeA, Attribute *attributeB);
+	static void getCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &cleanChain);
+
 	static int _nextAvailableId;
 	static std::map<int, Object *> _objectsById;
 };

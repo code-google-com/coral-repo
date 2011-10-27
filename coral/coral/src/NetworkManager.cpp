@@ -26,6 +26,12 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/depth_first_search.hpp>
+#include <boost/graph/reverse_graph.hpp>
+#include <boost/graph/topological_sort.hpp>
+
 #include "NetworkManager.h"
 #include "Node.h"
 #include "Attribute.h"
@@ -34,8 +40,118 @@
 
 using namespace coral;
 
+typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS> Graph;
+typedef boost::graph_traits<Graph>::vertex_descriptor GraphVertex;
+
+Graph _graph;
+
 int NetworkManager::_nextAvailableId = 0;
 std::map<int, Object *> NetworkManager::_objectsById;
+
+class DownstreamVisitor : public boost::default_dfs_visitor{
+public:
+	void discover_vertex(GraphVertex v, const Graph& g){
+		Attribute *attr = (Attribute*)NetworkManager::findObjectById(v);
+		
+		collectedAttributes->push_back(attr);
+	}
+	
+	std::vector<Attribute*> *collectedAttributes;
+};
+
+class UpstreamVisitor : public boost::default_dfs_visitor{
+public:
+	void finish_vertex(GraphVertex v, const boost::reverse_graph<Graph>& g){
+		Attribute *attr = (Attribute*)NetworkManager::findObjectById(v);
+		
+		collectedAttributes->push_back(attr);
+	}
+	
+	std::vector<Attribute*> *collectedAttributes;
+};
+
+void NetworkManager::getDownstreamChain(Attribute *attribute, std::vector<Attribute*> &downstreamChain){
+	downstreamChain.clear();
+	
+	int nvertices = boost::num_vertices(_graph);
+	
+	if(nvertices){
+		DownstreamVisitor visitor;
+		visitor.collectedAttributes = &downstreamChain;
+		
+		std::vector<boost::default_color_type> color_map(nvertices);
+		boost::depth_first_visit(_graph, boost::vertex(attribute->id(), _graph), visitor, 
+			boost::make_iterator_property_map(color_map.begin(), boost::get(boost::vertex_index, _graph), color_map[0]));
+	}
+}
+
+void NetworkManager::getUpstreamChain(Attribute *attribute, std::vector<Attribute*> &upstreamChain){
+	upstreamChain.clear();
+	
+	int nvertices = boost::num_vertices(_graph);
+	
+	if(nvertices){
+		UpstreamVisitor visitor;
+		visitor.collectedAttributes = &upstreamChain;
+		
+		std::vector<boost::default_color_type> color_map(nvertices);
+		boost::reverse_graph<Graph> reverseGraph(_graph);
+		boost::depth_first_visit(reverseGraph, boost::vertex(attribute->id(), _graph), visitor, 
+			boost::make_iterator_property_map(color_map.begin(), boost::get(boost::vertex_index, _graph), color_map[0]));
+	}
+}
+
+void NetworkManager::getCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &cleanChain){
+	std::vector<Attribute*> attributes;
+	getUpstreamChain(attribute, attributes);
+	
+	cleanChain.clear();
+	
+	int nvertices = boost::num_vertices(_graph);
+	std::vector<int> attrDependencyOrder(nvertices, 0);
+	
+	
+	// reorder the attributes sequence in parallel slices
+	std::vector<Node*> processedNodes;
+	int offset = 0;
+	for(int i = 0; i < attributes.size(); ++i){
+		Attribute *attr = attributes[i];
+		int attrId = attr->id();
+		
+		if(in_degree(attrId, _graph) > 0){
+			Graph::in_edge_iterator j, j_end;
+			int maxdist = 0;
+			
+			for(boost::tie(j, j_end) = boost::in_edges(attrId, _graph); j != j_end; ++j){
+				maxdist = std::max(attrDependencyOrder[source(*j, _graph)], maxdist);
+			}
+			
+			attrDependencyOrder[attrId] = maxdist + 1;
+		}
+		
+		if(attr->isOutput()){
+			Node *parentNode = attr->parent();
+			if(containerUtils::elementInContainer(parentNode, processedNodes)){ // make sure the same node doesn't fall in the same slice more than once.
+				offset++;
+			}
+			
+			int dependencyOrder = attrDependencyOrder[attrId] + offset;
+			std::vector<Attribute*> &slice = cleanChain[dependencyOrder];
+			slice.push_back(attr);
+			
+			processedNodes.push_back(parentNode);
+		}
+	}
+}
+
+
+void NetworkManager::addEdge(Attribute *attributeA, Attribute *attributeB){
+	boost::add_edge(attributeA->id(), attributeB->id(), _graph);
+}
+
+void NetworkManager::removeEdge(Attribute *attributeA, Attribute *attributeB){
+	boost::remove_edge(attributeA->id(), attributeB->id(), _graph);
+}
 
 int NetworkManager::useNextAvailableId(){
 	_nextAvailableId += 1;

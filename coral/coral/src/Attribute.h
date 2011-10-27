@@ -159,12 +159,8 @@ private:
 	Attribute* findSpecializerInBranch(std::map<int, std::vector<std::string> > &specializationMap);
 	void linkSpecializationTo(Attribute *attribute);
 	void cacheEvaluationChain();
-	void cacheDirtyChainDownstream();
-	void cacheDirtyChainUpstream(std::vector<Attribute*> &dirtyChain, std::vector<Attribute*> &processedAttributes);
-	void cacheCleanChainUpstream();
-	void cacheParallelCleanChain(const std::vector<Attribute*> &cleanChain);
-	bool isLastAttributeInChain(Attribute* attribute, const std::vector<Attribute*> &chain);
-	void cacheCleanChainDownstream(std::vector<Attribute*> &cleanChain, std::vector<Attribute*> &processedAttributes);
+	void cacheDirtyChainUpstream();
+	void cacheCleanChainDownstream();
 	void cleanSelf();
 	void processDirtyingDoneCallbackQueue();
 	void setSpecializationOverride(const std::string &specialization);
@@ -188,7 +184,7 @@ private:
 	int _computeTimeSeconds;
 	int _computeTimeMilliseconds;
 	std::vector<Attribute*> _dirtyChain;
-	std::vector<std::vector<std::vector<Attribute*> > > _cleanChain;
+	std::map<int, std::vector<Attribute*> > _cleanChain;
 	
 	Attribute();
 	Attribute(const Attribute &other);

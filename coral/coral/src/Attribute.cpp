@@ -54,7 +54,6 @@ void(*Attribute::_specializationCallBack)(Attribute *self) = 0;
 void(*Attribute::_valueChangedCallback)(Attribute *self) = 0;
 std::vector<void(*)(Attribute *)> _dirtyingDoneCallbackQueue;
 bool _cleaningLocked = false;
-std::string _cleaningAttributeName;
 
 namespace {
 	bool parentNodeNotInParallelSlice(Attribute *attribute, const std::vector<Attribute*> &parallelSlice){
@@ -111,6 +110,8 @@ Attribute::Attribute(const std::string &name, Node *parent):
 	_valueObserved(0),
 	_computeTimeSeconds(0),
 	_computeTimeMilliseconds(0){
+		
+	_dirtyChain.push_back(this);
 }
 
 Attribute::~Attribute(){
@@ -153,6 +154,8 @@ void Attribute::removeAffect(Attribute *attribute){
 		if(attribute->isAffectedBy(this)){
 			attribute->removeAffectFrom(this);
 		}
+		
+		NetworkManager::removeEdge(this, attribute);
 	}
 }
 
@@ -178,6 +181,8 @@ void Attribute::resetInputValuesInChain(){
 
 void Attribute::disconnectInput(){
 	if(_input){
+		NetworkManager::removeEdge(_input, this);
+		
 		Attribute *oldInput = _input;
 		_input = 0;
 		_inputValue = _value;
@@ -284,6 +289,8 @@ void Attribute::addAffect(Attribute *attribute){
 				attribute->addAffectedFrom(this);
 			}
 			
+			NetworkManager::addEdge(this, attribute);
+			
 			cacheEvaluationChain();
 		}
 	}
@@ -317,33 +324,25 @@ void Attribute::clean(){
 	if(!_cleaningLocked){
 		if(_isClean == false){
 			_cleaningLocked = true;
-			_cleaningAttributeName = fullName();
 			
 			boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
-	
-			for(int i = 0; i < _cleanChain.size(); ++i){
-				std::vector<Attribute*> *inputAttributes = &_cleanChain[i][0];
-				std::vector<Attribute*> *outputAttributes = &_cleanChain[i][1];
-			 	
-				for(int i = 0; i < inputAttributes->size(); ++i){
-					inputAttributes->at(i)->_isClean = true;
-				}
-				
+			
+			for(std::map<int, std::vector<Attribute*> >::iterator i = _cleanChain.begin(); i != _cleanChain.end(); ++i){
+				std::vector<Attribute*> &outputAttributes = i->second;
 				#ifdef CORAL_PARALLEL_TBB
-					tbb::parallel_for(tbb::blocked_range<size_t>(0, outputAttributes->size()), attribute_parallelClean(outputAttributes));
+					tbb::parallel_for(tbb::blocked_range<size_t>(0, outputAttributes.size()), attribute_parallelClean(&outputAttributes));
 				#else
-					for(int i = 0; i < outputAttributes->size(); ++i){
-						outputAttributes->at(i)->cleanSelf();
+					for(int j = 0; j < outputAttributes.size(); ++j){
+						outputAttributes[j]->cleanSelf();
 					}
 				#endif
 			}
-	
+			
 			boost::posix_time::ptime endTime = boost::posix_time::microsec_clock::universal_time();
 			_computeTimeSeconds = boost::posix_time::time_period(startTime, endTime).length().total_seconds();
 			_computeTimeMilliseconds = boost::posix_time::time_period(startTime, endTime).length().total_milliseconds() % 1000;
-	
+			
 			_cleaningLocked = false;
-			_cleaningAttributeName = "";
 		}
 	}
 }
@@ -352,6 +351,10 @@ void Attribute::cleanSelf(){
 	if(_isClean == false){
 		Node *parentNode = parent();
 		if(parentNode){
+			for(int i = 0; i < _affectedBy.size(); ++i){
+				_affectedBy[i]->_isClean = true;
+			}
+			
 			if(parentNode->updateEnabled()){
 				parentNode->doUpdate(this);
 			}
@@ -407,7 +410,7 @@ void Attribute::setInput(Attribute *attribute){
 			_input = attribute;
 			_inputValue = _value;
 			
-			cacheEvaluationChain();
+			NetworkManager::addEdge(_input, this);
 			resetInputValuesInChain();
 			
 			dirty();
@@ -418,6 +421,8 @@ void Attribute::setInput(Attribute *attribute){
 bool Attribute::connectTo(Attribute *attribute, ErrorObject *errorObject){
 	_outputs.push_back(attribute);
 	attribute->setInput(this);
+	
+	cacheEvaluationChain();
 	
 	bool success = updateBranchSpecializations(errorObject);
 	
@@ -826,182 +831,46 @@ std::string Attribute::debugInfo(){
 	info += "isClean: " + stringUtils::boolToString(_isClean) + "\n";
 	info += "last cleaning took: secs:" + stringUtils::intToString(_computeTimeSeconds) + ", millisecs: " + stringUtils::intToString(_computeTimeMilliseconds) + "\n";
 	
-	// info += "clean chain: ";
-	// 	for(int i = 0; i < _cleanChain.size(); ++i){
-	// 		std::vector<Attribute*> *inputAttributes = &_cleanChain[i][0];
-	// 		std::vector<Attribute*> *outputAttributes = &_cleanChain[i][1];
-	// 		
-	// 		info += "{";
-	// 		if(inputAttributes->size()){
-	// 			info += "inputs:[";
-	// 			for(int j = 0; j < inputAttributes->size(); ++j){
-	// 				info += inputAttributes->at(j)->fullName() + ",";
-	// 			}
-	// 			info += "],";
-	// 		}
-	// 		if(outputAttributes->size()){
-	// 			info += "outputs:[";
-	// 			for(int j = 0; j < outputAttributes->size(); ++j){
-	// 				info += outputAttributes->at(j)->fullName() + ",";
-	// 			}
-	// 			info += "]";
-	// 		}
-	// 		info += "}";
-	// 		
-	// 		if(i < _cleanChain.size() - 1){
-	// 			info += " --> ";
-	// 		}
-	// 	}
-	// 	info += "\n";
-	// 	
-	// 	info += "dirty chain: ";
-	// 	for(int i = 0; i < _dirtyChain.size(); ++i){
-	// 		info += _dirtyChain[i]->fullName();
-	// 		
-	// 		if(i < _dirtyChain.size() - 1){
-	// 			info += " --> ";
-	// 		}
-	// 	}
-	// 	info += "\n";
+	info += "dirty chain: [";
+	for(int i = 0; i < _dirtyChain.size(); ++i){
+		info += _dirtyChain[i]->fullName() + ", ";
+	}
+	info += "]\n";
+	
+	info += "clean chain: [";
+	for(std::map<int, std::vector<Attribute*> >::iterator i = _cleanChain.begin(); i != _cleanChain.end(); ++i){
+		std::vector<Attribute*> &outputAttributes = i->second;
+		info += "[";
+		for(int j = 0; j < outputAttributes.size(); ++j){
+			Node *parentNode = outputAttributes[j]->parent();
+			info += parentNode->fullName() + ", ";
+		}
+		info += "] -> ";
+	}
+	info += "]\n";
 	
 	return info;
 }
 
-void Attribute::cacheDirtyChainUpstream(std::vector<Attribute*> &dirtyChain, std::vector<Attribute*> &processedAttributes){
-	for(int i = 0; i < _affect.size(); ++i){
-		Attribute *attr = _affect[i];
-		attr->cacheDirtyChainUpstream(dirtyChain, processedAttributes);
-	}
-
-	for(int i = 0; i < _outputs.size(); ++i){
-		Attribute *attr = _outputs[i];
-		attr->cacheDirtyChainUpstream(dirtyChain, processedAttributes);
-	}
-	
-	if(containerUtils::elementInContainer(this, dirtyChain) == false){
-		dirtyChain.push_back(this);
-	}
-	
-	if(containerUtils::elementInContainer(this, processedAttributes) == false){
-		_dirtyChain.clear();
-		processedAttributes.push_back(this);
-		cacheDirtyChainUpstream(_dirtyChain, processedAttributes);
+void Attribute::cacheDirtyChainUpstream(){
+	std::vector<Attribute*> attributes;
+	NetworkManager::getUpstreamChain(this, attributes);
+	for(int i = 0; i < attributes.size(); ++i){
+		NetworkManager::getDownstreamChain(attributes[i], attributes[i]->_dirtyChain);
 	}
 }
 
-void Attribute::cacheDirtyChainDownstream(){
-	if(_input == 0 && _affectedBy.size() == 0){
-		_dirtyChain.clear();
-		std::vector<Attribute*> processedAttributes;
-		processedAttributes.push_back(this);
-		cacheDirtyChainUpstream(_dirtyChain, processedAttributes);
-	}
-	else{
-		if(_input){
-			_input->cacheDirtyChainDownstream();
-		}
-		
-		for(int i = 0; i < _affectedBy.size(); ++i){
-			_affectedBy[i]->cacheDirtyChainDownstream();
-		}
-	}
-}
-
-void Attribute::cacheCleanChainDownstream(std::vector<Attribute*> &cleanChain, std::vector<Attribute*> &processedAttributes){
-	if(_input){
-		_input->cacheCleanChainDownstream(cleanChain, processedAttributes);
-	}
-	
-	for(int i = 0; i < _affectedBy.size(); ++i){
-		_affectedBy[i]->cacheCleanChainDownstream(cleanChain, processedAttributes);
-	}
-	
-	if(containerUtils::elementInContainer(this, cleanChain) == false){
-		cleanChain.push_back(this);
-	}
-	
-	if(containerUtils::elementInContainer(this, processedAttributes) == false){
-		std::vector<Attribute*> newCleanChain;
-		processedAttributes.push_back(this);
-		cacheCleanChainDownstream(newCleanChain, processedAttributes);
-		cacheParallelCleanChain(cleanChain);
-	}
-}
-
-bool Attribute::isLastAttributeInChain(Attribute* attribute, const std::vector<Attribute*> &chain){
-	for(int i = 0; i < chain.size(); ++i){
-		Attribute *attr = chain[i];
-		for(int j = 0; j < attr->_affect.size(); ++j){
-			if(attr->_affect[j] == attribute){
-				return false;
-			}
-		}
-		
-		for(int j = 0; j < attr->_outputs.size(); ++j){
-			if(attr->_outputs[j] == attribute){
-				return false;
-			}
-		}
-	}
-	
-	return true;
-}
-
-void Attribute::cacheParallelCleanChain(const std::vector<Attribute*> &cleanChain){
-	std::vector<Attribute*> cleanChainCopy = cleanChain;
-	_cleanChain.clear();
-	
-	std::vector<std::vector<Attribute*> > parallelSlice(2);
-	while(cleanChainCopy.size() > 0){
-		std::vector<Attribute*> inputParallelSlice;
-		std::vector<Attribute*> outputParallelSlice;
-		
-		std::vector<Attribute*> localCleanChainCopy = cleanChainCopy;
-		
-		for(int i = 0; i < localCleanChainCopy.size(); ++i){
-			Attribute *attr = localCleanChainCopy[i];
-			if(isLastAttributeInChain(attr, localCleanChainCopy)){
-				if(attr->_isOutput){
-					if(parentNodeNotInParallelSlice(attr, outputParallelSlice)){ // avoid having the same node with multiple outputs compute on different cores at the same time (it'd crash)
-						outputParallelSlice.push_back(attr);
-						containerUtils::eraseElementInContainer(attr, cleanChainCopy);
-					}
-				}
-				else{
-					inputParallelSlice.push_back(attr);
-					containerUtils::eraseElementInContainer(attr, cleanChainCopy);
-				}
-			}
-		}
-		
-		parallelSlice[0] = inputParallelSlice;
-		parallelSlice[1] = outputParallelSlice;
-		_cleanChain.push_back(parallelSlice);
-	}
-}
-
-void Attribute::cacheCleanChainUpstream(){
-	if(_outputs.size() == 0 && _affect.size() == 0 && !_passThrough){
-		std::vector<Attribute*> cleanChain;
-		std::vector<Attribute*> processedAttributes;
-		
-		cacheCleanChainDownstream(cleanChain, processedAttributes);
-		cacheParallelCleanChain(cleanChain);
-	}
-	else{
-		for(int i = 0; i < _outputs.size(); ++i){
-			_outputs[i]->cacheCleanChainUpstream();
-		}
-	
-		for(int i = 0; i < _affect.size(); ++i){
-			_affect[i]->cacheCleanChainUpstream();
-		}
+void Attribute::cacheCleanChainDownstream(){
+	std::vector<Attribute*> attributes;
+	NetworkManager::getDownstreamChain(this, attributes);
+	for(int i = 0; i < attributes.size(); ++i){
+		NetworkManager::getCleanChain(attributes[i], attributes[i]->_cleanChain);
 	}
 }
 
 void Attribute::cacheEvaluationChain(){
-	cacheDirtyChainDownstream();
-	cacheCleanChainUpstream();
+	cacheDirtyChainUpstream();
+	cacheCleanChainDownstream();
 }
 
 std::vector<Attribute*> Attribute::specializationLinkedTo(){
