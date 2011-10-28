@@ -213,6 +213,10 @@ void attributeWrapper(){
 		.def("isAffectedBy", &Attribute::isAffectedBy)
 		.def("_setAllowedSpecialization", attribute_setAllowedSpecialization)
 		.def("inputSource", attribute_inputSource)
+		.def("setSpecializationOverride", &Attribute::setSpecializationOverride)
+		.def("removeSpecializationOverride", &Attribute::removeSpecializationOverride)
+		.def("forceSpecializationUpdate", &Attribute::forceSpecializationUpdate)
+		.def("specializationOverride", &Attribute::specializationOverride)
 		;
 	
 	Attribute::_connectToCallback = attribute_connectToCallback;

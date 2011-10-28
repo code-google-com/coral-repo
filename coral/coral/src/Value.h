@@ -40,6 +40,7 @@ public:
 	Value();
 	virtual ~Value();
 	
+	virtual void copy(const Value *other);
 	virtual std::string asString();
 	virtual void setFromString(const std::string &value);
 };

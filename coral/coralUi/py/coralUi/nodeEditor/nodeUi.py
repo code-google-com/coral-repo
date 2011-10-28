@@ -211,7 +211,40 @@ class NodeUi(QtGui.QGraphicsWidget):
         menu.show()
         
     def attributeUis(self):
-        return copy.copy(self._attributeUis)
+        orderedAttributes = []
+        if self._canOpenThis:
+            inputAttributes = {}
+            outputAttributes = {}
+            for attributeUi in self._attributeUis:
+                if attributeUi.isVisible():
+                    if attributeUi.inputHook():
+                        inputAttributes[attributeUi.coralAttribute().name()] = attributeUi
+                    else:
+                        outputAttributes[attributeUi.coralAttribute().name()] = attributeUi
+            
+            inputKeys = inputAttributes.keys()
+            inputKeys.sort()
+            outputKeys = outputAttributes.keys()
+            outputKeys.sort()
+            for key in inputKeys:
+                orderedAttributes.append(inputAttributes[key])
+            
+            for key in outputKeys:
+                orderedAttributes.append(outputAttributes[key])
+        else:
+            inputAttributes = []
+            outputAttributes = []
+            for attributeUi in self._attributeUis:
+                if attributeUi.isVisible():
+                    if attributeUi.inputHook():
+                        inputAttributes.append(attributeUi)
+                    else:
+                        outputAttributes.append(attributeUi)
+        
+            orderedAttributes = inputAttributes
+            orderedAttributes.extend(outputAttributes)
+        
+        return orderedAttributes
     
     def findAttributeUi(self, name):
         attributeUi = None
@@ -313,25 +346,15 @@ class NodeUi(QtGui.QGraphicsWidget):
     def addOutputAttributeUi(self, attributeUi):
         if attributeUi not in self._attributeUis:
             self._attributeUis.append(attributeUi)
-        
+    
     def updateLayout(self):
         labelWidth = self._label.boundingRect().width()
         width = labelWidth
         yPos = self._label.boundingRect().bottom() + self._spacerConstant
         
-        inputAttributes = []
-        outputAttributes = []
-        for attributeUi in self._attributeUis:
-            if attributeUi.isVisible():
-                if attributeUi.inputHook():
-                    inputAttributes.append(attributeUi)
-                else:
-                    outputAttributes.append(attributeUi)
+        attributes = self.attributeUis()
         
-        orderedAttributes = inputAttributes
-        orderedAttributes.extend(outputAttributes)
-        
-        for attributeUi in orderedAttributes:
+        for attributeUi in attributes:
             if attributeUi.isVisible():
                 attributeUi.updateLayout()
             

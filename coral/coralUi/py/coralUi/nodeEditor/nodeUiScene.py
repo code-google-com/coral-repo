@@ -61,7 +61,11 @@ class NodeUiScene(QtGui.QGraphicsScene):
         QtGui.QGraphicsScene.mouseReleaseEvent(self, event)
         
         if event.isAccepted() == False:
-            if event.button() == QtCore.Qt.RightButton:
+            if event.button() == QtCore.Qt.LeftButton:
+                from connectionHook import ConnectionHook
+                if ConnectionHook._outstandingDraggingConnection:
+                    ConnectionHook._removeOutstandingDraggingConnection()  
+            elif event.button() == QtCore.Qt.RightButton:
                 self._parentNodeUi().showRightClickMenu()
 
         self._selectionChanged()

@@ -82,7 +82,7 @@ class NumericAttributeUi(AttributeUi):
         return color
 
 class NumericAttributeInspectorWidget(AttributeInspectorWidget):
-    def __init__(self, coralAttribute, parentWidget):
+    def __init__(self, coralAttribute, parentWidget, sourceCoralAttributes = []):
         AttributeInspectorWidget.__init__(self, coralAttribute, parentWidget)
         
         self._valueField = None
@@ -102,29 +102,34 @@ class NumericAttributeInspectorWidget(AttributeInspectorWidget):
             del widget
     
     def _update(self):
-        numericAttribute = self.coralAttribute()
+        attr = self.coralAttribute()
+        numericAttribute = attr
+        
+        if attr.isPassThrough():
+            processedAttrs = []
+            numericAttribute = _findFirstConnectedAtributeNonPassThrough(attr, processedAttrs)
+        
         numericValue = numericAttribute.outValue()
         valueField = None
         specializationType = numericValue.type()
         if specializationType == numericValue.numericTypeInt:
-            valueField = IntValueField(numericAttribute, self)
+            valueField = IntValueField(attr, self)
         elif specializationType == numericValue.numericTypeFloat:
-            valueField = FloatValueField(numericAttribute, self)
+            valueField = FloatValueField(attr, self)
         elif specializationType == numericValue.numericTypeIntArray:
             if numericAttribute.value().size() == 1:
-                valueField = IntValueField(numericAttribute, self)
+                valueField = IntValueField(attr, self)
         elif specializationType == numericValue.numericTypeFloatArray:
             if numericAttribute.value().size() == 1:
-                valueField = FloatValueField(numericAttribute, self)
+                valueField = FloatValueField(attr, self)
         
         self._valueField = valueField
         
         if valueField is None:
-            valueField = QtGui.QLabel(numericAttribute.name(), self)
+            valueField = QtGui.QLabel(attr.name(), self)
         
         self.layout().addWidget(valueField)
         
-    
     def valueField(self):
         return self._valueField
         

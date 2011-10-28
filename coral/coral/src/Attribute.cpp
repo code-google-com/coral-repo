@@ -196,8 +196,9 @@ void Attribute::disconnectInput(){
 			
 			resetInputValuesInChain();
 			cacheEvaluationChain();
-		
+			
 			updateBranchSpecializations(error);
+			
 			dirty();
 			
 			if(parent()){
@@ -225,6 +226,7 @@ void Attribute::disconnectOutput(Attribute *attribute){
 			ErrorObject *error = new ErrorObject();
 			
 			cacheEvaluationChain();
+			
 			updateBranchSpecializations(error);
 			
 			if(parent()){
@@ -400,18 +402,54 @@ void Attribute::queueDirtyingDoneCallback(void(*callback)(Attribute *)){
 	_dirtyingDoneCallbackQueue.push_back(callback);
 }
 
+Attribute *Attribute::findFirstOutputNotPassThrough(){
+	Attribute *attr = 0;
+	for(int i = 0; i < _outputs.size(); ++i){
+		Attribute *outAttr = _outputs[i];
+		if(outAttr->_passThrough){
+			attr = outAttr->findFirstOutputNotPassThrough();
+			break;
+		}
+		else{
+			attr = outAttr;
+			break;
+		}
+	}
+	
+	return attr;
+}
+
+void Attribute::initValueFromPassThroughFirstOutput(Attribute *attribute){
+	// if this attribute got connected to a passThrough, 
+	// then we check if we need to initialize this value from the first connected output of the passThrough,
+	// we do this to uniform the outputs of a passThrough even before the passThrough gets an input...it's not foundamental, but it's nice to do so.
+	
+	if(attribute->_passThrough && _value){
+		if(!attribute->_input && attribute->_outputs.size()){
+			Attribute *source = attribute->findFirstOutputNotPassThrough();
+			if(source && source != this){
+				_value->copy(source->_value);
+			}
+		}
+	}
+}
+
 void Attribute::setInput(Attribute *attribute){
 	if(attribute){
 		if(_input != attribute){
 			if(_input){
 				disconnectInput();
 			}
-		
+			
 			_input = attribute;
 			_inputValue = _value;
 			
 			NetworkManager::addEdge(_input, this);
 			resetInputValuesInChain();
+			
+			if(_input->_passThrough){
+				initValueFromPassThroughFirstOutput(_input);
+			}
 			
 			dirty();
 		}
@@ -505,7 +543,7 @@ bool Attribute::isOutput(){
 std::string Attribute::asScript(){
 	std::string script;
 	
-	if(_value && _input == 0 && _affectedBy.size() == 0){
+	if(_value && inputSource() == 0 && _affectedBy.size() == 0){
 		std::string valueSaveScript = _value->asString();
 		if(valueSaveScript.empty() == false){
 			Command setAttributeValueCmd;
@@ -721,6 +759,12 @@ void Attribute::setSpecialization(const std::vector<std::string> &specialization
 		
 		dirty();
 	}
+	else if(_passThrough && !isDeleted()){
+		// if this is a passThrough we need to update the ui so it can pickup the right colors from the connected attributes
+		if(_specializationCallBack){
+			_specializationCallBack(this);
+		}
+	}
 }
 
 std::vector<std::string> Attribute::specialization(){
@@ -917,7 +961,7 @@ Attribute *Attribute::inputSource(){
 void Attribute::setSpecializationOverride(const std::string &specialization){
 	std::vector<std::string> spec(1);
 	spec[0] = specialization;
-	
+
 	_specializationOverride = spec;
 	setSpecialization(_specializationOverride);
 }
@@ -927,5 +971,12 @@ void Attribute::removeSpecializationOverride(){
 	setSpecialization(_allowedSpecialization);
 }
 
-
+std::string Attribute::specializationOverride(){
+	std::string override = "";
+	if(_specializationOverride.size()){
+		override = _specializationOverride[0];
+	}
+	
+	return override;
+}
 

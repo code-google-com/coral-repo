@@ -79,6 +79,10 @@ public:
 	bool isInput();
 	bool isOutput();
 	bool allowConnectionTo(Attribute *attribute);
+	void setSpecializationOverride(const std::string &specialization);
+	std::string specializationOverride();
+	void removeSpecializationOverride();
+	void forceSpecializationUpdate();
 	
 	/*! An array os strings that form the currently active specialization for this attribute.*/
 	std::vector<std::string> specialization();
@@ -129,7 +133,6 @@ protected:
 	void setIsInput(bool value);
 	void setIsClean(bool value);
 	void setAllowedSpecialization(const std::vector<std::string> &specialization);
-	void forceSpecializationUpdate();
 
 private:
 	friend class AttributeAccessor;
@@ -163,8 +166,8 @@ private:
 	void cacheCleanChainDownstream();
 	void cleanSelf();
 	void processDirtyingDoneCallbackQueue();
-	void setSpecializationOverride(const std::string &specialization);
-	void removeSpecializationOverride();
+	Attribute *findFirstOutputNotPassThrough();
+	void initValueFromPassThroughFirstOutput(Attribute *attribute);
 
 	Attribute *_input;
 	std::vector<Attribute*> _outputs;

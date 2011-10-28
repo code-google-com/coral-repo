@@ -61,7 +61,7 @@ class AttributeUi(QtGui.QGraphicsWidget):
             self._outputHook = ConnectionHook(self, isOutput = True)
         
         self._label.setBrush(parentNodeUi.labelsColor())
-        self._label.setText(coralAttribute.name())
+        self._label.setText(coralAttribute.name().split(":")[-1])
         
         self.setHooksColor(self.hooksColor(self._coralAttribute().allowedSpecialization()))
         
@@ -81,7 +81,7 @@ class AttributeUi(QtGui.QGraphicsWidget):
         return self._label.brush().color()
     
     def _coralAttributeNameChanged(self):
-        newName = self.coralAttribute().name()
+        newName = self.coralAttribute().name().split(":")[-1]
         self._label.setText(newName)
         
         self.parentNodeUi().updateLayout()
@@ -90,7 +90,7 @@ class AttributeUi(QtGui.QGraphicsWidget):
             parentNodeScene.update()
         
         if self._proxy:
-            self._proxy()._label.setText(newName)
+            self._proxy()._label.setText(self.coralAttribute().name())
             self._proxy().updateLayout()
             self._proxy().scene().update()
     
@@ -174,8 +174,10 @@ class AttributeUi(QtGui.QGraphicsWidget):
     def _updateLabel(self):
         attr = self.coralAttribute()
         label = self.label()
+        attrName = attr.name().split(":")[-1]
+        
         if "[]" in str(label.text()):
-            self.label().setText(attr.name())
+            self.label().setText(attrName)
         
         val = attr.outValue()
         if attr.isPassThrough():
@@ -185,7 +187,7 @@ class AttributeUi(QtGui.QGraphicsWidget):
                 
         if hasattr(val, "isArray"):
             if val.isArray():
-                self.label().setText(attr.name() + "[]")
+                self.label().setText(attrName + "[]")
         
     def specialized(self):
         self._updateLabel()

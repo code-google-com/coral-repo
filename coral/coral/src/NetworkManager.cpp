@@ -111,7 +111,7 @@ void NetworkManager::getCleanChain(Attribute *attribute, std::map<int, std::vect
 	std::vector<int> attrDependencyOrder(nvertices, 0);
 	
 	
-	// reorder the attributes sequence in parallel slices
+	// sort the chain in parallel slices
 	std::vector<Node*> processedNodes;
 	int offset = 0;
 	for(int i = 0; i < attributes.size(); ++i){

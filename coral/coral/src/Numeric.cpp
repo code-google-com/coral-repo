@@ -36,7 +36,7 @@ Numeric::Numeric():
 	_isArray(false),
 	_size(1){
 	
-	// giving first initial size of 1 to allow for defoult values to be there before the type is set.
+	// giving first initial size of 1 to allow for default values to be there before the type is set.
 	_intValues.resize(1);
 	_intValues[0] = 0;
 	
@@ -53,15 +53,19 @@ Numeric::Numeric():
 	_matrix44Values[0] = Imath::M44f();
 }
 
-void Numeric::setFromOther(const Numeric &other){
-	_type = other._type;
-	_isArray = other._isArray;
-	_size = other._size;
-	_intValues = other._intValues;
-	_floatValues = other._floatValues;
-	_vec3Values = other._vec3Values;
-	_quatValues = other._quatValues;
-	_matrix44Values = other._matrix44Values;
+void Numeric::copy(const Value *other){
+	const Numeric *otherNum = dynamic_cast<const Numeric*>(other);
+	
+	if(otherNum){
+		_type = otherNum->_type;
+		_isArray = otherNum->_isArray;
+		_size = otherNum->_size;
+		_intValues = otherNum->_intValues;
+		_floatValues = otherNum->_floatValues;
+		_vec3Values = otherNum->_vec3Values;
+		_quatValues = otherNum->_quatValues;
+		_matrix44Values = otherNum->_matrix44Values;
+	}
 }
 
 bool Numeric::isArray(){

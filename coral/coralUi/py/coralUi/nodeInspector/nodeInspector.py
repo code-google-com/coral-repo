@@ -31,25 +31,51 @@ import weakref
 from PyQt4 import QtGui, QtCore
 
 from ... import coralApp
+from ... import utils
 from ...observer import Observer
 from ..nodeEditor import nodeEditor
 from .. import mainWindow
+
 import fields
 
+class CustomComboBox(QtGui.QComboBox):
+    def __init__(self, parent):
+        QtGui.QComboBox.__init__(self, parent)
+        
+        self._showPopupCallback = None
+        self._currentItemChangedCallback = None
+        self._currentItemChangedCallbackEnabled = True
+        
+        self.connect(self, QtCore.SIGNAL("currentIndexChanged(QString)"), self._currentItemChanged)
+    
+    def setShowPopupCallback(self, callback):
+        self._showPopupCallback = utils.weakRef(callback)
+        
+    def setCurrentItemChangedCallback(self, callback):
+        self._currentItemChangedCallback = utils.weakRef(callback)
+    
+    def _currentItemChanged(self, itemText):
+        self._currentItemChangedCallback()
+    
+    def showPopup(self):
+        self._showPopupCallback()
+        
+        QtGui.QComboBox.showPopup(self)
 
-class SpecializationPresetCombo(QtGui.QWidget):
+class SpecializationCombo(QtGui.QWidget):
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         
-        self._label = QtGui.QLabel("specialization preset:", self)
-        self._combo = QtGui.QComboBox(self)
+        self._label = QtGui.QLabel("specialization:", self)
+        self._combo = CustomComboBox(self)
         
         self.setLayout(QtGui.QHBoxLayout(self))
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setSpacing(0)
         self.layout().addWidget(self._label)
         self.layout().addWidget(self._combo)
-
+    
+    
 class NodeInspectorWidget(QtGui.QWidget):
     def __init__(self, coralNode, parent):
         QtGui.QWidget.__init__(self, parent)
@@ -99,12 +125,13 @@ class NodeInspectorWidget(QtGui.QWidget):
         return False
     
     def _updatePresetCombo(self):
+        return
         coralNode = self._coralNode()
         
         presets = coralNode.specializationPresets()
         
         if len(presets) > 1:
-            presetCombo = SpecializationPresetCombo(self)
+            presetCombo = SpecializationCombo(self)
             for preset in presets:
                 presetCombo._combo.addItem(preset)
             
@@ -116,7 +143,27 @@ class NodeInspectorWidget(QtGui.QWidget):
             
             if self._nodeIsConnected(coralNode):
                 presetCombo._combo.setDisabled(True)
-            
+    
+    def _findFirstConnectedAtributeNonPassThrough(self, coralAttribute, processedAttributes):
+        foundAttr = None
+        if coralAttribute not in processedAttributes:
+            processedAttributes.append(coralAttribute)
+    
+            if coralAttribute.isPassThrough() == False:
+                return coralAttribute
+            else:
+                if coralAttribute.input():
+                    foundAttr = self._findFirstConnectedAtributeNonPassThrough(coralAttribute.input(), processedAttributes)
+                    if foundAttr:
+                        return foundAttr
+                
+                for out in coralAttribute.outputs():
+                    foundAttr = self._findFirstConnectedAtributeNonPassThrough(out, processedAttributes)
+                    if foundAttr:
+                        return foundAttr
+
+        return foundAttr
+    
     def build(self):
         coralNode = self.coralNode()
         
@@ -125,10 +172,20 @@ class NodeInspectorWidget(QtGui.QWidget):
             self.layout().addWidget(self._nameField)
         
         self._updatePresetCombo()
-            
-        for attribute in coralNode.attributes():
+        
+        nodeUi = nodeEditor.NodeEditor.findNodeUi(coralNode.id())
+        attrUis = nodeUi.attributeUis()
+        
+        for attrUi in attrUis:
+            attribute = attrUi.coralAttribute()
             if attribute.name().startswith("_") == False:
                 className = attribute.className()
+                if className == "PassThroughAttribute":
+                    processedAttrs = []
+                    sourceAttr = self._findFirstConnectedAtributeNonPassThrough(attribute, processedAttrs)
+                    if sourceAttr:
+                        className = sourceAttr.className()
+                    
                 if NodeInspector._inspectorWidgetClasses.has_key(className):
                     inspectorWidgetClass = NodeInspector._inspectorWidgetClasses[className]
                     inspectorWidget = inspectorWidgetClass(attribute, self)
@@ -146,16 +203,55 @@ class ProxyAttributeInspectorWidget(QtGui.QWidget):
         self._mainLayout = QtGui.QVBoxLayout(self)
         self._coralAttribute = weakref.ref(coralAttribute)
         self._nameField = None
+        self._specializationCombo = SpecializationCombo(self)
         
         self.setLayout(self._mainLayout)
         self._mainLayout.setContentsMargins(0, 0, 0, 0)
         self._mainLayout.setSpacing(0)
     
+    def _specializationComboChanged(self):
+        specialization = str(self._specializationCombo._combo.currentText())
+        attr = self._coralAttribute()
+        
+        if specialization != "" and specialization != "none":
+            attr.setSpecializationOverride(str(specialization));
+        else:
+            attr.removeSpecializationOverride()
+            
+        attr.forceSpecializationUpdate()
+    
+    def _populateSpecializationCombo(self):
+        coralAttribute = self._coralAttribute()
+        
+        coralAttribute.removeSpecializationOverride()
+        coralAttribute.forceSpecializationUpdate()
+        
+        attrSpecialization = coralAttribute.specialization()
+        
+        self._specializationCombo._combo.clear()
+        for spec in coralAttribute.specialization():
+            self._specializationCombo._combo.addItem(spec)
+        
+        self._specializationCombo._combo.addItem("none")
+        self._specializationCombo._combo.setCurrentIndex(len(attrSpecialization))
+        
     def build(self):
         coralAttribute = self._coralAttribute()
         
         self._nameField = fields.NameField(coralAttribute, self)
+        self.layout().addWidget(self._specializationCombo)
         self.layout().addWidget(self._nameField)
+        
+        self._specializationCombo._combo.setShowPopupCallback(self._populateSpecializationCombo)
+        self._specializationCombo._combo.setCurrentItemChangedCallback(self._specializationComboChanged)
+        
+        spec = coralAttribute.specialization()
+        if len(spec) == 1:
+            self._specializationCombo._combo.addItem(spec[0])
+            self._specializationCombo._combo.setCurrentIndex(0)
+        else:
+            self._specializationCombo._combo.addItem("none")
+            self._specializationCombo._combo.setCurrentIndex(0)
         
 class AttributeInspectorWidget(QtGui.QWidget):
     def __init__(self, coralAttribute, parent):
@@ -227,6 +323,7 @@ class NodeInspector(QtGui.QWidget):
         self._nodeConnectionChangedObserver = Observer()
         self._inspectorWidget = None
         self._node = None
+        self._attribute = None
         
         self.setLayout(self._mainLayout)
         self.setWindowTitle("node inspector")
@@ -247,8 +344,15 @@ class NodeInspector(QtGui.QWidget):
     
     def _nodeConnectionChanged(self):
         self.clear()
+        
+        node = None
+        attribute = None
         if self._node:
-            self._rebuild(self._node())
+            node = self._node()
+        elif self._attribute:
+            attribute = self._attribute()
+        
+        self._rebuild(node, attribute)
     
     def clear(self):
         self._header._classNameLabel.setText("")
@@ -277,6 +381,8 @@ class NodeInspector(QtGui.QWidget):
             self._inspectorWidget = ProxyAttributeInspectorWidget(attribute, self)
             self._inspectorWidget.build()
             self._contentLayout.addWidget(self._inspectorWidget)
+            
+            coralApp.addNodeConnectionChangedObserver(self._nodeConnectionChangedObserver, attribute.parent(), self._nodeConnectionChanged)
                 
     def _selectionChanged(self):
         if self._isLocked:
@@ -284,6 +390,7 @@ class NodeInspector(QtGui.QWidget):
         
         self.clear()
         self._node = None
+        self._attribute = None
         self._nodeConnectionChangedObserver = Observer()
         
         nodes = nodeEditor.NodeEditor.selectedNodes()
@@ -297,6 +404,7 @@ class NodeInspector(QtGui.QWidget):
             
             if attributes:
                 attr = attributes[0]
+                self._attribute = weakref.ref(attr)
                 self._rebuild(attribute = attr)
         
     def lock(self, value):

@@ -116,7 +116,7 @@ void numericNodesWrapper(){
 
 	boost::python::class_<Numeric, boost::shared_ptr<Numeric>, boost::python::bases<Value>, boost::noncopyable>("Numeric", boost::python::no_init)
 		.def("__init__", pythonWrapperUtils::__init__<Numeric>)
-		.def("setFromOther", &Numeric::setFromOther)
+		.def("copy", &Numeric::copy)
 		.def("type", numeric_type)
 		.def("isArray", &Numeric::isArray)
 		.def("size", &Numeric::size)

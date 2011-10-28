@@ -54,7 +54,7 @@ class CreateNode(Command):
             
             if newNode:
                 specializationPreset = self.argAsString("specializationPreset")
-                if specializationPreset != "none":
+                if specializationPreset != "" and specializationPreset != "none":
                     newNode.enableSpecializationPreset(specializationPreset)
                 
                 self.setResultString(newNode.fullName())
@@ -71,6 +71,7 @@ class CreateAttribute(Command):
         self.setArgString("parentNode", "")
         self.setArgBool("input", False)
         self.setArgBool("output", False)
+        self.setArgString("specializationOverride", "none")
         
     def doIt(self):
         className = self.argAsString("className")
@@ -85,8 +86,11 @@ class CreateAttribute(Command):
         if parentNode:
             newAttr = coralApp.createAttribute(className, name, parentNode, input, output)
             if newAttr:
+                specializationOverride = self.argAsString("specializationOverride")
+                if specializationOverride != "" and specializationOverride != "none":
+                    newAttr.setSpecializationOverride(specializationOverride)
+                    
                 self.setResultString(newAttr.fullName())
-                success = True
         
         if newAttr is None:
             coralApp.logError("CreateAttribute Command: failed to create new attribute.")

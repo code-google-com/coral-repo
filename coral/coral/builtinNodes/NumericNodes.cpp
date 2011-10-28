@@ -118,16 +118,16 @@ Vec3Node::Vec3Node(const std::string &name, Node* parent): Node(name, parent){
 	addAttributeSpecializationLink(_x, _y);
 	addAttributeSpecializationLink(_y, _z);
 	
-	setSpecializationPreset("single", _x, "Float");
-	setSpecializationPreset("single", _y, "Float");
-	setSpecializationPreset("single", _z, "Float");
-	setSpecializationPreset("single", _vector, "Vec3");
-	
-	setSpecializationPreset("array", _x, "FloatArray");
-	setSpecializationPreset("array", _y, "FloatArray");
-	setSpecializationPreset("array", _z, "FloatArray");
-	setSpecializationPreset("array", _vector, "Vec3Array");
-	enableSpecializationPreset("single");
+	// setSpecializationPreset("single", _x, "Float");
+	// setSpecializationPreset("single", _y, "Float");
+	// setSpecializationPreset("single", _z, "Float");
+	// setSpecializationPreset("single", _vector, "Vec3");
+	// 
+	// setSpecializationPreset("array", _x, "FloatArray");
+	// setSpecializationPreset("array", _y, "FloatArray");
+	// setSpecializationPreset("array", _z, "FloatArray");
+	// setSpecializationPreset("array", _vector, "Vec3Array");
+	// enableSpecializationPreset("single");
 }
 
 void Vec3Node::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
@@ -1691,7 +1691,7 @@ void SetSimulationResult::update(Attribute *attribute){
 	int sourceId = _source->value()->id();
 	
 	
-	_globalNumericStorage[sourceId].setFromOther(*_data->value());
+	_globalNumericStorage[sourceId].copy(_data->value());
 }
 
 GetSimulationResult::GetSimulationResult(const std::string &name, Node *parent): Node(name, parent){	
@@ -1717,10 +1717,10 @@ void GetSimulationResult::update(Attribute *attribute){
 	float time = _time->value()->floatValueAt(0);
 	
 	if(time == 0.0 || _globalNumericStorage.find(sourceId) == _globalNumericStorage.end()){
-		_globalNumericStorage[sourceId].setFromOther(*source);
+		_globalNumericStorage[sourceId].copy(source);
 	}
 	
-	_data->outValue()->setFromOther(_globalNumericStorage[sourceId]);
+	_data->outValue()->copy(&_globalNumericStorage[sourceId]);
 }
 
 QuatToAxisAngle::QuatToAxisAngle(const std::string &name, Node *parent): Node(name, parent)

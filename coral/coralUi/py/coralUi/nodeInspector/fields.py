@@ -66,7 +66,7 @@ class ObjectField(QtGui.QWidget):
     def valueWidget(self):
         return self._valueWidget
     
-    def setValueWidget(self, widget, endOfEditSignal, endOfEditCallback):
+    def setObjectWidget(self, widget, endOfEditSignal, endOfEditCallback):
         self._valueWidget = widget
         self._mainLayout.addWidget(widget)
         
@@ -74,7 +74,75 @@ class ObjectField(QtGui.QWidget):
     
     def coralObject(self):
         return self._coralObject()
+
+class AttributeField(ObjectField):
+    def __init__(self, coralAttribute, parentWidget):
+        ObjectField.__init__(self, coralAttribute.name().split(":")[-1], coralAttribute, parentWidget)
+        
+        self._valueChangedObserver = Observer()
+        self._sourceAttributes = self._findSourceAttributes()
+        
+        coralApp.addAttributeValueChangedObserver(self._valueChangedObserver, self._sourceAttributes[0](), self.attributeValueChanged)
     
+    def widgetValueChanged(self):
+        value = self.getWidgetValue(self.valueWidget())
+        for sourceAttr in self._sourceAttributes:
+            attr = sourceAttr()
+            if self.getAttributeValue(attr) != value:
+                self.setAttributeValue(attr, value)
+                attr.valueChanged()
+    
+    def attributeValueChanged(self):
+        value = self.getAttributeValue(self._sourceAttributes[0]())
+        if value != self.getWidgetValue(self.valueWidget()):
+            self.setWidgetValue(self.valueWidget(), value)
+    
+    def getWidgetValue(self, widget):
+        return None
+    
+    def setWidgetValue(self, widget):
+        pass
+    
+    def getAttributeValue(self, attribute):
+        return None
+    
+    def setAttributeValue(self, attribute, value):
+        pass
+    
+    def setAttributeWidget(self, widget, endOfEditSignal):
+        ObjectField.setObjectWidget(self, widget, endOfEditSignal, self.widgetValueChanged)
+        
+        attribute = self.coralObject()
+        if attribute.input() or attribute.affectedBy():
+            self.valueWidget().setDisabled(True)
+        
+        self.attributeValueChanged()
+    
+    def _findFirstOutNotPassThrough(self, attribute):
+        attr = None
+        
+        if attribute.isPassThrough():
+            for outAttr in attribute.outputs():
+                attr = self._findFirstOutNotPassThrough(outAttr)
+                if attr:
+                    break
+        else:
+            attr = attribute
+        
+	    return attr
+	
+    def _findSourceAttributes(self):
+        attr = self.coralObject()
+        attrs = []
+        if attr.isPassThrough():
+            for outAttr in attr.outputs():
+                sourceAttr = self._findFirstOutNotPassThrough(outAttr)
+                if sourceAttr:
+                    attrs.append(weakref.ref(sourceAttr))
+        if len(attrs) == 0:
+            attrs = [weakref.ref(attr)]
+        
+        return attrs
 
 class CustomDoubleSpinBox(QtGui.QDoubleSpinBox):
     def __init__(self, parent):
@@ -87,45 +155,28 @@ class CustomDoubleSpinBox(QtGui.QDoubleSpinBox):
         
         self._wheelCallback()
 
-class FloatValueField(ObjectField):
+class FloatValueField(AttributeField):
     def __init__(self, coralAttribute, parentWidget):
-        ObjectField.__init__(self, coralAttribute.name(), coralAttribute, parentWidget)
+        AttributeField.__init__(self, coralAttribute, parentWidget)
         
-        self._valueChangedObserver = Observer()
-        self._connectedInputObserver = Observer()
-        self._disconnectedInputObserver = Observer()
+        attrWidget = CustomDoubleSpinBox(self)
+        attrWidget._wheelCallback = utils.weakRef(self.widgetValueChanged)
+        attrWidget.setRange(-99999999999.0, 99999999999.0)
+        attrWidget.setSingleStep(0.1)
         
-        self.setValueWidget(CustomDoubleSpinBox(self), "editingFinished()", self._valueWidgetChanged)
-        self.valueWidget()._wheelCallback = utils.weakRef(self._valueWidgetChanged)
-        self.valueWidget().setRange(-99999999999.0, 99999999999.0)
-        self.valueWidget().setSingleStep(0.1)
-        
-        coralApp.addAttributeValueChangedObserver(self._valueChangedObserver, coralAttribute, self._valueChanged)
-        coralApp.addConnectedInputObserver(self._connectedInputObserver, coralAttribute, self._inputConnectionChanged)
-        coralApp.addDisconnectedInputObserver(self._disconnectedInputObserver, coralAttribute, self._inputConnectionChanged)
-        
-        self._valueChanged()
-        self._inputConnectionChanged()
-        
-        if coralAttribute.affectedBy():
-            self.valueWidget().setDisabled(True)
+        self.setAttributeWidget(attrWidget, "editingFinished()")
     
-    def _inputConnectionChanged(self):
-        if self.coralObject().input():
-            self.valueWidget().setDisabled(True)
-        else:
-            self.valueWidget().setDisabled(False)
+    def setAttributeValue(self, attribute, value):
+        attribute.outValue().setFloatValueAt(0, value)
     
-    def _valueWidgetChanged(self):
-        value = self.valueWidget().value()
-        if self.coralObject().outValue().floatValueAt(0) != value:
-            self.coralObject().outValue().setFloatValueAt(0, value)
-            self.coralObject().valueChanged()
+    def getAttributeValue(self, attribute):
+        return attribute.value().floatValueAt(0)
     
-    def _valueChanged(self):
-        value = self.coralObject().value().floatValueAt(0)
-        if value != self.valueWidget().value():
-            self.valueWidget().setValue(value)
+    def setWidgetValue(self, widget, value):
+        widget.setValue(value)
+    
+    def getWidgetValue(self, widget):
+        return widget.value()
 
 class CustomIntSpinBox(QtGui.QSpinBox):
     def __init__(self, parent):
@@ -138,119 +189,65 @@ class CustomIntSpinBox(QtGui.QSpinBox):
         
         self._wheelCallback()
         
-class IntValueField(ObjectField):
+class IntValueField(AttributeField):
     def __init__(self, coralAttribute, parentWidget):
-        ObjectField.__init__(self, coralAttribute.name(), coralAttribute, parentWidget)
+        AttributeField.__init__(self, coralAttribute, parentWidget)
         
-        self._valueChangedObserver = Observer()
-        self._connectedInputObserver = Observer()
-        self._disconnectedInputObserver = Observer()
-        self.setValueWidget(CustomIntSpinBox(self), "editingFinished()", self._valueWidgetChanged)
-        self.valueWidget()._wheelCallback = utils.weakRef(self._valueWidgetChanged)
-        self.valueWidget().setRange(-999999999, 999999999)
+        attrWidget = CustomIntSpinBox(self)
+        attrWidget._wheelCallback = utils.weakRef(self.widgetValueChanged)
+        attrWidget.setRange(-999999999, 999999999)
         
-        coralApp.addAttributeValueChangedObserver(self._valueChangedObserver, coralAttribute, self._valueChanged)
-        coralApp.addConnectedInputObserver(self._connectedInputObserver, coralAttribute, self._inputConnectionChanged)
-        coralApp.addDisconnectedInputObserver(self._disconnectedInputObserver, coralAttribute, self._inputConnectionChanged)
+        self.setAttributeWidget(attrWidget, "editingFinished()")
         
-        self._valueChanged()
-        self._inputConnectionChanged()
-        
-        if coralAttribute.affectedBy():
-            self.valueWidget().setDisabled(True)
+    def setAttributeValue(self, attribute, value):
+        attribute.outValue().setIntValueAt(0, value)
     
-    def _inputConnectionChanged(self):
-        if self.coralObject().input():
-            self.valueWidget().setDisabled(True)
-        else:
-            self.valueWidget().setDisabled(False)
+    def getAttributeValue(self, attribute):
+        return attribute.value().intValueAt(0)
     
-    def _valueWidgetChanged(self):
-        value = self.valueWidget().value()
-        if self.coralObject().outValue().intValueAt(0) != value:
-            self.coralObject().outValue().setIntValueAt(0, value)
-            self.coralObject().valueChanged()
+    def setWidgetValue(self, widget, value):
+        widget.setValue(value)
     
-    def _valueChanged(self):
-        value = self.coralObject().value().intValueAt(0)
-        if value != self.valueWidget().value():
-            self.valueWidget().setValue(value)
+    def getWidgetValue(self, widget):
+        return widget.value()
 
-class BoolValueField(ObjectField):
+class BoolValueField(AttributeField):
     def __init__(self, coralAttribute, parentWidget):
-        ObjectField.__init__(self, coralAttribute.name(), coralAttribute, parentWidget)
+        AttributeField.__init__(self, coralAttribute, parentWidget)
         
-        self._valueChangedObserver = Observer()
-        self._connectedInputObserver = Observer()
-        self._disconnectedInputObserver = Observer()
+        attrWidget = QtGui.QCheckBox(self)
+        attrWidget.setTristate(False)
+        self.setAttributeWidget(attrWidget, "stateChanged(int)")
         
-        self.setValueWidget(QtGui.QCheckBox(self), "stateChanged(int)", self._valueWidgetChanged)
-        
-        coralApp.addAttributeValueChangedObserver(self._valueChangedObserver, coralAttribute, self._valueChanged)
-        coralApp.addConnectedInputObserver(self._connectedInputObserver, coralAttribute, self._inputConnectionChanged)
-        coralApp.addDisconnectedInputObserver(self._disconnectedInputObserver, coralAttribute, self._inputConnectionChanged)
-        
-        self._valueChanged()
-        self._inputConnectionChanged()
-        
-        self.valueWidget().setTristate(False)
-        
-        if coralAttribute.affectedBy():
-            self.valueWidget().setDisabled(True)
+    def setAttributeValue(self, attribute, value):
+        attribute.outValue().setBoolValueAt(0, value)
     
-    def _inputConnectionChanged(self):
-        if self.coralObject().input():
-            self.valueWidget().setDisabled(True)
-        else:
-            self.valueWidget().setDisabled(False)
-   
-    def _valueWidgetChanged(self):
-        widgetValue = self.valueWidget().isChecked()
-        if widgetValue != self.coralObject().outValue().boolValueAt(0):
-            self.coralObject().outValue().setBoolValueAt(0, widgetValue)
-            self.coralObject().valueChanged()
+    def getAttributeValue(self, attribute):
+        return attribute.value().boolValueAt(0)
     
-    def _valueChanged(self):
-        value = self.coralObject().value().boolValueAt(0)
-        
-        if value != self.valueWidget().isChecked():
-            self.valueWidget().setCheckState(value)
+    def setWidgetValue(self, widget, value):
+        widget.setCheckState(value)
+    
+    def getWidgetValue(self, widget):
+        return widget.isChecked()
 
-class StringValueField(ObjectField):
+class StringValueField(AttributeField):
     def __init__(self, coralAttribute, parentWidget):
-        ObjectField.__init__(self, coralAttribute.name(), coralAttribute, parentWidget)
+        AttributeField.__init__(self, coralAttribute, parentWidget)
         
-        self._valueChangedObserver = Observer()
-        self._connectedInputObserver = Observer()
-        self._disconnectedInputObserver = Observer()
-        
-        self.setValueWidget(QtGui.QLineEdit(self), "editingFinished()", self._valueWidgetChanged)
-        
-        coralApp.addAttributeValueChangedObserver(self._valueChangedObserver, coralAttribute, self._valueChanged)
-        coralApp.addConnectedInputObserver(self._connectedInputObserver, coralAttribute, self._inputConnectionChanged)
-        coralApp.addDisconnectedInputObserver(self._disconnectedInputObserver, coralAttribute, self._inputConnectionChanged)
-        
-        self._valueChanged()
-        self._inputConnectionChanged()
-        
-        if coralAttribute.affectedBy():
-            self.valueWidget().setDisabled(True)
+        self.setAttributeWidget(QtGui.QLineEdit(self), "editingFinished()")
     
-    def _inputConnectionChanged(self):
-        if self.coralObject().input():
-            self.valueWidget().setDisabled(True)
-        else:
-            self.valueWidget().setDisabled(False)
+    def setAttributeValue(self, attribute, value):
+        attribute.outValue().setStringValue(value)
     
-    def _valueWidgetChanged(self):
-        self.coralObject().outValue().setStringValue(str(self.valueWidget().text()))
-        self.coralObject().valueChanged()
+    def getAttributeValue(self, attribute):
+        return attribute.value().stringValue()
     
-    def _valueChanged(self):
-        value = self.coralObject().value().stringValue()
-
-        if value != str(self.valueWidget().text()):
-            self.valueWidget().setText(value)
+    def setWidgetValue(self, widget, value):
+        widget.setText(value)
+    
+    def getWidgetValue(self, widget):
+        return str(widget.text())
 
 class NameField(ObjectField):
     def __init__(self, coralNode, parentWidget):
@@ -258,11 +255,11 @@ class NameField(ObjectField):
         
         self._nameChangedObserver = Observer()
         
-        self.setValueWidget(QtGui.QLineEdit(coralNode.name(), self), "editingFinished()", self._valueWidgetChanged)
+        self.setObjectWidget(QtGui.QLineEdit(coralNode.name(), self), "editingFinished()", self.widgetValueChanged)
         
         coralApp.addNameChangedObserver(self._nameChangedObserver, coralNode, self._nameChanged)
     
-    def _valueWidgetChanged(self):
+    def widgetValueChanged(self):
         newName = str(self.valueWidget().text())
         if self.coralObject().name() != newName:
             self.coralObject().setName(newName)

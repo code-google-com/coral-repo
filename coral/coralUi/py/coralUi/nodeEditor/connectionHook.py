@@ -37,6 +37,15 @@ import connection
 import nodeView
 
 class ConnectionHook(QtGui.QGraphicsItem):
+    _outstandingDraggingConnection = None
+    
+    @staticmethod
+    def _removeOutstandingDraggingConnection():
+        if ConnectionHook._outstandingDraggingConnection:
+            draggingConnection = ConnectionHook._outstandingDraggingConnection()
+            draggingConnection.deleteIt()
+            ConnectionHook._outstandingDraggingConnection = None
+    
     def __init__(self, parentAttributeUi, parentItem = None, isInput = False, isOutput = False):
         if parentItem is None:# parentItem is used by builtinUis.ContainedAttributeUiProxy
             parentItem = parentAttributeUi
@@ -118,6 +127,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
     def mousePressEvent(self, event):
         if self._isOutput:
             self._draggingConnection = connection.Connection(self)
+            ConnectionHook._outstandingDraggingConnection = weakref.ref(self._draggingConnection)
         elif self._connections:
             inputConnection = self._connections[0]
             
@@ -188,6 +198,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
             startHook = self._draggingConnection.startHook()
             self._draggingConnection.deleteIt()
             self._draggingConnection = None
+            ConnectionHook._outstandingDraggingConnection = None
             
             if self._draggingConnectionEndHook:
                 sourceAttribute = startHook.parentAttributeUi().coralAttribute()
@@ -197,7 +208,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
                 success = coralApp.executeCommand("ConnectAttributes", sourceAttribute = sourceAttribute.fullName(), destinationAttribute = destinationAttribute.fullName())
                 
                 self.parentAttributeUi().parentNodeUi().update()
-                
+    
     def boundingRect(self):
         return self._rect
     

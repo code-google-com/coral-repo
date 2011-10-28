@@ -425,7 +425,12 @@ std::string Node::asScript(){
 			else if(attr->isOutput()){
 				createAttributeCmd.setArgBool("output", true);
 			}
-		
+			
+			std::string spec = attr->specializationOverride();
+			if(!spec.empty()){
+				createAttributeCmd.setArgString("specializationOverride", spec);
+			}
+			
 			script += createAttributeCmd.asScript() + "\n";
 		}
 		

@@ -63,7 +63,7 @@ public:
 	};
 
 	Numeric();
-	void setFromOther(const Numeric &other);
+	void copy(const Value *other);
 	Numeric::Type type();
 	void setType(Numeric::Type type);
 	bool isArray();
