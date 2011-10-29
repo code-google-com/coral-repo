@@ -83,7 +83,8 @@ public:
 	std::string specializationOverride();
 	void removeSpecializationOverride();
 	void forceSpecializationUpdate();
-	
+	void forceDirty();
+
 	/*! An array os strings that form the currently active specialization for this attribute.*/
 	std::vector<std::string> specialization();
 	
@@ -144,7 +145,7 @@ private:
 	void addAffectedFrom(Attribute *attribute);
 	void removeAffectFrom(Attribute *attribute);
 	void setInput(Attribute *attribute);
-	void dirty();
+	void dirty(bool force = false);
 	void clean();
 	void addAffect(Attribute *attribute);
 	Attribute *findInputNotPass(Attribute *attribute);

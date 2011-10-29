@@ -214,14 +214,15 @@ class AttributeUi(QtGui.QGraphicsWidget):
             self._proxy().specialized()
         
     def setHooksColor(self, color, mixedColor = False):
+        hook = None
         if self._outputHook:
-            self._outputHook.setColor(color)
-            self._outputHook.setMixedColor(mixedColor)
+            hook = self._outputHook
+        else:
+            hook = self._inputHook
         
-        elif self._inputHook:
-            self._inputHook.setColor(color)
-            self._inputHook.setMixedColor(mixedColor)
-            
+        hook.setColor(color)
+        hook.setMixedColor(mixedColor)
+        
     def coralAttribute(self):
         return self._coralAttribute()
     

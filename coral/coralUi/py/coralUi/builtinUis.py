@@ -126,7 +126,7 @@ class NumericAttributeInspectorWidget(AttributeInspectorWidget):
         self._valueField = valueField
         
         if valueField is None:
-            valueField = QtGui.QLabel(attr.name(), self)
+            valueField = QtGui.QLabel(attr.name().split(":")[-1], self)
         
         self.layout().addWidget(valueField)
         

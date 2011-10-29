@@ -152,11 +152,14 @@ class AttributeUiProxy(QtGui.QGraphicsWidget):
             hookColor = attributeUi.outputHook().color()
         elif attributeUi.inputHook():
             hookColor = attributeUi.inputHook().color()
-            
+        
+        hook = None
         if self._outputHook:
-            self._outputHook.setColor(hookColor)
+            hook = self._outputHook
         elif self._inputHook:
-            self._inputHook.setColor(hookColor)
+            hook = self._inputHook
+        
+        hook.setColor(hookColor)
         
         self.update()
     

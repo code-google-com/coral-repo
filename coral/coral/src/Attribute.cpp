@@ -355,7 +355,7 @@ void Attribute::cleanSelf(){
 		if(parentNode){
 			for(int i = 0; i < _affectedBy.size(); ++i){
 				_affectedBy[i]->_isClean = true;
-			}
+			}	
 			
 			if(parentNode->updateEnabled()){
 				parentNode->doUpdate(this);
@@ -366,9 +366,9 @@ void Attribute::cleanSelf(){
 	}
 }
 
-void Attribute::dirty(){
+void Attribute::dirty(bool force){
 	if(!_cleaningLocked){
-		if(_isClean){
+		if(_isClean || force){
 			for(int i = 0; i < _dirtyChain.size(); ++i){
 				Attribute* attr = _dirtyChain[i];
 				attr->_isClean = false;
@@ -380,10 +380,18 @@ void Attribute::dirty(){
 					}
 				}
 			}
-		
+
 			processDirtyingDoneCallbackQueue();
 		}
 	}
+	
+	for(int i = 0; i < _dirtyChain.size(); ++i){
+		Attribute* attr = _dirtyChain[i];
+	}
+}
+
+void Attribute::forceDirty(){
+	dirty(true);
 }
 
 void Attribute::processDirtyingDoneCallbackQueue(){

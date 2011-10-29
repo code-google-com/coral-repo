@@ -217,6 +217,7 @@ void attributeWrapper(){
 		.def("removeSpecializationOverride", &Attribute::removeSpecializationOverride)
 		.def("forceSpecializationUpdate", &Attribute::forceSpecializationUpdate)
 		.def("specializationOverride", &Attribute::specializationOverride)
+		.def("forceDirty", &Attribute::forceDirty)
 		;
 	
 	Attribute::_connectToCallback = attribute_connectToCallback;

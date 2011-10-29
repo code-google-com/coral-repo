@@ -59,6 +59,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
         self._rect = QtCore.QRectF(0, 0, 10, 10)
         self._color = QtGui.QColor(200, 200, 200)
         self._brush = QtGui.QBrush(self.color())
+        self._pen = QtGui.QPen(QtCore.Qt.NoPen)
         self._draggingConnection = None
         self._draggingConnectionEndHook = None
         self._connections = []
@@ -67,8 +68,16 @@ class ConnectionHook(QtGui.QGraphicsItem):
         
         self.setFlags(QtGui.QGraphicsItem.ItemSendsScenePositionChanges)
     
+        self._pen.setWidthF(1.0)
+        
     def setMixedColor(self, value = True):
         self._mixedColor = value
+    
+    def setBorderEnabled(self, value = True):
+        if value:
+            self._pen.setStyle(QtCore.Qt.SolidLine)
+        else:
+            self._pen.setStyle(QtCore.Qt.NoPen)
     
     def updateToolTip(self):
         self.setToolTip(self._parentAttributeUi().toolTip())
@@ -114,6 +123,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
     def setColor(self, color):
         self._color.setRgb(color.red(), color.green(), color.blue())
         self._brush.setColor(self._color)
+        self._pen.setColor(self._color.darker(150))
     
     def color(self):
         return QtGui.QColor(self._color)
@@ -214,7 +224,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
     
     def paint(self, painter, option, widget):
         painter.setBrush(self._brush)
-        painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
+        painter.setPen(self._pen)
         painter.drawEllipse(self._rect)
         
         if self._mixedColor:

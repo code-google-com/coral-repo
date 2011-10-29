@@ -90,7 +90,8 @@ class AttributeField(ObjectField):
             attr = sourceAttr()
             if self.getAttributeValue(attr) != value:
                 self.setAttributeValue(attr, value)
-                attr.valueChanged()
+        
+        self.coralObject().forceDirty()
     
     def attributeValueChanged(self):
         value = self.getAttributeValue(self._sourceAttributes[0]())
@@ -114,31 +115,22 @@ class AttributeField(ObjectField):
         
         attribute = self.coralObject()
         if attribute.input() or attribute.affectedBy():
-            self.valueWidget().setDisabled(True)
-        
+            self.label().setText(">" + self.label().text())
+            
         self.attributeValueChanged()
     
-    def _findFirstOutNotPassThrough(self, attribute):
-        attr = None
-        
-        if attribute.isPassThrough():
-            for outAttr in attribute.outputs():
-                attr = self._findFirstOutNotPassThrough(outAttr)
-                if attr:
-                    break
+    def _collectOutAttrsNonPass(self, attribute, outAttrs):
+        if attribute.isPassThrough() == False:
+            outAttrs.append(weakref.ref(attribute))
         else:
-            attr = attribute
-        
-	    return attr
+            for outAttr in attribute.outputs():
+                self._collectOutAttrsNonPass(outAttr, outAttrs)
 	
     def _findSourceAttributes(self):
         attr = self.coralObject()
         attrs = []
         if attr.isPassThrough():
-            for outAttr in attr.outputs():
-                sourceAttr = self._findFirstOutNotPassThrough(outAttr)
-                if sourceAttr:
-                    attrs.append(weakref.ref(sourceAttr))
+            self._collectOutAttrsNonPass(attr, attrs)
         if len(attrs) == 0:
             attrs = [weakref.ref(attr)]
         

@@ -406,7 +406,7 @@ class NodeUi(QtGui.QGraphicsWidget):
         
         if nodeEditor.NodeEditor._nodeUis.has_key(self._coralNodeId):
             del nodeEditor.NodeEditor._nodeUis[self._coralNodeId]
-    
+
     def _openThis(self):
         if self._canOpenThis:
             focusedNodeEditor = nodeEditor.NodeEditor.focusedInstance()
@@ -414,7 +414,7 @@ class NodeUi(QtGui.QGraphicsWidget):
             if nodeView:
                 nodeView.setCurrentNodeUi(self)
                 self._nodeViewWatching = weakref.ref(nodeView)
-    
+                
     def mousePressEvent(self, event):
         if event.button() == QtCore.Qt.RightButton:
             pass
