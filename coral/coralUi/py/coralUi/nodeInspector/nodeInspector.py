@@ -50,17 +50,22 @@ class CustomComboBox(QtGui.QComboBox):
     
     def setShowPopupCallback(self, callback):
         self._showPopupCallback = utils.weakRef(callback)
-        
+ 
     def setCurrentItemChangedCallback(self, callback):
         self._currentItemChangedCallback = utils.weakRef(callback)
     
     def _currentItemChanged(self, itemText):
-        self._currentItemChangedCallback()
+        if self._currentItemChangedCallbackEnabled:
+            self._currentItemChangedCallback()
     
     def showPopup(self):
+        self._currentItemChangedCallbackEnabled = False
+        
         self._showPopupCallback()
         
         QtGui.QComboBox.showPopup(self)
+        
+        self._currentItemChangedCallbackEnabled = True
 
 class SpecializationCombo(QtGui.QWidget):
     def __init__(self, parent):
@@ -74,8 +79,7 @@ class SpecializationCombo(QtGui.QWidget):
         self.layout().setSpacing(0)
         self.layout().addWidget(self._label)
         self.layout().addWidget(self._combo)
-    
-    
+
 class NodeInspectorWidget(QtGui.QWidget):
     def __init__(self, coralNode, parent):
         QtGui.QWidget.__init__(self, parent)
@@ -85,6 +89,7 @@ class NodeInspectorWidget(QtGui.QWidget):
         self._nameField = None
         self._nameEditable = False
         self._attributeWidgets = {}
+        self._presetCombo = None
         
         self.setLayout(self._mainLayout)
         self._mainLayout.setContentsMargins(0, 0, 0, 0)
@@ -124,25 +129,45 @@ class NodeInspectorWidget(QtGui.QWidget):
         
         return False
     
+    def _presetComboItemChanged(self):
+        coralNode = self._coralNode()
+        combo = self._presetCombo._combo
+        selectedPreset = str(combo.currentText())
+        print selectedPreset
+        coralNode.enableSpecializationPreset(selectedPreset)
+        
+    def _populatePresetCombo(self):
+        coralNode = self._coralNode()
+        
+        combo = self._presetCombo._combo
+        combo.clear()
+        
+        presets = coralNode.specializationPresets()
+        
+        for preset in presets:
+            combo.addItem(preset)
+        
+        currentPreset = coralNode.enabledSpecializationPreset()
+        combo.setCurrentIndex(presets.index(currentPreset))
+        
     def _updatePresetCombo(self):
-        return
         coralNode = self._coralNode()
         
         presets = coralNode.specializationPresets()
         
         if len(presets) > 1:
-            presetCombo = SpecializationCombo(self)
-            for preset in presets:
-                presetCombo._combo.addItem(preset)
+            self._presetCombo = SpecializationCombo(self)
+            self.layout().addWidget(self._presetCombo)
             
             currentPreset = coralNode.enabledSpecializationPreset()
-            presetCombo._combo.setCurrentIndex(presets.index(currentPreset))
+            self._presetCombo._combo.addItem(currentPreset)
+            self._presetCombo._combo.setCurrentIndex(0)
             
-            self.layout().addWidget(presetCombo)
-            self.connect(presetCombo._combo, QtCore.SIGNAL("currentIndexChanged(QString)"), self._presetComboChanged)
+            self._presetCombo._combo.setShowPopupCallback(self._populatePresetCombo)
+            self._presetCombo._combo.setCurrentItemChangedCallback(self._presetComboItemChanged)
             
             if self._nodeIsConnected(coralNode):
-                presetCombo._combo.setDisabled(True)
+                self._presetCombo._combo.setDisabled(True)
     
     def _findFirstConnectedAtributeNonPassThrough(self, coralAttribute, processedAttributes):
         foundAttr = None
@@ -192,9 +217,6 @@ class NodeInspectorWidget(QtGui.QWidget):
                     self._attributeWidgets[attribute.name()] = weakref.ref(inspectorWidget)
                     self._mainLayout.addWidget(inspectorWidget)
                     inspectorWidget.build()
-    
-    def _presetComboChanged(self, preset):
-        self.coralNode().enableSpecializationPreset(str(preset))
 
 class ProxyAttributeInspectorWidget(QtGui.QWidget):
     def __init__(self, coralAttribute, parent):

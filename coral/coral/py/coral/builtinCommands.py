@@ -39,7 +39,7 @@ class CreateNode(Command):
         self.setArgString("className", "")
         self.setArgString("name", "")
         self.setArgString("parentNode", "")
-        self.setArgString("specializationPreset", "none")
+        self.setArgString("specializationPreset", "")
         
     def doIt(self):
         className = self.argAsString("className")
@@ -54,7 +54,7 @@ class CreateNode(Command):
             
             if newNode:
                 specializationPreset = self.argAsString("specializationPreset")
-                if specializationPreset != "" and specializationPreset != "none":
+                if specializationPreset:
                     newNode.enableSpecializationPreset(specializationPreset)
                 
                 self.setResultString(newNode.fullName())

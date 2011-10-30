@@ -607,7 +607,7 @@ std::string Node::enabledSpecializationPreset(){
 }
 
 void Node::enableSpecializationPreset(const std::string &preset){
-	if(preset != _specializationPreset && _specializationPresets.find(preset) != _specializationPresets.end()){
+	if(preset != _specializationPreset && _specializationPresets.find(preset) != _specializationPresets.end() || preset == "none"){
 		_specializationPreset = preset;
 		std::vector<Attribute*> attrs = attributes();
 		

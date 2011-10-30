@@ -118,16 +118,16 @@ Vec3Node::Vec3Node(const std::string &name, Node* parent): Node(name, parent){
 	addAttributeSpecializationLink(_x, _y);
 	addAttributeSpecializationLink(_y, _z);
 	
-	// setSpecializationPreset("single", _x, "Float");
-	// setSpecializationPreset("single", _y, "Float");
-	// setSpecializationPreset("single", _z, "Float");
-	// setSpecializationPreset("single", _vector, "Vec3");
-	// 
-	// setSpecializationPreset("array", _x, "FloatArray");
-	// setSpecializationPreset("array", _y, "FloatArray");
-	// setSpecializationPreset("array", _z, "FloatArray");
-	// setSpecializationPreset("array", _vector, "Vec3Array");
-	// enableSpecializationPreset("single");
+	setSpecializationPreset("single", _x, "Float");
+	setSpecializationPreset("single", _y, "Float");
+	setSpecializationPreset("single", _z, "Float");
+	setSpecializationPreset("single", _vector, "Vec3");
+	
+	setSpecializationPreset("array", _x, "FloatArray");
+	setSpecializationPreset("array", _y, "FloatArray");
+	setSpecializationPreset("array", _z, "FloatArray");
+	setSpecializationPreset("array", _vector, "Vec3Array");
+	enableSpecializationPreset("single");
 }
 
 void Vec3Node::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
@@ -527,6 +527,30 @@ Matrix44Node::Matrix44Node(const std::string &name, Node* parent): Node(name, pa
 	addAttributeSpecializationLink(_scaleX, _matrix);
 	addAttributeSpecializationLink(_scaleY, _matrix);
 	addAttributeSpecializationLink(_scaleZ, _matrix);
+	
+	setSpecializationPreset("single", _translateX, "Float");
+	setSpecializationPreset("single", _translateY, "Float");
+	setSpecializationPreset("single", _translateZ, "Float");
+	setSpecializationPreset("single", _eulerX, "Float");
+	setSpecializationPreset("single", _eulerY, "Float");
+	setSpecializationPreset("single", _eulerZ, "Float");
+	setSpecializationPreset("single", _scaleX, "Float");
+	setSpecializationPreset("single", _scaleY, "Float");
+	setSpecializationPreset("single", _scaleZ, "Float");
+	setSpecializationPreset("single", _matrix, "Matrix44");
+	
+	setSpecializationPreset("array", _translateX, "FloatArray");
+	setSpecializationPreset("array", _translateY, "FloatArray");
+	setSpecializationPreset("array", _translateZ, "FloatArray");
+	setSpecializationPreset("array", _eulerX, "FloatArray");
+	setSpecializationPreset("array", _eulerY, "FloatArray");
+	setSpecializationPreset("array", _eulerZ, "FloatArray");
+	setSpecializationPreset("array", _scaleX, "FloatArray");
+	setSpecializationPreset("array", _scaleY, "FloatArray");
+	setSpecializationPreset("array", _scaleZ, "FloatArray");
+	setSpecializationPreset("array", _matrix, "Matrix44Array");
+	
+	enableSpecializationPreset("single");
 	
 	_scaleX->outValue()->setFloatValueAt(0, 1.0);
 	_scaleY->outValue()->setFloatValueAt(0, 1.0);

@@ -2,7 +2,7 @@
 version = 0.1
 
 def runScript(topNode = 'root'):
-    executeCommand('CreateNode', className = 'Matrix44', name = 'EulerToMatrixNode45', parentNode = topNode)
+    executeCommand('CreateNode', className = 'Matrix44', name = 'EulerToMatrixNode45', specializationPreset = 'single', parentNode = topNode)
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode45.translateX', value = '[-8.600000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode45.translateY', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode45.translateZ', value = '[0.000000] 3')
@@ -13,7 +13,7 @@ def runScript(topNode = 'root'):
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode45.scaleY', value = '[1.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode45.scaleZ', value = '[1.000000] 3')
     
-    executeCommand('CreateNode', className = 'Matrix44', name = 'EulerToMatrixNode46', parentNode = topNode)
+    executeCommand('CreateNode', className = 'Matrix44', name = 'EulerToMatrixNode46', specializationPreset = 'single', parentNode = topNode)
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode46.translateX', value = '[7.700000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode46.translateY', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode46.translateZ', value = '[0.000000] 3')
@@ -24,91 +24,94 @@ def runScript(topNode = 'root'):
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode46.scaleY', value = '[1.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.EulerToMatrixNode46.scaleZ', value = '[1.000000] 3')
     
-    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric4', parentNode = topNode)
+    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric4', specializationPreset = 'none', parentNode = topNode)
     
-    executeCommand('CreateNode', className = 'CollapsedNode', name = 'SplineIk', parentNode = topNode)
+    executeCommand('CreateNode', className = 'CollapsedNode', name = 'SplineIk', specializationPreset = 'none', parentNode = topNode)
     executeCommand('CreateAttribute', name = 'controlStart', className = 'PassThroughAttribute', parentNode = topNode + '.SplineIk', input = True)
     executeCommand('CreateAttribute', name = 'controlEnd', className = 'PassThroughAttribute', parentNode = topNode + '.SplineIk', input = True)
     executeCommand('CreateAttribute', name = 'joints', className = 'PassThroughAttribute', parentNode = topNode + '.SplineIk', output = True)
     executeCommand('CreateAttribute', name = 'nJoints', className = 'PassThroughAttribute', parentNode = topNode + '.SplineIk', input = True)
     
-    executeCommand('CreateNode', className = 'Matrix44RotationAxis', name = 'Matrix44RotationAxis', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Matrix44RotationAxis', name = 'Matrix44RotationAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint3', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint3', specializationPreset = 'single', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint3.x', value = '[-5.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint3.y', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint3.z', value = '[0.000000] 3')
     
-    executeCommand('CreateNode', className = 'RangeArray', name = 'RangeArray1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'RangeArray', name = 'RangeArray1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.RangeArray1.end', value = '[1.000000] 3')
     
-    executeCommand('CreateNode', className = 'Vec3Cross', name = 'zAxis', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3Cross', name = 'zAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'SplinePoint', name = 'SplinePoint1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'SplinePoint', name = 'SplinePoint1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Sub', name = 'Sub', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Sub', name = 'Sub', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Sub.in0', value = '[10] 1')
     
-    executeCommand('CreateNode', className = 'Mul', name = 'Mul', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Mul', name = 'Mul', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Matrix44RotationAxis', name = 'Matrix44RotationAxis1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Matrix44RotationAxis', name = 'Matrix44RotationAxis1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'RangeArray', name = 'RangeArray', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'RangeArray', name = 'RangeArray', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.RangeArray.start', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.RangeArray.end', value = '[1.000000] 3')
     
-    executeCommand('CreateNode', className = 'Float', name = 'Float', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Float', name = 'Float', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Float.out', value = '[1.000000] 3')
     
-    executeCommand('CreateNode', className = 'Vec3Cross', name = 'yAxis', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3Cross', name = 'yAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'SplinePoint', name = 'SplinePoint', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'SplinePoint', name = 'SplinePoint', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Int', name = 'Int2', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Int', name = 'Int2', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Int2.out', value = '[1] 1')
     
-    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric3', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric3', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Vec3', name = 'Vec3', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3', name = 'Vec3', specializationPreset = 'single', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Vec3.x', value = '[0.100000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Vec3.y', value = '[0.100000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Vec3.z', value = '[0.100000] 3')
     
-    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Sub', name = 'Sub1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Sub', name = 'Sub1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Sub1.in0', value = '[10] 1')
     
-    executeCommand('CreateNode', className = 'Mul', name = 'Mul3', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Mul', name = 'Mul3', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Mul', name = 'Mul4', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Mul', name = 'Mul4', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Mul', name = 'Mul1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Mul', name = 'Mul1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Add', name = 'Add', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Add', name = 'Add', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Mul', name = 'Mul2', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Mul', name = 'Mul2', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'ConstantArray', name = 'ConstantArray3', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'ConstantArray', name = 'ConstantArray3', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.ConstantArray3.size', value = '[10] 1')
     
-    executeCommand('CreateNode', className = 'Matrix44FromVectors', name = 'Matrix44FromVectors', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Matrix44FromVectors', name = 'Matrix44FromVectors', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint0', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint0', specializationPreset = 'single', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint0.x', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint0.y', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint0.z', value = '[0.000000] 3')
     
-    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint1', specializationPreset = 'single', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint1.x', value = '[5.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint1.y', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint1.z', value = '[0.000000] 3')
     
-    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint4', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3', name = 'curvePoint4', specializationPreset = 'single', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint4.x', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint4.y', value = '[0.000000] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.curvePoint4.z', value = '[0.000000] 3')
     
-    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric2', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric2', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'BuildArray', name = 'controlPoints', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'BuildArray', name = 'controlPoints', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('CreateAttribute', name = 'in0', className = 'NumericAttribute', parentNode = topNode + '.SplineIk.controlPoints', input = True)
     executeCommand('CreateAttribute', name = 'in1', className = 'NumericAttribute', parentNode = topNode + '.SplineIk.controlPoints', input = True)
     executeCommand('CreateAttribute', name = 'in2', className = 'NumericAttribute', parentNode = topNode + '.SplineIk.controlPoints', input = True)
@@ -118,20 +121,22 @@ def runScript(topNode = 'root'):
     executeCommand('SetupDynamicAttribute', attribute = topNode + '.SplineIk.controlPoints.in2', affect = [topNode + '.SplineIk.controlPoints.array'], affectedBy = [], allowedSpecialization = ['Int','Float','Vec3','Matrix44'], specializationLinkedTo = [topNode + '.SplineIk.controlPoints.array'], specializationLinkedBy = [])
     executeCommand('SetupDynamicAttribute', attribute = topNode + '.SplineIk.controlPoints.in3', affect = [topNode + '.SplineIk.controlPoints.array'], affectedBy = [], allowedSpecialization = ['Int','Float','Vec3','Matrix44'], specializationLinkedTo = [topNode + '.SplineIk.controlPoints.array'], specializationLinkedBy = [])
     
-    executeCommand('CreateNode', className = 'Div', name = 'Div', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Div', name = 'Div', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Div.in1', value = '[10] 1')
     
-    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'ConstantArray', name = 'ConstantArray2', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'ConstantArray', name = 'ConstantArray2', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.ConstantArray2.size', value = '[10] 1')
     
-    executeCommand('CreateNode', className = 'Vec3Normalize', name = 'tempZAxis', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Vec3Normalize', name = 'tempZAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Int', name = 'Int1', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Int', name = 'Int1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Int1.out', value = '[2] 1')
     
-    executeCommand('CreateNode', className = 'Sub', name = 'Sub2', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Sub', name = 'Sub2', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
-    executeCommand('CreateNode', className = 'Sub', name = 'xAxis', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Sub', name = 'xAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.controlStart', destinationAttribute = topNode + '.SplineIk.Matrix44RotationAxis.matrix')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Div.out', destinationAttribute = topNode + '.SplineIk.RangeArray1.start')
@@ -187,23 +192,18 @@ def runScript(topNode = 'root'):
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Matrix44RotationAxis.axisZ', destinationAttribute = topNode + '.SplineIk.Sub2.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.SplinePoint1.pointsOnCurve', destinationAttribute = topNode + '.SplineIk.xAxis.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.SplinePoint.pointsOnCurve', destinationAttribute = topNode + '.SplineIk.xAxis.in1')
-    executeCommand('CreateNode', className = 'Int', name = 'Int', parentNode = topNode)
-    executeCommand('SetAttributeValue', attribute = topNode + '.Int.out', value = '[13] 1')
-    
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.EulerToMatrixNode45.matrix', destinationAttribute = topNode + '.SplineIk.controlStart')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.EulerToMatrixNode46.matrix', destinationAttribute = topNode + '.SplineIk.controlEnd')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.joints', destinationAttribute = topNode + '.DrawNumeric4.numeric')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.EulerToMatrixNode45.matrix', destinationAttribute = topNode + '.SplineIk.controlStart')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.EulerToMatrixNode46.matrix', destinationAttribute = topNode + '.SplineIk.controlEnd')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.Int.out', destinationAttribute = topNode + '.SplineIk.nJoints')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Matrix44FromVectors.matrix', destinationAttribute = topNode + '.SplineIk.joints')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.Int.out', destinationAttribute = topNode + '.SplineIk.nJoints')
     # nodeEditor save data
     executeCommand('SetNodeUiData', node = topNode, data = {})
     executeCommand('SetNodeUiData', node = topNode + '.EulerToMatrixNode45', data = {'pos': [-216.79797979798093, -666.41414141414316]})
     executeCommand('SetNodeUiData', node = topNode + '.EulerToMatrixNode46', data = {'pos': [-347.01249335459931, -456.90138224348897]})
     executeCommand('SetNodeUiData', node = topNode + '.DrawNumeric4', data = {'pos': [432.53968253968213, -321.34920634920849]})
-    executeCommand('SetNodeUiData', node = topNode + '.SplineIk', data = {'attributes': [{'name': 'controlStart', 'pos': [-1089.7500000000009, 10.499999999999984]}, {'name': 'controlEnd', 'pos': [-1090.5000000000009, 120.99999999999986]}, {'name': 'joints', 'pos': [3234.2500000000045, 1258.0000000000014]}, {'name': 'nJoints', 'pos': [-1077.0000000000014, -121.24999999999983]}], 'pos': [70.341799693361452, -358.43795093795273]})
+    executeCommand('SetNodeUiData', node = topNode + '.SplineIk', data = {'attributes': [{'name': 'controlEnd', 'pos': [-1090.5000000000009, 120.99999999999986]}, {'name': 'controlStart', 'pos': [-1089.7500000000009, 10.499999999999984]}, {'name': 'nJoints', 'pos': [-1077.0000000000014, -121.24999999999983]}, {'name': 'joints', 'pos': [3234.2500000000045, 1258.0000000000014]}], 'pos': [70.341799693361452, -358.43795093795273]})
     executeCommand('SetNodeUiData', node = topNode + '.SplineIk.Matrix44RotationAxis', data = {'pos': [991.00000000000023, 814.66666666666697]})
     executeCommand('SetNodeUiData', node = topNode + '.SplineIk.curvePoint3', data = {'pos': [-911.75000000000045, 254.63636363636368]})
     executeCommand('SetNodeUiData', node = topNode + '.SplineIk.RangeArray1', data = {'pos': [361.33333333333343, 648.00000000000034]})
@@ -240,5 +240,4 @@ def runScript(topNode = 'root'):
     executeCommand('SetNodeUiData', node = topNode + '.SplineIk.Int1', data = {'pos': [30.666666666666671, 298.66666666666674]})
     executeCommand('SetNodeUiData', node = topNode + '.SplineIk.Sub2', data = {'pos': [1280.0000000000002, 916.25000000000011]})
     executeCommand('SetNodeUiData', node = topNode + '.SplineIk.xAxis', data = {'pos': [2025.6923076923085, 929.3846153846157]})
-    executeCommand('SetNodeUiData', node = topNode + '.Int', data = {'pos': [-205.02923976608224, -164.70760233918321]})
     
