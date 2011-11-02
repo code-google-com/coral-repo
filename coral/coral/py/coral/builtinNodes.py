@@ -43,6 +43,7 @@ def loadPlugin():
     plugin.registerNode("Quat", _coral.QuatNode, tags = ["numeric"], description = "Generate a quaternion.\nWorks with single or array values.")
     plugin.registerNode("QuatToFloats", _coral.QuatToFloats, tags = ["numeric"], description = "Get r, x, y, z values from a quaternion.\nWorks with single or array values.")
     plugin.registerNode("QuatToAxisAngle", _coral.QuatToAxisAngle, tags = ["numeric"], description = "Convert a quaternion to axis/angle.")
+    plugin.registerNode("QuatToEulerRotation", _coral.QuatToEulerRotation, tags = ["numeric"], description = "Convert a quaternion to euler rotation.")
     plugin.registerNode("Matrix44", _coral.Matrix44Node, tags = ["numeric"], description = "Generate a Matrix44.")
     plugin.registerNode("ConstantArray", _coral.ConstantArray, tags = ["numeric"], description = "Generate an array from a constant value.")
     plugin.registerNode("ArraySize", _coral.ArraySize, tags = ["numeric"], description = "Get the size of a numeric array")

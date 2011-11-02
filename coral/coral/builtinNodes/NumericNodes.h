@@ -375,6 +375,18 @@ private:
 	NumericAttribute *_angle;
 };
 
+class QuatToEulerRotation: public Node
+{
+public:
+	QuatToEulerRotation(const std::string &name, Node *parent);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_quat;
+	NumericAttribute *_euler;
+};
+
 }
 #endif
 

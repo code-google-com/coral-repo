@@ -1973,6 +1973,73 @@ void QuatToAxisAngle::update(Attribute *attribute)
 	setAttributeIsClean(_angle, true);
 }
 
+QuatToEulerRotation::QuatToEulerRotation(const std::string &name, Node *parent): Node(name, parent)
+{
+	_quat = new NumericAttribute("quat",this);
+	_euler = new NumericAttribute("euler",this);
+
+	addInputAttribute(_quat);
+	addOutputAttribute(_euler);
+
+	setAttributeAffect(_quat, _euler);
+
+	std::vector<std::string> quatSpecializations;
+	quatSpecializations.push_back("Quat");
+	quatSpecializations.push_back("QuatArray");
+
+	std::vector<std::string> eulerSpecializations;
+	eulerSpecializations.push_back("Vec3");
+	eulerSpecializations.push_back("Vec3Array");
+
+	setAttributeAllowedSpecializations(_quat, quatSpecializations);
+	setAttributeAllowedSpecializations(_euler, eulerSpecializations);
+
+	addAttributeSpecializationLink(_quat, _euler);
+}
+
+void QuatToEulerRotation::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
+{
+	if(specializationA.size() < specializationB.size()){
+		std::string specB = specializationB[0];
+		specializationB.resize(1);
+		if(stringUtils::endswith(specializationA[0], "Array")){
+			specializationB[0] = specB + "Array";
+		}
+		else{
+			specializationB[0] = specB;
+		}
+	}
+	else if(specializationB.size() < specializationA.size()){
+		std::string specA = specializationA[0];
+		specializationA.resize(1);
+
+		if(stringUtils::endswith(specializationB[0], "Array")){
+			specializationA[0] = specA + "Array";
+		}
+		else{
+			specializationA[0] = specA;
+		}
+	}
+}
+
+void QuatToEulerRotation::update(Attribute *attribute)
+{
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	int size = quatValues.size();
+
+	std::vector<Imath::V3f> eulerValues(size);
+
+	for(int i = 0; i < size; ++i){
+		const Imath::Quatf &quat = quatValues[i];
+		eulerValues[i].x = atan2(2.0*quat.v.y*quat.r-2.0*quat.v.x*quat.v.z, 1.0-2.0*quat.v.y*quat.v.y-2.0*quat.v.z*quat.v.z)*180.0/float(M_PI);
+		eulerValues[i].y = asin(2.0*quat.v.x*quat.v.y+2.0*quat.v.z*quat.r)*180.0/float(M_PI);
+		eulerValues[i].z = atan2(2.0*quat.v.x*quat.r-2.0*quat.v.y*quat.v.z, 1.0-2.0*quat.v.x*quat.v.x-2.0*quat.v.z*quat.v.z)*180.0/float(M_PI);
+	}
+
+	_euler->outValue()->setVec3Values(eulerValues);
+
+	setAttributeIsClean(_euler, true);
+}
 
 
 
