@@ -55,8 +55,9 @@ def loadPlugin():
     plugin.registerNode("RangeLoop", _coral.RangeLoop, tags = ["numeric"], description = "Generate a value that will loop in a given range of values.\nWorks with single or array values.")
     plugin.registerNode("RandomNumber", _coral.RandomNumber, tags = ["numeric"], description = "Generate a random number.\nWorks with single or array values.")
     #plugin.registerNode("NumericIterator", _coral.NumericIterator, tags = ["numeric", "loop"], description = "Use it inside a loop node to build an array of values.")
-    plugin.registerNode("ArrayIndices", _coral.ArrayIndices, tags = ["numeric"], description = "Build an array composed by all the indexes extracted from the given input array.")
+    plugin.registerNode("ArrayIndices", _coral.ArrayIndices, tags = ["numeric", "loop"], description = "Build an array composed by all the indexes extracted from the given input array.")
     plugin.registerNode("GetArrayElement", _coral.GetArrayElement, tags = ["numeric"], description = "Get a single element of an array.")
+    plugin.registerNode("SetArrayElement", _coral.SetArrayElement, tags = ["numeric"], description = "Set a single element of an array.")
     #plugin.registerNode("SetSimulationResult", _coral.SetSimulationResult, tags = ["numeric"], description = "Set the numeric values at the end of a simulation step.\nConnect to a ProcessSimulation node.")
     #plugin.registerNode("GetSimulationResult", _coral.GetSimulationResult, tags = ["numeric"], description = "Get the values originally stored by SetSimulationResult and reuse them in the simulation step.\nUse a Time node to advance and play the simulation.")
     
@@ -84,7 +85,7 @@ def loadPlugin():
     plugin.registerNode("String", _coral.StringNode, tags = ["generic"])
     plugin.registerNode("Time", timeNode.TimeNode, tags = ["generic"])
     plugin.registerNode("CoralIOImporter", _coral.CoralIOImporter, tags = ["generic"])
-    #plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic"])
+    #plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic", "loop"])
     #plugin.registerNode("ProcessSimulation", _coral.ProcessSimulation, tags = ["generic"])
     
     plugin.registerAttribute("BoolAttribute", _coral.BoolAttribute)

@@ -67,6 +67,7 @@ private:
 	GeoAttribute *_geo;
 	NumericAttribute *_vertex;
 	NumericAttribute *_neighbourPoints;
+	NumericAttribute *_neighbourVertices;
 };
 
 }

@@ -181,3 +181,16 @@ std::vector<NestedObject*> NestedObject::allParentObjects(){
 	return parents;
 }
 
+bool NestedObject::isChildOf(NestedObject *parent){	
+	NestedObject *currentParent = _parentObject;
+	while(currentParent){
+		if(parent == currentParent){
+			return true;
+		}
+		
+		currentParent = currentParent->_parentObject;
+	}
+	
+	return false;
+}
+

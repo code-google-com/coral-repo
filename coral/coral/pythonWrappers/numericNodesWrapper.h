@@ -182,6 +182,7 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<NumericIterator, LoopIteratorNode>("NumericIterator");
 	pythonWrapperUtils::pythonWrapper<ArrayIndices, Node>("ArrayIndices");
 	pythonWrapperUtils::pythonWrapper<GetArrayElement, Node>("GetArrayElement");
+	pythonWrapperUtils::pythonWrapper<SetArrayElement, Node>("SetArrayElement");
 	pythonWrapperUtils::pythonWrapper<GetSimulationResult, Node>("GetSimulationResult");
 	pythonWrapperUtils::pythonWrapper<SetSimulationResult, Node>("SetSimulationResult");
 }

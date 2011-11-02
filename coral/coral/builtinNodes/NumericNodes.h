@@ -285,7 +285,10 @@ private:
 	NumericAttribute *_array;
 	void(NumericIterator::*_selectedOperation)(unsigned int, Numeric *, Numeric *);
 	
+	void stepInt(unsigned int index, Numeric *element, Numeric *array);
 	void stepFloat(unsigned int index, Numeric *element, Numeric *array);
+	void stepVec3(unsigned int index, Numeric *element, Numeric *array);
+	void stepMatrix44(unsigned int index, Numeric *element, Numeric *array);
 };
 
 class ArrayIndices: public Node{
@@ -315,6 +318,26 @@ private:
 	void updateFloat(Numeric *array, int index, Numeric *element);
 	void updateVec3(Numeric *array, int index, Numeric *element);
 	void updateMatrix44(Numeric *array, int index, Numeric *element);
+};
+
+class SetArrayElement: public Node{
+public:
+	SetArrayElement(const std::string &name, Node *parent);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void attributeSpecializationChanged(Attribute *attribute);
+	void update(Attribute *attribute);	
+	
+private:
+	NumericAttribute *_array;
+	NumericAttribute *_index;
+	NumericAttribute *_element;
+	NumericAttribute *_outArray;
+	void(SetArrayElement::*_selectedOperation)(Numeric *, int, Numeric *, Numeric *);
+
+	void updateInt(Numeric *array, int index, Numeric *element, Numeric *outArray);
+	void updateFloat(Numeric *array, int index, Numeric *element, Numeric *outArray);
+	void updateVec3(Numeric *array, int index, Numeric *element, Numeric *outArray);
+	void updateMatrix44(Numeric *array, int index, Numeric *element, Numeric *outArray);
 };
 
 class SetSimulationResult: public Node{

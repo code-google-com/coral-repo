@@ -29,6 +29,8 @@
 #ifndef GEO_H
 #define GEO_H
 
+#include <tbb/mutex.h>
+
 #include <vector>
 #include <ImathVec.h>
 
@@ -82,11 +84,11 @@ public:
 	Edge(): _geo(0), _vertices(2), _points(2){
 	}
 	
-	std::vector<Face*> faces(){
+	const std::vector<Face*> &faces() const{
 		return _faces;
 	}
 	
-	std::vector<Vertex*> vertices(){
+	const std::vector<Vertex*> &vertices() const{
 		return _vertices;
 	}
 	
@@ -114,19 +116,23 @@ public:
 	Vertex(): _id(0), _geo(0), _point(0){
 	}
 	
+	int id(){
+		return _id;
+	}
+	
 	Imath::V3f point(){
 		return *_point;
 	}
 	
-	std::vector<Face*> neighbourFaces(){
+	const std::vector<Face*> &neighbourFaces() const{
 		return _neighbourFaces;
 	}
 	
-	std::vector<Edge*> neighbourEdges(){
+	const std::vector<Edge*> &neighbourEdges() const{
 		return _neighbourEdges;
 	}
 	
-	std::vector<Vertex*> neighbourVertices(){
+	const std::vector<Vertex*> &neighbourVertices() const{
 		return _neighbourVertices;
 	}
 	
@@ -174,7 +180,8 @@ public:
 private:
 	void computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNormals);
 	void cacheTopologyStructures();
-	
+	void cacheFaceNormals();
+
 	// topology
 	std::vector<std::vector<int> > _rawFaces;
 	std::vector<Face> _faces;
@@ -192,6 +199,8 @@ private:
 	bool _topologyStructuresDirty;
 	bool _faceNormalsDirty;
 	bool _verticesNormalsDirty;
+	
+	tbb::mutex _localMutex;
 };
 
 }

@@ -58,6 +58,7 @@ public:
 	std::vector<NestedObject*> objects();
 	Object *parentObject();
 	std::vector<NestedObject*> allParentObjects();
+	bool isChildOf(NestedObject *parent);
 	
 	static void(*_setNameCallback)(NestedObject *self, const std::string &name);
 	

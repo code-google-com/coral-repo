@@ -70,34 +70,53 @@ void SetGeoPoints::update(Attribute *attribute){
 
 GeoNeighbourPoints::GeoNeighbourPoints(const std::string &name, Node *parent): Node(name, parent){
 	_geo = new GeoAttribute("geo", this);	
-	_vertex = new NumericAttribute("pointId", this);
+	_vertex = new NumericAttribute("vertex", this);
 	_neighbourPoints = new NumericAttribute("points", this);
+	_neighbourVertices = new NumericAttribute("vertices", this);
 	
 	addInputAttribute(_geo);
 	addInputAttribute(_vertex);
 	addOutputAttribute(_neighbourPoints);
+	addOutputAttribute(_neighbourVertices);
 	
 	setAttributeAffect(_geo, _neighbourPoints);
 	setAttributeAffect(_vertex, _neighbourPoints);
+	setAttributeAffect(_geo, _neighbourVertices);
+	setAttributeAffect(_vertex, _neighbourVertices);
 
 	setAttributeAllowedSpecialization(_vertex, "Int");
 	setAttributeAllowedSpecialization(_neighbourPoints, "Vec3Array");
+	setAttributeAllowedSpecialization(_neighbourVertices, "IntArray");
 }
 
 void GeoNeighbourPoints::update(Attribute *attribute){
 	Geo *geo = _geo->value();
 	int vertexId = _vertex->value()->intValueAt(0);
-	if(vertexId < 0){
-		vertexId = 0;
-	}
-	
-	std::vector<Imath::V3f> neighbourPoints;
-	
+
 	const std::vector<Vertex> &vertices = geo->vertices();
-	if(vertexId < vertices.size()){
-		neighbourPoints = vertices[vertexId].neighbourPoints();
-	}
 	
-	_neighbourPoints->outValue()->setVec3Values(neighbourPoints);
+	if(vertexId < 0 || vertexId >= vertices.size()){
+		if(attribute == _neighbourPoints){
+			_neighbourPoints->outValue()->setVec3Values(std::vector<Imath::V3f>());
+		}
+		else{
+			_neighbourVertices->outValue()->setIntValues(std::vector<int>());
+		}
+	}
+	else{
+		if(attribute == _neighbourPoints){
+			_neighbourPoints->outValue()->setVec3Values(vertices[vertexId].neighbourPoints());
+		}
+		else{
+			const std::vector<Vertex*> &neighbourVertices = vertices[vertexId].neighbourVertices();
+			int neighboursSize = neighbourVertices.size();
+
+			std::vector<int> neighbourIds(neighboursSize);
+			for(int i = 0; i < neighboursSize; ++i){
+				neighbourIds[i] = neighbourVertices[i]->id();
+			}
+			_neighbourVertices->outValue()->setIntValues(neighbourIds);
+		}
+	}	
 }
 

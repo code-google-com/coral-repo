@@ -26,6 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+
+
 #include "Geo.h"
 #include <assert.h>
 #include "containerUtils.h"
@@ -148,46 +150,59 @@ void Geo::computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNorm
 	}
 }
 
+void Geo::cacheFaceNormals(){
+	if(_topologyStructuresDirty){
+		cacheTopologyStructures();
+	}
+	
+	std::vector<Imath::V3f> vertexPerFaceNormals;
+	computeVertexPerFaceNormals(vertexPerFaceNormals);
+	
+	int facesCount = (int)_rawFaces.size();
+	_faceNormals.resize(facesCount);
+
+	int counter = 0;
+	for(int f = 0; f < facesCount; ++f){
+		std::vector<int> &face = _rawFaces[f];
+
+		Imath::V3f faceNormal(0.f, 0.f, 0.f);
+
+		for(unsigned int v = 0; v < face.size(); ++v){
+			faceNormal += vertexPerFaceNormals[counter];
+			++counter;
+		}
+
+		faceNormal /= face.size();
+		faceNormal.normalize();
+
+		_faceNormals[f].setValue(faceNormal);
+	}
+
+	_faceNormalsDirty = false;
+}
+
 const std::vector<Imath::V3f> &Geo::faceNormals(){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_localMutex);
+	#endif
+	
 	if(_faceNormalsDirty){
-		if(_topologyStructuresDirty){
-			cacheTopologyStructures();
-		}
-		
-		std::vector<Imath::V3f> vertexPerFaceNormals;
-		computeVertexPerFaceNormals(vertexPerFaceNormals);
-		
-		int facesCount = (int)_rawFaces.size();
-		_faceNormals.resize(facesCount);
-
-		int counter = 0;
-		for(int f = 0; f < facesCount; ++f){
-			std::vector<int> &face = _rawFaces[f];
-
-			Imath::V3f faceNormal(0.f, 0.f, 0.f);
-
-			for(unsigned int v = 0; v < face.size(); ++v){
-				faceNormal += vertexPerFaceNormals[counter];
-				++counter;
-			}
-
-			faceNormal /= face.size();
-			faceNormal.normalize();
-
-			_faceNormals[f].setValue(faceNormal);
-		}
-
-		_faceNormalsDirty = false;
+		cacheFaceNormals();
 	}
 	
 	return _faceNormals;
 }
 
-// nedeed by GL drawing and GetGeoNormal node
 const std::vector<Imath::V3f> &Geo::verticesNormals(){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_localMutex);
+	#endif
+	
 	if(_verticesNormalsDirty){
-		faceNormals();
-
+		if(_faceNormalsDirty){
+			cacheFaceNormals();
+		}
+		
 		int verticesCount = (int)_points.size();
 		_verticesNormals.resize(verticesCount);
 
@@ -288,7 +303,7 @@ void Geo::cacheTopologyStructures(){
 				edge._vertices[1] = &vertex2;
 				edge._points[0] = &point1;
 				edge._points[1] = &point2;
-			
+				
 				// vertex neighbours
 				if(!containerUtils::elementInContainer<Vertex*>(&vertex1, vertex2._neighbourVertices)){
 					vertex2._neighbourVertices.push_back(&vertex1);
@@ -314,10 +329,14 @@ void Geo::cacheTopologyStructures(){
 }
 
 const std::vector<Vertex> &Geo::vertices(){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_localMutex);
+	#endif
+	
 	if(_topologyStructuresDirty){
 		cacheTopologyStructures();
 	}
-	
+
 	return _vertices;
 }
 

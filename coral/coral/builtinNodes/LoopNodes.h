@@ -9,10 +9,14 @@ namespace coral{
 class LoopIteratorNode: public Node{
 public:
 	LoopIteratorNode(const std::string &name, Node *parent);
+	NumericAttribute *index();
 	virtual void loopStart(unsigned int loopRangeSize);
 	virtual void loopStep(unsigned int index);
 	virtual void loopEnd();
 	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_index;
 };
 
 class ForLoopNode: public Node{
@@ -25,8 +29,9 @@ private:
 	NumericAttribute *_indexRange;
 	NumericAttribute *_currentIndex;
 	
-	void collectCleanChain(Attribute *attribute, std::vector<Attribute*> &cleanChain);
 	void collectLoopOperators(std::vector<LoopIteratorNode*> &loopOperators);
+	void getSubCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &subCleanChain);
+	void subClean(std::map<int, std::vector<Attribute*> > &subCleanChain);
 };
 
 }

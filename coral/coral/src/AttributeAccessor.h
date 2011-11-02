@@ -55,6 +55,10 @@ public:
 		self.clean();
 	}
 	
+	static void _cleanSelf(Attribute &self){
+		self.cleanSelf();
+	}
+	
 	static void _setIsClean(Attribute &self, bool value){
 		self.setIsClean(value);
 	}

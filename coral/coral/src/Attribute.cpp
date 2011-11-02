@@ -353,8 +353,9 @@ void Attribute::cleanSelf(){
 	if(_isClean == false){
 		Node *parentNode = parent();
 		if(parentNode){
-			for(int i = 0; i < _affectedBy.size(); ++i){
-				_affectedBy[i]->_isClean = true;
+			std::vector<Attribute*> inputsToClean = _inputsCleanChain[id()];
+			for(int i = 0; i < inputsToClean.size(); ++i){
+				inputsToClean[i]->_isClean = true;
 			}	
 			
 			if(parentNode->updateEnabled()){
@@ -916,7 +917,7 @@ void Attribute::cacheCleanChainDownstream(){
 	std::vector<Attribute*> attributes;
 	NetworkManager::getDownstreamChain(this, attributes);
 	for(int i = 0; i < attributes.size(); ++i){
-		NetworkManager::getCleanChain(attributes[i], attributes[i]->_cleanChain);
+		NetworkManager::getCleanChain(attributes[i], attributes[i]->_cleanChain, attributes[i]->_inputsCleanChain);
 	}
 }
 

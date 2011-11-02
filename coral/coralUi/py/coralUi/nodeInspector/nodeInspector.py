@@ -56,12 +56,14 @@ class CustomComboBox(QtGui.QComboBox):
     
     def _currentItemChanged(self, itemText):
         if self._currentItemChangedCallbackEnabled:
-            self._currentItemChangedCallback()
+            if self._currentItemChangedCallback:
+                self._currentItemChangedCallback()
     
     def showPopup(self):
         self._currentItemChangedCallbackEnabled = False
         
-        self._showPopupCallback()
+        if self._showPopupCallback:
+            self._showPopupCallback()
         
         QtGui.QComboBox.showPopup(self)
         
@@ -133,7 +135,7 @@ class NodeInspectorWidget(QtGui.QWidget):
         coralNode = self._coralNode()
         combo = self._presetCombo._combo
         selectedPreset = str(combo.currentText())
-        print selectedPreset
+        
         coralNode.enableSpecializationPreset(selectedPreset)
         
     def _populatePresetCombo(self):

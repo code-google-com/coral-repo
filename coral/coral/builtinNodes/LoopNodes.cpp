@@ -1,11 +1,22 @@
 #include "LoopNodes.h"
 #include "../src/Numeric.h"
 #include "../src/containerUtils.h"
+#include "../src/NetworkManager.h"
+#include "../src/AttributeAccessor.h"
 
 using namespace coral;
 
 LoopIteratorNode::LoopIteratorNode(const std::string &name, Node *parent): 
-	Node(name, parent){
+Node(name, parent){
+	_index = new NumericAttribute("index", this);
+	
+	addInputAttribute(_index);
+	
+	setAttributeAllowedSpecialization(_index, "Int");
+}
+
+NumericAttribute *LoopIteratorNode::index(){
+	return _index;
 }
 
 void LoopIteratorNode::loopStart(unsigned int loopRangeSize){
@@ -18,11 +29,8 @@ void LoopIteratorNode::loopEnd(){
 }
 
 void LoopIteratorNode::update(Attribute *attribute){
-	ForLoopNode *parentNode = (ForLoopNode*)parent();
-	if(parentNode){
-		int currentIndex = ((Numeric*)parentNode->inputAttributeAt(1)->outValue())->intValueAt(0);
-		loopStep(currentIndex);
-	}
+	int currentIndex = _index->value()->intValueAt(0);
+	loopStep(currentIndex);
 }
 
 ForLoopNode::ForLoopNode(const std::string &name, Node *parent): Node(name, parent){
@@ -47,30 +55,6 @@ void ForLoopNode::addDynamicAttribute(Attribute *attribute){
 	}
 }
 
-void ForLoopNode::collectCleanChain(Attribute *attribute, std::vector<Attribute*> &cleanChain){
-	std::vector<NestedObject*> attrParents = attribute->allParentObjects();
-	if(containerUtils::elementInContainer<NestedObject*>(this, attrParents)){
-		Attribute *input = attribute->input();
-		if(input){
-			collectCleanChain(input, cleanChain);
-		}
-		
-		std::vector<Attribute*> affectedBy = attribute->affectedBy();
-		for(int i = 0; i < affectedBy.size(); ++i){
-			collectCleanChain(affectedBy[i], cleanChain);
-		}
-	
-		if(attribute->isOutput()){
-			Node *parentNode = attribute->parent();
-			if(parentNode->parent() == this && parentNode->updateEnabled()){
-				if(!containerUtils::elementInContainer(attribute, cleanChain)){
-					cleanChain.push_back(attribute);
-				}
-			}
-		}
-	}
-}
-
 void ForLoopNode::collectLoopOperators(std::vector<LoopIteratorNode*> &loopOperators){
 	std::vector<Node*> childrenNodes = nodes();
 	for(int i = 0; i < childrenNodes.size(); ++i){
@@ -83,14 +67,43 @@ void ForLoopNode::collectLoopOperators(std::vector<LoopIteratorNode*> &loopOpera
 	}
 }
 
+void ForLoopNode::getSubCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &subCleanChain){
+	std::vector<Attribute*> attributes;
+	NetworkManager::getUpstreamChain(attribute, attributes);
+	
+	int n = 0;
+	for(int i = 0; i < attributes.size(); ++i){
+		Attribute *attr = attributes[i];
+		if(attr->isOutput()){
+			Node *parentNode = attr->parent();
+			if(parentNode){
+				if(parentNode->isChildOf(this)){
+					subCleanChain[n].push_back(attr);
+					n++;
+				}
+			}
+		}
+	}
+}
+
+void ForLoopNode::subClean(std::map<int, std::vector<Attribute*> > &subCleanChain){
+	for(std::map<int, std::vector<Attribute*> >::iterator i = subCleanChain.begin(); i != subCleanChain.end(); ++i){
+		std::vector<Attribute*> &slice = i->second;
+		for(int j = 0; j < slice.size(); ++j){
+			Attribute *attr = slice[j];
+			attr->parent()->update(attr);
+		}
+	}
+}
+
 void ForLoopNode::update(Attribute *attribute){
 	Numeric * currentIndex = _currentIndex->outValue();
 	Numeric *indexRange = _indexRange->value();
 	const std::vector<int> &idRangeValues = indexRange->intValues();
 	int loopRangeSize = idRangeValues.size();
 	
-	std::vector<Attribute*> cleanChain;
-	collectCleanChain(attribute, cleanChain);
+	std::map<int, std::vector<Attribute*> > subCleanChain;
+	getSubCleanChain(attribute, subCleanChain);
 	
 	std::vector<LoopIteratorNode*> loopOperators;
 	collectLoopOperators(loopOperators);
@@ -103,11 +116,7 @@ void ForLoopNode::update(Attribute *attribute){
 	for(int i = 0; i < loopRangeSize; ++i){
 		currentIndex->setIntValueAt(0, idRangeValues[i]);
 		
-		for(int j = 0; j < cleanChain.size(); ++j){
-			Attribute *outAttr = cleanChain[j];
-			Node *parentNode = outAttr->parent();
-			parentNode->update(outAttr);
-		}
+		subClean(subCleanChain);
 	}
 	
 	for(int i = 0; i < loopOperatorsSize; ++i){

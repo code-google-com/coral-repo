@@ -55,13 +55,16 @@ public:
 private:
 	friend class Object;
 	friend class Attribute;
+	friend class Node;
 	
 	static int useNextAvailableId();
 	static void storeObject(int id, Object *object);
 	static void removeObject(int id);
 	static void addEdge(Attribute *attributeA, Attribute *attributeB);
 	static void removeEdge(Attribute *attributeA, Attribute *attributeB);
-	static void getCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &cleanChain);
+	static void getCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &cleanChain, std::map<int, std::vector<Attribute*> > &affectedInputs);
+	static void collectParentNodeConnectedInputs(Attribute *attribute, Node *parentNode, std::vector<Attribute*> &attributes);
+
 
 	static int _nextAvailableId;
 	static std::map<int, Object *> _objectsById;

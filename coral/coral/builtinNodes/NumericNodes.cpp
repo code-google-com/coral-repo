@@ -1497,14 +1497,15 @@ void RandomNumber::update(Attribute *attribute){
 }
 
 NumericIterator::NumericIterator(const std::string &name, Node* parent): 
-	LoopIteratorNode(name, parent),
-	_selectedOperation(0){
+LoopIteratorNode(name, parent),
+_selectedOperation(0){
 	_element = new NumericAttribute("element", this);
 	_array = new NumericAttribute("array", this);
 	
 	addInputAttribute(_element);
 	addOutputAttribute(_array);
 	
+	setAttributeAffect(index(), _array);
 	setAttributeAffect(_element, _array);
 	
 	std::vector<std::string> elementSpec;
@@ -1544,9 +1545,16 @@ void NumericIterator::attributeSpecializationChanged(Attribute *attribute){
 		Numeric::Type type = _array->outValue()->type();
 		if(type != Numeric::numericTypeAny){
 			if(type == Numeric::numericTypeIntArray){
+				_selectedOperation = &NumericIterator::stepInt;
 			}
 			else if(type == Numeric::numericTypeFloatArray){
 				_selectedOperation = &NumericIterator::stepFloat;
+			}
+			else if(type == Numeric::numericTypeVec3Array){
+				_selectedOperation = &NumericIterator::stepVec3;
+			}
+			else if(type == Numeric::numericTypeMatrix44Array){
+				_selectedOperation = &NumericIterator::stepMatrix44;
 			}
 		}
 	}
@@ -1556,8 +1564,20 @@ void NumericIterator::loopStart(unsigned int loopRangeSize){
 	_array->outValue()->resize(loopRangeSize);
 }
 
+void NumericIterator::stepInt(unsigned int index, Numeric *element, Numeric *array){
+	array->setIntValueAt(index, element->intValueAt(0));
+}
+
 void NumericIterator::stepFloat(unsigned int index, Numeric *element, Numeric *array){
 	array->setFloatValueAt(index, element->floatValueAt(0));
+}
+
+void NumericIterator::stepVec3(unsigned int index, Numeric *element, Numeric *array){
+	array->setVec3ValueAt(index, element->vec3ValueAt(0));
+}
+
+void NumericIterator::stepMatrix44(unsigned int index, Numeric *element, Numeric *array){
+	array->setMatrix44ValueAt(index, element->matrix44ValueAt(0));
 }
 
 void NumericIterator::loopStep(unsigned int index){
@@ -1692,6 +1712,133 @@ void GetArrayElement::update(Attribute *attribute){
 		Numeric *element = _element->outValue();
 		
 		(this->*_selectedOperation)(array, index, element);
+	}
+}
+
+SetArrayElement::SetArrayElement(const std::string &name, Node *parent):
+Node(name, parent),
+_selectedOperation(0){
+	_array = new NumericAttribute("array", this);
+	_index = new NumericAttribute("index", this);
+	_element = new NumericAttribute("element", this);
+	_outArray = new NumericAttribute("outArray", this);
+	
+	addInputAttribute(_array);
+	addInputAttribute(_index);
+	addInputAttribute(_element);
+	addOutputAttribute(_outArray);
+	
+	setAttributeAffect(_array, _outArray);
+	setAttributeAffect(_element, _outArray);
+	setAttributeAffect(_index, _outArray);
+	
+	std::vector<std::string> allowedSpecs;
+	allowedSpecs.push_back("Int");
+	allowedSpecs.push_back("Float");
+	allowedSpecs.push_back("Vec3");
+	allowedSpecs.push_back("Matrix44");
+	
+	std::vector<std::string> allowedArraySpecs;
+	allowedArraySpecs.push_back("IntArray");
+	allowedArraySpecs.push_back("FloatArray");
+	allowedArraySpecs.push_back("Vec3Array");
+	allowedArraySpecs.push_back("Matrix44Array");
+	
+	setAttributeAllowedSpecializations(_array, allowedArraySpecs);
+	setAttributeAllowedSpecializations(_element, allowedSpecs);
+	setAttributeAllowedSpecialization(_index, "Int");
+	setAttributeAllowedSpecializations(_outArray, allowedArraySpecs);
+	
+	addAttributeSpecializationLink(_array, _outArray);
+	addAttributeSpecializationLink(_element, _outArray);
+}
+
+void SetArrayElement::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _array){
+		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	}
+	else{
+		if(specializationA.size() < specializationB.size()){
+			specializationB.resize(specializationA.size());
+			for(int i = 0; i < specializationA.size(); ++i){
+				specializationB[i] = specializationA[i] + "Array";
+			}
+		}
+		else if(specializationB.size() < specializationA.size()){
+			specializationA.resize(specializationB.size());
+			for(int i = 0; i < specializationB.size(); ++i){
+				specializationA[i] = stringUtils::strip(specializationB[i], "Array");
+			}
+		}
+	}
+}
+
+void SetArrayElement::attributeSpecializationChanged(Attribute *attribute){
+	if(attribute == _array){
+		_selectedOperation = 0;
+		
+		Numeric::Type type = _array->outValue()->type();
+		if(type != Numeric::numericTypeAny){
+			if(type == Numeric::numericTypeIntArray){
+				_selectedOperation = &SetArrayElement::updateInt;
+			}
+			else if(type == Numeric::numericTypeFloatArray){
+				_selectedOperation = &SetArrayElement::updateFloat;
+			}
+			else if(type == Numeric::numericTypeVec3Array){
+				_selectedOperation = &SetArrayElement::updateVec3;
+			}
+			else if(type == Numeric::numericTypeMatrix44Array){
+				_selectedOperation = &SetArrayElement::updateMatrix44;
+			}
+		}
+	}
+}
+
+void SetArrayElement::updateInt(Numeric *array, int index, Numeric *element, Numeric *outArray){
+	std::vector<int> values = array->intValues();
+	if(index >= 0 && index < values.size()){
+		values[index] = element->intValueAt(0);
+	}
+	
+	outArray->setIntValues(values);
+}
+
+void SetArrayElement::updateFloat(Numeric *array, int index, Numeric *element, Numeric *outArray){
+	std::vector<float> values = array->floatValues();
+	if(index >= 0 && index < values.size()){
+		values[index] = element->floatValueAt(0);
+	}
+	
+	outArray->setFloatValues(values);
+}
+
+void SetArrayElement::updateVec3(Numeric *array, int index, Numeric *element, Numeric *outArray){
+	std::vector<Imath::V3f> values = array->vec3Values();
+	if(index >= 0 && index < values.size()){
+		values[index] = element->vec3ValueAt(0);
+	}
+	
+	outArray->setVec3Values(values);
+}
+
+void SetArrayElement::updateMatrix44(Numeric *array, int index, Numeric *element, Numeric *outArray){
+	std::vector<Imath::M44f> values = array->matrix44Values();
+	if(index >= 0 && index < values.size()){
+		values[index] = element->matrix44ValueAt(0);
+	}
+	
+	outArray->setMatrix44Values(values);
+}
+
+void SetArrayElement::update(Attribute *attribute){
+	if(_selectedOperation){
+		Numeric *array = _array->value();
+		int index = _index->value()->intValueAt(0);
+		Numeric *element = _element->value();
+		Numeric *outArray = _outArray->outValue();
+		
+		(this->*_selectedOperation)(array, index, element, outArray);
 	}
 }
 

@@ -189,6 +189,7 @@ private:
 	int _computeTimeMilliseconds;
 	std::vector<Attribute*> _dirtyChain;
 	std::map<int, std::vector<Attribute*> > _cleanChain;
+	std::map<int, std::vector<Attribute*> > _inputsCleanChain;
 	
 	Attribute();
 	Attribute(const Attribute &other);

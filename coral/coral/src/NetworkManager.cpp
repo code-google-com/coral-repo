@@ -28,6 +28,7 @@
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
+#include <boost/graph/subgraph.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/reverse_graph.hpp>
 #include <boost/graph/topological_sort.hpp>
@@ -101,15 +102,27 @@ void NetworkManager::getUpstreamChain(Attribute *attribute, std::vector<Attribut
 	}
 }
 
-void NetworkManager::getCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &cleanChain){
+void NetworkManager::collectParentNodeConnectedInputs(Attribute *attribute, Node *parentNode, std::vector<Attribute*> &attributes){
+	std::vector<Attribute*> chain;
+	getUpstreamChain(attribute, chain);
+	
+	for(int i = 0; i < parentNode->_inputAttributes.size(); ++i){
+		Attribute *attr = parentNode->_inputAttributes[i];
+		if(std::find(chain.begin(), chain.end(), attr) != chain.end()){
+			attributes.push_back(attr);
+		}
+	}
+}
+
+void NetworkManager::getCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &cleanChain, std::map<int, std::vector<Attribute*> > &affectedInputs){
 	std::vector<Attribute*> attributes;
 	getUpstreamChain(attribute, attributes);
 	
 	cleanChain.clear();
+	affectedInputs.clear();
 	
 	int nvertices = boost::num_vertices(_graph);
 	std::vector<int> attrDependencyOrder(nvertices, 0);
-	
 	
 	// sort the chain in parallel slices
 	std::vector<Node*> processedNodes;
@@ -131,15 +144,20 @@ void NetworkManager::getCleanChain(Attribute *attribute, std::map<int, std::vect
 		
 		if(attr->isOutput()){
 			Node *parentNode = attr->parent();
-			if(containerUtils::elementInContainer(parentNode, processedNodes)){ // make sure the same node doesn't fall in the same slice more than once.
-				offset++;
+			if(parentNode){
+				if(containerUtils::elementInContainer(parentNode, processedNodes)){ // make sure the same node doesn't fall in the same slice more than once.
+					offset++;
+				}
+			
+				int dependencyOrder = attrDependencyOrder[attrId] + offset;
+				std::vector<Attribute*> &slice = cleanChain[dependencyOrder];
+				slice.push_back(attr);
+			
+				processedNodes.push_back(parentNode);
+				
+				std::vector<Attribute*> &inputs = affectedInputs[attr->id()];
+				collectParentNodeConnectedInputs(attr, parentNode, inputs);
 			}
-			
-			int dependencyOrder = attrDependencyOrder[attrId] + offset;
-			std::vector<Attribute*> &slice = cleanChain[dependencyOrder];
-			slice.push_back(attr);
-			
-			processedNodes.push_back(parentNode);
 		}
 	}
 }
