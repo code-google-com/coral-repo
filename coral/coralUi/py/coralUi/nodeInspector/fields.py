@@ -139,7 +139,7 @@ class AttributeField(ObjectField):
 class CustomDoubleSpinBox(QtGui.QDoubleSpinBox):
     def __init__(self, parent):
         QtGui.QDoubleSpinBox.__init__(self, parent)
-        
+        self.setDecimals(4)
         self._wheelCallback = None
     
     def wheelEvent(self, wheelEvent):
