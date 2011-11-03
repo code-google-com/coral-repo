@@ -387,6 +387,30 @@ private:
 	NumericAttribute *_euler;
 };
 
+class QuatToMatrix44: public Node
+{
+public:
+	QuatToMatrix44(const std::string &name, Node *parent);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_quat;
+	NumericAttribute *_matrix;
+};
+
+class Matrix44ToQuat: public Node
+{
+public:
+	Matrix44ToQuat(const std::string &name, Node *parent);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_quat;
+	NumericAttribute *_matrix;
+};
+
 }
 #endif
 
