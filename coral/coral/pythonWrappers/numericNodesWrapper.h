@@ -167,6 +167,8 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<QuatNode, Node>("QuatNode");
 	pythonWrapperUtils::pythonWrapper<QuatToFloats, Node>("QuatToFloats");
 	pythonWrapperUtils::pythonWrapper<QuatToAxisAngle, Node>("QuatToAxisAngle");
+	pythonWrapperUtils::pythonWrapper<QuatToEulerRotation, Node>("QuatToEulerRotation");
+	pythonWrapperUtils::pythonWrapper<QuatToMatrix44, Node>("QuatToMatrix44");
 	pythonWrapperUtils::pythonWrapper<Matrix44Node, Node>("Matrix44Node");
 	pythonWrapperUtils::pythonWrapper<ConstantArray, Node>("ConstantArray");
 	pythonWrapperUtils::pythonWrapper<ArraySize, Node>("ArraySize");
@@ -177,6 +179,7 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Matrix44RotationAxis, Node>("Matrix44RotationAxis");
 	pythonWrapperUtils::pythonWrapper<Matrix44FromVectors, Node>("Matrix44FromVectors");
 	pythonWrapperUtils::pythonWrapper<Matrix44EulerRotation, Node>("Matrix44EulerRotation");
+	pythonWrapperUtils::pythonWrapper<Matrix44ToQuat, Node>("Matrix44ToQuat");
 	pythonWrapperUtils::pythonWrapper<RangeLoop, Node>("RangeLoop");
 	pythonWrapperUtils::pythonWrapper<RandomNumber, Node>("RandomNumber");
 	pythonWrapperUtils::pythonWrapper<NumericIterator, LoopIteratorNode>("NumericIterator");

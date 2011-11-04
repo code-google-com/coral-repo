@@ -2078,6 +2078,247 @@ void QuatToAxisAngle::update(Attribute *attribute)
 	setAttributeIsClean(_angle, true);
 }
 
+QuatToEulerRotation::QuatToEulerRotation(const std::string &name, Node *parent): Node(name, parent)
+{
+	_quat = new NumericAttribute("quat",this);
+	_euler = new NumericAttribute("euler",this);
+
+	addInputAttribute(_quat);
+	addOutputAttribute(_euler);
+
+	setAttributeAffect(_quat, _euler);
+
+	std::vector<std::string> quatSpecializations;
+	quatSpecializations.push_back("Quat");
+	quatSpecializations.push_back("QuatArray");
+
+	std::vector<std::string> eulerSpecializations;
+	eulerSpecializations.push_back("Vec3");
+	eulerSpecializations.push_back("Vec3Array");
+
+	setAttributeAllowedSpecializations(_quat, quatSpecializations);
+	setAttributeAllowedSpecializations(_euler, eulerSpecializations);
+
+	addAttributeSpecializationLink(_quat, _euler);
+}
+
+void QuatToEulerRotation::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
+{
+	if(specializationA.size() < specializationB.size()){
+		std::string specB = specializationB[0];
+		specializationB.resize(1);
+		if(stringUtils::endswith(specializationA[0], "Array")){
+			specializationB[0] = specB + "Array";
+		}
+		else{
+			specializationB[0] = specB;
+		}
+	}
+	else if(specializationB.size() < specializationA.size()){
+		std::string specA = specializationA[0];
+		specializationA.resize(1);
+
+		if(stringUtils::endswith(specializationB[0], "Array")){
+			specializationA[0] = specA + "Array";
+		}
+		else{
+			specializationA[0] = specA;
+		}
+	}
+}
+
+void QuatToEulerRotation::update(Attribute *attribute)
+{
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	int size = quatValues.size();
+
+	std::vector<Imath::V3f> eulerValues(size);
+
+	float degree = (180 / M_PI);
+	Imath::Eulerf euler;
+	Imath::M44f mtx;
+
+	for(int i = 0; i < size; ++i){
+		Imath::Quatf quat = quatValues[i];
+		quat.normalize();
+		mtx = quat.toMatrix44();
+
+		euler.extract(mtx);
+		eulerValues[i].x = euler.x * degree;
+		eulerValues[i].y = euler.y * degree;
+		eulerValues[i].z = euler.z * degree;
+	}
+
+	_euler->outValue()->setVec3Values(eulerValues);
+
+	setAttributeIsClean(_euler, true);
+}
+
+QuatToMatrix44::QuatToMatrix44(const std::string &name, Node *parent): Node(name, parent)
+{
+	_quat = new NumericAttribute("quat",this);
+	_matrix = new NumericAttribute("matrix",this);
+
+	addInputAttribute(_quat);
+	addOutputAttribute(_matrix);
+
+	setAttributeAffect(_quat, _matrix);
+
+	std::vector<std::string> quatSpecializations;
+	quatSpecializations.push_back("Quat");
+	quatSpecializations.push_back("QuatArray");
+
+	std::vector<std::string> matrixSpecializations;
+	matrixSpecializations.push_back("Matrix44");
+	matrixSpecializations.push_back("Matrix44Array");
+
+	setAttributeAllowedSpecializations(_quat, quatSpecializations);
+	setAttributeAllowedSpecializations(_matrix, matrixSpecializations);
+
+	addAttributeSpecializationLink(_quat, _matrix);
+}
+
+void QuatToMatrix44::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
+{
+	if(specializationA.size() < specializationB.size()){
+		std::string specB = specializationB[0];
+		specializationB.resize(1);
+		if(stringUtils::endswith(specializationA[0], "Array")){
+			specializationB[0] = specB + "Array";
+		}
+		else{
+			specializationB[0] = specB;
+		}
+	}
+	else if(specializationB.size() < specializationA.size()){
+		std::string specA = specializationA[0];
+		specializationA.resize(1);
+
+		if(stringUtils::endswith(specializationB[0], "Array")){
+			specializationA[0] = specA + "Array";
+		}
+		else{
+			specializationA[0] = specA;
+		}
+	}
+}
+
+void QuatToMatrix44::update(Attribute *attribute)
+{
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	int size = quatValues.size();
+
+	std::vector<Imath::M44f> matrixValues(size);
+
+	for(int i = 0; i < size; ++i){
+		Imath::Quatf quat = quatValues[i];
+		quat.normalize();
+		matrixValues[i] = quat.toMatrix44();
+	}
+
+	_matrix->outValue()->setMatrix44Values(matrixValues);
+
+	setAttributeIsClean(_matrix, true);
+}
+
+Matrix44ToQuat::Matrix44ToQuat(const std::string &name, Node *parent): Node(name, parent)
+{
+	_quat = new NumericAttribute("quat",this);
+	_matrix = new NumericAttribute("matrix",this);
+
+	addInputAttribute(_matrix);
+	addOutputAttribute(_quat);
+
+	setAttributeAffect(_matrix,_quat);
+
+	std::vector<std::string> quatSpecializations;
+	quatSpecializations.push_back("Quat");
+	quatSpecializations.push_back("QuatArray");
+
+	std::vector<std::string> matrixSpecializations;
+	matrixSpecializations.push_back("Matrix44");
+	matrixSpecializations.push_back("Matrix44Array");
+
+	setAttributeAllowedSpecializations(_quat, quatSpecializations);
+	setAttributeAllowedSpecializations(_matrix, matrixSpecializations);
+
+	addAttributeSpecializationLink(_matrix,_quat);
+}
+
+void Matrix44ToQuat::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
+{
+	if(specializationA.size() < specializationB.size()){
+		std::string specB = specializationB[0];
+		specializationB.resize(1);
+		if(stringUtils::endswith(specializationA[0], "Array")){
+			specializationB[0] = specB + "Array";
+		}
+		else{
+			specializationB[0] = specB;
+		}
+	}
+	else if(specializationB.size() < specializationA.size()){
+		std::string specA = specializationA[0];
+		specializationA.resize(1);
+
+		if(stringUtils::endswith(specializationB[0], "Array")){
+			specializationA[0] = specA + "Array";
+		}
+		else{
+			specializationA[0] = specA;
+		}
+	}
+}
+
+void Matrix44ToQuat::update(Attribute *attribute)
+{
+	const std::vector<Imath::M44f> &mtxValues = _matrix->value()->matrix44Values();
+	int size = mtxValues.size();
+
+	std::vector<Imath::Quatf> quatValues(size);
+
+	for(int i = 0; i < size; ++i){
+		const Imath::M44f& kRot = mtxValues[i];
+
+		float fTrace = kRot[0][0]+kRot[1][1]+kRot[2][2];
+		float fRoot;
+
+		if ( fTrace > 0.0 )
+		{
+			// |w| > 1/2, may as well choose w > 1/2
+			fRoot = sqrt(fTrace + 1.0);  // 2w
+			quatValues[i].r = 0.5*fRoot;
+			fRoot = 0.5/fRoot;  // 1/(4w)
+			quatValues[i].v.x = -(kRot[2][1]-kRot[1][2])*fRoot;
+			quatValues[i].v.y = -(kRot[0][2]-kRot[2][0])*fRoot;
+			quatValues[i].v.z = -(kRot[1][0]-kRot[0][1])*fRoot;
+		}
+		else
+		{
+			// |w| <= 1/2
+			static unsigned int s_iNext[3] = { 1, 2, 0 };
+			unsigned int ii = 0;
+			if ( kRot[1][1] > kRot[0][0] )
+				ii = 1;
+			if ( kRot[2][2] > kRot[ii][ii] )
+				ii = 2;
+			unsigned int j = s_iNext[ii];
+			unsigned int k = s_iNext[j];
+
+			fRoot = sqrt(kRot[ii][ii]-kRot[j][j]-kRot[k][k] + 1.0);
+			float* apkQuat[3] = { &(quatValues[i].v.x), &(quatValues[i].v.y), &(quatValues[i].v.z) };
+			*apkQuat[ii] = -0.5*fRoot;
+			fRoot = 0.5/fRoot;
+			quatValues[i].r = (kRot[k][j]-kRot[j][k])*fRoot;
+			*apkQuat[j] = -(kRot[j][ii]+kRot[ii][j])*fRoot;
+			*apkQuat[k] = -(kRot[k][ii]+kRot[ii][k])*fRoot;
+		}
+	}
+
+	_quat->outValue()->setQuatValues(quatValues);
+
+	setAttributeIsClean(_quat, true);
+}
 
 
 
