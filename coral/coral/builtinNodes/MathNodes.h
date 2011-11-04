@@ -103,6 +103,18 @@ private:
 	NumericAttribute *_outNumber;
 };
 
+class TrigonometricFunctions: public Node{
+public:
+
+	TrigonometricFunctions(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_inNumber;
+	NumericAttribute *_outNumber;
+	NumericAttribute *_function;
+};
+
 }
 
 #endif

@@ -341,6 +341,42 @@ class CollapsedNodeUi(NodeUi):
                         finalPos = hookPos - (proxyAttr.inputHook().scenePos() - proxyAttr.scenePos())
                         proxyAttr.setPos(finalPos)
 
+class TrigonometricFuncNodeInspectorWidget(NodeInspectorWidget):
+    def __init__(self, coralNode, parentWidget):
+        NodeInspectorWidget.__init__(self, coralNode, parentWidget)
+        
+        
+    def build(self):
+        NodeInspectorWidget.build(self)
+        
+        w = self.attributeWidget("func")
+        #if w:
+        #    w.setHidden(True)
+        idx = self.coralNode().findAttribute("func").value().intValueAt(0)
+        self._labelFuncBox = QtGui.QLabel("func")
+        self._funcBox = QtGui.QComboBox(self)
+        self._funcBox.insertItem(0,"cos")
+        self._funcBox.insertItem(1,"sin")
+        self._funcBox.insertItem(2,"tan")
+        self._funcBox.insertItem(3,"acos")
+        self._funcBox.insertItem(4,"asin")
+        self._funcBox.insertItem(5,"atan")
+        self._funcBox.insertItem(6,"cosh")
+        self._funcBox.insertItem(7,"sinh")
+        self._funcBox.insertItem(8,"tanh")
+        self._funcBox.setCurrentIndex(idx)
+        
+        self._funcBoxLayout = QtGui.QHBoxLayout()
+        self._funcBoxLayout.addWidget(self._labelFuncBox)
+        self._funcBoxLayout.addWidget(self._funcBox)
+        
+        self.layout().addLayout(self._funcBoxLayout)
+        
+        self.connect(self._funcBox, QtCore.SIGNAL("currentIndexChanged(int)"), self._funcChanged)
+    
+    def _funcChanged(self, idx):
+        self.coralNode().findAttribute("func").outValue().setIntValueAt(0,idx)
+        self.update()
 
 def loadPluginUi():
     plugin = PluginUi("builtinUis")
@@ -359,5 +395,6 @@ def loadPluginUi():
     plugin.registerInspectorWidget("BoolAttribute", BoolAttributeInspectorWidget)
     plugin.registerInspectorWidget("BuildArray", BuildArrayInspectorWidget)
     plugin.registerInspectorWidget("Time", TimeNodeInspectorWidget)
+    plugin.registerInspectorWidget("TrigonometricFunc", TrigonometricFuncNodeInspectorWidget)
     
     return plugin
