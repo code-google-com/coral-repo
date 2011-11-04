@@ -68,6 +68,22 @@ void SetGeoPoints::update(Attribute *attribute){
 	outGeoValue->displacePoints(_points->value()->vec3Values());
 }
 
+GetGeoNormals::GetGeoNormals(const std::string &name, Node *parent): Node(name, parent){
+	_geo = new GeoAttribute("geo", this);
+	_normals = new NumericAttribute("normals", this);
+	
+	addInputAttribute(_geo);
+	addOutputAttribute(_normals);
+	
+	setAttributeAffect(_geo, _normals);
+	
+	setAttributeAllowedSpecialization(_normals, "Vec3Array");
+}
+
+void GetGeoNormals::update(Attribute *attribute){
+	_normals->outValue()->setVec3Values(_geo->value()->verticesNormals());
+}
+
 GeoNeighbourPoints::GeoNeighbourPoints(const std::string &name, Node *parent): Node(name, parent){
 	_geo = new GeoAttribute("geo", this);	
 	_vertex = new NumericAttribute("vertex", this);
@@ -110,7 +126,7 @@ void GeoNeighbourPoints::update(Attribute *attribute){
 		else{
 			const std::vector<Vertex*> &neighbourVertices = vertices[vertexId].neighbourVertices();
 			int neighboursSize = neighbourVertices.size();
-
+			
 			std::vector<int> neighbourIds(neighboursSize);
 			for(int i = 0; i < neighboursSize; ++i){
 				neighbourIds[i] = neighbourVertices[i]->id();

@@ -19,7 +19,7 @@ ProcessSimulation::ProcessSimulation(const std::string &name, Node *parent):
 	setClassName("ProcessSimulation");
 	
 	if(_globalProcessSimulation){
-		setIsInvalid(true, "Only one ProcessSimulation node is allowed.");
+		setIsInvalid(true, "You can only instantiate one ProcessSimulation node.");
 		return;
 	}
 	
@@ -30,8 +30,6 @@ ProcessSimulation::ProcessSimulation(const std::string &name, Node *parent):
 	addOutputAttribute(_cleaner);
 	
 	setAttributeAffect(_process, _cleaner);
-	
-	setAttributeAllowedSpecialization(_process, "process");
 	
 	_globalProcessSimulation = this;
 }

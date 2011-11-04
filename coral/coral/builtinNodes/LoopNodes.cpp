@@ -77,10 +77,15 @@ void ForLoopNode::getSubCleanChain(Attribute *attribute, std::map<int, std::vect
 		if(attr->isOutput()){
 			Node *parentNode = attr->parent();
 			if(parentNode){
-				if(parentNode->isChildOf(this)){
+				if(parentNode->parent() == this){
 					subCleanChain[n].push_back(attr);
 					n++;
 				}
+				
+				// if(parentNode->isChildOf(this)){
+				// 	subCleanChain[n].push_back(attr);
+				// 	n++;
+				// }
 			}
 		}
 	}

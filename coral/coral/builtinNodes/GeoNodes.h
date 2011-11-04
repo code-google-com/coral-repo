@@ -58,6 +58,16 @@ private:
 	NumericAttribute *_points;
 };
 
+class GetGeoNormals: public Node{
+public:
+	GetGeoNormals(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+	
+private:
+	GeoAttribute *_geo;
+	NumericAttribute *_normals;
+};
+
 class GeoNeighbourPoints: public Node{
 public:
 	GeoNeighbourPoints(const std::string &name, Node *parent);

@@ -97,7 +97,7 @@ void MayaGeoAttribute::transferValueFromMaya(MPlug &plug, MDataBlock &data){
 	
 	// create coral geo
 	coral::Geo *coralGeo = outValue();
-
+	
 	if(coralGeo->hasSameTopology(coralFaces)){
 		coralGeo->setPoints(coralPoints);
 	}

@@ -186,8 +186,8 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<ArrayIndices, Node>("ArrayIndices");
 	pythonWrapperUtils::pythonWrapper<GetArrayElement, Node>("GetArrayElement");
 	pythonWrapperUtils::pythonWrapper<SetArrayElement, Node>("SetArrayElement");
-	pythonWrapperUtils::pythonWrapper<GetSimulationResult, Node>("GetSimulationResult");
-	pythonWrapperUtils::pythonWrapper<SetSimulationResult, Node>("SetSimulationResult");
+	pythonWrapperUtils::pythonWrapper<GetSimulationStep, Node>("GetSimulationStep");
+	pythonWrapperUtils::pythonWrapper<SetSimulationStep, Node>("SetSimulationStep");
 }
 
 #endif

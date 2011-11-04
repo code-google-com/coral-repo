@@ -35,6 +35,7 @@ import _coralMaya
 class MayaGeoInput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaGeoInput")
         
         if self.isValid():
             self._value = _coralMaya.MayaGeoAttribute("geo", self)
@@ -46,6 +47,7 @@ class MayaGeoInput(CoralMayaNode):
 class MayaGeoOutput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaGeoOutput")
         
         if self.isValid():
             self._value = _coralMaya.MayaGeoAttribute("geo", self)

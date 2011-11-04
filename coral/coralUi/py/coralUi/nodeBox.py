@@ -203,14 +203,17 @@ class NodeBox(QtGui.QWidget):
     
     def _searchFieldMovedUpDown(self, direction):
         if direction == "up":
-            self._nodeShelf.setCurrentRow(self._nodeShelf.currentRow() - 1)
-            if str(self._nodeShelf.currentItem().text()).startswith("::") and self._nodeShelf.currentRow() > self._nodeShelf.count():
+            nextItem = self._nodeShelf.item(self._nodeShelf.currentRow() - 1)
+            if nextItem:
                 self._nodeShelf.setCurrentRow(self._nodeShelf.currentRow() - 1)
                 
         elif direction == "down":
-            self._nodeShelf.setCurrentRow(self._nodeShelf.currentRow() + 1)
-            if str(self._nodeShelf.currentItem().text()).startswith("::") and self._nodeShelf.currentRow() < self._nodeShelf.count():
+            nextItem = self._nodeShelf.item(self._nodeShelf.currentRow() + 1)
+            if nextItem:
                 self._nodeShelf.setCurrentRow(self._nodeShelf.currentRow() + 1)
+        
+        if str(self._nodeShelf.currentItem().text()).startswith("::") and self._nodeShelf.currentRow() > 0:
+            self._searchFieldMovedUpDown(direction)
                 
         self._nodeShelfItemClicked(self._nodeShelf.currentItem())
     

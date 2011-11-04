@@ -109,21 +109,22 @@ class NumericAttributeInspectorWidget(AttributeInspectorWidget):
             processedAttrs = []
             numericAttribute = _findFirstConnectedAtributeNonPassThrough(attr, processedAttrs)
         
-        numericValue = numericAttribute.outValue()
         valueField = None
-        specializationType = numericValue.type()
-        if specializationType == numericValue.numericTypeInt:
-            valueField = IntValueField(attr, self)
-        elif specializationType == numericValue.numericTypeFloat:
-            valueField = FloatValueField(attr, self)
-        elif specializationType == numericValue.numericTypeIntArray:
-            if numericAttribute.value().size() == 1:
+        if numericAttribute:
+            numericValue = numericAttribute.outValue()
+            specializationType = numericValue.type()
+            if specializationType == numericValue.numericTypeInt:
                 valueField = IntValueField(attr, self)
-        elif specializationType == numericValue.numericTypeFloatArray:
-            if numericAttribute.value().size() == 1:
+            elif specializationType == numericValue.numericTypeFloat:
                 valueField = FloatValueField(attr, self)
+            elif specializationType == numericValue.numericTypeIntArray:
+                if numericAttribute.value().size() == 1:
+                    valueField = IntValueField(attr, self)
+            elif specializationType == numericValue.numericTypeFloatArray:
+                if numericAttribute.value().size() == 1:
+                    valueField = FloatValueField(attr, self)
         
-        self._valueField = valueField
+            self._valueField = valueField
         
         if valueField is None:
             valueField = QtGui.QLabel(attr.name().split(":")[-1], self)

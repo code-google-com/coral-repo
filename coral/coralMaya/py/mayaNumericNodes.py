@@ -35,6 +35,7 @@ import _coralMaya
 class MayaFloatInput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaFloatInput")
         
         if self.isValid():
             self._value = _coralMaya.MayaFloatAttribute("value", self)
@@ -46,6 +47,7 @@ class MayaFloatInput(CoralMayaNode):
 class MayaFloatOutput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaFloatOutput")
         
         if self.isValid():
             self._value = _coralMaya.MayaFloatAttribute("value", self)
@@ -57,6 +59,7 @@ class MayaFloatOutput(CoralMayaNode):
 class MayaIntInput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaIntInput")
         
         if self.isValid():
             self._value = _coralMaya.MayaIntAttribute("value", self)
@@ -68,6 +71,7 @@ class MayaIntInput(CoralMayaNode):
 class MayaIntOutput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaIntOutput")
         
         if self.isValid():
             self._value = _coralMaya.MayaIntAttribute("value", self)
@@ -79,6 +83,7 @@ class MayaIntOutput(CoralMayaNode):
 class MayaMatrixInput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaMatrixInput")
         
         if self.isValid():
             self._value = _coralMaya.MayaMatrixAttribute("value", self)
@@ -90,6 +95,7 @@ class MayaMatrixInput(CoralMayaNode):
 class MayaMatrixOutput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaMatrixOutput")
         
         if self.isValid():
             self._value = _coralMaya.MayaMatrixAttribute("value", self)
@@ -101,6 +107,7 @@ class MayaMatrixOutput(CoralMayaNode):
 class MayaAngleInput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaAngleInput")
         
         if self.isValid():
             self._value = _coralMaya.MayaAngleAttribute("value", self)
@@ -112,6 +119,7 @@ class MayaAngleInput(CoralMayaNode):
 class MayaAngleOutput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaAngleOutput")
         
         if self.isValid():
             self._value = _coralMaya.MayaAngleAttribute("value", self)
@@ -123,6 +131,7 @@ class MayaAngleOutput(CoralMayaNode):
 class MayaAngle3ArrayOutput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaAngle3ArrayOutput")
         
         if self.isValid():
             self._value = _coralMaya.MayaAngle3ArrayAttribute("value", self)
@@ -134,6 +143,7 @@ class MayaAngle3ArrayOutput(CoralMayaNode):
 class MayaFloat3ArrayOutput(CoralMayaNode):
     def __init__(self, name, parent):
         CoralMayaNode.__init__(self, name, parent)
+        self.setClassName("MayaFloat3ArrayOutput")
         
         if self.isValid():
             self._value = _coralMaya.MayaFloat3ArrayAttribute("value", self)

@@ -123,29 +123,31 @@ void Geo::build(const std::vector<Imath::V3f> &points, const std::vector<std::ve
 }
 
 void Geo::computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNormals){
-	int lastFaceID = _rawFaces.size()-1;
-	std::vector<int> &lastFace = _rawFaces[lastFaceID];
-
-	int size = _vertexIdOffset[lastFaceID] + lastFace.size();
-
-	vertexPerFaceNormals.resize(size);
-
-	int counter = 0;
-	for(unsigned int faceID = 0; faceID < _rawFaces.size(); ++faceID){
-		std::vector<int> &face = _rawFaces[faceID];
-
-		int faceVerticesCount = (int)face.size();
-
-		for(int i = 0; i < faceVerticesCount; i++){
-			// for each triplet of points in this polygon, cross the 2 adjacent points of each point
-			// es: {last,0,1}, {0,1,2}, {1,2,3}, {2,3,last}, {3,last,0}
-
-			const Imath::V3f& v0 = _points[face[i == 0 ? faceVerticesCount-1 : i-1]];
-			const Imath::V3f& v1 = _points[face[i]];
-			const Imath::V3f& v2 = _points[face[i == faceVerticesCount-1 ? 0 : i+1]];
-
-			vertexPerFaceNormals[counter].setValue((v1-v0).cross(v2-v0).normalized());
-			++counter;
+	int nFaces = _rawFaces.size();
+	if(nFaces){
+		int lastFaceID = nFaces - 1;
+		std::vector<int> &lastFace = _rawFaces[lastFaceID];
+	
+		int size = _vertexIdOffset[lastFaceID] + lastFace.size();
+		vertexPerFaceNormals.resize(size);
+    
+		int counter = 0;
+		for(unsigned int faceID = 0; faceID < _rawFaces.size(); ++faceID){
+			std::vector<int> &face = _rawFaces[faceID];
+    
+			int faceVerticesCount = (int)face.size();
+    
+			for(int i = 0; i < faceVerticesCount; i++){
+				// for each triplet of points in this polygon, cross the 2 adjacent points of each point
+				// es: {last,0,1}, {0,1,2}, {1,2,3}, {2,3,last}, {3,last,0}
+    
+				const Imath::V3f& v0 = _points[face[i == 0 ? faceVerticesCount-1 : i-1]];
+				const Imath::V3f& v1 = _points[face[i]];
+				const Imath::V3f& v2 = _points[face[i == faceVerticesCount-1 ? 0 : i+1]];
+    
+				vertexPerFaceNormals[counter].setValue((v1-v0).cross(v2-v0).normalized());
+				++counter;
+			}
 		}
 	}
 }
@@ -280,45 +282,34 @@ void Geo::cacheTopologyStructures(){
 			edge._faces.push_back(&face);
 			edge._geo = this;
 			
-			if(j > 0){
-				int edgeVertexId1;
-				int edgeVertexId2;
+			int edgeVertexId1 = rawVerticesPerFace[(verticesPerFaceCount + j - 1) % verticesPerFaceCount];
+			int edgeVertexId2 = rawVerticesPerFace[j];
 			
-				if(j == verticesPerFaceCount - 1){
-					edgeVertexId1 = rawVerticesPerFace[j];
-					edgeVertexId2 = rawVerticesPerFace[0];
-				}
-				else{
-					edgeVertexId1 = rawVerticesPerFace[j - 1];
-					edgeVertexId2 = rawVerticesPerFace[j];
-				}
+			Vertex &vertex1 = _vertices[edgeVertexId1];
+			Vertex &vertex2 = _vertices[edgeVertexId2];
+		
+			Imath::V3f &point1 = _points[edgeVertexId1];
+			Imath::V3f &point2 = _points[edgeVertexId2];
+		
+			edge._vertices[0] = &vertex1;
+			edge._vertices[1] = &vertex2;
+			edge._points[0] = &point1;
+			edge._points[1] = &point2;
 			
-				Vertex &vertex1 = _vertices[edgeVertexId1];
-				Vertex &vertex2 = _vertices[edgeVertexId2];
-			
-				Imath::V3f &point1 = _points[edgeVertexId1];
-				Imath::V3f &point2 = _points[edgeVertexId2];
-			
-				edge._vertices[0] = &vertex1;
-				edge._vertices[1] = &vertex2;
-				edge._points[0] = &point1;
-				edge._points[1] = &point2;
-				
-				// vertex neighbours
-				if(!containerUtils::elementInContainer<Vertex*>(&vertex1, vertex2._neighbourVertices)){
-					vertex2._neighbourVertices.push_back(&vertex1);
-					vertex2._neighbourPoints.push_back(&point1);
-				}
-				if(!containerUtils::elementInContainer<Vertex*>(&vertex2, vertex1._neighbourVertices)){
-					vertex1._neighbourVertices.push_back(&vertex2);
-					vertex1._neighbourPoints.push_back(&point2);
-				}
-				if(!containerUtils::elementInContainer<Edge*>(&edge, vertex1._neighbourEdges)){
-					vertex1._neighbourEdges.push_back(&edge);
-				}
-				if(!containerUtils::elementInContainer<Edge*>(&edge, vertex2._neighbourEdges)){
-					vertex2._neighbourEdges.push_back(&edge);
-				}
+			// vertex neighbours
+			if(!containerUtils::elementInContainer<Vertex*>(&vertex1, vertex2._neighbourVertices)){
+				vertex2._neighbourVertices.push_back(&vertex1);
+				vertex2._neighbourPoints.push_back(&point1);
+			}
+			if(!containerUtils::elementInContainer<Vertex*>(&vertex2, vertex1._neighbourVertices)){
+				vertex1._neighbourVertices.push_back(&vertex2);
+				vertex1._neighbourPoints.push_back(&point2);
+			}
+			if(!containerUtils::elementInContainer<Edge*>(&edge, vertex1._neighbourEdges)){
+				vertex1._neighbourEdges.push_back(&edge);
+			}
+			if(!containerUtils::elementInContainer<Edge*>(&edge, vertex2._neighbourEdges)){
+				vertex2._neighbourEdges.push_back(&edge);
 			}
 			
 			vertexIdOffset += verticesPerFaceCount;

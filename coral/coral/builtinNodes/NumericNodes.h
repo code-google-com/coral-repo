@@ -312,12 +312,12 @@ private:
 	NumericAttribute *_array;
 	NumericAttribute *_index;
 	NumericAttribute *_element;
-	void(GetArrayElement::*_selectedOperation)(Numeric *, int, Numeric *);
+	void(GetArrayElement::*_selectedOperation)(Numeric *, const std::vector<int> &, Numeric *);
 	
-	void updateInt(Numeric *array, int index, Numeric *element);
-	void updateFloat(Numeric *array, int index, Numeric *element);
-	void updateVec3(Numeric *array, int index, Numeric *element);
-	void updateMatrix44(Numeric *array, int index, Numeric *element);
+	void updateInt(Numeric *array, const std::vector<int> &index, Numeric *element);
+	void updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element);
+	void updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element);
+	void updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element);
 };
 
 class SetArrayElement: public Node{
@@ -340,25 +340,25 @@ private:
 	void updateMatrix44(Numeric *array, int index, Numeric *element, Numeric *outArray);
 };
 
-class SetSimulationResult: public Node{
+class SetSimulationStep: public Node{
 public:
-	SetSimulationResult(const std::string &name, Node *parent);
+	SetSimulationStep(const std::string &name, Node *parent);
 	void update(Attribute *attribute);
 	
 private:
 	NumericAttribute *_source;
 	NumericAttribute *_data;
-	PassThroughAttribute *_process;
+	NumericAttribute *_result;
 };
 
-class GetSimulationResult: public Node{
+class GetSimulationStep: public Node{
 public:
-	GetSimulationResult(const std::string &name, Node *parent);
+	GetSimulationStep(const std::string &name, Node *parent);
 	void update(Attribute *attribute);
 	
 private:
 	NumericAttribute *_source;
-	NumericAttribute *_time;
+	NumericAttribute *_step;
 	NumericAttribute *_data;
 };
 

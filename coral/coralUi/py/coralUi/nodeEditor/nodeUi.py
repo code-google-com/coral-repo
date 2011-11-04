@@ -111,20 +111,21 @@ class NodeUi(QtGui.QGraphicsWidget):
         timer.start()
     
     def hoverEnterEvent(self, event):
-        if nodeView.NodeView._lastHoveredItem is not self:
-            if nodeView.NodeView._lastHoveredItem:
-                nodeView.NodeView._lastHoveredItem.hoverLeaveEvent(None)
+        if not nodeView.NodeView._panning:
+            if nodeView.NodeView._lastHoveredItem is not self:
+                if nodeView.NodeView._lastHoveredItem:
+                    nodeView.NodeView._lastHoveredItem.hoverLeaveEvent(None)
             
-            zoom = self.scene().zoom()
-            if zoom < 0.6:
-                factor =  0.7 / zoom
+                zoom = self.scene().zoom()
+                if zoom < 0.6:
+                    factor =  0.7 / zoom
                 
-                self.setTransformOriginPoint(self.rect().center())
-                self._magnify(factor)
+                    self.setTransformOriginPoint(self.rect().center())
+                    self._magnify(factor)
                 
-                nodeView.NodeView._lastHoveredItem = self
+                    nodeView.NodeView._lastHoveredItem = self
                 
-                self.setZValue(9999999)
+                    self.setZValue(9999999)
         
     def hoverLeaveEvent(self, event):
         if nodeView.NodeView._lastHoveredItem is self:
