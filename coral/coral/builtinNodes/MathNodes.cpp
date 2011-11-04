@@ -305,7 +305,7 @@ TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *pa
 {
 
 	_inNumber = new NumericAttribute("inNumber", this);
-	_outNumber = new NumericAttribute("ouNumber", this);
+	_outNumber = new NumericAttribute("outNumber", this);
 	_function = new NumericAttribute("func", this);
 
 	addInputAttribute(_inNumber);

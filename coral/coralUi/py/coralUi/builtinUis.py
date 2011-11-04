@@ -351,8 +351,9 @@ class TrigonometricFuncNodeInspectorWidget(NodeInspectorWidget):
         NodeInspectorWidget.build(self)
         
         w = self.attributeWidget("func")
-        #if w:
-        #    w.setHidden(True)
+        if w:
+            w.setHidden(True)
+        
         idx = self.coralNode().findAttribute("func").value().intValueAt(0)
         self._labelFuncBox = QtGui.QLabel("func")
         self._funcBox = QtGui.QComboBox(self)
@@ -377,7 +378,7 @@ class TrigonometricFuncNodeInspectorWidget(NodeInspectorWidget):
     
     def _funcChanged(self, idx):
         self.coralNode().findAttribute("func").outValue().setIntValueAt(0,idx)
-        self.update()
+        self.coralNode().update(self.coralNode().findAttribute("ouNumber"))
 
 def loadPluginUi():
     plugin = PluginUi("builtinUis")
