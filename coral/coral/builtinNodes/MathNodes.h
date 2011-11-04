@@ -115,6 +115,26 @@ private:
 	NumericAttribute *_function;
 };
 
+class Radians: public Node{
+public:
+	Radians(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_inNumber;
+	NumericAttribute *_outNumber;
+};
+
+class Degrees: public Node{
+public:
+	Degrees(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_inNumber;
+	NumericAttribute *_outNumber;
+};
+
 }
 
 #endif

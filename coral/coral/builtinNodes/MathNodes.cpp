@@ -370,3 +370,63 @@ void TrigonometricFunctions::update(Attribute *attribute){
 	_outNumber->outValue()->setFloatValues(outValues);
 }
 
+Radians::Radians(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Radians::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = in[i]*M_PI/180.0f;
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Degrees::Degrees(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Degrees::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = in[i]*180.0f/float(M_PI);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
