@@ -126,7 +126,7 @@ void GeoNeighbourPoints::update(Attribute *attribute){
 		else{
 			const std::vector<Vertex*> &neighbourVertices = vertices[vertexId].neighbourVertices();
 			int neighboursSize = neighbourVertices.size();
-
+			
 			std::vector<int> neighbourIds(neighboursSize);
 			for(int i = 0; i < neighboursSize; ++i){
 				neighbourIds[i] = neighbourVertices[i]->id();
