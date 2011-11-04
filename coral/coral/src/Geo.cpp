@@ -123,29 +123,31 @@ void Geo::build(const std::vector<Imath::V3f> &points, const std::vector<std::ve
 }
 
 void Geo::computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNormals){
-	int lastFaceID = _rawFaces.size()-1;
-	std::vector<int> &lastFace = _rawFaces[lastFaceID];
-
-	int size = _vertexIdOffset[lastFaceID] + lastFace.size();
-
-	vertexPerFaceNormals.resize(size);
-
-	int counter = 0;
-	for(unsigned int faceID = 0; faceID < _rawFaces.size(); ++faceID){
-		std::vector<int> &face = _rawFaces[faceID];
-
-		int faceVerticesCount = (int)face.size();
-
-		for(int i = 0; i < faceVerticesCount; i++){
-			// for each triplet of points in this polygon, cross the 2 adjacent points of each point
-			// es: {last,0,1}, {0,1,2}, {1,2,3}, {2,3,last}, {3,last,0}
-
-			const Imath::V3f& v0 = _points[face[i == 0 ? faceVerticesCount-1 : i-1]];
-			const Imath::V3f& v1 = _points[face[i]];
-			const Imath::V3f& v2 = _points[face[i == faceVerticesCount-1 ? 0 : i+1]];
-
-			vertexPerFaceNormals[counter].setValue((v1-v0).cross(v2-v0).normalized());
-			++counter;
+	int nFaces = _rawFaces.size();
+	if(nFaces){
+		int lastFaceID = nFaces - 1;
+		std::vector<int> &lastFace = _rawFaces[lastFaceID];
+	
+		int size = _vertexIdOffset[lastFaceID] + lastFace.size();
+		vertexPerFaceNormals.resize(size);
+    
+		int counter = 0;
+		for(unsigned int faceID = 0; faceID < _rawFaces.size(); ++faceID){
+			std::vector<int> &face = _rawFaces[faceID];
+    
+			int faceVerticesCount = (int)face.size();
+    
+			for(int i = 0; i < faceVerticesCount; i++){
+				// for each triplet of points in this polygon, cross the 2 adjacent points of each point
+				// es: {last,0,1}, {0,1,2}, {1,2,3}, {2,3,last}, {3,last,0}
+    
+				const Imath::V3f& v0 = _points[face[i == 0 ? faceVerticesCount-1 : i-1]];
+				const Imath::V3f& v1 = _points[face[i]];
+				const Imath::V3f& v2 = _points[face[i == faceVerticesCount-1 ? 0 : i+1]];
+    
+				vertexPerFaceNormals[counter].setValue((v1-v0).cross(v2-v0).normalized());
+				++counter;
+			}
 		}
 	}
 }

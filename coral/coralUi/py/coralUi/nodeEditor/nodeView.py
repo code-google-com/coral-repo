@@ -39,6 +39,7 @@ class NodeView(QtGui.QGraphicsView):
     _lastHoveredItem = None
     _animSpeed = 50.0
     _animSteps = 50.0
+    _panning = False
     
     def __init__(self, parent):
         QtGui.QGraphicsView.__init__(self, parent)
@@ -188,6 +189,7 @@ class NodeView(QtGui.QGraphicsView):
             self._lastPanPoint = mouseEvent.pos()
             self.setCursor(QtCore.Qt.ClosedHandCursor)
             self._panning = True
+            NodeView._panning = True
         else:
             QtGui.QGraphicsView.mousePressEvent(self, mouseEvent)
     
@@ -205,6 +207,7 @@ class NodeView(QtGui.QGraphicsView):
             self.setCursor(QtCore.Qt.ArrowCursor)
             self._lastPanPoint = QtCore.QPoint()
             self._panning = False
+            NodeView._panning = False
         else:
             QtGui.QGraphicsView.mouseReleaseEvent(self, mouseEvent)
     

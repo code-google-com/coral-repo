@@ -1641,28 +1641,99 @@ GetArrayElement::GetArrayElement(const std::string &name, Node *parent):
 	
 	std::vector<std::string> elementSpec;
 	elementSpec.push_back("Int");
+	elementSpec.push_back("IntArray");
 	elementSpec.push_back("Float");
+	elementSpec.push_back("FloatArray");
 	elementSpec.push_back("Vec3");
+	elementSpec.push_back("Vec3Array");
 	elementSpec.push_back("Matrix44");
+	elementSpec.push_back("Matrix44Array");
+	
+	std::vector<std::string> indexSpec;
+	indexSpec.push_back("Int");
+	indexSpec.push_back("IntArray");
 	
 	setAttributeAllowedSpecializations(_array, arraySpec);
-	setAttributeAllowedSpecialization(_index, "Int");
+	setAttributeAllowedSpecializations(_index, indexSpec);
 	setAttributeAllowedSpecializations(_element, elementSpec);
 	
 	addAttributeSpecializationLink(_array, _element);
+	addAttributeSpecializationLink(_index, _element);
 }
 
 void GetArrayElement::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
-	if(specializationA.size() < specializationB.size()){
-		specializationB.resize(specializationA.size());
+	if(attributeA == _array){
+		std::vector<std::string> newSpecA;
 		for(int i = 0; i < specializationA.size(); ++i){
-			specializationB[i] = stringUtils::strip(specializationA[i], "Array");
+			std::string &specA = specializationA[i];
+			std::string typeA = stringUtils::strip(specA, "Array");
+			for(int j = 0; j < specializationB.size(); ++j){
+				std::string typeB = stringUtils::strip(specializationB[j], "Array");
+				if(typeA == typeB){
+					newSpecA.push_back(specA);
+					break;
+				}
+			}
 		}
-	}
-	else if(specializationB.size() < specializationA.size()){
-		specializationA.resize(specializationB.size());
+		
+		std::vector<std::string> newSpecB;
 		for(int i = 0; i < specializationB.size(); ++i){
-			specializationA[i] = specializationB[i] + "Array";
+			std::string &specB = specializationB[i];
+			std::string typeB = stringUtils::strip(specB, "Array");
+			for(int j = 0; j < specializationA.size(); ++j){
+				std::string typeA = stringUtils::strip(specializationA[j], "Array");
+				if(typeB == typeA){
+					newSpecB.push_back(specB);
+					break;
+				}
+			}
+		}
+		
+		specializationA = newSpecA;
+		specializationB = newSpecB;
+	}
+	else{
+		if(specializationA.size() == 1){
+			std::string specASuffix = "";
+			if(stringUtils::endswith(specializationA[0], "Array")){
+				specASuffix = "Array";
+			}
+			
+			std::vector<std::string> newSpecB;
+			for(int i = 0; i < specializationB.size(); ++i){
+				std::string &specB = specializationB[i];
+				
+				std::string specBSuffix = "";
+				if(stringUtils::endswith(specB, "Array")){
+					specBSuffix = "Array";
+				}
+				
+				if(specASuffix == specBSuffix){
+					newSpecB.push_back(specB);
+				}
+			}
+			
+			specializationB = newSpecB;
+		}
+		else{
+			std::vector<std::string> newSpecA;
+			for(int i = 0; i < specializationB.size(); ++i){
+				std::string &specB = specializationB[i];
+				if(!stringUtils::endswith(specB, "Array")){
+					newSpecA.push_back("Int");
+					break;
+				}
+			}
+			
+			for(int i = 0; i < specializationB.size(); ++i){
+				std::string &specB = specializationB[i];
+				if(stringUtils::endswith(specB, "Array")){
+					newSpecA.push_back("IntArray");
+					break;
+				}
+			}
+			
+			specializationA = newSpecA;
 		}
 	}
 }
@@ -1689,26 +1760,42 @@ void GetArrayElement::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void GetArrayElement::updateInt(Numeric *array, int index, Numeric *element){
-	element->setIntValueAt(0, array->intValueAt(index));
+void GetArrayElement::updateInt(Numeric *array, const std::vector<int> &index, Numeric *element){
+	int size = index.size();
+	element->resize(size);
+	for(int i = 0; i < size; ++i){
+		element->setIntValueAt(i, array->intValueAt(index[i]));
+	}
 }
 
-void GetArrayElement::updateFloat(Numeric *array, int index, Numeric *element){
-	element->setFloatValueAt(0, array->floatValueAt(index));
+void GetArrayElement::updateFloat(Numeric *array,  const std::vector<int> &index, Numeric *element){
+	int size = index.size();
+	element->resize(size);
+	for(int i = 0; i < size; ++i){
+		element->setFloatValueAt(i, array->floatValueAt(index[i]));
+	}
 }
 
-void GetArrayElement::updateVec3(Numeric *array, int index, Numeric *element){
-	element->setVec3ValueAt(0, array->vec3ValueAt(index));
+void GetArrayElement::updateVec3(Numeric *array,  const std::vector<int> &index, Numeric *element){
+	int size = index.size();
+	element->resize(size);
+	for(int i = 0; i < size; ++i){
+		element->setVec3ValueAt(i, array->vec3ValueAt(index[i]));
+	}
 }
 
-void GetArrayElement::updateMatrix44(Numeric *array, int index, Numeric *element){
-	element->setMatrix44ValueAt(0, array->matrix44ValueAt(index));
+void GetArrayElement::updateMatrix44(Numeric *array,  const std::vector<int> &index, Numeric *element){
+	int size = index.size();
+	element->resize(size);
+	for(int i = 0; i < size; ++i){
+		element->setMatrix44ValueAt(i, array->matrix44ValueAt(index[i]));
+	}
 }
 
 void GetArrayElement::update(Attribute *attribute){
 	if(_selectedOperation){
 		Numeric *array = _array->value();
-		int index = _index->value()->intValueAt(0);
+		std::vector<int> index = _index->value()->intValues();
 		Numeric *element = _element->outValue();
 		
 		(this->*_selectedOperation)(array, index, element);
@@ -1842,57 +1929,75 @@ void SetArrayElement::update(Attribute *attribute){
 	}
 }
 
-SetSimulationResult::SetSimulationResult(const std::string &name, Node *parent): Node(name, parent){	
+SetSimulationStep::SetSimulationStep(const std::string &name, Node *parent): Node(name, parent){	
 	_source = new NumericAttribute("source", this);
 	_data = new NumericAttribute("data", this);
-	_process = new PassThroughAttribute("process", this);
+	_result = new NumericAttribute("result", this);
 	
 	addInputAttribute(_source);
 	addInputAttribute(_data);
-	addOutputAttribute(_process);
+	addOutputAttribute(_result);
 	
-	setAttributeAffect(_data, _process);
-	
-	setAttributeAllowedSpecialization(_process, "process");
+	setAttributeAffect(_data, _result);
 	
 	addAttributeSpecializationLink(_source, _data);
+	addAttributeSpecializationLink(_source, _result);
 }
 
-void SetSimulationResult::update(Attribute *attribute){
+void SetSimulationStep::update(Attribute *attribute){
 	int sourceId = _source->value()->id();
+	Numeric *data = _data->value();
 	
-	
-	_globalNumericStorage[sourceId].copy(_data->value());
+	_globalNumericStorage[sourceId].copy(data);
+	_result->outValue()->copy(data);
 }
 
-GetSimulationResult::GetSimulationResult(const std::string &name, Node *parent): Node(name, parent){	
+GetSimulationStep::GetSimulationStep(const std::string &name, Node *parent): Node(name, parent){	
 	_source = new NumericAttribute("source", this);
-	_time = new NumericAttribute("time", this);
+	_step = new NumericAttribute("step", this);
 	_data = new NumericAttribute("data", this);
 	
 	addInputAttribute(_source);
-	addInputAttribute(_time);
+	addInputAttribute(_step);
 	addOutputAttribute(_data);
 	
 	setAttributeAffect(_source, _data);
-	setAttributeAffect(_time, _data);
+	setAttributeAffect(_step, _data);
 	
-	setAttributeAllowedSpecialization(_time, "Float");
+	std::vector<std::string> spec;
+	spec.push_back("Int");
+	spec.push_back("Float");
+	setAttributeAllowedSpecializations(_step, spec);
 	
 	addAttributeSpecializationLink(_source, _data);
 }
 
-void GetSimulationResult::update(Attribute *attribute){
+void GetSimulationStep::update(Attribute *attribute){
 	Numeric *source = _source->value();
 	int sourceId = source->id();
-	float time = _time->value()->floatValueAt(0);
+	Numeric *step = _step->value();
+	if(step->type() == Numeric::numericTypeFloat){
+		float step = _step->value()->floatValueAt(0);
 	
-	if(time == 0.0 || _globalNumericStorage.find(sourceId) == _globalNumericStorage.end()){
-		_globalNumericStorage[sourceId].copy(source);
+		if(step == 0.0 || _globalNumericStorage.find(sourceId) == _globalNumericStorage.end()){
+			_globalNumericStorage[sourceId].copy(source);
+		}
+	
+		_data->outValue()->copy(&_globalNumericStorage[sourceId]);
 	}
+	else if(step->type() == Numeric::numericTypeInt){
+		int step = _step->value()->intValueAt(0);
 	
-	_data->outValue()->copy(&_globalNumericStorage[sourceId]);
+		if(step == 0 || _globalNumericStorage.find(sourceId) == _globalNumericStorage.end()){
+			_globalNumericStorage[sourceId].copy(source);
+		}
+	
+		_data->outValue()->copy(&_globalNumericStorage[sourceId]);
+		
+	}
 }
+
+
 
 QuatToAxisAngle::QuatToAxisAngle(const std::string &name, Node *parent): Node(name, parent)
 {

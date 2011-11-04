@@ -74,6 +74,7 @@ void CoralNetworkNode::updateCoralAttributeMap(){
 	_coralAttributeMap.clear();
 	_inputPlugs.clear();
 	_outputPlugs.clear();
+	_inputPlugsToPull.clear();
 	
 	if(coralNodeObj){
 		coral::Node *coralNode = (coral::Node*)coralNodeObj;
@@ -86,7 +87,8 @@ void CoralNetworkNode::updateCoralAttributeMap(){
 			if(!plug.isNull()){
 				_coralAttributeMap[plug.partialName().asChar()] = coralAttribute->id();
 				if(coralAttribute->isOutput()){
-					_inputPlugs.append(plug);
+					_inputPlugs.push_back(plug);
+					_inputPlugsToPull.push_back(plug);
 				}
 				else{
 					coralMayaAttribute->setCanDirtyMayaAttribute(true);
@@ -111,9 +113,9 @@ void CoralNetworkNode::coralCanDirtyOutAttrs(bool value){
 
 MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){
 	PyGILState_STATE state = PyGILState_Ensure(); // ensure python's threades won't fuck up maya
-	
-	for(int i = 0; i < _inputPlugs.length(); ++i){
-		MPlug inPlug = _inputPlugs[i];
+	for(int i = 0; i < _inputPlugsToPull.size(); ++i){
+		MPlug inPlug = _inputPlugsToPull[i];
+		
 		if(!inPlug.isNull())
 		{
 			std::string attrName = inPlug.partialName().asChar();
@@ -135,11 +137,14 @@ MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){
 				CoralMayaAttribute *coralMayaAttr = dynamic_cast<CoralMayaAttribute*>(coralObject);
 				coralMayaAttr->transferValueToMaya(outPlug, data);
 				coralMayaAttr->setCanDirtyMayaAttribute(true);
+				data.setClean(outPlug);
 			}
 		}
 	}
 	
 	PyGILState_Release(state);
+	
+	_inputPlugsToPull.clear();
 	
     return MS::kSuccess;
 }
@@ -149,13 +154,17 @@ MStatus CoralNetworkNode::setDependentsDirty(MPlug const &inPlug, MPlugArray &af
 		coralCanDirtyOutAttrs(false);
 	}
 	
-	affectedPlugs = _outputPlugs;
-	for(int i = 0; i < _outputPlugs.length(); ++i){
-		int elements = _outputPlugs[i].numElements();
-		for(int j = 0; j < elements; ++j){
-			affectedPlugs.append(_outputPlugs[i].elementByPhysicalIndex(j));
-			for(int k = 0; k < _outputPlugs[i].elementByPhysicalIndex(j).numChildren(); ++k){
-				affectedPlugs.append(_outputPlugs[i].elementByPhysicalIndex(j).child(k));
+	if(containerUtils::elementInContainer(inPlug, _inputPlugs)){
+		_inputPlugsToPull.push_back(inPlug);
+		
+		affectedPlugs = _outputPlugs;
+		for(int i = 0; i < _outputPlugs.length(); ++i){
+			int elements = _outputPlugs[i].numElements();
+			for(int j = 0; j < elements; ++j){
+				affectedPlugs.append(_outputPlugs[i].elementByPhysicalIndex(j));
+				for(int k = 0; k < _outputPlugs[i].elementByPhysicalIndex(j).numChildren(); ++k){
+					affectedPlugs.append(_outputPlugs[i].elementByPhysicalIndex(j).child(k));
+				}
 			}
 		}
 	}
@@ -167,6 +176,25 @@ MStatus CoralNetworkNode::shouldSave(const MPlug &plug, bool &isSaving){
 	isSaving = true;
 	
 	return MS::kSuccess;
+}
+
+void CoralNetworkNode::copyInternalData(MPxNode *node){
+	MFnDependencyNode nodeFn(node->thisMObject());
+	int coralNodeId = nodeFn.findPlug("coralNodeId").asInt();
+	coral::Object *coralNodeObj = coral::NetworkManager::findObjectById(coralNodeId);
+	if(coralNodeObj){
+		coral::Node *coralNode = (coral::Node*)coralNodeObj;
+		MString coralNodeName = coralNode->fullName().data();
+		MString coralNodeParentName = coralNode->parent()->fullName().data();
+		
+		MString pythonCode = "from coralMaya import coralMayaApp;";
+		pythonCode += "from coral import coralApp;";
+		pythonCode += "coralMayaApp.FiberMayaAppData._associateCoralNetworkNode = '" + name() + "';";
+		pythonCode += "coralApp.executeCommand('Paste', nodes = ['" + coralNodeName + "'], parentNode = '" + coralNodeParentName + "');";
+		pythonCode += "coralMayaApp.FiberMayaAppData._associateCoralNetworkNode = '';";
+		MGlobal::displayInfo("python(\"" + pythonCode + "\");");
+		MGlobal::executeCommand("python(\"" + pythonCode + "\");");
+	}
 }
 
 MStatus CoralNetworkNode::initialize(){

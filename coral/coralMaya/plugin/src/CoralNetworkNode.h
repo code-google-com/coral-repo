@@ -72,6 +72,7 @@ public:
 	virtual MStatus compute(const MPlug& plug, MDataBlock& data);
 	virtual MStatus setDependentsDirty(MPlug const &inPlug, MPlugArray &affectedPlugs);
 	virtual MStatus shouldSave(const MPlug &plug, bool &isSaving);
+	virtual void copyInternalData(MPxNode *node);
 	
 	static void* creator();
 	static MStatus initialize();
@@ -84,7 +85,8 @@ public:
 	
 private:
 	std::map<std::string, int> _coralAttributeMap;
-	MPlugArray _inputPlugs;
+	std::vector<MPlug> _inputPlugs;
+	std::vector<MPlug> _inputPlugsToPull;
 	MPlugArray _outputPlugs;
 	
 	std::vector<coral::Attribute*> findCoralMayaAttributes(coral::Node *coralNode);

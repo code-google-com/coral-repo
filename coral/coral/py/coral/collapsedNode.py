@@ -39,3 +39,29 @@ class CollapsedNode(_coral.Node):
         self._setUpdateEnabled(False)
         self._setAllowDynamicAttributes(True)
 
+    def _attributesAsScript(self):
+        script = ""
+        
+        createAttributeCmd = _coral.Command()
+        createAttributeCmd.setName("CreateAttribute")
+        createAttributeCmd.setArgString("className", "PassThroughAttribute")
+        createAttributeCmd.setArgString("name", "")
+        createAttributeCmd.setArgString("parentNode", self.fullName())
+        createAttributeCmd.setArgBool("input", False)
+        createAttributeCmd.setArgBool("output", False)
+        
+        for attribute in self.inputAttributes():
+            createAttributeCmd.setArgString("name", attribute.name())
+            createAttributeCmd.setArgBool("input", True)
+            createAttributeCmd.setArgBool("output", False)
+            
+            script += createAttributeCmd.asScript() + "\n"
+        
+        for attribute in self.outputAttributes():
+            createAttributeCmd.setArgString("name", attribute.name())
+            createAttributeCmd.setArgBool("input", False)
+            createAttributeCmd.setArgBool("output", True)
+            
+            script += createAttributeCmd.asScript() + "\n"
+        
+        return script

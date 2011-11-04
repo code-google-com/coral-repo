@@ -37,6 +37,7 @@ void geoWrapper(){
 	pythonWrapperUtils::pythonWrapper<GeoAttribute, Attribute>("GeoAttribute");
 	pythonWrapperUtils::pythonWrapper<GetGeoPoints, Node>("GetGeoPoints");
 	pythonWrapperUtils::pythonWrapper<SetGeoPoints, Node>("SetGeoPoints");
+	pythonWrapperUtils::pythonWrapper<GetGeoNormals, Node>("GetGeoNormals");
 	pythonWrapperUtils::pythonWrapper<GeoNeighbourPoints, Node>("GeoNeighbourPoints");
 }
 

@@ -53,6 +53,9 @@ class CoralMayaNode(coral.Node):
             return
     
     def deleteIt(self):
+        mayaNode = self.parent().mayaNode()
+        cmds.lockNode(mayaNode, lock = False)
+        
         if self.isValid():
             for attr in self.attributes():
                 if hasattr(attr, "mayaAttribute"):
@@ -62,18 +65,21 @@ class CoralMayaNode(coral.Node):
         
         coral.Node.deleteIt(self)
         
+        cmds.lockNode(mayaNode, lock = True)
+        
     def setName(self, name):
         coral.Node.setName(self, str(name))
         newName = str(self.name())
         
+        mayaNode = self.parent().mayaNode()
+        cmds.lockNode(mayaNode, lock = False)
+        
         for attr in self.attributes():
             if hasattr(attr, "setMayaAttribute"):
-                try:
-                    cmds.renameAttr(str(attr.mayaNode() + "." + attr.mayaAttribute()), str(newName))
-                except:
-                    pass
-                
+                cmds.renameAttr(attr.mayaNode() + "." + attr.mayaAttribute(), newName)
                 attr.setMayaAttribute(newName)
+        
+        cmds.lockNode(mayaNode, lock = True)
                 
     # this is just a utility method to create the most common maya-attribute types,
     def createMayaAttribute(self, type):
