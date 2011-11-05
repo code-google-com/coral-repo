@@ -35,6 +35,7 @@
 #include <vector>
 
 #include <ImathVec.h>
+#include <ImathColor.h>
 #include <ImathMatrix.h>
 #include <ImathQuat.h>
 
@@ -56,6 +57,8 @@ public:
 		numericTypeFloatArray,
 		numericTypeVec3,
 		numericTypeVec3Array,
+		numericTypeCol4,
+		numericTypeCol4Array,
 		numericTypeQuat,
 		numericTypeQuatArray,
 		numericTypeMatrix44,
@@ -72,21 +75,25 @@ public:
 	void setIntValueAt(unsigned int id, int value);
 	void setFloatValueAt(unsigned int id, float value);
 	void setVec3ValueAt(unsigned int id, const Imath::V3f &value);
+	void setCol4ValueAt(unsigned int id, const Imath::Color4f &value);
 	void setQuatValueAt(unsigned int id, const Imath::Quatf &value);
 	void setMatrix44ValueAt(unsigned int id, const Imath::M44f &value);
 	const std::vector<int> &intValues();
 	const std::vector<float> &floatValues();
 	const std::vector<Imath::V3f> &vec3Values();
+	const std::vector<Imath::Color4f> &col4Values();
 	const std::vector<Imath::Quatf> &quatValues();
 	const std::vector<Imath::M44f> &matrix44Values();
 	int intValueAt(unsigned int id);
 	float floatValueAt(unsigned int id);
 	Imath::V3f vec3ValueAt(unsigned int id);
+	Imath::Color4f col4ValueAt(unsigned int id);
 	Imath::Quatf quatValueAt(unsigned int id);
 	Imath::M44f matrix44ValueAt(unsigned int id);
 	void setIntValues(const std::vector<int> &values);
 	void setFloatValues(const std::vector<float> &values);
 	void setVec3Values(const std::vector<Imath::V3f> &values);
+	void setCol4Values(const std::vector<Imath::Color4f> &values);
 	void setQuatValues(const std::vector<Imath::Quatf> &values);
 	void setMatrix44Values(const std::vector<Imath::M44f> &values);
 	bool isArrayType(Numeric::Type type);
@@ -101,6 +108,7 @@ private:
 	std::vector<int> _intValues;
 	std::vector<float> _floatValues;
 	std::vector<Imath::V3f > _vec3Values;
+	std::vector<Imath::Color4f > _col4Values;
 	std::vector<Imath::Quatf > _quatValues;
 	std::vector<Imath::M44f > _matrix44Values;
 	bool _isArray;

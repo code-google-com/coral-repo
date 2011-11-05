@@ -32,6 +32,7 @@
 #include "../src/Numeric.h"
 
 typedef Imath::V3f vec3;
+typedef Imath::Color4f col4;
 typedef Imath::M44f matrix44;
 
 using namespace coral;

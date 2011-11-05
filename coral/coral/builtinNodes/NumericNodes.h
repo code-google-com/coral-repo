@@ -81,6 +81,34 @@ private:
 	NumericAttribute *_z;
 };
 
+class Col4Node: public Node{
+public:
+	Col4Node(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+
+private:
+	NumericAttribute *_r;
+	NumericAttribute *_g;
+	NumericAttribute *_b;
+	NumericAttribute *_a;
+	NumericAttribute *_color;
+};
+
+class Col4ToFloats: public Node{
+public:
+	Col4ToFloats(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+
+private:
+	NumericAttribute *_color;
+	NumericAttribute *_r;
+	NumericAttribute *_g;
+	NumericAttribute *_b;
+	NumericAttribute *_a;
+};
+
 class QuatNode: public Node{
 public:
 	QuatNode(const std::string &name, Node *parent);
@@ -165,6 +193,7 @@ private:
 	void updateInt(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
 	void updateFloat(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
 	void updateVec3(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
+	void updateCol4(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
 	void updateMatrix44(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
 };
 
@@ -288,6 +317,7 @@ private:
 	void stepInt(unsigned int index, Numeric *element, Numeric *array);
 	void stepFloat(unsigned int index, Numeric *element, Numeric *array);
 	void stepVec3(unsigned int index, Numeric *element, Numeric *array);
+	void stepCol4(unsigned int index, Numeric *element, Numeric *array);
 	void stepMatrix44(unsigned int index, Numeric *element, Numeric *array);
 };
 
@@ -317,6 +347,7 @@ private:
 	void updateInt(Numeric *array, const std::vector<int> &index, Numeric *element);
 	void updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element);
 	void updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element);
+	void updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element);
 	void updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element);
 };
 
@@ -337,6 +368,7 @@ private:
 	void updateInt(Numeric *array, int index, Numeric *element, Numeric *outArray);
 	void updateFloat(Numeric *array, int index, Numeric *element, Numeric *outArray);
 	void updateVec3(Numeric *array, int index, Numeric *element, Numeric *outArray);
+	void updateCol4(Numeric *array, int index, Numeric *element, Numeric *outArray);
 	void updateMatrix44(Numeric *array, int index, Numeric *element, Numeric *outArray);
 };
 

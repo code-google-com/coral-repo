@@ -520,6 +520,12 @@ void ConditionalValue::transferValuesVec3(Bool *condition, Numeric *ifTrue, Nume
 	out->setVec3Values(outValues);
 }
 
+void ConditionalValue::transferValuesCol4(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+	std::vector<Imath::Color4f> outValues;
+	conditionalValueTransfer<Imath::Color4f>(condition->boolValueAt(0), ifTrue->col4Values(), ifFalse->col4Values(), outValues);
+	out->setCol4Values(outValues);
+}
+
 void ConditionalValue::transferValuesMatrix44(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
 	std::vector<Imath::M44f> outValues;
 	conditionalValueTransfer<Imath::M44f>(condition->boolValueAt(0), ifTrue->matrix44Values(), ifFalse->matrix44Values(), outValues);
@@ -544,6 +550,12 @@ void ConditionalValue::transferValuesVec3BoolArray(Bool *condition, Numeric *ifT
 	out->setVec3Values(outValues);
 }
 
+void ConditionalValue::transferValuesCol4BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+	std::vector<Imath::Color4f> outValues;
+	conditionalValueTransferBoolArray<Imath::Color4f>(condition->boolValues(), ifTrue->col4Values(), ifFalse->col4Values(), outValues);
+	out->setCol4Values(outValues);
+}
+
 void ConditionalValue::transferValuesMatrix44BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
 	std::vector<Imath::M44f> outValues;
 	conditionalValueTransferBoolArray<Imath::M44f>(condition->boolValues(), ifTrue->matrix44Values(), ifFalse->matrix44Values(), outValues);
@@ -565,6 +577,9 @@ void ConditionalValue::attributeSpecializationChanged(Attribute *attribute){
 			else if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
 				_selectedOperation = &ConditionalValue::transferValuesVec3;
 			}
+			else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &ConditionalValue::transferValuesCol4;
+			}
 			else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
 				_selectedOperation = &ConditionalValue::transferValuesMatrix44;
 			}
@@ -578,6 +593,9 @@ void ConditionalValue::attributeSpecializationChanged(Attribute *attribute){
 			}
 			else if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
 				_selectedOperation = &ConditionalValue::transferValuesVec3BoolArray;
+			}
+			else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &ConditionalValue::transferValuesCol4BoolArray;
 			}
 			else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
 				_selectedOperation = &ConditionalValue::transferValuesMatrix44BoolArray;

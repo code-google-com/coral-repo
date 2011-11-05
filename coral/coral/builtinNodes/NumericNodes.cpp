@@ -271,6 +271,208 @@ void Vec3ToFloats::update(Attribute *attribute){
 	setAttributeIsClean(_z, true);
 }
 
+Col4Node::Col4Node(const std::string &name, Node* parent): Node(name, parent){
+	_r = new NumericAttribute("r", this);
+	_g = new NumericAttribute("g", this);
+	_b = new NumericAttribute("b", this);
+	_a = new NumericAttribute("a", this);
+	_color = new NumericAttribute("color", this);
+
+	addInputAttribute(_r);
+	addInputAttribute(_g);
+	addInputAttribute(_b);
+	addInputAttribute(_a);
+	addOutputAttribute(_color);
+
+	setAttributeAffect(_r, _color);
+	setAttributeAffect(_g, _color);
+	setAttributeAffect(_b, _color);
+	setAttributeAffect(_a, _color);
+
+	std::vector<std::string> rgbaSpecializations;
+	rgbaSpecializations.push_back("Float");
+	rgbaSpecializations.push_back("FloatArray");
+
+	std::vector<std::string> colorSpecializations;
+	colorSpecializations.push_back("Col4");
+	colorSpecializations.push_back("Col4Array");
+
+	setAttributeAllowedSpecializations(_r, colorSpecializations);
+	setAttributeAllowedSpecializations(_g, colorSpecializations);
+	setAttributeAllowedSpecializations(_b, colorSpecializations);
+	setAttributeAllowedSpecializations(_color, colorSpecializations);
+
+	addAttributeSpecializationLink(_r, _color);
+	addAttributeSpecializationLink(_r, _g);
+	addAttributeSpecializationLink(_g, _b);
+	addAttributeSpecializationLink(_b, _a); // TODO: Please Andreas, check this :)
+
+	setSpecializationPreset("single", _r, "Float");
+	setSpecializationPreset("single", _g, "Float");
+	setSpecializationPreset("single", _b, "Float");
+	setSpecializationPreset("single", _a, "Float");
+	setSpecializationPreset("single", _color, "Col4");
+
+	setSpecializationPreset("array", _r, "FloatArray");
+	setSpecializationPreset("array", _g, "FloatArray");
+	setSpecializationPreset("array", _b, "FloatArray");
+	setSpecializationPreset("array", _a, "FloatArray");
+	setSpecializationPreset("array", _color, "Col4Array");
+	enableSpecializationPreset("single");
+}
+
+void Col4Node::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _r && attributeB == _color){
+		std::vector<std::string> colorSpecializations = _color->allowedSpecialization();
+		std::vector<std::string> rSpecializations = _r->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Float"){
+				specializationB.push_back(colorSpecializations[0]);
+			}
+			else if(specializationA[0] == "FloatArray"){
+				specializationB.push_back(colorSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Col4"){
+				specializationA.push_back(rSpecializations[0]);
+			}
+			else if(specializationB[0] == "Col4Array"){
+				specializationA.push_back(rSpecializations[1]);
+			}
+		}
+	}
+	else{
+		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	}
+}
+
+void Col4Node::update(Attribute *attribute){
+	Numeric *r = _r->value();
+	Numeric *g = _g->value();
+	Numeric *b = _b->value();
+	Numeric *a = _a->value();
+
+	NumericAttribute *attrs[] = {_r, _g, _b, _a};
+	int minorSize = findMinorNumericSize(attrs, 4);
+	if(minorSize < 1)
+		minorSize = 1;
+
+	std::vector<Imath::Color4f> outArray(minorSize);
+
+	for(int i = 0; i < minorSize; ++i){
+		Imath::Color4f *col = &outArray[i];
+		col->r = r->floatValueAt(i);
+		col->g = g->floatValueAt(i);
+		col->b = b->floatValueAt(i);
+		col->a = a->floatValueAt(i);
+	}
+
+	_color->outValue()->setCol4Values(outArray);
+}
+
+Col4ToFloats::Col4ToFloats(const std::string &name, Node* parent): Node(name, parent){
+	_color = new NumericAttribute("color", this);
+	_r = new NumericAttribute("r", this);
+	_g = new NumericAttribute("g", this);
+	_b = new NumericAttribute("b", this);
+	_a = new NumericAttribute("a", this);
+
+	addInputAttribute(_color);
+	addOutputAttribute(_r);
+	addOutputAttribute(_g);
+	addOutputAttribute(_b);
+	addOutputAttribute(_a);
+
+	setAttributeAffect(_color, _r);
+	setAttributeAffect(_color, _g);
+	setAttributeAffect(_color, _b);
+	setAttributeAffect(_color, _a);
+
+	std::vector<std::string> colorSpecializations;
+	colorSpecializations.push_back("Col4");
+	colorSpecializations.push_back("Col4Array");
+
+	std::vector<std::string> rgbaSpecializations;
+	rgbaSpecializations.push_back("Float");
+	rgbaSpecializations.push_back("FloatArray");
+
+	setAttributeAllowedSpecializations(_color, colorSpecializations);
+	setAttributeAllowedSpecializations(_r, rgbaSpecializations);
+	setAttributeAllowedSpecializations(_g, rgbaSpecializations);
+	setAttributeAllowedSpecializations(_b, rgbaSpecializations);
+	setAttributeAllowedSpecializations(_a, rgbaSpecializations);
+
+	addAttributeSpecializationLink(_color, _r);	//TODO: Could you just check this Andreas?
+	addAttributeSpecializationLink(_r, _g);
+	addAttributeSpecializationLink(_g, _b);
+	addAttributeSpecializationLink(_b, _a);
+}
+
+void Col4ToFloats::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _color && attributeB == _r){
+		std::vector<std::string> colorSpecializations = _color->allowedSpecialization();
+		std::vector<std::string> rSpecializations = _r->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Col4"){
+				specializationB.push_back(rSpecializations[0]);
+			}
+			else if(specializationA[0] == "Col4Array"){
+				specializationB.push_back(rSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Float"){
+				specializationA.push_back(colorSpecializations[0]);
+			}
+			else if(specializationB[0] == "FloatArray"){
+				specializationA.push_back(colorSpecializations[1]);
+			}
+		}
+	}
+	else{
+		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	}
+}
+
+void Col4ToFloats::update(Attribute *attribute){
+	const std::vector<Imath::Color4f> &col4Values = _color->value()->col4Values();
+	int size = col4Values.size();
+
+	std::vector<float> rValues(size);
+	std::vector<float> gValues(size);
+	std::vector<float> bValues(size);
+	std::vector<float> aValues(size);
+
+	for(int i = 0; i < size; ++i){
+		const Imath::Color4f &col = col4Values[i];
+		rValues[i] = col.r;
+		gValues[i] = col.g;
+		bValues[i] = col.b;
+		aValues[i] = col.a;
+	}
+
+	_r->outValue()->setFloatValues(rValues);
+	_g->outValue()->setFloatValues(gValues);
+	_b->outValue()->setFloatValues(bValues);
+	_a->outValue()->setFloatValues(aValues);
+
+	setAttributeIsClean(_r, true);
+	setAttributeIsClean(_g, true);
+	setAttributeIsClean(_b, true);
+	setAttributeIsClean(_a, true);
+}
+
 QuatNode::QuatNode(const std::string &name, Node* parent): Node(name, parent)
 {
 	_r = new NumericAttribute("r", this);
@@ -641,12 +843,14 @@ ConstantArray::ConstantArray(const std::string &name, Node *parent): Node(name, 
 	constantSpecializations.push_back("Int");
 	constantSpecializations.push_back("Float");
 	constantSpecializations.push_back("Vec3");
+	constantSpecializations.push_back("Col4");
 	constantSpecializations.push_back("Matrix44");
 	
 	std::vector<std::string> arraySpecializations;
 	arraySpecializations.push_back("IntArray");
 	arraySpecializations.push_back("FloatArray");
 	arraySpecializations.push_back("Vec3Array");
+	arraySpecializations.push_back("Col4Array");
 	arraySpecializations.push_back("Matrix44Array");
 	
 	setAttributeAllowedSpecialization(_size, "Int");
@@ -711,6 +915,14 @@ void ConstantArray::update(Attribute *attribute){
 			}
 			array->setVec3Values(values);
 		}
+		else if(constant->type() == Numeric::numericTypeCol4){
+			Imath::Color4f constantValue = constant->col4ValueAt(0);
+			std::vector<Imath::Color4f> values(size);
+			for(int i = 0; i < size; ++i){
+				values[i] = constantValue;
+			}
+			array->setCol4Values(values);
+		}
 		else if(constant->type() == Numeric::numericTypeMatrix44){
 			Imath::M44f constantValue = constant->matrix44ValueAt(0);
 			std::vector<Imath::M44f> values(size);
@@ -738,6 +950,7 @@ ArraySize::ArraySize(const std::string &name, Node *parent): Node(name, parent){
 	arraySpecializations.push_back("IntArray");
 	arraySpecializations.push_back("FloatArray");
 	arraySpecializations.push_back("Vec3Array");
+	arraySpecializations.push_back("Col4Array");
 	arraySpecializations.push_back("Matrix44Array");
 	
 	setAttributeAllowedSpecializations(_array, arraySpecializations);
@@ -774,6 +987,7 @@ void BuildArray::addNumericAttribute(){
 	specialization.push_back("Int");
 	specialization.push_back("Float");
 	specialization.push_back("Vec3");
+	specialization.push_back("Col4");
 	specialization.push_back("Matrix44");
 	
 	setAttributeAllowedSpecializations(attr, specialization);
@@ -814,6 +1028,9 @@ void BuildArray::attributeSpecializationChanged(Attribute *attribute){
 			else if(type == Numeric::numericTypeVec3Array){
 				_selectedOperation = &BuildArray::updateVec3;
 			}
+			else if(type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &BuildArray::updateCol4;
+			}
 			else if(type == Numeric::numericTypeMatrix44Array){
 				_selectedOperation = &BuildArray::updateMatrix44;
 			}
@@ -849,6 +1066,16 @@ void BuildArray::updateVec3(const std::vector<Attribute*> &inAttrs, int arraySiz
 	}
 	
 	array->setVec3Values(arrayValues);
+}
+
+void BuildArray::updateCol4(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array){
+	std::vector<Imath::Color4f> arrayValues(arraySize);
+	for(int i = 0; i < arraySize; ++i){
+		Numeric *inNum = (Numeric*)inAttrs[i]->value();
+		arrayValues[i] = inNum->col4ValueAt(0);
+	}
+
+	array->setCol4Values(arrayValues);
 }
 
 void BuildArray::updateMatrix44(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array){
@@ -1512,6 +1739,7 @@ _selectedOperation(0){
 	elementSpec.push_back("Int");
 	elementSpec.push_back("Float");
 	elementSpec.push_back("Vec3");
+	elementSpec.push_back("Col4");
 	elementSpec.push_back("Matrix44");
 	setAttributeAllowedSpecializations(_element, elementSpec);
 	
@@ -1519,6 +1747,7 @@ _selectedOperation(0){
 	arraySpec.push_back("IntArray");
 	arraySpec.push_back("FloatArray");
 	arraySpec.push_back("Vec3Array");
+	arraySpec.push_back("Col4Array");
 	arraySpec.push_back("Matrix44Array");
 	setAttributeAllowedSpecializations(_array, arraySpec);
 	
@@ -1553,6 +1782,9 @@ void NumericIterator::attributeSpecializationChanged(Attribute *attribute){
 			else if(type == Numeric::numericTypeVec3Array){
 				_selectedOperation = &NumericIterator::stepVec3;
 			}
+			else if(type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &NumericIterator::stepCol4;
+			}
 			else if(type == Numeric::numericTypeMatrix44Array){
 				_selectedOperation = &NumericIterator::stepMatrix44;
 			}
@@ -1574,6 +1806,10 @@ void NumericIterator::stepFloat(unsigned int index, Numeric *element, Numeric *a
 
 void NumericIterator::stepVec3(unsigned int index, Numeric *element, Numeric *array){
 	array->setVec3ValueAt(index, element->vec3ValueAt(0));
+}
+
+void NumericIterator::stepCol4(unsigned int index, Numeric *element, Numeric *array){
+	array->setCol4ValueAt(index, element->col4ValueAt(0));
 }
 
 void NumericIterator::stepMatrix44(unsigned int index, Numeric *element, Numeric *array){
@@ -1602,6 +1838,7 @@ ArrayIndices::ArrayIndices(const std::string &name, Node* parent): Node(name, pa
 	arraySpec.push_back("IntArray");
 	arraySpec.push_back("FloatArray");
 	arraySpec.push_back("Vec3Array");
+	arraySpec.push_back("Col4Array");
 	arraySpec.push_back("Matrix44Array");
 	
 	setAttributeAllowedSpecializations(_array, arraySpec);
@@ -1637,6 +1874,7 @@ GetArrayElement::GetArrayElement(const std::string &name, Node *parent):
 	arraySpec.push_back("IntArray");
 	arraySpec.push_back("FloatArray");
 	arraySpec.push_back("Vec3Array");
+	arraySpec.push_back("Col4Array");
 	arraySpec.push_back("Matrix44Array");
 	
 	std::vector<std::string> elementSpec;
@@ -1646,6 +1884,8 @@ GetArrayElement::GetArrayElement(const std::string &name, Node *parent):
 	elementSpec.push_back("FloatArray");
 	elementSpec.push_back("Vec3");
 	elementSpec.push_back("Vec3Array");
+	elementSpec.push_back("Col4");
+	elementSpec.push_back("Col4Array");
 	elementSpec.push_back("Matrix44");
 	elementSpec.push_back("Matrix44Array");
 	
@@ -1753,6 +1993,9 @@ void GetArrayElement::attributeSpecializationChanged(Attribute *attribute){
 			else if(type == Numeric::numericTypeVec3Array){
 				_selectedOperation = &GetArrayElement::updateVec3;
 			}
+			else if(type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &GetArrayElement::updateCol4;
+			}
 			else if(type == Numeric::numericTypeMatrix44Array){
 				_selectedOperation = &GetArrayElement::updateMatrix44;
 			}
@@ -1781,6 +2024,14 @@ void GetArrayElement::updateVec3(Numeric *array,  const std::vector<int> &index,
 	element->resize(size);
 	for(int i = 0; i < size; ++i){
 		element->setVec3ValueAt(i, array->vec3ValueAt(index[i]));
+	}
+}
+
+void GetArrayElement::updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element){
+	int size = index.size();
+	element->resize(size);
+	for(int i = 0; i < size; ++i){
+		element->setCol4ValueAt(i, array->col4ValueAt(index[i]));
 	}
 }
 
@@ -1823,12 +2074,14 @@ _selectedOperation(0){
 	allowedSpecs.push_back("Int");
 	allowedSpecs.push_back("Float");
 	allowedSpecs.push_back("Vec3");
+	allowedSpecs.push_back("Col4");
 	allowedSpecs.push_back("Matrix44");
 	
 	std::vector<std::string> allowedArraySpecs;
 	allowedArraySpecs.push_back("IntArray");
 	allowedArraySpecs.push_back("FloatArray");
 	allowedArraySpecs.push_back("Vec3Array");
+	allowedArraySpecs.push_back("Col4Array");
 	allowedArraySpecs.push_back("Matrix44Array");
 	
 	setAttributeAllowedSpecializations(_array, allowedArraySpecs);
@@ -1875,6 +2128,9 @@ void SetArrayElement::attributeSpecializationChanged(Attribute *attribute){
 			else if(type == Numeric::numericTypeVec3Array){
 				_selectedOperation = &SetArrayElement::updateVec3;
 			}
+			else if(type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &SetArrayElement::updateCol4;
+			}
 			else if(type == Numeric::numericTypeMatrix44Array){
 				_selectedOperation = &SetArrayElement::updateMatrix44;
 			}
@@ -1907,6 +2163,15 @@ void SetArrayElement::updateVec3(Numeric *array, int index, Numeric *element, Nu
 	}
 	
 	outArray->setVec3Values(values);
+}
+
+void SetArrayElement::updateCol4(Numeric *array, int index, Numeric *element, Numeric *outArray){
+	std::vector<Imath::Color4f> values = array->col4Values();
+	if(index >= 0 && index < values.size()){
+		values[index] = element->col4ValueAt(0);
+	}
+
+	outArray->setCol4Values(values);
 }
 
 void SetArrayElement::updateMatrix44(Numeric *array, int index, Numeric *element, Numeric *outArray){

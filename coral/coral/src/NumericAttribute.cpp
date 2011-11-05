@@ -41,6 +41,8 @@ NumericAttribute::NumericAttribute(const std::string &name, Node *parent) : Attr
 	allowedSpecialization.push_back("FloatArray");
 	allowedSpecialization.push_back("Vec3");
 	allowedSpecialization.push_back("Vec3Array");
+	allowedSpecialization.push_back("Col4");
+	allowedSpecialization.push_back("Col4Array");
 	allowedSpecialization.push_back("Quat");
 	allowedSpecialization.push_back("QuatArray");
 	allowedSpecialization.push_back("Matrix44");
@@ -86,6 +88,12 @@ Numeric::Type NumericAttribute::numericTypeFromString(const std::string &typeStr
 	}
 	else if(typeStr == "Vec3Array"){
 		type = Numeric::numericTypeVec3Array;
+	}
+	else if(typeStr == "Col4"){
+		type = Numeric::numericTypeCol4;
+	}
+	else if(typeStr == "Col4Array"){
+		type = Numeric::numericTypeCol4Array;
 	}
 	else if(typeStr == "Quat"){
 		type = Numeric::numericTypeQuat;

@@ -69,6 +69,14 @@ int numeric_numericTypeVec3Array(){
 	return int(Numeric::numericTypeVec3Array);
 }
 
+int numeric_numericTypeCol4(){
+	return int(Numeric::numericTypeCol4);
+}
+
+int numeric_numericTypeCol4Array(){
+	return int(Numeric::numericTypeCol4Array);
+}
+
 int numeric_numericTypeQuat(){
 	return int(Numeric::numericTypeQuat);
 }
@@ -91,6 +99,10 @@ int numeric_type(Numeric &self){
 
 std::vector<Imath::V3f> numeric_vec3Values(Numeric &self){
 	return self.vec3Values();
+}
+
+std::vector<Imath::Color4f> numeric_col4Values(Numeric &self){
+	return self.col4Values();
 }
 
 std::vector<Imath::Quatf> numeric_quatValues(Numeric &self){
@@ -123,21 +135,25 @@ void numericNodesWrapper(){
 		.def("setIntValueAt", &Numeric::setIntValueAt)
 		.def("setFloatValueAt", &Numeric::setFloatValueAt)
 		.def("setVec3ValueAt", &Numeric::setVec3ValueAt)
+		.def("setCol4ValueAt", &Numeric::setCol4ValueAt)
 		.def("setQuatValueAt", &Numeric::setQuatValueAt)
 		.def("setMatrix44ValueAt", &Numeric::setMatrix44ValueAt)
 		.def("intValues", numeric_intValues)
 		.def("floatValues", numeric_floatValues)
 		.def("vec3Values", numeric_vec3Values)
+		.def("col4Values", numeric_col4Values)
 		.def("quatValues", numeric_quatValues)
 		.def("matrix44Values", numeric_matrix44Values)
 		.def("intValueAt", &Numeric::intValueAt)
 		.def("floatValueAt", &Numeric::floatValueAt)
 		.def("vec3ValueAt", &Numeric::vec3ValueAt)
+		.def("col4ValueAt", &Numeric::col4ValueAt)
 		.def("quatValueAt", &Numeric::quatValueAt)
 		.def("matrix44ValueAt", &Numeric::matrix44ValueAt)
 		.def("setIntValues", &Numeric::setIntValues)
 		.def("setFloatValues", &Numeric::setFloatValues)
 		.def("setVec3Values", &Numeric::setVec3Values)
+		.def("setCol4Values", &Numeric::setCol4Values)
 		.def("setMatrix44Values", &Numeric::setMatrix44Values)
 		.add_static_property("numericTypeAny", numeric_numericTypeAny)
 		.add_static_property("numericTypeInt", numeric_numericTypeInt)
@@ -146,6 +162,8 @@ void numericNodesWrapper(){
 		.add_static_property("numericTypeFloatArray", numeric_numericTypeFloatArray)
 		.add_static_property("numericTypeVec3", numeric_numericTypeVec3)
 		.add_static_property("numericTypeVec3Array", numeric_numericTypeVec3Array)
+		.add_static_property("numericTypeCol4", numeric_numericTypeCol4)
+		.add_static_property("numericTypeCol4Array", numeric_numericTypeCol4Array)
 		.add_static_property("numericTypeQuat", numeric_numericTypeQuat)
 		.add_static_property("numericTypeQuatArray", numeric_numericTypeQuatArray)
 		.add_static_property("numericTypeMatrix44", numeric_numericTypeMatrix44)
@@ -164,6 +182,8 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<DivNode, ArithmeticNode>("DivNode");
 	pythonWrapperUtils::pythonWrapper<Vec3Node, Node>("Vec3Node");
 	pythonWrapperUtils::pythonWrapper<Vec3ToFloats, Node>("Vec3ToFloats");
+	pythonWrapperUtils::pythonWrapper<Col4Node, Node>("Col4Node");
+	pythonWrapperUtils::pythonWrapper<Col4ToFloats, Node>("Col4ToFloats");
 	pythonWrapperUtils::pythonWrapper<QuatNode, Node>("QuatNode");
 	pythonWrapperUtils::pythonWrapper<QuatToFloats, Node>("QuatToFloats");
 	pythonWrapperUtils::pythonWrapper<QuatToAxisAngle, Node>("QuatToAxisAngle");

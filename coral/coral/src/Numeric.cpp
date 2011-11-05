@@ -192,6 +192,11 @@ void Numeric::setVec3ValueAt(unsigned int id, const Imath::V3f &value){
 		_vec3Values[id] = value;
 }
 
+void Numeric::setCol4ValueAt(unsigned int id, const Imath::Color4f &value){
+	if(id < _col4Values.size())
+		_col4Values[id] = value;
+}
+
 void Numeric::setQuatValueAt(unsigned int id, const Imath::Quatf &value){
 	if(id < _quatValues.size())
 		_quatValues[id] = value;
@@ -212,6 +217,10 @@ const std::vector<float> &Numeric::floatValues(){
 
 const std::vector<Imath::V3f> &Numeric::vec3Values(){
 	return _vec3Values;
+}
+
+const std::vector<Imath::Color4f> &Numeric::col4Values(){
+	return _col4Values;
 }
 
 const std::vector<Imath::Quatf> &Numeric::quatValues(){
@@ -258,6 +267,18 @@ Imath::V3f Numeric::vec3ValueAt(unsigned int id){
 	return Imath::V3f(0.0, 0.0, 0.0);
 }
 
+Imath::Color4f Numeric::col4ValueAt(unsigned int id){
+	int size = _col4Values.size();
+	if(id < size){
+		return _col4Values[id];
+	}
+	else if(size > 0){
+		return _col4Values[size - 1];
+	}
+
+	return Imath::Color4f(0.0, 0.0, 0.0, 1.0);
+}
+
 Imath::Quatf Numeric::quatValueAt(unsigned int id){
 	int size = _quatValues.size();
 	if(id < size){
@@ -295,6 +316,11 @@ void Numeric::setFloatValues(const std::vector<float> &values){
 void Numeric::setVec3Values(const std::vector<Imath::V3f> &values){
 	_vec3Values = values;
 	_size = _vec3Values.size();
+}
+
+void Numeric::setCol4Values(const std::vector<Imath::Color4f> &values){
+	_col4Values = values;
+	_size = _col4Values.size();
 }
 
 void Numeric::setQuatValues(const std::vector<Imath::Quatf> &values){
@@ -361,6 +387,32 @@ std::string Numeric::asString(){
 					value += ",";
 				}
 				
+				if(i % 20 == 19)
+					value += "\n";
+			}
+		}
+		else if(_type == numericTypeCol4 || _type == numericTypeCol4Array){
+			char buffer[sizeof(float)];
+			for(int i = 0; i < _col4Values.size(); ++i){
+				value += "(";
+				Imath::Color4f *col = &_col4Values[i];
+
+				sprintf(buffer, "%f", col->r);
+				value += std::string(buffer) + ",";
+
+				sprintf(buffer, "%f", col->g);
+				value += std::string(buffer) + ",";
+
+				sprintf(buffer, "%f", col->b);
+				value += std::string(buffer) + ",";
+
+				sprintf(buffer, "%f", col->a);
+				value += std::string(buffer) + ")";
+
+				if(i < _col4Values.size() - 1){
+					value += ",";
+				}
+
 				if(i % 20 == 19)
 					value += "\n";
 			}

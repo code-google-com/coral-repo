@@ -110,6 +110,26 @@ void NumericDrawNode::drawVec3(Numeric *numeric){
 	glEnable(GL_LIGHTING);
 }
 
+void NumericDrawNode::drawCol4(Numeric *numeric){
+	glDisable(GL_LIGHTING);
+	glShadeModel(GL_FLAT);
+
+	std::vector<Imath::Color4f> col4Values = numeric->col4Values();
+
+	glPointSize(50.f);
+	//glColor4f(col4Values[0].r, col4Values[0].g, col4Values[0].b, col4Values[0].a);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)&col4Values[0].r);
+	glColorPointer(3, GL_FLOAT, 0, (GLvoid*)&col4Values[0].r);
+	glDrawArrays(GL_POINTS, 0, col4Values.size());
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+
+	glEnable(GL_LIGHTING);
+}
+
 void NumericDrawNode::draw(){
 	DrawNode::draw();
 	
@@ -117,6 +137,9 @@ void NumericDrawNode::draw(){
 	Numeric::Type type = numeric->type();
 	if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
 		drawVec3(numeric);
+	}
+	else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeVec3Array){
+		drawCol4(numeric);
 	}
 	else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
 		drawMatrix44(numeric);

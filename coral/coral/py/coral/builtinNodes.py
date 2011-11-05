@@ -40,6 +40,8 @@ def loadPlugin():
     plugin.registerNode("Float", _coral.FloatNode, tags = ["numeric"], description = "Generate a float.")
     plugin.registerNode("Vec3", _coral.Vec3Node, tags = ["numeric"], description = "Generate a vec3.\nWorks with single or array values.")
     plugin.registerNode("Vec3ToFloats", _coral.Vec3ToFloats, tags = ["numeric"], description = "Get x, y, z values from a vec3.\nWorks with single or array values.")
+    plugin.registerNode("Col4", _coral.Col4Node, tags = ["numeric"], description = "Generate a col4.\nWorks with single or array values.")
+    plugin.registerNode("Col4ToFloats", _coral.Col4ToFloats, tags = ["numeric"], description = "Get r, g, b, a values from a col4.\nWorks with single or array values.")
     plugin.registerNode("Quat", _coral.QuatNode, tags = ["numeric"], description = "Generate a quaternion.\nWorks with single or array values.")
     plugin.registerNode("QuatToFloats", _coral.QuatToFloats, tags = ["numeric"], description = "Get r, x, y, z values from a quaternion.\nWorks with single or array values.")
     plugin.registerNode("QuatToAxisAngle", _coral.QuatToAxisAngle, tags = ["numeric"], description = "Convert a quaternion to axis/angle.")

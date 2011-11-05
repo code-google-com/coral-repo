@@ -114,6 +114,8 @@ AddNode::AddNode(const std::string &name, Node *parent) : ArithmeticNode(name, p
 	specs.push_back("FloatArray");
 	specs.push_back("Vec3");
 	specs.push_back("Vec3Array");
+	specs.push_back("Col4");
+	specs.push_back("Col4Array");
 	
 	setAttributeAllowedSpecializations(_in0, specs);
 	setAttributeAllowedSpecializations(_in1, specs);
@@ -130,6 +132,8 @@ SubNode::SubNode(const std::string &name, Node *parent) : ArithmeticNode(name, p
 	specs.push_back("FloatArray");
 	specs.push_back("Vec3");
 	specs.push_back("Vec3Array");
+	specs.push_back("Col4");
+	specs.push_back("Col4Array");
 	
 	setAttributeAllowedSpecializations(_in0, specs);
 	setAttributeAllowedSpecializations(_in1, specs);
@@ -150,6 +154,8 @@ DivNode::DivNode(const std::string &name, Node *parent) : ArithmeticNode(name, p
 	specs.push_back("FloatArray");
 	specs.push_back("Vec3");
 	specs.push_back("Vec3Array");
+	specs.push_back("Col4");
+	specs.push_back("Col4Array");
 	
 	setAttributeAllowedSpecializations(_in0, specs);
 	setAttributeAllowedSpecializations(_in1, specs);

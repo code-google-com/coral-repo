@@ -114,11 +114,13 @@ private:
 	void transferValuesInt(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 	void transferValuesFloat(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 	void transferValuesVec3(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
+	void transferValuesCol4(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 	void transferValuesMatrix44(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 	
 	void transferValuesIntBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 	void transferValuesFloatBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 	void transferValuesVec3BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
+	void transferValuesCol4BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 	void transferValuesMatrix44BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
 };
 

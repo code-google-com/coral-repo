@@ -43,6 +43,7 @@ public:
 
 private:
 	void drawVec3(coral::Numeric *numeric);
+	void drawCol4(coral::Numeric *numeric);
 	void drawMatrix44(coral::Numeric *numeric);
 	
 	coral::NumericAttribute *_numeric;
