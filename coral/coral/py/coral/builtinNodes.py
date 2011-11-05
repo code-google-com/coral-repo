@@ -76,6 +76,9 @@ def loadPlugin():
     plugin.registerNode("Vec3Cross", _coral.Vec3Cross, tags = ["math"])
     plugin.registerNode("Vec3Normalize", _coral.Vec3Normalize, tags = ["math"])
     plugin.registerNode("Acos", _coral.Acos, tags = ["math"])
+    plugin.registerNode("TrigonometricFunc", _coral.TrigonometricFunc, tags = ["math"])
+    plugin.registerNode("Radians", _coral.Radians, tags = ["math"])
+    plugin.registerNode("Degrees", _coral.Degrees, tags = ["math"])
     
     plugin.registerAttribute("GeoAttribute", _coral.GeoAttribute)
     plugin.registerNode("SetGeoPoints", _coral.SetGeoPoints, tags = ["geometry"])

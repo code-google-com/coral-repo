@@ -300,3 +300,133 @@ void Acos::update(Attribute *attribute){
 	_outNumber->outValue()->setFloatValues(outValues);
 }
 
+TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *parent):
+	Node(name, parent)
+{
+
+	_inNumber = new NumericAttribute("inNumber", this);
+	_outNumber = new NumericAttribute("outNumber", this);
+	_function = new NumericAttribute("func", this);
+
+	addInputAttribute(_inNumber);
+	addInputAttribute(_function);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+	setAttributeAffect(_function, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+
+	std::vector<std::string> funcSpecialization;
+	funcSpecialization.push_back("Int");
+
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+	setAttributeAllowedSpecializations(_function, funcSpecialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void TrigonometricFunctions::update(Attribute *attribute){
+	std::vector<float> inValues = _inNumber->value()->floatValues();
+	int inFunction = _function->value()->intValues()[0];
+	std::vector<float> outValues(inValues.size());
+
+	for(int i = 0; i < inValues.size(); ++i){
+		switch(inFunction)
+		{
+		case 0:
+			outValues[i] = cos(inValues[i]);
+			break;
+		case 1:
+			outValues[i] = sin(inValues[i]);
+			break;
+		case 2:
+			outValues[i] = tan(inValues[i]);
+			break;
+		case 3:
+			outValues[i] = acos(inValues[i]);
+			break;
+		case 4:
+			outValues[i] = asin(inValues[i]);
+			break;
+		case 5:
+			outValues[i] = atan(inValues[i]);
+			break;
+		case 6:
+			outValues[i] = cosh(inValues[i]);
+			break;
+		case 7:
+			outValues[i] = sinh(inValues[i]);
+			break;
+		case 8:
+			outValues[i] = tanh(inValues[i]);
+			break;
+		}
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Radians::Radians(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Radians::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = in[i]*M_PI/180.0f;
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Degrees::Degrees(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Degrees::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = in[i]*180.0f/float(M_PI);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
