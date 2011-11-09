@@ -704,7 +704,9 @@ def deleteNodes(nodes):
 
 def deleteAttributes(attributes):
     for attribute in attributes:
-        attribute.deleteIt()
+        parentNode = attribute.parent()
+        if attribute in parentNode.dynamicAttributes():
+            attribute.deleteIt()
 
 def _parseNetworkScript(saveScript):
     #returns the variables collected in the saveScript.

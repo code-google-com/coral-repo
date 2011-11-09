@@ -39,10 +39,14 @@ ForLoopNode::ForLoopNode(const std::string &name, Node *parent): Node(name, pare
 	
 	_indexRange = new NumericAttribute("indexRange", this);
 	_currentIndex = new NumericAttribute("_currentIndex", this);
+	_out = new PassThroughAttribute("out", this);
 	
 	addInputAttribute(_indexRange);
 	addInputAttribute(_currentIndex);
+	addOutputAttribute(_out);
 	
+	setAttributeAffect(_indexRange, _out);
+
 	setAttributeAllowedSpecialization(_indexRange, "IntArray");
 	setAttributeAllowedSpecialization(_currentIndex, "Int");
 }

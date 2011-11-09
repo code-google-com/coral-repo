@@ -3,6 +3,7 @@
 
 #include "../src/Node.h"
 #include "../src/NumericAttribute.h"
+#include "../src/PassThroughAttribute.h"
 
 namespace coral{
 
@@ -28,6 +29,7 @@ public:
 private:	
 	NumericAttribute *_indexRange;
 	NumericAttribute *_currentIndex;
+	PassThroughAttribute *_out;
 	
 	void collectLoopOperators(std::vector<LoopIteratorNode*> &loopOperators);
 	void getSubCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &subCleanChain);
