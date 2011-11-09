@@ -42,7 +42,7 @@ void MayaGeoAttribute::transferValueToMaya(MPlug &plug, MDataBlock &data){
 	MIntArray mayaFaceCount;
 	MIntArray mayaFaceVertices;
 	
-	const std::vector<std::vector<int> > coralFaces = coralGeo->faces();
+	const std::vector<std::vector<int> > coralFaces = coralGeo->rawFaces();
 	for(int polyId = 0; polyId < coralFaces.size(); ++polyId){
 		const std::vector<int> *coralFace = &coralFaces[polyId];
 		int faceVertexCount = coralFace->size();

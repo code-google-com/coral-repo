@@ -31,6 +31,7 @@
 
 #include <tbb/mutex.h>
 
+#include <map>
 #include <vector>
 #include <ImathVec.h>
 
@@ -51,11 +52,11 @@ public:
 		return _geo;
 	}
 	
-	const std::vector<Edge> &edges(){
+	const std::vector<Edge*> &edges(){
 		return _edges;
 	}
 	
-	std::vector<Vertex*> vertices(){
+	const std::vector<Vertex*> &vertices(){
 		return _vertices;
 	}
 	
@@ -74,17 +75,17 @@ private:
 	
 	int _id;
 	Geo *_geo;
-	std::vector<Edge> _edges;
+	std::vector<Edge*> _edges;
 	std::vector<Vertex*> _vertices;
 	std::vector<Imath::V3f*> _points;
 };
 
 class Edge{
 public:
-	Edge(): _geo(0), _vertices(2), _points(2){
+	Edge(): _id(0), _geo(0), _vertices(2), _points(2){
 	}
 	
-	const std::vector<Face*> &faces() const{
+	const std::vector<Face*> &rawFaces() const{
 		return _faces;
 	}
 	
@@ -105,6 +106,7 @@ public:
 private:
 	friend class Geo;
 	
+	int _id;
 	Geo *_geo;
 	std::vector<Face*> _faces;
 	std::vector<Vertex*> _vertices;
@@ -167,7 +169,7 @@ public:
 	void build(const std::vector<Imath::V3f> &points, const std::vector<std::vector<int> > &faces);
 	const std::vector<Imath::V3f> &points();
 	int pointsCount() const;
-	const std::vector<std::vector<int> > &faces();
+	const std::vector<std::vector<int> > &rawFaces();
 	int facesCount() const;
 	const std::vector<Imath::V3f> &faceNormals();
 	const std::vector<Imath::V3f> &verticesNormals();
@@ -175,19 +177,23 @@ public:
 	void displacePoints(const std::vector<Imath::V3f> &displacedPoints);
 	bool hasSameTopology(const std::vector<std::vector<int> > &faces) const;
 	void clear();
-	const std::vector<Vertex> &vertices();
+	const std::vector<Vertex*> &vertices();
+	const std::vector<Edge*> &edges();
+	const std::vector<Face*> &faces();
 
 private:
 	void computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNormals);
 	void cacheTopologyStructures();
 	void cacheFaceNormals();
 
-	// topology
 	std::vector<std::vector<int> > _rawFaces;
 	std::vector<Face> _faces;
+	std::vector<Face*> _facesPtr;
 	std::vector<Vertex> _vertices;
+	std::vector<Vertex*> _verticesPtr;
+	std::vector<Edge*> _edges;
+	std::map<int, std::map<int, Edge> > _edgesMap;
 	
-	// external access
 	std::vector<Imath::V3f> _points;
 	std::vector<Imath::V3f> _faceNormals;
 	std::vector<Imath::V3f> _verticesNormals;

@@ -87,7 +87,7 @@ void GeoDrawNode::drawPoints(Geo *geo){
 
 void GeoDrawNode::drawSmooth(Geo *geo){
 	const std::vector<Imath::V3f> &points = geo->points();
-	const std::vector<std::vector<int> > &faces = geo->faces();
+	const std::vector<std::vector<int> > &faces = geo->rawFaces();
 	const std::vector<Imath::V3f> &verticesNormals = geo->verticesNormals();
 	
 	if(verticesNormals.empty() == false){
@@ -113,7 +113,7 @@ void GeoDrawNode::drawSmooth(Geo *geo){
 
 void GeoDrawNode::drawFlat(Geo *geo){
 	const std::vector<Imath::V3f> &points = geo->points();
-	const std::vector<std::vector<int> > &faces = geo->faces();
+	const std::vector<std::vector<int> > &faces = geo->rawFaces();
 	const std::vector<Imath::V3f> &faceNormals = geo->faceNormals();
 	
 	if(faceNormals.empty() == false){
@@ -142,7 +142,7 @@ void GeoDrawNode::drawFlat(Geo *geo){
 
 void GeoDrawNode::drawWireframe(Geo *geo){
 	const std::vector<Imath::V3f> &points = geo->points();
-	const std::vector<std::vector<int> > &faces = geo->faces();
+	const std::vector<std::vector<int> > &faces = geo->rawFaces();
 	int facesCount = (int)faces.size();
 	
 	glLineWidth(1.f);							// GL_LINE_BIT
@@ -163,7 +163,7 @@ void GeoDrawNode::drawWireframe(Geo *geo){
 
 void GeoDrawNode::drawNormals(Geo *geo, bool shouldDrawFlat){
 	const std::vector<Imath::V3f> &points = geo->points();
-	const std::vector<std::vector<int> > &faces = geo->faces();
+	const std::vector<std::vector<int> > &faces = geo->rawFaces();
 
 	int facesCount = (int)faces.size();
 

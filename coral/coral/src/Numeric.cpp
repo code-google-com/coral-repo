@@ -339,176 +339,121 @@ std::string Numeric::asString(){
 	if(_type != numericTypeAny){
 		std::string value;
 		std::string type;
+		std::ostringstream stream;
 		
 		if(_type == numericTypeInt || _type == numericTypeIntArray){
-			char buffer[sizeof(int)];
 			for(int i = 0; i < _intValues.size(); ++i){
-				sprintf(buffer, "%i", _intValues[i]);
-				value += std::string(buffer);
+				stream << _intValues[i];
 				
 				if(i < _intValues.size() - 1){
-					value += ",";
+					stream << ",";
 				}
 				
 				if(i % 20 == 19)
-					value += "\n";
+					stream << "\n";
 			}
 		}
 		else if(_type == numericTypeFloat || _type == numericTypeFloatArray){
-			char buffer[sizeof(float)];
 			for(int i = 0; i < _floatValues.size(); ++i){
-				sprintf(buffer, "%f", _floatValues[i]);
-				value += std::string(buffer);
+				stream << _floatValues[i];
 				
 				if(i < _floatValues.size() - 1){
-					value += ",";
+					stream << ",";
 				}
 				
 				if(i % 20 == 19)
-					value += "\n";
+					stream << "\n";
 			}
 		}
 		else if(_type == numericTypeVec3 || _type == numericTypeVec3Array){
-			char buffer[sizeof(float)];
 			for(int i = 0; i < _vec3Values.size(); ++i){
-				value += "(";
+				stream << "(";
 				Imath::V3f *vec = &_vec3Values[i];
-			
-				sprintf(buffer, "%f", vec->x);
-				value += std::string(buffer) + ",";
-			
-				sprintf(buffer, "%f", vec->y);
-				value += std::string(buffer) + ",";
-			
-				sprintf(buffer, "%f", vec->z);
-				value += std::string(buffer) + ")";
+
+				stream << vec->x << ",";
+				stream << vec->y << ",";
+				stream << vec->z << ")";
 				
 				if(i < _vec3Values.size() - 1){
-					value += ",";
+					stream << ",";
 				}
 				
 				if(i % 20 == 19)
-					value += "\n";
+					stream << "\n";
 			}
 		}
 		else if(_type == numericTypeCol4 || _type == numericTypeCol4Array){
-			char buffer[sizeof(float)];
 			for(int i = 0; i < _col4Values.size(); ++i){
-				value += "(";
+				stream << "(";
 				Imath::Color4f *col = &_col4Values[i];
 
-				sprintf(buffer, "%f", col->r);
-				value += std::string(buffer) + ",";
-
-				sprintf(buffer, "%f", col->g);
-				value += std::string(buffer) + ",";
-
-				sprintf(buffer, "%f", col->b);
-				value += std::string(buffer) + ",";
-
-				sprintf(buffer, "%f", col->a);
-				value += std::string(buffer) + ")";
+				stream << col->r << ",";
+				stream << col->g << ",";
+				stream << col->b << ",";
+				stream << col->a << ")";
 
 				if(i < _col4Values.size() - 1){
-					value += ",";
+					stream << ",";
 				}
 
 				if(i % 20 == 19)
-					value += "\n";
+					stream << "\n";
 			}
 		}
 		else if(_type == numericTypeQuat || _type == numericTypeQuatArray){
-			char buffer[sizeof(float)];
 			for(int i = 0; i < _quatValues.size(); ++i){
-				value += "(";
+				stream << "(";
 				Imath::Quatf *quat = &_quatValues[i];
 
-				sprintf(buffer, "%f", quat->r);
-				value += std::string(buffer) + ",";
-
-				sprintf(buffer, "%f", quat->v.x);
-				value += std::string(buffer) + ",";
-
-				sprintf(buffer, "%f", quat->v.y);
-				value += std::string(buffer) + ",";
-
-				sprintf(buffer, "%f", quat->v.z);
-				value += std::string(buffer) + ")";
+				stream << quat->r << ",";
+				stream << quat->v.x << ",";
+				stream << quat->v.y << ",";
+				stream << quat->v.z << ")";
 
 				if(i < _quatValues.size() - 1){
-					value += ",";
+					stream << ",";
 				}
 
 				if(i % 20 == 19)
-					value += "\n";
+					stream << "\n";
 			}
 		}
 		else if(_type == numericTypeMatrix44 || _type == numericTypeMatrix44Array){
-			char buffer[sizeof(float)];
 			for(int i = 0; i < _matrix44Values.size(); ++i){
-				value += "(";
+				stream << "(";
 				Imath::M44f *mat = &_matrix44Values[i];
 				
-				sprintf(buffer, "%f", mat->x[0][0]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[0][1]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[0][2]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[0][3]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[1][0]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[1][1]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[1][2]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[1][3]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[2][0]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[2][1]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[2][2]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[2][3]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[3][0]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[3][1]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[3][2]);
-				value += std::string(buffer) + ",";
-				
-				sprintf(buffer, "%f", mat->x[3][3]);
-				value += std::string(buffer) + ")";
+				stream << mat->x[0][0] << ",";
+				stream << mat->x[0][1] << ",";
+				stream << mat->x[0][2] << ",";
+				stream << mat->x[0][3] << ",";
+				stream << mat->x[1][0] << ",";
+				stream << mat->x[1][1] << ",";
+				stream << mat->x[1][2] << ",";
+				stream << mat->x[1][3] << ",";
+				stream << mat->x[2][0] << ",";
+				stream << mat->x[2][1] << ",";
+				stream << mat->x[2][2] << ",";
+				stream << mat->x[2][3] << ",";
+				stream << mat->x[3][0] << ",";
+				stream << mat->x[3][1] << ",";
+				stream << mat->x[3][2] << ",";
+				stream << mat->x[3][3] << ")";
 				
 				if(i < _vec3Values.size() - 1){
-					value += ",";
+					stream << ",";
 				}
 				
 				if(i % 20 == 19)
-					value += "\n";
+					stream << "\n";
 			}
 		}
 		
-		char buffer[sizeof(int)];
-		sprintf(buffer, "%i", int(_type));
-		type = std::string(buffer);
+		value = stream.str();
+		stream.clear();
+
+		stream << _type;
+		type = stream.str();
 		
 		script = "[" + value + "] " + type;
 	}

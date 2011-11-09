@@ -33,6 +33,7 @@
 #include "../src/Node.h"
 #include "../src/Attribute.h"
 #include "../src/NumericAttribute.h"
+#include "../src/EnumAttribute.h"
 
 namespace coral{
 
@@ -93,16 +94,6 @@ private:
 	NumericAttribute *_normalized;
 };
 
-class Acos: public Node{
-public:
-	Acos(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
-
-private:
-	NumericAttribute *_inNumber;
-	NumericAttribute *_outNumber;
-};
-
 class TrigonometricFunctions: public Node{
 public:
 
@@ -112,7 +103,7 @@ public:
 private:
 	NumericAttribute *_inNumber;
 	NumericAttribute *_outNumber;
-	NumericAttribute *_function;
+	EnumAttribute *_function;
 };
 
 class Radians: public Node{

@@ -201,7 +201,7 @@ class NodeInspectorWidget(QtGui.QWidget):
         self._updatePresetCombo()
         
         nodeUi = nodeEditor.NodeEditor.findNodeUi(coralNode.id())
-        attrUis = nodeUi.attributeUis()
+        attrUis = nodeUi.attributeUis(includeHidden = True)
         
         for attrUi in attrUis:
             attribute = attrUi.coralAttribute()

@@ -26,22 +26,29 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef CORAL_GEOWRAPPER_H
-#define CORAL_GEOWRAPPER_H
 
-#include "../src/GeoAttribute.h"
-#include "../builtinNodes/GeoNodes.h"
+#ifndef CORAL_ENUMWRAPPER_H
+#define CORAL_ENUMWRAPPER_H
+
+#include <boost/python.hpp>
+#include "../src/EnumAttribute.h"
 #include "../src/pythonWrapperUtils.h"
 
-void geoWrapper(){
-	pythonWrapperUtils::pythonWrapper<GeoAttribute, Attribute>("GeoAttribute");
-	pythonWrapperUtils::pythonWrapper<GetGeoPoints, Node>("GetGeoPoints");
-	pythonWrapperUtils::pythonWrapper<SetGeoPoints, Node>("SetGeoPoints");
-	pythonWrapperUtils::pythonWrapper<GetGeoNormals, Node>("GetGeoNormals");
-	pythonWrapperUtils::pythonWrapper<GeoNeighbourPoints, Node>("GeoNeighbourPoints");
+using namespace coral;
+
+void enumWrapper(){
+	boost::python::class_<Enum, boost::shared_ptr<Enum>, boost::python::bases<Value>, boost::noncopyable>("Enum", boost::python::no_init)
+		.def("__init__", pythonWrapperUtils::__init__<Enum>)
+		.def("createUnwrapped", pythonWrapperUtils::createUnwrapped<Enum>)
+		.staticmethod("createUnwrapped")
+		.def("addEntry", &Enum::addEntry)
+		.def("indices", &Enum::indices)
+		.def("entries", &Enum::entries)
+		.def("setCurrentIndex", &Enum::setCurrentIndex)
+		.def("currentIndex", &Enum::currentIndex)
+	;
 	
-	pythonWrapperUtils::pythonWrapper<GetGeoElements, Node>("GetGeoElements");
-	pythonWrapperUtils::pythonWrapper<GetGeoSubElements, Node>("GetGeoSubElements");
+	pythonWrapperUtils::pythonWrapper<EnumAttribute, Attribute>("EnumAttribute");
 }
 
 #endif

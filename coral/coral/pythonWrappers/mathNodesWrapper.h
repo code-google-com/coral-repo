@@ -41,7 +41,6 @@ void mathNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Abs, Node>("Abs");
 	pythonWrapperUtils::pythonWrapper<Vec3Cross, Node>("Vec3Cross");
 	pythonWrapperUtils::pythonWrapper<Vec3Normalize, Node>("Vec3Normalize");
-	pythonWrapperUtils::pythonWrapper<Acos, Node>("Acos");
 	pythonWrapperUtils::pythonWrapper<TrigonometricFunctions, Node>("TrigonometricFunc");
 	pythonWrapperUtils::pythonWrapper<Radians, Node>("Radians");
 	pythonWrapperUtils::pythonWrapper<Degrees, Node>("Degrees");

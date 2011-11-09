@@ -1,3 +1,4 @@
+
 // <license>
 // Copyright (C) 2011 Andrea Interguglielmi, All rights reserved.
 // This file is part of the coral repository downloaded from http://code.google.com/p/coral-repo.
@@ -26,19 +27,61 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#ifndef CORAL_ENUMATTRIBUTE_H
+#define CORAL_ENUMATTRIBUTE_H
 
-#ifndef CORAL_PROCESSNODEWRAPPER_H
-#define CORAL_PROCESSNODEWRAPPER_H
+#include <string>
+#include <map>
+#include <vector>
 
-#include <boost/python.hpp>
-#include "../builtinNodes/ProcessSimulation.h"
-#include "../src/pythonWrapperUtils.h"
+#include "Value.h"
+#include "Attribute.h"
+#include "stringUtils.h"
 
-using namespace coral;
+namespace coral{
 
-void processNodeWrapper(){
-	pythonWrapperUtils::pythonWrapper<ProcessSimulation, Node>("ProcessSimulation");
-	pythonWrapperUtils::pythonWrapper<ProcessCleanerAttribute, Attribute>("ProcessCleanerAttribute");
+//! An Enum to store int:string pairs inside an EnumAttribute.
+class CORAL_EXPORT Enum: public Value{
+public:
+	Enum();
+	void addEntry(int id, const std::string &value);
+	std::vector<int> indices();
+	std::vector<std::string> entries();
+	void setCurrentIndex(int index);
+	int currentIndex();
+	std::string asString();
+	void setFromString(const std::string &value);
+	void setCurrentIndexChangedCallback(Node * parentNode, void(*callback)(Node *, Enum *));
+	
+
+private:
+	int _currentIndex;
+	std::map<int, std::string> _enum;
+	void(*_currentIndexChangedCallback)(Node *, Enum *);
+	Node *_parentNode;
+};
+
+//! Stores an Enum value.
+class CORAL_EXPORT EnumAttribute: public Attribute{
+public:
+	EnumAttribute(const std::string &name, Node *parent) : Attribute(name, parent){
+		setClassName("EnumAttribute");
+		setValuePtr(new Enum());
+		
+		std::vector<std::string> allowedSpecialization;
+		allowedSpecialization.push_back("Enum");
+		setAllowedSpecialization(allowedSpecialization);
+	}
+
+	Enum *value(){
+		return (Enum*)Attribute::value();
+	}
+	Enum *outValue(){
+		return (Enum*)Attribute::outValue();
+	}
+};
+
 }
 
 #endif
+

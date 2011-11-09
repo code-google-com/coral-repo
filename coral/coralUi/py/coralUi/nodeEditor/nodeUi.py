@@ -211,13 +211,13 @@ class NodeUi(QtGui.QGraphicsWidget):
         menu.move(cursorPos.x(), cursorPos.y())
         menu.show()
         
-    def attributeUis(self):
+    def attributeUis(self, includeHidden = False):
         orderedAttributes = []
         if self._canOpenThis:
             inputAttributes = {}
             outputAttributes = {}
             for attributeUi in self._attributeUis:
-                if attributeUi.isVisible():
+                if attributeUi.isVisible() or includeHidden == True:
                     if attributeUi.inputHook():
                         inputAttributes[attributeUi.coralAttribute().name()] = attributeUi
                     else:
@@ -236,7 +236,7 @@ class NodeUi(QtGui.QGraphicsWidget):
             inputAttributes = []
             outputAttributes = []
             for attributeUi in self._attributeUis:
-                if attributeUi.isVisible():
+                if attributeUi.isVisible() or includeHidden == True:
                     if attributeUi.inputHook():
                         inputAttributes.append(attributeUi)
                     else:

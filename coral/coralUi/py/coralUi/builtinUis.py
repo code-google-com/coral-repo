@@ -58,7 +58,7 @@ class NumericAttributeUi(AttributeUi):
         "Quat": QtGui.QColor(0, 255, 0),
         "Matrix44": QtGui.QColor(179, 102, 255)
         }
-        
+    
     def __init__(self, coralAttribute, parentNodeUi):
         AttributeUi.__init__(self, coralAttribute, parentNodeUi)
     
@@ -159,11 +159,42 @@ def _findFirstConnectedAtributeNonPassThrough(coralAttribute, processedAttribute
 
     return foundAttr
 
+class EnumAttributeUi(AttributeUi):
+    def __init__(self, coralAttribute, parentNodeUi):
+        AttributeUi.__init__(self, coralAttribute, parentNodeUi)
+        
+        self.setVisible(False)
+
+class EnumAttributeInspectorWidget(AttributeInspectorWidget):
+    def __init__(self, coralAttribute, parentWidget):
+        AttributeInspectorWidget.__init__(self, coralAttribute, parentWidget)
+        
+        self._combo = QtGui.QComboBox(self)
+        self._label = QtGui.QLabel(coralAttribute.name() + " ", self)
+        self._hlayout = QtGui.QHBoxLayout()
+        
+        self._hlayout.addWidget(self._label)
+        self._hlayout.addWidget(self._combo)
+        self.layout().addLayout(self._hlayout)
+        
+        coralEnum = coralAttribute.value()
+        indices = coralEnum.indices()
+        i = 0
+        for entry in coralEnum.entries():
+            self._combo.insertItem(indices[i], entry)
+            i += 1
+        
+        self._combo.setCurrentIndex(coralEnum.currentIndex())
+        self.connect(self._combo, QtCore.SIGNAL("currentIndexChanged(int)"), self._comboChanged)
+    
+    def _comboChanged(self, index):
+        self.coralAttribute().outValue().setCurrentIndex(index)
+        self.coralAttribute().valueChanged()
+    
 class BoolAttributeInspectorWidget(AttributeInspectorWidget):
     def __init__(self, coralAttribute, parentWidget):
         AttributeInspectorWidget.__init__(self, coralAttribute, parentWidget)
 
-        coralAttribute = self.coralAttribute()
         if coralAttribute.value().size() == 1:
             valueField = BoolValueField(coralAttribute, self)
             self.layout().addWidget(valueField)
@@ -343,44 +374,6 @@ class CollapsedNodeUi(NodeUi):
                         finalPos = hookPos - (proxyAttr.inputHook().scenePos() - proxyAttr.scenePos())
                         proxyAttr.setPos(finalPos)
 
-class TrigonometricFuncNodeInspectorWidget(NodeInspectorWidget):
-    def __init__(self, coralNode, parentWidget):
-        NodeInspectorWidget.__init__(self, coralNode, parentWidget)
-        
-        
-    def build(self):
-        NodeInspectorWidget.build(self)
-        
-        w = self.attributeWidget("func")
-        if w:
-            w.setHidden(True)
-        
-        idx = self.coralNode().findAttribute("func").value().intValueAt(0)
-        self._labelFuncBox = QtGui.QLabel("func")
-        self._funcBox = QtGui.QComboBox(self)
-        self._funcBox.insertItem(0,"cos")
-        self._funcBox.insertItem(1,"sin")
-        self._funcBox.insertItem(2,"tan")
-        self._funcBox.insertItem(3,"acos")
-        self._funcBox.insertItem(4,"asin")
-        self._funcBox.insertItem(5,"atan")
-        self._funcBox.insertItem(6,"cosh")
-        self._funcBox.insertItem(7,"sinh")
-        self._funcBox.insertItem(8,"tanh")
-        self._funcBox.setCurrentIndex(idx)
-        
-        self._funcBoxLayout = QtGui.QHBoxLayout()
-        self._funcBoxLayout.addWidget(self._labelFuncBox)
-        self._funcBoxLayout.addWidget(self._funcBox)
-        
-        self.layout().addLayout(self._funcBoxLayout)
-        
-        self.connect(self._funcBox, QtCore.SIGNAL("currentIndexChanged(int)"), self._funcChanged)
-    
-    def _funcChanged(self, idx):
-        self.coralNode().findAttribute("func").outValue().setIntValueAt(0,idx)
-        self.coralNode().update(self.coralNode().findAttribute("ouNumber"))
-
 def loadPluginUi():
     plugin = PluginUi("builtinUis")
     
@@ -390,6 +383,8 @@ def loadPluginUi():
     plugin.registerAttributeUi("GeoAttribute", GeoAttributeUi)
     plugin.registerAttributeUi("StringAttribute", StringAttributeUi)
     plugin.registerAttributeUi("BoolAttribute", BoolAttributeUi)
+    plugin.registerAttributeUi("EnumAttribute", EnumAttributeUi)
+    
     plugin.registerNodeUi("CollapsedNode", CollapsedNodeUi)
     plugin.registerNodeUi("ForLoop", ForLoopNodeUi)
     
@@ -398,6 +393,6 @@ def loadPluginUi():
     plugin.registerInspectorWidget("BoolAttribute", BoolAttributeInspectorWidget)
     plugin.registerInspectorWidget("BuildArray", BuildArrayInspectorWidget)
     plugin.registerInspectorWidget("Time", TimeNodeInspectorWidget)
-    plugin.registerInspectorWidget("TrigonometricFunc", TrigonometricFuncNodeInspectorWidget)
+    plugin.registerInspectorWidget("EnumAttribute", EnumAttributeInspectorWidget)
     
     return plugin

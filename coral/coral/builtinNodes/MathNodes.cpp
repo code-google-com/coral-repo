@@ -270,43 +270,12 @@ void Vec3Normalize::update(Attribute *attribute){
 	_normalized->outValue()->setVec3Values(normalizedValues);
 }
 
-Acos::Acos(const std::string &name, Node *parent): Node(name, parent){
-	_inNumber = new NumericAttribute("inNumber", this);
-	_outNumber = new NumericAttribute("outNumber", this);
-	
-	addInputAttribute(_inNumber);
-	addOutputAttribute(_outNumber);
-	
-	setAttributeAffect(_inNumber, _outNumber);
-	
-	std::vector<std::string> specialization;
-	specialization.push_back("Float");
-	specialization.push_back("FloatArray");
-	
-	setAttributeAllowedSpecializations(_inNumber, specialization);
-	setAttributeAllowedSpecializations(_outNumber, specialization);
-	
-	addAttributeSpecializationLink(_inNumber, _outNumber);
-}
-
-void Acos::update(Attribute *attribute){
-	std::vector<float> inValues = _inNumber->value()->floatValues();
-	std::vector<float> outValues(inValues.size());
-	
-	for(int i = 0; i < inValues.size(); ++i){
-		outValues[i] = acos(inValues[i]);
-	}
-	
-	_outNumber->outValue()->setFloatValues(outValues);
-}
-
 TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *parent):
 	Node(name, parent)
 {
-
 	_inNumber = new NumericAttribute("inNumber", this);
 	_outNumber = new NumericAttribute("outNumber", this);
-	_function = new NumericAttribute("func", this);
+	_function = new EnumAttribute("func", this);
 
 	addInputAttribute(_inNumber);
 	addInputAttribute(_function);
@@ -324,14 +293,24 @@ TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *pa
 
 	setAttributeAllowedSpecializations(_inNumber, specialization);
 	setAttributeAllowedSpecializations(_outNumber, specialization);
-	setAttributeAllowedSpecializations(_function, funcSpecialization);
-
+	
 	addAttributeSpecializationLink(_inNumber, _outNumber);
+	
+	Enum *func = _function->outValue();
+	func->addEntry(0, "cos");
+	func->addEntry(1, "sin");
+	func->addEntry(2, "tan");
+	func->addEntry(3, "acos");
+	func->addEntry(4, "asin");
+	func->addEntry(5, "atan");
+	func->addEntry(6, "cosh");
+	func->addEntry(7, "sinh");
+	func->addEntry(8, "tanh");
 }
 
 void TrigonometricFunctions::update(Attribute *attribute){
 	std::vector<float> inValues = _inNumber->value()->floatValues();
-	int inFunction = _function->value()->intValues()[0];
+	int inFunction = _function->value()->currentIndex();
 	std::vector<float> outValues(inValues.size());
 
 	for(int i = 0; i < inValues.size(); ++i){

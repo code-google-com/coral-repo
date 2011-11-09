@@ -75,7 +75,6 @@ def loadPlugin():
     plugin.registerNode("Abs", _coral.Abs, tags = ["math"])
     plugin.registerNode("Vec3Cross", _coral.Vec3Cross, tags = ["math"])
     plugin.registerNode("Vec3Normalize", _coral.Vec3Normalize, tags = ["math"])
-    plugin.registerNode("Acos", _coral.Acos, tags = ["math"])
     plugin.registerNode("TrigonometricFunc", _coral.TrigonometricFunc, tags = ["math"])
     plugin.registerNode("Radians", _coral.Radians, tags = ["math"])
     plugin.registerNode("Degrees", _coral.Degrees, tags = ["math"])
@@ -89,13 +88,14 @@ def loadPlugin():
     plugin.registerNode("GeoSphere", _coral.GeoSphere, tags = ["geometry"])
     plugin.registerNode("GeoCube", _coral.GeoCube, tags = ["geometry"])
     plugin.registerNode("GeoNeighbourPoints", _coral.GeoNeighbourPoints, tags = ["geometry"])
+    plugin.registerNode("GetGeoElements", _coral.GetGeoElements, tags = ["geometry"])
+    plugin.registerNode("GetGeoSubElements", _coral.GetGeoSubElements, tags = ["geometry"])
     
     plugin.registerAttribute("StringAttribute", _coral.StringAttribute)
     plugin.registerNode("String", _coral.StringNode, tags = ["generic"])
     plugin.registerNode("Time", timeNode.TimeNode, tags = ["generic"])
     plugin.registerNode("CoralIOImporter", _coral.CoralIOImporter, tags = ["generic"])
     plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic", "loop"])
-    plugin.registerNode("ProcessSimulation", _coral.ProcessSimulation, tags = ["generic"])
     
     plugin.registerAttribute("BoolAttribute", _coral.BoolAttribute)
     plugin.registerNode("Bool", _coral.BoolNode, tags = ["conditional"])

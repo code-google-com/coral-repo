@@ -56,7 +56,7 @@ int Geo::pointsCount() const{
 	return (int)_points.size();
 }
 
-const std::vector<std::vector<int> > &Geo::faces(){
+const std::vector<std::vector<int> > &Geo::rawFaces(){
 	return _rawFaces;
 }
 
@@ -234,11 +234,16 @@ const std::vector<Imath::V3f> &Geo::verticesNormals(){
 void Geo::cacheTopologyStructures(){
 	int faceCount = _rawFaces.size();
 	_faces.resize(faceCount);
+	_facesPtr.resize(faceCount);
 	_vertexIdOffset.resize(faceCount);
 	
 	int vertexCount = _points.size();
 	_vertices.resize(vertexCount);
+	_verticesPtr.resize(vertexCount);
 	_vertexFaces.resize(vertexCount);
+	
+	_edges.clear();
+	_edgesMap.clear();
 	
 	int vertexIdOffset = 0;
 	
@@ -246,6 +251,8 @@ void Geo::cacheTopologyStructures(){
 		std::vector<int> &rawVerticesPerFace = _rawFaces[i];
 		
 		Face &face = _faces[i];
+		_facesPtr[i] = &face;
+		
 		face._id = i;
 		face._geo = this;
 		
@@ -268,6 +275,8 @@ void Geo::cacheTopologyStructures(){
 			
 			// vertex
 			Vertex &vertex = _vertices[vertexId];
+			
+			_verticesPtr[vertexId] = &vertex;
 			vertex._id = vertexId;
 			vertex._geo = this;
 			vertex._point = &point;
@@ -278,23 +287,30 @@ void Geo::cacheTopologyStructures(){
 			}
 			
 			// edge
-			Edge &edge = face._edges[j];
-			edge._faces.push_back(&face);
-			edge._geo = this;
-			
 			int edgeVertexId1 = rawVerticesPerFace[(verticesPerFaceCount + j - 1) % verticesPerFaceCount];
 			int edgeVertexId2 = rawVerticesPerFace[j];
+			
+			Edge &edge = _edgesMap[edgeVertexId1][edgeVertexId2];
+			
+			face._edges[j] = &edge;
+			edge._faces.push_back(&face);
 			
 			Vertex &vertex1 = _vertices[edgeVertexId1];
 			Vertex &vertex2 = _vertices[edgeVertexId2];
 		
 			Imath::V3f &point1 = _points[edgeVertexId1];
 			Imath::V3f &point2 = _points[edgeVertexId2];
-		
-			edge._vertices[0] = &vertex1;
-			edge._vertices[1] = &vertex2;
-			edge._points[0] = &point1;
-			edge._points[1] = &point2;
+			
+			if(!containerUtils::elementInContainer(&edge, _edges)){
+				_edges.push_back(&edge);
+				
+				edge._geo = this;
+				edge._id = _edges.size() - 1;
+				edge._vertices[0] = &vertex1;
+				edge._vertices[1] = &vertex2;
+				edge._points[0] = &point1;
+				edge._points[1] = &point2;
+			}
 			
 			// vertex neighbours
 			if(!containerUtils::elementInContainer<Vertex*>(&vertex1, vertex2._neighbourVertices)){
@@ -319,7 +335,7 @@ void Geo::cacheTopologyStructures(){
 	_topologyStructuresDirty = false;
 }
 
-const std::vector<Vertex> &Geo::vertices(){
+const std::vector<Vertex*> &Geo::vertices(){
 	#ifdef CORAL_PARALLEL_TBB
 		tbb::mutex::scoped_lock lock(_localMutex);
 	#endif
@@ -328,7 +344,29 @@ const std::vector<Vertex> &Geo::vertices(){
 		cacheTopologyStructures();
 	}
 
-	return _vertices;
+	return _verticesPtr;
 }
 
+const std::vector<Edge*> &Geo::edges(){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_localMutex);
+	#endif
+	
+	if(_topologyStructuresDirty){
+		cacheTopologyStructures();
+	}
+	
+	return _edges;
+}
 
+const std::vector<Face*> &Geo::faces(){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_localMutex);
+	#endif
+	
+	if(_topologyStructuresDirty){
+		cacheTopologyStructures();
+	}
+	
+	return _facesPtr;
+}

@@ -29,14 +29,63 @@
 #ifndef CORAL_GEONODES_H
 #define CORAL_GEONODES_H
 
+#include <ImathVec.h>
+
 #include "../src/Node.h"
 #include "../src/GeoAttribute.h"
 #include "../src/Numeric.h"
 #include "../src/NumericAttribute.h"
+#include "../src/EnumAttribute.h"
 
 namespace coral
 {
+
+class GetGeoElements: public Node{
+public:
+	GetGeoElements(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
 	
+private:
+	EnumAttribute *_context;
+	GeoAttribute *_geo;
+	NumericAttribute *_points;
+	NumericAttribute *_indices;
+	
+	std::string _currentContext;
+	std::vector<std::string> _contexts;
+	
+	void(GetGeoElements::*_contextualUpdate)(Geo *, std::vector<Imath::V3f>&, std::vector<int>&);
+	
+	void updateVertices(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	void updateEdges(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	void updateFaces(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	void updateNormalsPerVertex(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	void updateNormalsPerFace(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	
+	static void contextChanged(Node *parentNode, Enum *enum_);
+};
+
+class GetGeoSubElements: public Node{
+public:
+	GetGeoSubElements(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	EnumAttribute *_context;
+	GeoAttribute *_geo;
+	NumericAttribute *_index;
+	NumericAttribute *_points;
+	NumericAttribute *_indices;
+
+	void(GetGeoSubElements::*_contextualUpdate)(Geo *, int, std::vector<Imath::V3f>&, std::vector<int>&);
+
+	void updateVertexNeighbours(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	void updateEdgeVertices(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	void updateFaceVertices(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+
+	static void contextChanged(Node *parentNode, Enum *enum_);
+};
+
 class GetGeoPoints: public Node{
 public:
 	GetGeoPoints(const std::string &name, Node *parent);
