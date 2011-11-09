@@ -236,10 +236,7 @@ int Numeric::intValueAt(unsigned int id){
 	if(id < size){
 		return _intValues[id];
 	}
-	else if(size > 0){
-		return _intValues[size - 1];
-	}
-		
+	
 	return 0;
 }
 
@@ -248,10 +245,7 @@ float Numeric::floatValueAt(unsigned int id){
 	if(id < size){
 		return _floatValues[id];
 	}
-	else if(size > 0){
-		return _floatValues[size - 1];
-	}
-		
+	
 	return 0.0;
 }
 
@@ -259,9 +253,6 @@ Imath::V3f Numeric::vec3ValueAt(unsigned int id){
 	int size = _vec3Values.size();
 	if(id < size){
 		return _vec3Values[id];
-	}
-	else if(size > 0){
-		return _vec3Values[size - 1];
 	}
 	
 	return Imath::V3f(0.0, 0.0, 0.0);
@@ -272,10 +263,7 @@ Imath::Color4f Numeric::col4ValueAt(unsigned int id){
 	if(id < size){
 		return _col4Values[id];
 	}
-	else if(size > 0){
-		return _col4Values[size - 1];
-	}
-
+	
 	return Imath::Color4f(0.0, 0.0, 0.0, 1.0);
 }
 
@@ -284,10 +272,7 @@ Imath::Quatf Numeric::quatValueAt(unsigned int id){
 	if(id < size){
 		return _quatValues[id];
 	}
-	else if(size > 0){
-		return _quatValues[size - 1];
-	}
-
+	
 	return Imath::Quatf();
 }
 
@@ -295,9 +280,6 @@ Imath::M44f Numeric::matrix44ValueAt(unsigned int id){
 	int size = _matrix44Values.size();
 	if(id < size){
 		return _matrix44Values[id];
-	}
-	else if(size > 0){
-		return _matrix44Values[size - 1];
 	}
 	
 	return Imath::M44f();
