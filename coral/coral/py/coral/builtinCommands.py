@@ -152,9 +152,7 @@ class DeleteObjects(Command):
         for attrName in attributesName:
             attr = coralApp.findAttribute(attrName)
             if attr:
-                parentNode = attr.parent()
-                if attr in parentNode.dynamicAttributes():
-                    attributes.append(attr)
+                attributes.append(attr)
         
         if attributes:
             coralApp.deleteAttributes(attributes)

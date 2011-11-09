@@ -290,6 +290,12 @@ void Geo::cacheTopologyStructures(){
 			int edgeVertexId1 = rawVerticesPerFace[(verticesPerFaceCount + j - 1) % verticesPerFaceCount];
 			int edgeVertexId2 = rawVerticesPerFace[j];
 			
+			if(edgeVertexId2 < edgeVertexId1){
+				int tmp = edgeVertexId2;
+				edgeVertexId2 = edgeVertexId1;
+				edgeVertexId1 = tmp;
+			}
+			
 			Edge &edge = _edgesMap[edgeVertexId1][edgeVertexId2];
 			
 			face._edges[j] = &edge;

@@ -32,33 +32,40 @@ std::vector<std::string> Enum::entries(){
 }
 
 std::string Enum::asString(){
-	std::string value = "{";
+	std::string value = "[{";
 	for(std::map<int, std::string>::iterator i = _enum.begin(); i != _enum.end(); ++i){
-		value += stringUtils::intToString(i->first) + ":'" + i->second + "',";
+		value += stringUtils::intToString(i->first) + ":\"" + i->second + "\",";
 	}
 	
-	value += "}";
+	value += "}," + stringUtils::intToString(_currentIndex) + "]";
 	
 	return value;
 }
 
 void Enum::setFromString(const std::string &value){
-	std::string entriesStr = stringUtils::strip("[]", value);
-	std::vector<std::string> entries;
-	stringUtils::split(",", entries, entriesStr);
-	
-	for(int i = 0; i < entries.size(); ++i){
-		std::string &entry = entries[i];
-		if(entry != ""){
-			std::vector<std::string> keyVal;
-			stringUtils::split(":", keyVal, entry);
-			
-			if(keyVal.size() == 2){
-				int key = stringUtils::parseInt(keyVal[0]);
-				std::string val = stringUtils::strip("'", keyVal[1]);
-				_enum[key] = val;
+	std::string fieldsStr = stringUtils::strip(value, "[]{");
+	std::vector<std::string> fields;
+	stringUtils::split(fieldsStr, fields, "},");
+
+	if(fields.size() == 2){
+		std::vector<std::string> entries;
+		stringUtils::split(fields[0], entries, ",");
+		
+		for(int i = 0; i < entries.size(); ++i){
+			std::string &entry = entries[i];
+			if(entry != ""){
+				std::vector<std::string> keyVal;
+				stringUtils::split(entry, keyVal, ":");
+				
+				if(keyVal.size() == 2){
+					int key = stringUtils::parseInt(keyVal[0]);
+					std::string val = stringUtils::strip(keyVal[1], "\"");
+					_enum[key] = val;
+				}
 			}
 		}
+
+		setCurrentIndex(stringUtils::parseInt(fields[1]));
 	}
 }
 
