@@ -210,7 +210,6 @@ _contextualUpdate(0){
 }
 
 void GetGeoSubElements::updateVertexNeighbours(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices){
-	std::cout << "???" << std::endl;
 	const std::vector<Vertex*> &vertices = geo->vertices();
 	if(index >= 0 && index < vertices.size()){
 		Vertex *vertex = vertices[index];

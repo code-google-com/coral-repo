@@ -10,12 +10,12 @@ def runScript(topNode = 'root'):
     executeCommand('SetAttributeValue', attribute = topNode + '.DrawGeo.normals', value = 'False')
     
     executeCommand('CreateNode', className = 'GeoCube', name = 'GeoCube', specializationPreset = 'none', parentNode = topNode)
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.width', value = '[10] 103')
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.height', value = '[10] 103')
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.depth', value = '[10] 103')
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.widthSubdivisions', value = '[7] 71')
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.heightSubdivisions', value = '[10] 101')
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.depthSubdivisions', value = '[7] 71')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.width', value = '[10] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.height', value = '[10] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.depth', value = '[10] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.widthSubdivisions', value = '[5] 1')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.heightSubdivisions', value = '[5] 1')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoCube.depthSubdivisions', value = '[5] 1')
     
     executeCommand('CreateNode', className = 'CollapsedNode', name = 'Smooth', specializationPreset = 'none', parentNode = topNode)
     executeCommand('CreateAttribute', name = '2:geo', className = 'PassThroughAttribute', parentNode = topNode + '.Smooth', input = True, specializationOverride = 'Geo')
@@ -26,7 +26,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateAttribute', name = 'input', className = 'PassThroughAttribute', parentNode = topNode + '.Smooth.ForLoop', input = True, specializationOverride = 'IntArray')
     executeCommand('CreateAttribute', name = 'input1', className = 'PassThroughAttribute', parentNode = topNode + '.Smooth.ForLoop', input = True)
     executeCommand('CreateAttribute', name = 'input2', className = 'PassThroughAttribute', parentNode = topNode + '.Smooth.ForLoop', input = True, specializationOverride = 'Geo')
-    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.ForLoop._currentIndex', value = '[10] 101')
+    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.ForLoop._currentIndex', value = '[10] 1')
     
     executeCommand('CreateNode', className = 'GetSimulationStep', name = 'GetSimulationStep', specializationPreset = 'none', parentNode = topNode + '.Smooth.ForLoop')
     
@@ -35,7 +35,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'ForLoop', name = 'ForLoop', specializationPreset = 'none', parentNode = topNode + '.Smooth.ForLoop')
     executeCommand('CreateAttribute', name = 'input', className = 'PassThroughAttribute', parentNode = topNode + '.Smooth.ForLoop.ForLoop', input = True, specializationOverride = 'Geo')
     executeCommand('CreateAttribute', name = 'input1', className = 'PassThroughAttribute', parentNode = topNode + '.Smooth.ForLoop.ForLoop', input = True, specializationOverride = 'Vec3Array')
-    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.ForLoop.ForLoop._currentIndex', value = '[379] 3791')
+    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.ForLoop.ForLoop._currentIndex', value = '[151] 1')
     
     executeCommand('CreateNode', className = 'GeoNeighbourPoints', name = 'GeoNeighbourPoints', specializationPreset = 'none', parentNode = topNode + '.Smooth.ForLoop.ForLoop')
     
@@ -50,7 +50,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'Add', name = 'Add1', specializationPreset = 'none', parentNode = topNode + '.Smooth.ForLoop.ForLoop')
     
     executeCommand('CreateNode', className = 'Int', name = 'one', specializationPreset = 'none', parentNode = topNode + '.Smooth.ForLoop.ForLoop')
-    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.ForLoop.ForLoop.one.out', value = '[1] 11')
+    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.ForLoop.ForLoop.one.out', value = '[1] 1')
     
     executeCommand('CreateNode', className = 'NumericIterator', name = 'NumericIterator', specializationPreset = 'none', parentNode = topNode + '.Smooth.ForLoop.ForLoop')
     
@@ -83,9 +83,9 @@ def runScript(topNode = 'root'):
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.Smooth.ForLoop.GetSimulationStep.data', destinationAttribute = topNode + '.Smooth.ForLoop.ForLoop.input1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.Smooth.ForLoop.ForLoop.NumericIterator.array', destinationAttribute = topNode + '.Smooth.ForLoop.ForLoop.out')
     executeCommand('CreateNode', className = 'RangeArray', name = 'RangeArray', specializationPreset = 'none', parentNode = topNode + '.Smooth')
-    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.RangeArray.start', value = '[0] 01')
-    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.RangeArray.end', value = '[10] 101')
-    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.RangeArray.steps', value = '[10] 101')
+    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.RangeArray.start', value = '[0] 1')
+    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.RangeArray.end', value = '[10] 1')
+    executeCommand('SetAttributeValue', attribute = topNode + '.Smooth.RangeArray.steps', value = '[10] 1')
     
     executeCommand('CreateNode', className = 'ArrayIndices', name = 'ArrayIndices', specializationPreset = 'none', parentNode = topNode + '.Smooth')
     
@@ -117,7 +117,7 @@ def runScript(topNode = 'root'):
     executeCommand('SetNodeUiData', node = topNode, data = {})
     executeCommand('SetNodeUiData', node = topNode + '.DrawGeo', data = {'pos': [372.11111111111177, 251.66666666666697]})
     executeCommand('SetNodeUiData', node = topNode + '.GeoCube', data = {'pos': [-120.65240641711236, 151.5026737967915]})
-    executeCommand('SetNodeUiData', node = topNode + '.Smooth', data = {'attributes': [{'name': '1:iterations', 'pos': [-18.375, -28.0]}, {'name': '2:geo', 'pos': [-16.144879426129307, 123.17338217338215]}, {'name': 'output', 'pos': [930.44196428571468, 256.57142857142867]}], 'pos': [151.51198721281457, 187.46385422856025]})
+    executeCommand('SetNodeUiData', node = topNode + '.Smooth', data = {'attributes': [{'name': '1:iterations', 'pos': [-18.375, -28.0]}, {'name': '2:geo', 'pos': [-16.144879426129307, 123.17338217338215]}, {'name': 'output', 'pos': [930.44196428571468, 256.57142857142867]}], 'pos': [150.51198721281457, 187.46385422856025]})
     executeCommand('SetNodeUiData', node = topNode + '.Smooth.ForLoop', data = {'attributes': [{'name': 'indexRange', 'pos': [0.0, 0.0]}, {'name': 'input', 'pos': [35.0, 320.00000000000028]}, {'name': 'input1', 'pos': [45.0, 229.0]}, {'name': 'input2', 'pos': [56.999999999999964, 466.00000000000006]}, {'name': 'out', 'pos': [1204.4444444444455, 472.88888888888908]}], 'pos': [444.20512820512823, 73.871794871794805]})
     executeCommand('SetNodeUiData', node = topNode + '.Smooth.ForLoop.GetSimulationStep', data = {'pos': [395.0, 264.00000000000011]})
     executeCommand('SetNodeUiData', node = topNode + '.Smooth.ForLoop.SetSimulationStep', data = {'pos': [911.66666666666663, 226.0]})

@@ -25,8 +25,10 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
+
+#include <ImathMatrixAlgo.h>
+
 #include "Numeric.h"
-#include <assert.h>
 #include "stringUtils.h"
 
 using namespace coral;
@@ -236,6 +238,9 @@ int Numeric::intValueAt(unsigned int id){
 	if(id < size){
 		return _intValues[id];
 	}
+	else if(size){
+		return _intValues[size - 1];
+	}
 	
 	return 0;
 }
@@ -244,6 +249,9 @@ float Numeric::floatValueAt(unsigned int id){
 	int size = _floatValues.size();
 	if(id < size){
 		return _floatValues[id];
+	}
+	else if(size){
+		return _floatValues[size - 1];
 	}
 	
 	return 0.0;
@@ -254,6 +262,9 @@ Imath::V3f Numeric::vec3ValueAt(unsigned int id){
 	if(id < size){
 		return _vec3Values[id];
 	}
+	else if(size){
+		return _vec3Values[size - 1];
+	}
 	
 	return Imath::V3f(0.0, 0.0, 0.0);
 }
@@ -263,7 +274,10 @@ Imath::Color4f Numeric::col4ValueAt(unsigned int id){
 	if(id < size){
 		return _col4Values[id];
 	}
-	
+	else if(size){
+		return _col4Values[size - 1];
+	}
+
 	return Imath::Color4f(0.0, 0.0, 0.0, 1.0);
 }
 
@@ -272,8 +286,11 @@ Imath::Quatf Numeric::quatValueAt(unsigned int id){
 	if(id < size){
 		return _quatValues[id];
 	}
-	
-	return Imath::Quatf();
+	else if(size){
+		return _quatValues[size - 1];
+	}
+
+	return Imath::Quatf(0.0, 0.0, 0.0, 1.0);
 }
 
 Imath::M44f Numeric::matrix44ValueAt(unsigned int id){
@@ -281,8 +298,11 @@ Imath::M44f Numeric::matrix44ValueAt(unsigned int id){
 	if(id < size){
 		return _matrix44Values[id];
 	}
+	else if(size){
+		return _matrix44Values[size - 1];
+	}
 	
-	return Imath::M44f();
+	return Imath::identity44f;
 }
 
 void Numeric::setIntValues(const std::vector<int> &values){
@@ -319,8 +339,6 @@ std::string Numeric::asString(){
 	std::string script;
 	
 	if(_type != numericTypeAny){
-		std::string value;
-		std::string type;
 		std::ostringstream stream;
 		
 		if(_type == numericTypeInt || _type == numericTypeIntArray){
@@ -431,13 +449,10 @@ std::string Numeric::asString(){
 			}
 		}
 		
-		value = stream.str();
-		stream.clear();
-
-		stream << _type;
-		type = stream.str();
+		std::ostringstream type;
+		type << _type;
 		
-		script = "[" + value + "] " + type;
+		script = "[" + stream.str() + "] " + type.str();
 	}
 	
 	return script;
