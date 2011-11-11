@@ -26,15 +26,27 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#include "PassThroughAttribute.h"
-#include "Node.h"
-#include "Value.h"
+#ifndef CORAL_PROCESSNODE_H
+#define CORAL_PROCESSNODE_H
 
-using namespace coral;
+#include "../src/Node.h"
+#include "../src/NumericAttribute.h"
+#include "../src/EnumAttribute.h"
 
-PassThroughAttribute::PassThroughAttribute(const std::string &name, Node *parent): Attribute(name, parent){
-	setPassThrough(true);
-	setClassName("PassThroughAttribute");
+namespace coral{
 
-	setValuePtr(new Value());
+class ProcessNode : public Node{
+public:
+	ProcessNode(const std::string &name, Node *parent);
+	void addInputData();
+	void update(Attribute *attribute);
+
+private:
+	EnumAttribute *_getDataFrom;
+	NumericAttribute *_data0;
+	NumericAttribute *_out;
+};
+
 }
+
+#endif

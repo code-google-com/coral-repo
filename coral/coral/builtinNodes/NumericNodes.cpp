@@ -28,6 +28,7 @@
 
 #include <map>
 #include <cmath>
+#include <tbb/mutex.h>
 
 #include "NumericNodes.h"
 #include "../src/Numeric.h"
@@ -62,7 +63,7 @@ int findMinorNumericSize(NumericAttribute *attrs[], int numAttrs){
 }
 
 std::map<int, Numeric> _globalNumericStorage;
-
+tbb::mutex _globalMutex;
 }
 
 
@@ -2210,6 +2211,10 @@ SetSimulationStep::SetSimulationStep(const std::string &name, Node *parent): Nod
 }
 
 void SetSimulationStep::update(Attribute *attribute){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_globalMutex);
+	#endif
+
 	int sourceId = _source->value()->id();
 	Numeric *data = _data->value();
 	
@@ -2238,6 +2243,10 @@ GetSimulationStep::GetSimulationStep(const std::string &name, Node *parent): Nod
 }
 
 void GetSimulationStep::update(Attribute *attribute){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_globalMutex);
+	#endif
+
 	Numeric *source = _source->value();
 	int sourceId = source->id();
 	Numeric *step = _step->value();

@@ -209,6 +209,27 @@ class StringAttributeInspectorWidget(AttributeInspectorWidget):
         valueField = StringValueField(coralAttribute, self)
         self.layout().addWidget(valueField)
 
+class ProcessNodeInspectorWidget(NodeInspectorWidget):
+    def __init__(self, coralNode, parentWidget):
+        NodeInspectorWidget.__init__(self, coralNode, parentWidget)
+    
+    def build(self):
+        NodeInspectorWidget.build(self)
+        
+        addAttrButton = QtGui.QPushButton("Add Input Data", self)
+        self.layout().addWidget(addAttrButton)
+        self.connect(addAttrButton, QtCore.SIGNAL("clicked()"), self._addInputClicked)
+    
+    def _addInputClicked(self):
+        node = self.coralNode()
+        node.addInputData()
+        newAttr = node.inputAttributes()[-1]
+        
+        nodeUi = NodeEditor.findNodeUi(node.id())
+        newAttrUi = NodeEditor._createAttributeUi(newAttr, nodeUi)
+        nodeUi.addInputAttributeUi(newAttrUi)
+        nodeUi.updateLayout()
+
 class BuildArrayInspectorWidget(NodeInspectorWidget):
     def __init__(self, coralNode, parentWidget):
         NodeInspectorWidget.__init__(self, coralNode, parentWidget)
@@ -394,5 +415,6 @@ def loadPluginUi():
     plugin.registerInspectorWidget("BuildArray", BuildArrayInspectorWidget)
     plugin.registerInspectorWidget("Time", TimeNodeInspectorWidget)
     plugin.registerInspectorWidget("EnumAttribute", EnumAttributeInspectorWidget)
+    plugin.registerInspectorWidget("Process", ProcessNodeInspectorWidget)
     
     return plugin

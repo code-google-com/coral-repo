@@ -405,7 +405,7 @@ void Attribute::processDirtyingDoneCallbackQueue(){
 
 void Attribute::queueDirtyingDoneCallback(void(*callback)(Attribute *)){
 	#ifdef CORAL_PARALLEL_TBB
-		tbb::mutex::scoped_lock(_globalMutex);
+		tbb::mutex::scoped_lock lock(_globalMutex);
 	#endif
 	
 	_dirtyingDoneCallbackQueue.push_back(callback);

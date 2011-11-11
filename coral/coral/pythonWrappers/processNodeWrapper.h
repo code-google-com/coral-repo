@@ -26,15 +26,19 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#include "PassThroughAttribute.h"
-#include "Node.h"
-#include "Value.h"
+
+#ifndef CORAL_PROCESSNODEWRAPPER_H
+#define CORAL_PROCESSNODEWRAPPER_H
+
+#include <boost/python.hpp>
+#include "../builtinNodes/ProcessNode.h"
+#include "../src/pythonWrapperUtils.h"
 
 using namespace coral;
 
-PassThroughAttribute::PassThroughAttribute(const std::string &name, Node *parent): Attribute(name, parent){
-	setPassThrough(true);
-	setClassName("PassThroughAttribute");
-
-	setValuePtr(new Value());
+void processNodeWrapper(){
+	pythonWrapperUtils::pythonWrapper<ProcessNode, Node>("ProcessNode")
+		.def("addInputData", &ProcessNode::addInputData);
 }
+
+#endif

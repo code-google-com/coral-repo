@@ -79,7 +79,7 @@ void MainDrawRoutine::dirtyingDoneCallback(Attribute *attribute){
 void MainDrawRoutine::scheduleRender(){
 	if(!_renderScheduled){
 		#ifdef CORAL_PARALLEL_TBB
-			tbb::mutex::scoped_lock(_globalMutex);
+			tbb::mutex::scoped_lock lock(_globalMutex);
 		#endif
 		_renderScheduled = true;
 		

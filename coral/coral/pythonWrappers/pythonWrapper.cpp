@@ -60,6 +60,7 @@
 #include "coralIOWrapper.h"
 #include "loopNodesWrapper.h"
 #include "enumWrapper.h"
+#include "processNodeWrapper.h"
 
 using namespace coral;
 
@@ -114,6 +115,7 @@ BOOST_PYTHON_MODULE(_coral)
 	splineNodesWrapper();
 	coralIOWrapper();
 	enumWrapper();
+	processNodeWrapper();
 	
 	boost::python::to_python_converter<std::vector<std::string>, pythonWrapperUtils::stdVectorToPythonList<std::string> >();
 	boost::python::to_python_converter<std::vector<Node*>, ObjectVectorToPythonList<Node> >();

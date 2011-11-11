@@ -63,8 +63,8 @@ def loadPlugin():
     plugin.registerNode("ArrayIndices", _coral.ArrayIndices, tags = ["numeric", "loop"], description = "Build an array composed by all the indexes extracted from the given input array.")
     plugin.registerNode("GetArrayElement", _coral.GetArrayElement, tags = ["numeric"], description = "Get a single element of an array.")
     plugin.registerNode("SetArrayElement", _coral.SetArrayElement, tags = ["numeric"], description = "Set a single element of an array.")
-    plugin.registerNode("GetSimulationStep", _coral.GetSimulationStep, tags = ["numeric"], description = "Get the values stored by SetSimulationStep and reuse them in the simulation step.\nWhen the step attribute is set to 0 the simulation is reset and the data is taken from the source.")
-    plugin.registerNode("SetSimulationStep", _coral.SetSimulationStep, tags = ["numeric"], description = "Set some numeric values and make them available to a GetSimulationStep node connected to the same source.\n")
+    plugin.registerNode("GetSimulationStep", _coral.GetSimulationStep, tags = ["numeric", "simulation"], description = "Get the values stored by SetSimulationStep and reuse them in the simulation step.\nWhen the step attribute is set to 0 the simulation is reset and the data is taken from the source.")
+    plugin.registerNode("SetSimulationStep", _coral.SetSimulationStep, tags = ["numeric", "simulation"], description = "Set some numeric values and make them available to a GetSimulationStep node connected to the same source.\n")
     
     plugin.registerNode("Add", _coral.AddNode, tags = ["math"])
     plugin.registerNode("Sub", _coral.SubNode, tags = ["math"])
@@ -96,6 +96,7 @@ def loadPlugin():
     plugin.registerNode("Time", timeNode.TimeNode, tags = ["generic"])
     plugin.registerNode("CoralIOImporter", _coral.CoralIOImporter, tags = ["generic"])
     plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic", "loop"])
+    plugin.registerNode("Process", _coral.ProcessNode, tags = ["generic", "simulation"])
     
     plugin.registerAttribute("BoolAttribute", _coral.BoolAttribute)
     plugin.registerNode("Bool", _coral.BoolNode, tags = ["conditional"])

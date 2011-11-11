@@ -121,8 +121,8 @@ void NumericDrawNode::drawCol4(Numeric *numeric){
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)&col4Values[0].r);
-	glColorPointer(3, GL_FLOAT, 0, (GLvoid*)&col4Values[0].r);
+	glVertexPointer(3, GL_FLOAT, sizeof(GLfloat)*4, (GLvoid*)&col4Values[0].r);
+	glColorPointer(4, GL_FLOAT, 0, (GLvoid*)&col4Values[0].r);
 	glDrawArrays(GL_POINTS, 0, col4Values.size());
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
@@ -138,7 +138,7 @@ void NumericDrawNode::draw(){
 	if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
 		drawVec3(numeric);
 	}
-	else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeVec3Array){
+	else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeCol4Array){
 		drawCol4(numeric);
 	}
 	else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){

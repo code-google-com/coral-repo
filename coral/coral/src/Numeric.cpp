@@ -160,6 +160,9 @@ void Numeric::resize(unsigned int newSize){
 		else if(_type == numericTypeMatrix44 || _type == numericTypeMatrix44Array){
 			_matrix44Values.resize(newSize);
 		}
+		else if(_type == numericTypeCol4 || _type == numericTypeCol4Array){
+			_col4Values.resize(newSize);
+		}
 		_size = newSize;
 	}
 }
