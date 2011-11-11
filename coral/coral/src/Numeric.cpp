@@ -49,10 +49,13 @@ Numeric::Numeric():
 	_vec3Values[0] = Imath::V3f(0.0, 0.0, 0.0);
 	
 	_quatValues.resize(1);
-	_quatValues[0] = Imath::Quatf();
+	_quatValues[0] = Imath::Quatf(0.0, 0.0, 0.0, 1.0);
 
 	_matrix44Values.resize(1);
-	_matrix44Values[0] = Imath::M44f();
+	_matrix44Values[0] = Imath::identity44f;
+
+	_col4Values.resize(1);
+	_col4Values[0] = Imath::Color4f(0.0, 0.0, 0.0, 1.0);
 }
 
 void Numeric::copy(const Value *other){
@@ -67,6 +70,7 @@ void Numeric::copy(const Value *other){
 		_vec3Values = otherNum->_vec3Values;
 		_quatValues = otherNum->_quatValues;
 		_matrix44Values = otherNum->_matrix44Values;
+		_col4Values = otherNum->_col4Values;
 	}
 }
 
@@ -76,15 +80,6 @@ bool Numeric::isArray(){
 
 unsigned int Numeric::size(){
 	return _size;
-}
-
-void Numeric::copyFromOther(Numeric *other){
-	_type = other->_type;
-	_isArray = other->_isArray;
-	_intValues = other->_intValues;
-	_floatValues = other->_floatValues;
-	_vec3Values = other->_vec3Values;
-	_quatValues = other->_quatValues;
 }
 
 Numeric::Type Numeric::type(){
@@ -141,6 +136,15 @@ void Numeric::setType(Numeric::Type type){
 		_size = _matrix44Values.size();
 		_isArray = true;
 	}
+	else if(type == numericTypeCol4){
+		_col4Values.resize(1);
+		_size = 1;
+		_isArray = false;
+	}
+	else if(type == numericTypeCol4Array){
+		_size = _col4Values.size();
+		_isArray = true;
+	}
 }
 
 void Numeric::resize(unsigned int newSize){
@@ -174,7 +178,8 @@ bool Numeric::isArrayType(Numeric::Type type){
 		type == numericTypeFloatArray ||
 		type == numericTypeVec3Array ||
 		type == numericTypeQuatArray ||
-		type == numericTypeMatrix44Array){
+		type == numericTypeMatrix44Array ||
+		type == numericTypeCol4Array){
 		
 		arrayType = true;
 	}
@@ -562,6 +567,30 @@ void Numeric::setFromString(const std::string &value){
 			}
 			
 			_size = _matrix44Values.size();
+		}
+		else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeCol4Array){
+			_col4Values.clear();
+			
+			std::vector<std::string> values;
+			stringUtils::split(valuesStr, values, "),(");
+
+			for(int i = 0; i < values.size(); ++i){
+				std::string numericValuesStr = stringUtils::strip(values[i], "()");
+				std::vector<std::string> numericValues;
+				stringUtils::split(numericValuesStr, numericValues, ",");
+				
+				if(numericValues.size() == 4){
+					float r = stringUtils::parseFloat(numericValues[0]);
+					float g = stringUtils::parseFloat(numericValues[1]);
+					float b = stringUtils::parseFloat(numericValues[2]);
+					float a = stringUtils::parseFloat(numericValues[3]);
+					
+					Imath::Color4f col(r, g, b, a);
+					_col4Values.push_back(col);
+				}
+			}
+		
+			_size = _col4Values.size();
 		}
 	}
 }
