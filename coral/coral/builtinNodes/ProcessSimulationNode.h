@@ -26,19 +26,27 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#ifndef CORAL_PROCESSNODE_H
+#define CORAL_PROCESSNODE_H
 
-#ifndef CORAL_PROCESSNODEWRAPPER_H
-#define CORAL_PROCESSNODEWRAPPER_H
+#include "../src/Node.h"
+#include "../src/NumericAttribute.h"
+#include "../src/EnumAttribute.h"
 
-#include <boost/python.hpp>
-#include "../builtinNodes/ProcessNode.h"
-#include "../src/pythonWrapperUtils.h"
+namespace coral{
 
-using namespace coral;
+class ProcessSimulationNode : public Node{
+public:
+	ProcessSimulationNode(const std::string &name, Node *parent);
+	void addInputData();
+	void update(Attribute *attribute);
 
-void processNodeWrapper(){
-	pythonWrapperUtils::pythonWrapper<ProcessNode, Node>("ProcessNode")
-		.def("addInputData", &ProcessNode::addInputData);
+private:
+	EnumAttribute *_getDataFrom;
+	NumericAttribute *_data0;
+	NumericAttribute *_out;
+};
+
 }
 
 #endif

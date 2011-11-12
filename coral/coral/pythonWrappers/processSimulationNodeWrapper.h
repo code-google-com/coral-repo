@@ -26,53 +26,19 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#include "ProcessNode.h"
-#include "../src/Numeric.h"
-#include "../src/stringUtils.h"
+
+#ifndef CORAL_PROCESSNODEWRAPPER_H
+#define CORAL_PROCESSNODEWRAPPER_H
+
+#include <boost/python.hpp>
+#include "../builtinNodes/ProcessSimulationNode.h"
+#include "../src/pythonWrapperUtils.h"
 
 using namespace coral;
 
-ProcessNode::ProcessNode(const std::string &name, Node *parent) : Node(name, parent){
-	setClassName("Process");
-	setAllowDynamicAttributes(true);
-
-	_getDataFrom = new EnumAttribute("getDataFrom", this);
-	_data0 = new NumericAttribute("data0", this);
-	_out = new NumericAttribute("out", this);
-
-	addInputAttribute(_getDataFrom);
-	addInputAttribute(_data0);
-	addOutputAttribute(_out);
-
-	setAttributeAffect(_getDataFrom, _out);
-	setAttributeAffect(_data0, _out);
-
-	addAttributeSpecializationLink(_data0, _out);
-
-	_getDataFrom->outValue()->addEntry(0, "data0");
+void processSimulationNodeWrapper(){
+	pythonWrapperUtils::pythonWrapper<ProcessSimulationNode, Node>("ProcessSimulationNode")
+		.def("addInputData", &ProcessSimulationNode::addInputData);
 }
 
-void ProcessNode::addInputData(){
-	int newId = inputAttributes().size();
-	std::string numStr = stringUtils::intToString(newId);
-	NumericAttribute *attr = new NumericAttribute("data" + numStr, this);
-	addInputAttribute(attr);
-	setAttributeAffect(attr, _out);
-	
-	addAttributeSpecializationLink(attr, _out);
-
-	addDynamicAttribute(attr);
-
-	updateAttributeSpecialization(attr);
-
-	_getDataFrom->outValue()->addEntry(newId, attr->name());
-}
-
-void ProcessNode::update(Attribute *attribute){
-	int attrToTransfer = _getDataFrom->value()->currentIndex();
-
-	std::vector<Attribute*> attrs = inputAttributes();
-	if(attrToTransfer < attrs.size()){
-		_out->outValue()->copy(attrs[attrToTransfer]->value());
-	}
-}
+#endif

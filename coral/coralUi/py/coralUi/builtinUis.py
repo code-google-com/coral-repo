@@ -209,7 +209,7 @@ class StringAttributeInspectorWidget(AttributeInspectorWidget):
         valueField = StringValueField(coralAttribute, self)
         self.layout().addWidget(valueField)
 
-class ProcessNodeInspectorWidget(NodeInspectorWidget):
+class ProcessSimulationNodeInspectorWidget(NodeInspectorWidget):
     def __init__(self, coralNode, parentWidget):
         NodeInspectorWidget.__init__(self, coralNode, parentWidget)
     
@@ -415,6 +415,6 @@ def loadPluginUi():
     plugin.registerInspectorWidget("BuildArray", BuildArrayInspectorWidget)
     plugin.registerInspectorWidget("Time", TimeNodeInspectorWidget)
     plugin.registerInspectorWidget("EnumAttribute", EnumAttributeInspectorWidget)
-    plugin.registerInspectorWidget("Process", ProcessNodeInspectorWidget)
+    plugin.registerInspectorWidget("ProcessSimulation", ProcessSimulationNodeInspectorWidget)
     
     return plugin

@@ -47,6 +47,10 @@ class Face{
 public:
 	Face(): _id(0), _geo(0){
 	}
+
+	int id(){
+		return _id;
+	}
 	
 	Geo *geo(){
 		return _geo;
@@ -83,6 +87,10 @@ private:
 class Edge{
 public:
 	Edge(): _id(0), _geo(0), _vertices(2), _points(2){
+	}
+
+	int id(){
+		return _id;
 	}
 	
 	const std::vector<Face*> &rawFaces() const{

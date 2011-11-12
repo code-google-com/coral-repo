@@ -103,8 +103,6 @@ public:
 private:
 	friend class NumericOperation;
 	
-	void copyFromOther(Numeric *other);
-	
 	std::vector<int> _intValues;
 	std::vector<float> _floatValues;
 	std::vector<Imath::V3f > _vec3Values;
