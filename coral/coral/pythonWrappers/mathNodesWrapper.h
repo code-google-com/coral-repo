@@ -40,10 +40,24 @@ void mathNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Matrix44Inverse, Node>("Matrix44Inverse");
 	pythonWrapperUtils::pythonWrapper<Abs, Node>("Abs");
 	pythonWrapperUtils::pythonWrapper<Vec3Cross, Node>("Vec3Cross");
+	pythonWrapperUtils::pythonWrapper<Vec3Dot, Node>("Vec3Dot");
 	pythonWrapperUtils::pythonWrapper<Vec3Normalize, Node>("Vec3Normalize");
 	pythonWrapperUtils::pythonWrapper<TrigonometricFunctions, Node>("TrigonometricFunc");
 	pythonWrapperUtils::pythonWrapper<Radians, Node>("Radians");
 	pythonWrapperUtils::pythonWrapper<Degrees, Node>("Degrees");
+	pythonWrapperUtils::pythonWrapper<Atan2, Node>("Atan2");
+	pythonWrapperUtils::pythonWrapper<Sqrt, Node>("Sqrt");
+	pythonWrapperUtils::pythonWrapper<Ceil, Node>("Ceil");
+	pythonWrapperUtils::pythonWrapper<Floor, Node>("Floor");
+	pythonWrapperUtils::pythonWrapper<Round, Node>("Round");
+	pythonWrapperUtils::pythonWrapper<Exp, Node>("Exp");
+	pythonWrapperUtils::pythonWrapper<Pow, Node>("Pow");
+	pythonWrapperUtils::pythonWrapper<Log, Node>("Log");
+	pythonWrapperUtils::pythonWrapper<Log10, Node>("Log10");
+	pythonWrapperUtils::pythonWrapper<Min, Node>("Min");
+	pythonWrapperUtils::pythonWrapper<Max, Node>("Max");
+	pythonWrapperUtils::pythonWrapper<Average, Node>("Average");
+	pythonWrapperUtils::pythonWrapper<Slerp, Node>("Slerp");
 }
 
 #endif
