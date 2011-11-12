@@ -33,6 +33,9 @@
 
 #include <ImathVec.h>
 #include <ImathMatrix.h>
+#include <ImathQuat.h>
+
+#include <limits>
 
 using namespace coral;
 
@@ -240,6 +243,83 @@ void Vec3Cross::update(Attribute *attribute){
 	_crossProduct->outValue()->setVec3Values(crossedValues);
 }
 
+Vec3Dot::Vec3Dot(const std::string &name, Node *parent): Node(name, parent){
+	_vector0 = new NumericAttribute("vector0", this);
+	_vector1 = new NumericAttribute("vector1", this);
+	_dotProduct = new NumericAttribute("dotProduct", this);
+
+	addInputAttribute(_vector0);
+	addInputAttribute(_vector1);
+	addOutputAttribute(_dotProduct);
+
+	setAttributeAffect(_vector0, _dotProduct);
+	setAttributeAffect(_vector1, _dotProduct);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Vec3");
+	specialization.push_back("Vec3Array");
+
+	std::vector<std::string> outSpecialization;
+	outSpecialization.push_back("Float");
+	outSpecialization.push_back("FloatArray");
+
+	setAttributeAllowedSpecializations(_vector0, specialization);
+	setAttributeAllowedSpecializations(_vector1, specialization);
+	setAttributeAllowedSpecializations(_dotProduct, outSpecialization);
+
+	addAttributeSpecializationLink(_vector0, _dotProduct);
+	addAttributeSpecializationLink(_vector1, _dotProduct);
+}
+
+void Vec3Dot::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _vector0 && attributeB == _dotProduct){
+		std::vector<std::string> vectorSpecializations = _vector0->allowedSpecialization();
+		std::vector<std::string> dotSpecializations = _dotProduct->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Vec3"){
+				specializationB.push_back(dotSpecializations[0]);
+			}
+			else if(specializationA[0] == "Vec3Array"){
+				specializationB.push_back(dotSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Float"){
+				specializationA.push_back(vectorSpecializations[0]);
+			}
+			else if(specializationB[0] == "FloatArray"){
+				specializationA.push_back(vectorSpecializations[1]);
+			}
+		}
+	}
+}
+
+void Vec3Dot::update(Attribute *attribute){
+	const std::vector<Imath::V3f> &vector0 = _vector0->value()->vec3Values();
+	const std::vector<Imath::V3f> &vector1 = _vector1->value()->vec3Values();
+
+	int size0 = vector0.size();
+	int size1 = vector1.size();
+
+	int minSize = size0;
+	if(size0 < size1){
+		minSize = size1;
+	}
+
+	std::vector<float> dotValues(minSize);
+
+	for(int i = 0; i < minSize; ++i){
+		dotValues[i] = vector0[i].dot(vector1[i]);
+	}
+
+	_dotProduct->outValue()->setFloatValues(dotValues);
+}
+
 Vec3Normalize::Vec3Normalize(const std::string &name, Node *parent): Node(name, parent){
 	_vector = new NumericAttribute("vector", this);
 	_normalized = new NumericAttribute("normalized", this);
@@ -408,4 +488,714 @@ void Degrees::update(Attribute *attribute){
 
 	_outNumber->outValue()->setFloatValues(outValues);
 }
+
+Floor::Floor(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Floor::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::floor(in[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Ceil::Ceil(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Ceil::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::ceil(in[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Round::Round(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Round::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::floor(in[i]+0.5);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Exp::Exp(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Exp::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::exp(in[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Log::Log(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Log::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::log(in[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Log10::Log10(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Log10::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::log(in[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Pow::Pow(const std::string &name, Node *parent): Node(name, parent){
+	_base = new NumericAttribute("base", this);
+	_exponent = new NumericAttribute("exponent", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_base);
+	addInputAttribute(_exponent);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_base, _outNumber);
+	setAttributeAffect(_exponent, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_base, specialization);
+	setAttributeAllowedSpecializations(_exponent, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_base, _outNumber);
+	addAttributeSpecializationLink(_exponent, _outNumber);
+}
+
+void Pow::update(Attribute *attribute){
+	const std::vector<float> &base = _base->value()->floatValues();
+	const std::vector<float> &exponent = _exponent->value()->floatValues();
+	int size = base.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::pow(base[i],exponent[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Sqrt::Sqrt(const std::string &name, Node *parent): Node(name, parent){
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Sqrt::update(Attribute *attribute){
+	const std::vector<float> &in = _inNumber->value()->floatValues();
+	int size = in.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::sqrt(in[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Atan2::Atan2(const std::string &name, Node *parent): Node(name, parent){
+	_inNumberY = new NumericAttribute("y", this);
+	_inNumberX = new NumericAttribute("x", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumberY);
+	addInputAttribute(_inNumberX);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumberY, _outNumber);
+	setAttributeAffect(_inNumberX, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Float");
+	specialization.push_back("FloatArray");
+	setAttributeAllowedSpecializations(_inNumberY, specialization);
+	setAttributeAllowedSpecializations(_inNumberX, specialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inNumberY, _outNumber);
+	addAttributeSpecializationLink(_inNumberX, _outNumber);
+}
+
+void Atan2::update(Attribute *attribute){
+	const std::vector<float> &y = _inNumberY->value()->floatValues();
+	const std::vector<float> &x = _inNumberX->value()->floatValues();
+	int size = y.size();
+
+	std::vector<float> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = std::atan2(y[i],x[i]);
+	}
+
+	_outNumber->outValue()->setFloatValues(outValues);
+}
+
+Min::Min(const std::string &name, Node *parent):
+	Node(name, parent),
+	_selectedOperation(0){
+
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("IntArray");
+	specialization.push_back("FloatArray");
+
+	std::vector<std::string> outSpecialization;
+	outSpecialization.push_back("Int");
+	outSpecialization.push_back("Float");
+
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, outSpecialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Min::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
+
+	Numeric::Type type = _inNumber->outValue()->type();
+
+	if( type == Numeric::numericTypeIntArray){
+		_selectedOperation = &Min::min_int;
+	}
+	else if( type == Numeric::numericTypeFloatArray){
+		_selectedOperation = &Min::min_float;
+	}
+}
+
+void Min::min_int(Numeric *inNumber, Numeric *outNumber){
+	std::vector<int> inValues = inNumber->intValues();
+	std::vector<int> outValues(1);
+
+	int min = std::numeric_limits<int>::max();
+	for(int i = 0; i < inValues.size(); ++i){
+		min = (inValues[i]<min?inValues[i]:min);
+	}
+	outValues[0] = min;
+
+	outNumber->setIntValues(outValues);
+}
+
+void Min::min_float(Numeric *inNumber, Numeric *outNumber){
+	std::vector<float> inValues = inNumber->floatValues();
+	std::vector<float> outValue(1);
+
+	float min = std::numeric_limits<float>::max();
+	for(int i = 0; i < inValues.size(); ++i){
+		min = (inValues[i]<min?inValues[i]:min);
+	}
+	outValue[0] = min;
+
+	outNumber->setFloatValues(outValue);
+}
+
+void Min::update(Attribute *attribute){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
+	}
+}
+
+void Min::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _inNumber && attributeB == _outNumber){
+		std::vector<std::string> inSpecializations = _inNumber->allowedSpecialization();
+		std::vector<std::string> outSpecializations = _outNumber->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "IntArray"){
+				specializationB.push_back(outSpecializations[0]);
+			}
+			else if(specializationA[0] == "FloatArray"){
+				specializationB.push_back(outSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Int"){
+				specializationA.push_back(inSpecializations[0]);
+			}
+			else if(specializationB[0] == "Float"){
+				specializationA.push_back(inSpecializations[1]);
+			}
+		}
+	}
+}
+
+Max::Max(const std::string &name, Node *parent):
+	Node(name, parent),
+	_selectedOperation(0){
+
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("IntArray");
+	specialization.push_back("FloatArray");
+
+	std::vector<std::string> outSpecialization;
+	outSpecialization.push_back("Int");
+	outSpecialization.push_back("Float");
+
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, outSpecialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Max::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
+
+	Numeric::Type type = _inNumber->outValue()->type();
+
+	if( type == Numeric::numericTypeIntArray){
+		_selectedOperation = &Max::max_int;
+	}
+	else if( type == Numeric::numericTypeFloatArray){
+		_selectedOperation = &Max::max_float;
+	}
+}
+
+void Max::max_int(Numeric *inNumber, Numeric *outNumber){
+	std::vector<int> inValues = inNumber->intValues();
+	std::vector<int> outValues(1);
+
+	int max = std::numeric_limits<int>::min();
+	for(int i = 0; i < inValues.size(); ++i){
+		max = (inValues[i]>max?inValues[i]:max);
+	}
+	outValues[0] = max;
+
+	outNumber->setIntValues(outValues);
+}
+
+void Max::max_float(Numeric *inNumber, Numeric *outNumber){
+	std::vector<float> inValues = inNumber->floatValues();
+	std::vector<float> outValue(1);
+
+	float max = std::numeric_limits<float>::min();
+	for(int i = 0; i < inValues.size(); ++i){
+		max = (inValues[i]>max?inValues[i]:max);
+	}
+	outValue[0] = max;
+
+	outNumber->setFloatValues(outValue);
+}
+
+void Max::update(Attribute *attribute){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
+	}
+}
+
+void Max::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _inNumber && attributeB == _outNumber){
+		std::vector<std::string> inSpecializations = _inNumber->allowedSpecialization();
+		std::vector<std::string> outSpecializations = _outNumber->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "IntArray"){
+				specializationB.push_back(outSpecializations[0]);
+			}
+			else if(specializationA[0] == "FloatArray"){
+				specializationB.push_back(outSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Int"){
+				specializationA.push_back(inSpecializations[0]);
+			}
+			else if(specializationB[0] == "Float"){
+				specializationA.push_back(inSpecializations[1]);
+			}
+		}
+	}
+}
+
+Average::Average(const std::string &name, Node *parent):
+	Node(name, parent),
+	_selectedOperation(0){
+
+	_inNumber = new NumericAttribute("in", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inNumber);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inNumber, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("IntArray");
+	specialization.push_back("FloatArray");
+
+	std::vector<std::string> outSpecialization;
+	outSpecialization.push_back("Int");
+	outSpecialization.push_back("Float");
+
+	setAttributeAllowedSpecializations(_inNumber, specialization);
+	setAttributeAllowedSpecializations(_outNumber, outSpecialization);
+
+	addAttributeSpecializationLink(_inNumber, _outNumber);
+}
+
+void Average::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
+
+	Numeric::Type type = _inNumber->outValue()->type();
+
+	if( type == Numeric::numericTypeIntArray){
+		_selectedOperation = &Average::average_int;
+	}
+	else if( type == Numeric::numericTypeFloatArray){
+		_selectedOperation = &Average::average_float;
+	}
+}
+
+void Average::average_int(Numeric *inNumber, Numeric *outNumber){
+	std::vector<int> inValues = inNumber->intValues();
+	std::vector<int> outValues(1);
+
+	int av = 0;
+	for(int i = 0; i < inValues.size(); ++i){
+		av += inValues[i];
+	}
+	outValues[0] = int(av/inValues.size());
+
+	outNumber->setIntValues(outValues);
+}
+
+void Average::average_float(Numeric *inNumber, Numeric *outNumber){
+	std::vector<float> inValues = inNumber->floatValues();
+	std::vector<float> outValue(1);
+
+	float av = 0;
+	for(int i = 0; i < inValues.size(); ++i){
+		av += inValues[i];
+	}
+	outValue[0] = av/inValues.size();
+
+	outNumber->setFloatValues(outValue);
+}
+
+void Average::update(Attribute *attribute){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
+	}
+}
+
+void Average::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _inNumber && attributeB == _outNumber){
+		std::vector<std::string> inSpecializations = _inNumber->allowedSpecialization();
+		std::vector<std::string> outSpecializations = _outNumber->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "IntArray"){
+				specializationB.push_back(outSpecializations[0]);
+			}
+			else if(specializationA[0] == "FloatArray"){
+				specializationB.push_back(outSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Int"){
+				specializationA.push_back(inSpecializations[0]);
+			}
+			else if(specializationB[0] == "Float"){
+				specializationA.push_back(inSpecializations[1]);
+			}
+		}
+	}
+}
+
+Slerp::Slerp(const std::string &name, Node *parent): Node(name, parent){
+	_inQuat1 = new NumericAttribute("q1", this);
+	_inQuat2 = new NumericAttribute("q2", this);
+	_param = new NumericAttribute("t", this);
+	_outNumber = new NumericAttribute("out", this);
+
+	addInputAttribute(_inQuat1);
+	addInputAttribute(_inQuat2);
+	addInputAttribute(_param);
+	addOutputAttribute(_outNumber);
+
+	setAttributeAffect(_inQuat1, _outNumber);
+	setAttributeAffect(_inQuat2, _outNumber);
+	setAttributeAffect(_param, _outNumber);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Quat");
+	specialization.push_back("QuatArray");
+
+	std::vector<std::string> paramSpecialization;
+	paramSpecialization.push_back("Float");
+	paramSpecialization.push_back("FloatArray");
+
+	setAttributeAllowedSpecializations(_inQuat1, specialization);
+	setAttributeAllowedSpecializations(_inQuat2, specialization);
+	setAttributeAllowedSpecializations(_param, paramSpecialization);
+	setAttributeAllowedSpecializations(_outNumber, specialization);
+
+	addAttributeSpecializationLink(_inQuat1, _outNumber);
+	addAttributeSpecializationLink(_inQuat2, _outNumber);
+	addAttributeSpecializationLink(_param, _outNumber);
+}
+
+void Slerp::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _inQuat1 && attributeB == _outNumber){
+		std::vector<std::string> inSpecializations = _inQuat1->allowedSpecialization();
+		std::vector<std::string> outSpecializations = _outNumber->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Quat"){
+				specializationB.push_back(outSpecializations[0]);
+			}
+			else if(specializationA[0] == "QuatArray"){
+				specializationB.push_back(outSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Quat"){
+				specializationA.push_back(inSpecializations[0]);
+			}
+			else if(specializationB[0] == "QuatArray"){
+				specializationA.push_back(inSpecializations[1]);
+			}
+		}
+	}
+	if(attributeA == _inQuat2 && attributeB == _outNumber){
+		std::vector<std::string> inSpecializations = _inQuat2->allowedSpecialization();
+		std::vector<std::string> outSpecializations = _outNumber->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Quat"){
+				specializationB.push_back(outSpecializations[0]);
+			}
+			else if(specializationA[0] == "QuatArray"){
+				specializationB.push_back(outSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Quat"){
+				specializationA.push_back(inSpecializations[0]);
+			}
+			else if(specializationB[0] == "QuatArray"){
+				specializationA.push_back(inSpecializations[1]);
+			}
+		}
+	}
+	if(attributeA == _param && attributeB == _outNumber){
+		std::vector<std::string> inSpecializations = _param->allowedSpecialization();
+		std::vector<std::string> outSpecializations = _outNumber->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Float"){
+				specializationB.push_back(outSpecializations[0]);
+			}
+			else if(specializationA[0] == "FloatArray"){
+				specializationB.push_back(outSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Quat"){
+				specializationA.push_back(inSpecializations[0]);
+			}
+			else if(specializationB[0] == "QuatArray"){
+				specializationA.push_back(inSpecializations[1]);
+			}
+		}
+	}
+}
+
+void Slerp::update(Attribute *attribute){
+	const std::vector<Imath::Quatf> &q1 = _inQuat1->value()->quatValues();
+	const std::vector<Imath::Quatf> &q2 = _inQuat2->value()->quatValues();
+	const std::vector<float> &t = _param->value()->floatValues();
+	int size = q1.size();
+	size = (q2.size()<size)?q2.size():size;
+	size = (t.size()<size)?t.size():size;
+
+	std::vector<Imath::Quatf> outValues(size);
+	for(int i = 0; i < size; ++i){
+		outValues[i] = slerp(q1[i],q2[i],t[i]);
+	}
+
+	_outNumber->outValue()->setQuatValues(outValues);
+}
+
+
+
+
 
