@@ -38,7 +38,6 @@
 #include "../src/Command.h"
 
 #include <ImathEuler.h>
-#include <ImathRandom.h>
 
 using namespace coral;
 
@@ -1662,8 +1661,8 @@ void RandomNumber::updateFloat(Numeric *min, Numeric *max, Numeric *out){
 	float minVal = min->floatValueAt(0);
 	float maxVal = max->floatValueAt(0);
 	
-	Imath::Rand32 rand;
-	float outVal = rand.nextf(minVal, maxVal);
+	float outVal = ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
+
 	out->setFloatValueAt(0, outVal);
 }
 
@@ -1674,13 +1673,12 @@ void RandomNumber::updateFloatArray(Numeric *min, Numeric *max, Numeric *out){
 	if(minorSize < 1)
 		minorSize = 1;
 	
-	Imath::Rand32 rand;
 	std::vector<float> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
 		float minVal = min->floatValueAt(0);
 		float maxVal = max->floatValueAt(0);
 		
-		outVals[i] =  rand.nextf(minVal, maxVal);
+		outVals[i] =  ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
 	}
 	
 	out->setFloatValues(outVals);
@@ -1690,8 +1688,7 @@ void RandomNumber::updateInt(Numeric *min, Numeric *max, Numeric *out){
 	int minVal = min->intValueAt(0);
 	int maxVal = max->intValueAt(0);
 	
-	Imath::Rand32 rand;
-	int outVal = rand.nextf(minVal, maxVal);
+	int outVal = ((rand() / RAND_MAX) * (maxVal - minVal)) + minVal;
 	out->setIntValueAt(0, outVal);
 }
 
@@ -1707,8 +1704,7 @@ void RandomNumber::updateIntArray(Numeric *min, Numeric *max, Numeric *out){
 		int minVal = min->intValueAt(0);
 		int maxVal = max->intValueAt(0);
 		
-		Imath::Rand32 rand;
-		outVals[i] =  rand.nextf(minVal, maxVal);
+		outVals[i] =  ((rand() / RAND_MAX) * (maxVal - minVal)) + minVal;
 	}
 	
 	out->setIntValues(outVals);
