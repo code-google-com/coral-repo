@@ -92,6 +92,8 @@ def loadPlugin():
     plugin.registerNode("Max", _coral.Max, tags = ["math"])
     plugin.registerNode("Average", _coral.Average, tags = ["math"])
     plugin.registerNode("Slerp", _coral.Slerp, tags = ["math"])
+    plugin.registerNode("QuatMultiply", _coral.QuatMultiply, tags = ["math"])
+    plugin.registerNode("QuatNormalize", _coral.QuatNormalize, tags = ["math"])
     
     plugin.registerAttribute("GeoAttribute", _coral.GeoAttribute)
     plugin.registerNode("SetGeoPoints", _coral.SetGeoPoints, tags = ["geometry"])
@@ -119,5 +121,7 @@ def loadPlugin():
     plugin.registerNode("ConditionalValue", _coral.ConditionalValue, tags = ["conditional"])
     
     plugin.registerNode("SplinePoint", _coral.SplinePoint, tags = ["curve"])
+    
+    plugin.registerNode("Transform", _coral.Transform, tags = ["dag"])
     
     return plugin

@@ -58,6 +58,8 @@ void mathNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Max, Node>("Max");
 	pythonWrapperUtils::pythonWrapper<Average, Node>("Average");
 	pythonWrapperUtils::pythonWrapper<Slerp, Node>("Slerp");
+	pythonWrapperUtils::pythonWrapper<QuatMultiply, Node>("QuatMultiply");
+	pythonWrapperUtils::pythonWrapper<QuatNormalize, Node>("QuatNormalize");
 }
 
 #endif
