@@ -8,6 +8,12 @@ sconsUtils.importBuildEnvs()
 
 buildMode = sconsUtils.getEnvVar("CORAL_BUILD_MODE")
 
+msvc_version = ""
+if os.environ.has_key("MSVC_VERSION"):
+    msvc_version = os.environ["MSVC_VERSION"]
+
+
+
 env = Environment(
   CPPPATH = [
     sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"),
@@ -26,7 +32,7 @@ env = Environment(
     sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
     sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH")],
   SHLIBPREFIX = "",
-  MSVC_VERSION="9.0",
+  MSVC_VERSION=msvc_version,
   TARGET_ARCH = platform.machine())
 
 if sys.platform.startswith("linux"):
@@ -36,9 +42,11 @@ elif sys.platform == "darwin":
     
 elif sys.platform.startswith("win"):
     env["SHLIBSUFFIX"] = ".pyd"
-    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj /MP")
+    env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj /MP /openmp")
     env["CCFLAGS"] = ["-DCORAL_COMPILE"]
     env["LINKFLAGS"] = ["/MANIFEST:NO"]
+    if os.environ.has_key("CORAL_OPENMP"):
+        env["CCFLAGS"].append("-DCORAL_OPENMP")
 
 if os.environ.has_key("CORAL_PARALLEL"):
     parallel =  os.environ["CORAL_PARALLEL"]

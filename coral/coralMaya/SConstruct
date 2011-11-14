@@ -5,6 +5,11 @@ import platform
 import sconsUtils
 
 os.environ["CORAL_BUILD_FLAVOUR"] = "coralMaya"
+
+msvc_version = ""
+if os.environ.has_key("MSVC_VERSION"):
+    msvc_version = os.environ["MSVC_VERSION"]
+
 sconsUtils.importBuildEnvs()
 
 coralPath = os.path.join(os.pardir, "coral")
@@ -37,7 +42,7 @@ env = Environment(
         sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
         sconsUtils.getEnvVar("CORAL_MAYA_LIBS_PATH")],
     SHLIBPREFIX = "",
-	MSVC_VERSION="9.0",
+	MSVC_VERSION=msvc_version,
     TARGET_ARCH = platform.machine())
 
 if sys.platform.startswith("linux"):

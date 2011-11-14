@@ -4,6 +4,10 @@ import os
 import platform
 import sconsUtils
 
+msvc_version = ""
+if os.environ.has_key("MSVC_VERSION"):
+    msvc_version = os.environ["MSVC_VERSION"]
+
 sconsUtils.importBuildEnvs()
 
 buildMode = sconsUtils.getEnvVar("CORAL_BUILD_MODE")
@@ -25,7 +29,7 @@ env = Environment(
     sconsUtils.getEnvVar("CORAL_PYTHON_LIBS_PATH"), 
     sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH")],
   SHLIBPREFIX = "",
-  MSVC_VERSION="9.0",
+  MSVC_VERSION=msvc_version,
   TARGET_ARCH = platform.machine())
 
 

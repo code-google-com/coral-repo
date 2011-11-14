@@ -34,6 +34,7 @@
 #include "../src/Attribute.h"
 #include "../src/NumericAttribute.h"
 #include "../src/EnumAttribute.h"
+#include "../src/GeoAttribute.h"
 
 namespace coral{
 
@@ -48,10 +49,20 @@ private:
 	NumericAttribute *_rotate;
 	NumericAttribute *_scale;
 	NumericAttribute *_parent;
+	EnumAttribute *_rotateOrder;
+	NumericAttribute *_share;
+	NumericAttribute *_rotatePivot;
+	NumericAttribute *_rotatePivotTranslate;
+	NumericAttribute *_scalePivot;
+	NumericAttribute *_scalePivotTranslate;
+	NumericAttribute *_rotateAxis;
+	GeoAttribute *_ingeo;
+
 
 	//output attributes
 	NumericAttribute *_local;
 	NumericAttribute *_outWorld;
+	GeoAttribute *_outgeo;
 };
 
 }
