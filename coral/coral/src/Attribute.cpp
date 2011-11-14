@@ -109,7 +109,8 @@ Attribute::Attribute(const std::string &name, Node *parent):
 	_passThrough(false),
 	_valueObserved(0),
 	_computeTimeSeconds(0),
-	_computeTimeMilliseconds(0){
+	_computeTimeMilliseconds(0),
+	_notifyParentNodeOnDirty(false){
 		
 	_dirtyChain.push_back(this);
 }
@@ -367,6 +368,10 @@ void Attribute::cleanSelf(){
 	}
 }
 
+void Attribute::setNotifyParentNodeOnDirty(bool value){
+	_notifyParentNodeOnDirty = value;
+}
+
 void Attribute::dirty(bool force){
 	if(!_cleaningLocked){
 		if(_isClean || force){
@@ -374,7 +379,14 @@ void Attribute::dirty(bool force){
 				Attribute* attr = _dirtyChain[i];
 				attr->_isClean = false;
 				attr->onDirtied();
-			
+				
+				if(attr->_notifyParentNodeOnDirty){
+					Node *parentNode = parent();
+					if(parentNode){
+						parentNode->attributeDirtied(attr);
+					}
+				}
+
 				if(attr->_valueObserved){
 					if(attr->_valueChangedCallback && !attr->isDeleted()){
 						attr->_valueChangedCallback(attr);

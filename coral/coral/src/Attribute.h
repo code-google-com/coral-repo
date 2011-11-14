@@ -169,6 +169,7 @@ private:
 	void processDirtyingDoneCallbackQueue();
 	Attribute *findFirstOutputNotPassThrough();
 	void initValueFromPassThroughFirstOutput(Attribute *attribute);
+	void setNotifyParentNodeOnDirty(bool value);
 
 	Attribute *_input;
 	std::vector<Attribute*> _outputs;
@@ -179,6 +180,7 @@ private:
 	bool _isInput;
 	bool _passThrough;
 	bool _valueObserved;
+	bool _notifyParentNodeOnDirty;
 	Value *_value;
 	Value *_inputValue;
 	std::vector<std::string> _allowedSpecialization;

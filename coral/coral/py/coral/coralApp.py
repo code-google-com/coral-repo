@@ -403,14 +403,17 @@ def findAttribute(fullName):
 
 def findObject(fullName):
     names = fullName.split(".")
-    names.pop(0)
-    
-    object = rootNode()
-    for name in names:
-        object = object.findObject(name)
-        
-        if object is None:
-            break
+    rootName = names.pop(0)
+
+    object = None
+    root = rootNode()
+    if rootName == root.name():
+        object = root
+        for name in names:
+            object = object.findObject(name)
+            
+            if object is None:
+                break
     
     return object
 

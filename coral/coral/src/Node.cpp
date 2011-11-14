@@ -651,6 +651,11 @@ std::vector<std::string> Node::specializationPresets(){
 	return presets;
 }
 
+void Node::catchAttributeDirtied(Attribute *attribute, bool value){
+	if(containerUtils::elementInContainer(attribute, attributes())){
+		attribute->setNotifyParentNodeOnDirty(value);
+	}
+}
 
-
-
+void Node::attributeDirtied(Attribute *attribute){
+}

@@ -31,6 +31,7 @@ import weakref
 from PyQt4 import QtGui, QtCore
 
 from .. import coralApp
+from .. import utils
 from ..observer import Observer
 from pluginUi import PluginUi 
 from nodeEditor.nodeUi import NodeUi
@@ -230,6 +231,112 @@ class ProcessSimulationNodeInspectorWidget(NodeInspectorWidget):
         nodeUi.addInputAttributeUi(newAttrUi)
         nodeUi.updateLayout()
 
+        self.nodeInspector().refresh()
+
+class AttributeSpecializationComboBox(QtGui.QComboBox):
+    def __init__(self, coralAttribute, parent):
+        QtGui.QComboBox.__init__(self, parent)
+        
+        self._coralAttribute = weakref.ref(coralAttribute)
+        self._showPopupCallback = None
+        self._currentItemChangedCallback = None
+        self._currentItemChangedCallbackEnabled = True
+        
+        self.connect(self, QtCore.SIGNAL("currentIndexChanged(QString)"), self._currentItemChanged)
+    
+    def coralAttribute(self):
+        return self._coralAttribute()
+
+    def setShowPopupCallback(self, callback):
+        self._showPopupCallback = utils.weakRef(callback)
+ 
+    def setCurrentItemChangedCallback(self, callback):
+        self._currentItemChangedCallback = utils.weakRef(callback)
+    
+    def _currentItemChanged(self, itemText):
+        if self._currentItemChangedCallbackEnabled:
+            if self._currentItemChangedCallback:
+                self._currentItemChangedCallback(self)
+    
+    def showPopup(self):
+        self._currentItemChangedCallbackEnabled = False
+        
+        if self._showPopupCallback:
+            self._showPopupCallback(self)
+        
+        QtGui.QComboBox.showPopup(self)
+        
+        self._currentItemChangedCallbackEnabled = True
+
+class KernelNodeInspectorWidget(NodeInspectorWidget):
+    def __init__(self, coralNode, parentWidget):
+        NodeInspectorWidget.__init__(self, coralNode, parentWidget)
+
+    def _addInputClicked(self):
+        coralApp.createAttribute("NumericAttribute", "input", self.coralNode(), input = True)
+        self.nodeInspector().refresh()
+
+    def _addOutputClicked(self):
+        coralApp.createAttribute("NumericAttribute", "output", self.coralNode(), output = True)
+        self.nodeInspector().refresh()
+    
+    def _popupSpecCombo(self, comboBox):
+        coralAttribute = comboBox.coralAttribute()
+        
+        coralAttribute.removeSpecializationOverride()
+        coralAttribute.forceSpecializationUpdate()
+        
+        attrSpecialization = coralAttribute.specialization()
+        
+        comboBox.clear()
+        for spec in coralAttribute.specialization():
+            comboBox.addItem(spec)
+        
+        comboBox.addItem("none")
+        comboBox.setCurrentIndex(len(attrSpecialization))
+    
+    def _currentSpecChanged(self, comboBox):
+        specialization = str(comboBox.currentText())
+        attr = comboBox.coralAttribute()
+        
+        if specialization != "" and specialization != "none":
+            attr.setSpecializationOverride(str(specialization));
+        else:
+            attr.removeSpecializationOverride()
+            
+        attr.forceSpecializationUpdate()
+
+    def build(self):
+        NodeInspectorWidget.build(self)
+
+        groupBox = QtGui.QGroupBox("attribute editor", self)
+        vlayout = QtGui.QVBoxLayout()
+        groupBox.setLayout(vlayout)
+        
+        addInAttrButton = QtGui.QPushButton("Add Input", groupBox)
+        addOutAttrButton = QtGui.QPushButton("Add Output", groupBox)
+
+        vlayout.addWidget(addInAttrButton)
+        vlayout.addWidget(addOutAttrButton)
+
+        self.connect(addInAttrButton, QtCore.SIGNAL("clicked()"), self._addInputClicked)
+        self.connect(addOutAttrButton, QtCore.SIGNAL("clicked()"), self._addOutputClicked)
+
+        for attr in self.coralNode().dynamicAttributes():
+            hlayout = QtGui.QHBoxLayout()
+
+            attrName = QtGui.QLineEdit(attr.name(), groupBox);
+            hlayout.addWidget(attrName)
+
+            specCombo = AttributeSpecializationComboBox(attr, groupBox)
+            specCombo.setShowPopupCallback(self._popupSpecCombo)
+            specCombo.setCurrentItemChangedCallback(self._currentSpecChanged)
+            hlayout.addWidget(specCombo)
+
+            vlayout.addLayout(hlayout)
+
+        self.layout().addWidget(groupBox)
+
 class BuildArrayInspectorWidget(NodeInspectorWidget):
     def __init__(self, coralNode, parentWidget):
         NodeInspectorWidget.__init__(self, coralNode, parentWidget)
@@ -250,6 +357,8 @@ class BuildArrayInspectorWidget(NodeInspectorWidget):
         newAttrUi = NodeEditor._createAttributeUi(newAttr, nodeUi)
         nodeUi.addInputAttributeUi(newAttrUi)
         nodeUi.updateLayout()
+
+        self.nodeInspector().refresh()
 
 class TimeNodeInspectorWidget(NodeInspectorWidget):
     def __init__(self, coralNode, parentWidget):
@@ -416,5 +525,6 @@ def loadPluginUi():
     plugin.registerInspectorWidget("Time", TimeNodeInspectorWidget)
     plugin.registerInspectorWidget("EnumAttribute", EnumAttributeInspectorWidget)
     plugin.registerInspectorWidget("ProcessSimulation", ProcessSimulationNodeInspectorWidget)
+    plugin.registerInspectorWidget("KernelNode", KernelNodeInspectorWidget)
     
     return plugin

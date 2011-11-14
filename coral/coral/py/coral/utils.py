@@ -45,9 +45,10 @@ class WeakMethod(object):
     def __nonzero__(self):
         return self._object() is not None
         
-    def __call__(self):
-        if self._object():
-            return self._method(self._object())
+    def __call__(self, *args):
+        obj = self._object()
+        if obj:
+            return self._method(obj, *args)
 
 def weakRef(object):
     ref = NoneRef()

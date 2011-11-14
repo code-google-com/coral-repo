@@ -92,11 +92,15 @@ class NodeInspectorWidget(QtGui.QWidget):
         self._nameEditable = False
         self._attributeWidgets = {}
         self._presetCombo = None
+        self._nodeInspector = weakref.ref(parent)
         
         self.setLayout(self._mainLayout)
         self._mainLayout.setContentsMargins(0, 0, 0, 0)
         self._mainLayout.setSpacing(2)
     
+    def nodeInspector(self):
+        return self._nodeInspector()
+
     def attributeWidget(self, name):
         widget = None
         if self._attributeWidgets.has_key(name):
@@ -258,7 +262,7 @@ class ProxyAttributeInspectorWidget(QtGui.QWidget):
         
         self._specializationCombo._combo.addItem("none")
         self._specializationCombo._combo.setCurrentIndex(len(attrSpecialization))
-        
+    
     def build(self):
         coralAttribute = self._coralAttribute()
         
@@ -276,7 +280,7 @@ class ProxyAttributeInspectorWidget(QtGui.QWidget):
         else:
             self._specializationCombo._combo.addItem("none")
             self._specializationCombo._combo.setCurrentIndex(0)
-        
+    
 class AttributeInspectorWidget(QtGui.QWidget):
     def __init__(self, coralAttribute, parent):
         QtGui.QWidget.__init__(self, parent)
@@ -366,7 +370,7 @@ class NodeInspector(QtGui.QWidget):
         
         self._selectionChanged()
     
-    def _nodeConnectionChanged(self):
+    def refresh(self):
         self.clear()
         
         node = None
@@ -399,14 +403,14 @@ class NodeInspector(QtGui.QWidget):
             self._contentLayout.addWidget(self._inspectorWidget)
             self._header._classNameLabel.setText(node.className())
         
-            coralApp.addNodeConnectionChangedObserver(self._nodeConnectionChangedObserver, node, self._nodeConnectionChanged)
+            coralApp.addNodeConnectionChangedObserver(self._nodeConnectionChangedObserver, node, self.refresh)
         
         elif attribute:
             self._inspectorWidget = ProxyAttributeInspectorWidget(attribute, self)
             self._inspectorWidget.build()
             self._contentLayout.addWidget(self._inspectorWidget)
             
-            coralApp.addNodeConnectionChangedObserver(self._nodeConnectionChangedObserver, attribute.parent(), self._nodeConnectionChanged)
+            coralApp.addNodeConnectionChangedObserver(self._nodeConnectionChangedObserver, attribute.parent(), self.refresh)
                 
     def _selectionChanged(self):
         if self._isLocked:

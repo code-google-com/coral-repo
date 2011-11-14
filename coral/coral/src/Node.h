@@ -77,6 +77,7 @@ public:
 	void enableSpecializationPreset(const std::string &preset);
 	std::string enabledSpecializationPreset();
 	std::vector<std::string> specializationPresets();
+	
 
 	//! Returns a python script to recreate all the nodes contained within this node.
 	//! This method will invoke the asScript() virtual method for each contained node, in order to recreate the content of this node.
@@ -85,6 +86,10 @@ public:
 	//! The default implementation of this method will return the python code needed to create this node,
 	//! you should reimplement this if you need a more complex script to recreate this node.
 	virtual std::string asScript();
+
+	//! This method is invoked by a child attribute when it gets dirtied.
+	//! To enable it for a particular attribute this node must call catchAttributeDirtied(childAttr, true) from its constructor.
+	virtual void attributeDirtied(Attribute *attribute);
 	
 	virtual void setName(const std::string &name);
 	virtual void deleteIt();
@@ -114,6 +119,7 @@ protected:
 	void setAllowDynamicAttributes(bool value);
 	void updateAttributeSpecialization(Attribute *attribute);
 	void setSpecializationPreset(const std::string &presetName, Attribute *attribute, const std::string &specialization);
+	void catchAttributeDirtied(Attribute *attribute, bool value = true);
 
 private:
 	friend class NodeAccessor;

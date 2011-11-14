@@ -13,7 +13,8 @@ env = Environment(
     sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"),
     sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH"), 
     sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"),
-    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH")],
+    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH"),
+    os.path.join(os.pardir, "opencl11")],
   LIBS = [
     sconsUtils.getEnvVar("CORAL_IMATH_LIB"),
     sconsUtils.getEnvVar("CORAL_IMATH_IEX_LIB"),
@@ -32,6 +33,7 @@ if sys.platform.startswith("linux"):
     pass
 elif sys.platform == "darwin":
     env["SHLIBSUFFIX"] = ".so"
+    env["FRAMEWORKS"] = ["OpenCL"]
     
 elif sys.platform.startswith("win"):
     env["SHLIBSUFFIX"] = ".pyd"
