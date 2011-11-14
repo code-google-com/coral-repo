@@ -28,13 +28,10 @@
 
 #include "PassThroughAttribute.h"
 #include "Node.h"
-#include "Value.h"
 
 using namespace coral;
 
 PassThroughAttribute::PassThroughAttribute(const std::string &name, Node *parent): Attribute(name, parent){
 	setPassThrough(true);
 	setClassName("PassThroughAttribute");
-
-	setValuePtr(new Value());
 }

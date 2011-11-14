@@ -25,6 +25,7 @@ env = Environment(
     sconsUtils.getEnvVar("CORAL_PYTHON_LIBS_PATH"), 
     sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH")],
   SHLIBPREFIX = "",
+  MSVC_VERSION="9.0",
   TARGET_ARCH = platform.machine())
 
 

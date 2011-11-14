@@ -34,6 +34,7 @@
 #include "../src/Attribute.h"
 #include "../src/NumericAttribute.h"
 #include "../src/PassThroughAttribute.h"
+#include "../src/StringAttribute.h"
 #include "LoopNodes.h"
 
 namespace coral{
@@ -363,13 +364,13 @@ private:
 	NumericAttribute *_index;
 	NumericAttribute *_element;
 	NumericAttribute *_outArray;
-	void(SetArrayElement::*_selectedOperation)(Numeric *, int, Numeric *, Numeric *);
+	void(SetArrayElement::*_selectedOperation)(Numeric *, const std::vector<int> &, Numeric *, Numeric *);
 
-	void updateInt(Numeric *array, int index, Numeric *element, Numeric *outArray);
-	void updateFloat(Numeric *array, int index, Numeric *element, Numeric *outArray);
-	void updateVec3(Numeric *array, int index, Numeric *element, Numeric *outArray);
-	void updateCol4(Numeric *array, int index, Numeric *element, Numeric *outArray);
-	void updateMatrix44(Numeric *array, int index, Numeric *element, Numeric *outArray);
+	void updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
+	void updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
+	void updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
+	void updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
+	void updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
 };
 
 class SetSimulationStep: public Node{
@@ -378,7 +379,7 @@ public:
 	void update(Attribute *attribute);
 	
 private:
-	NumericAttribute *_source;
+	StringAttribute *_storageKey;
 	NumericAttribute *_data;
 	NumericAttribute *_result;
 };
@@ -389,6 +390,7 @@ public:
 	void update(Attribute *attribute);
 	
 private:
+	StringAttribute *_storageKey;
 	NumericAttribute *_source;
 	NumericAttribute *_step;
 	NumericAttribute *_data;

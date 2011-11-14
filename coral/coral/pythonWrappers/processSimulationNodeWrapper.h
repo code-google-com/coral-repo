@@ -26,19 +26,19 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef CORALOBJECTACCESSOR_H
-#define CORALOBJECTACCESSOR_H
 
-#include "Object.h"
+#ifndef CORAL_PROCESSNODEWRAPPER_H
+#define CORAL_PROCESSNODEWRAPPER_H
 
-namespace coral{
-	
-class ObjectAccessor{
-public:
-	static void _setIsDeleted(Object &self, bool value){
-		self.setIsDeleted(value);
-	}
-};
+#include <boost/python.hpp>
+#include "../builtinNodes/ProcessSimulationNode.h"
+#include "../src/pythonWrapperUtils.h"
 
+using namespace coral;
+
+void processSimulationNodeWrapper(){
+	pythonWrapperUtils::pythonWrapper<ProcessSimulationNode, Node>("ProcessSimulationNode")
+		.def("addInputData", &ProcessSimulationNode::addInputData);
 }
+
 #endif

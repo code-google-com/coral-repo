@@ -39,6 +39,7 @@ env = Environment(
     sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
     sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH")],
   SHLIBPREFIX = "",
+  MSVC_VERSION="9.0",
   TARGET_ARCH = platform.machine())
 
 if sys.platform.startswith("linux"):

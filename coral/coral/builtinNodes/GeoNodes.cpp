@@ -44,12 +44,6 @@ void GetGeoElements::contextChanged(Node *parentNode, Enum *enum_){
 	else if(id == 2){
 		self->_contextualUpdate = &GetGeoElements::updateFaces;
 	}
-	else if(id == 3){
-		self->_contextualUpdate = &GetGeoElements::updateNormalsPerVertex;
-	}
-	else if(id == 4){
-		self->_contextualUpdate = &GetGeoElements::updateNormalsPerFace;
-	}
 }
 
 GetGeoElements::GetGeoElements(const std::string &name, Node *parent): 
@@ -57,106 +51,62 @@ Node(name, parent),
 _contextualUpdate(0){
 	_context = new EnumAttribute("context", this);
 	_geo = new GeoAttribute("geo", this);
-	_points = new NumericAttribute("points", this);
-	_indices = new NumericAttribute("indices", this);
+	_elements = new NumericAttribute("elements", this);
 	
 	addInputAttribute(_context);
 	addInputAttribute(_geo);
-	addOutputAttribute(_points);
-	addOutputAttribute(_indices);
+	addOutputAttribute(_elements);
 	
-	setAttributeAffect(_context, _points);
-	setAttributeAffect(_context, _indices);
-	setAttributeAffect(_geo, _points);
-	setAttributeAffect(_geo, _indices);
+	setAttributeAffect(_context, _elements);
+	setAttributeAffect(_geo, _elements);
 	
-	setAttributeAllowedSpecialization(_indices, "IntArray");
-	setAttributeAllowedSpecialization(_points, "Vec3Array");
+	setAttributeAllowedSpecialization(_elements, "IntArray");
 	
 	Enum *context = _context->outValue();
 	context->addEntry(0, "vertices");
 	context->addEntry(1, "edges");
 	context->addEntry(2, "faces");
-	context->addEntry(3, "normals per vertex");
-	context->addEntry(4, "normals per face");
 	
 	context->setCurrentIndexChangedCallback(this, GetGeoElements::contextChanged);
 	context->setCurrentIndex(0);
 }
 
-void GetGeoElements::updateVertices(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices){
-	points = geo->points();
-	int size = points.size();
-	indices.resize(size);
+void GetGeoElements::updateVertices(Geo *geo, std::vector<int> &elements){
+	const std::vector<Vertex*> &vertices = geo->vertices();
+	int size = vertices.size();
+	elements.resize(size);
 	for(int i = 0; i < size; ++i){
-		indices[i] = i;
+		elements[i] = vertices[i]->id();
 	}
 }
 
-void GetGeoElements::updateEdges(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices){
+void GetGeoElements::updateEdges(Geo *geo, std::vector<int> &elements){
 	const std::vector<Edge*> &edges = geo->edges();
 	int size = edges.size();
-	indices.resize(size);
-	points.resize(size * 2);
+	elements.resize(size);
 	
 	for(int i = 0; i < size; ++i){
-		indices[i] = i;
-		
-		Edge *edge = edges[i];
-		const std::vector<Vertex*> &vertices = edge->vertices();
-		
-		int pointId = i * 2;
-		points[pointId] = vertices[0]->point();
-		points[pointId + 1] = vertices[1]->point();
+		elements[i] = edges[i]->id();
 	}
 }
 
-void GetGeoElements::updateFaces(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices){
+void GetGeoElements::updateFaces(Geo *geo, std::vector<int> &elements){
 	const std::vector<Face*> &faces = geo->faces();
 	int size = faces.size();
-	indices.resize(size);
+	elements.resize(size);
 	
 	for(int i = 0; i < size; ++i){
-		indices[i] = i;
-		
-		Face *face = faces[i];
-		std::vector<Imath::V3f> facePoints = face->points();
-		for(int j = 0; j < facePoints.size(); ++j){
-			points.push_back(facePoints[j]);
-		}
-	}
-}
-
-void GetGeoElements::updateNormalsPerVertex(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices){
-	points = geo->verticesNormals();
-	int size = points.size();
-	indices.resize(size);
-	for(int i = 0; i < size; ++i){
-		indices[i] = i;
-	}
-}
-
-void GetGeoElements::updateNormalsPerFace(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices){
-	points = geo->faceNormals();
-	int size = points.size();
-	indices.resize(size);
-	for(int i = 0; i < size; ++i){
-		indices[i] = i;
+		elements[i] = faces[i]->id();
 	}
 }
 
 void GetGeoElements::update(Attribute *attribute){
 	if(_contextualUpdate){
 		Geo *geo = _geo->value();
-		std::vector<Imath::V3f> points;
-		std::vector<int> indices;
-		(this->*_contextualUpdate)(geo, points, indices);
+		std::vector<int> elements;
+		(this->*_contextualUpdate)(geo, elements);
 		
-		_points->outValue()->setVec3Values(points);
-		_indices->outValue()->setIntValues(indices);
-		
-		setAttributeIsClean(_points, true);
-		setAttributeIsClean(_indices, true);
+		_elements->outValue()->setIntValues(elements);
 	}
 }
 
@@ -180,25 +130,22 @@ _contextualUpdate(0){
 	_context = new EnumAttribute("context", this);
 	_geo = new GeoAttribute("geo", this);
 	_index = new NumericAttribute("index", this);
-	_points = new NumericAttribute("points", this);
-	_indices = new NumericAttribute("indices", this);
-
+	_subElements = new NumericAttribute("subElements", this);
+	
 	addInputAttribute(_context);
 	addInputAttribute(_geo);
 	addInputAttribute(_index);
-	addOutputAttribute(_points);
-	addOutputAttribute(_indices);
+	addOutputAttribute(_subElements);
 
-	setAttributeAffect(_context, _points);
-	setAttributeAffect(_context, _indices);
-	setAttributeAffect(_geo, _points);
-	setAttributeAffect(_geo, _indices);
-	setAttributeAffect(_index, _points);
-	setAttributeAffect(_index, _indices);
+	setAttributeAffect(_context, _subElements);
+	setAttributeAffect(_geo, _subElements);
+	setAttributeAffect(_index, _subElements);
 	
-	setAttributeAllowedSpecialization(_index, "Int");
-	setAttributeAllowedSpecialization(_points, "Vec3Array");
-	setAttributeAllowedSpecialization(_indices, "IntArray");
+	std::vector<std::string> indexSpecs;
+	indexSpecs.push_back("Int");
+	indexSpecs.push_back("IntArray");
+	setAttributeAllowedSpecializations(_index, indexSpecs);
+	setAttributeAllowedSpecialization(_subElements, "IntArray");
 	
 	Enum *context = _context->outValue();
 	context->addEntry(0, "vertex neighbours");
@@ -209,56 +156,49 @@ _contextualUpdate(0){
 	context->setCurrentIndex(0);
 }
 
-void GetGeoSubElements::updateVertexNeighbours(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices){
+void GetGeoSubElements::updateVertexNeighbours(Geo *geo, const std::vector<int> &index, std::vector<int> &subElements){
 	const std::vector<Vertex*> &vertices = geo->vertices();
-	if(index >= 0 && index < vertices.size()){
-		Vertex *vertex = vertices[index];
-		const std::vector<Vertex*> &neighbours = vertex->neighbourVertices();
-		int size = neighbours.size();
+	int verticesSize = vertices.size();
 
-		points.resize(size);
-		indices.resize(size);
+	for(int i = 0; i < index.size(); ++i){
+		int vertexId = index[i];
 
-		for(int i = 0; i < size; ++i){
-			Vertex *neighbour = neighbours[i];
-			points[i] = neighbour->point();
-			indices[i] = neighbour->id();
+		if(vertexId >= 0 && vertexId < verticesSize){
+			const std::vector<Vertex*> &neighbours = vertices[vertexId]->neighbourVertices();
+			for(int j = 0; j < neighbours.size(); ++j){
+				subElements.push_back(neighbours[j]->id());
+			}
 		}
 	}
 }
 
-void GetGeoSubElements::updateEdgeVertices(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices){
+void GetGeoSubElements::updateEdgeVertices(Geo *geo, const std::vector<int> &index, std::vector<int> &subElements){
 	const std::vector<Edge*> &edges = geo->edges();
-	if(index >= 0 && index < edges.size()){
-		Edge *edge = edges[index];
-		const std::vector<Vertex*> &vertices = edge->vertices();
-		
-		int size = 2;
-		points.resize(size);
-		indices.resize(size);
+	int edgesSize = edges.size();
 
-		for(int i = 0; i < size; ++i){
-			Vertex *vertex = vertices[i];
-			points[i] = vertex->point();
-			indices[i] = vertex->id();
+	for(int i = 0; i < index.size(); ++i){
+		int edgeId = index[i];
+
+		if(edgeId >= 0 && edgeId < edgesSize){
+			const std::vector<Vertex*> &vertices = edges[edgeId]->vertices();
+			subElements.push_back(vertices[0]->id());
+			subElements.push_back(vertices[1]->id());
 		}
 	}
 }
 
-void GetGeoSubElements::updateFaceVertices(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices){
+void GetGeoSubElements::updateFaceVertices(Geo *geo, const std::vector<int> &index, std::vector<int> &subElements){
 	const std::vector<Face*> &faces = geo->faces();
-	if(index >= 0 && index < faces.size()){
-		Face *face = faces[index];
-		const std::vector<Vertex*> &vertices = face->vertices();
+	int facesSize = faces.size();
 
-		int size = vertices.size();
-		points.resize(size);
-		indices.resize(size);
+	for(int i = 0; i < index.size(); ++i){
+		int faceId = index[i];
 
-		for(int i = 0; i < size; ++i){
-			Vertex *vertex = vertices[i];
-			points[i] = vertex->point();
-			indices[i] = vertex->id();
+		if(faceId >= 0 && faceId < facesSize){
+			const std::vector<Vertex*> &vertices = faces[faceId]->vertices();
+			for(int j = 0; j < vertices.size(); ++j){
+				subElements.push_back(vertices[j]->id());
+			}
 		}
 	}
 }
@@ -266,17 +206,12 @@ void GetGeoSubElements::updateFaceVertices(Geo *geo, int index, std::vector<Imat
 void GetGeoSubElements::update(Attribute *attribute){
 	if(_contextualUpdate){
 		Geo *geo = _geo->value();
-		int index = _index->value()->intValueAt(0);
+		const std::vector<int> &index = _index->value()->intValues();
 
-		std::vector<Imath::V3f> points;
-		std::vector<int> indices;
-		(this->*_contextualUpdate)(geo, index, points, indices);
+		std::vector<int> subElements;
+		(this->*_contextualUpdate)(geo, index, subElements);
 		
-		_points->outValue()->setVec3Values(points);
-		_indices->outValue()->setIntValues(indices);
-		
-		setAttributeIsClean(_points, true);
-		setAttributeIsClean(_indices, true);
+		_subElements->outValue()->setIntValues(subElements);
 	}
 }
 

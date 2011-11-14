@@ -26,19 +26,53 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef CORALOBJECTACCESSOR_H
-#define CORALOBJECTACCESSOR_H
+#include "ProcessSimulationNode.h"
+#include "../src/Numeric.h"
+#include "../src/stringUtils.h"
 
-#include "Object.h"
+using namespace coral;
 
-namespace coral{
-	
-class ObjectAccessor{
-public:
-	static void _setIsDeleted(Object &self, bool value){
-		self.setIsDeleted(value);
-	}
-};
+ProcessSimulationNode::ProcessSimulationNode(const std::string &name, Node *parent) : Node(name, parent){
+	setClassName("ProcessSimulation");
+	setAllowDynamicAttributes(true);
 
+	_getDataFrom = new EnumAttribute("getDataFrom", this);
+	_data0 = new NumericAttribute("data0", this);
+	_out = new NumericAttribute("out", this);
+
+	addInputAttribute(_getDataFrom);
+	addInputAttribute(_data0);
+	addOutputAttribute(_out);
+
+	setAttributeAffect(_getDataFrom, _out);
+	setAttributeAffect(_data0, _out);
+
+	addAttributeSpecializationLink(_data0, _out);
+
+	_getDataFrom->outValue()->addEntry(0, "data0");
 }
-#endif
+
+void ProcessSimulationNode::addInputData(){
+	int newId = inputAttributes().size() - 1;
+	std::string numStr = stringUtils::intToString(newId);
+	NumericAttribute *attr = new NumericAttribute("data" + numStr, this);
+	addInputAttribute(attr);
+	setAttributeAffect(attr, _out);
+	
+	addAttributeSpecializationLink(attr, _out);
+
+	addDynamicAttribute(attr);
+
+	updateAttributeSpecialization(attr);
+
+	_getDataFrom->outValue()->addEntry(newId, attr->name());
+}
+
+void ProcessSimulationNode::update(Attribute *attribute){
+	int attrToTransfer = _getDataFrom->value()->currentIndex() + 1;
+
+	std::vector<Attribute*> attrs = inputAttributes();
+	if(attrToTransfer < attrs.size()){
+		_out->outValue()->copy(attrs[attrToTransfer]->value());
+	}
+}

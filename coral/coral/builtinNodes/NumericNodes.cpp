@@ -38,7 +38,6 @@
 #include "../src/Command.h"
 
 #include <ImathEuler.h>
-#include <ImathRandom.h>
 
 using namespace coral;
 
@@ -62,7 +61,7 @@ int findMinorNumericSize(NumericAttribute *attrs[], int numAttrs){
 	return minorSize;
 }
 
-std::map<int, Numeric> _globalNumericStorage;
+std::map<std::string, Numeric> _globalNumericStorage;
 tbb::mutex _globalMutex;
 }
 
@@ -1662,8 +1661,8 @@ void RandomNumber::updateFloat(Numeric *min, Numeric *max, Numeric *out){
 	float minVal = min->floatValueAt(0);
 	float maxVal = max->floatValueAt(0);
 	
-	Imath::Rand32 rand;
-	float outVal = rand.nextf(minVal, maxVal);
+	float outVal = ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
+
 	out->setFloatValueAt(0, outVal);
 }
 
@@ -1674,13 +1673,12 @@ void RandomNumber::updateFloatArray(Numeric *min, Numeric *max, Numeric *out){
 	if(minorSize < 1)
 		minorSize = 1;
 	
-	Imath::Rand32 rand;
 	std::vector<float> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
 		float minVal = min->floatValueAt(0);
 		float maxVal = max->floatValueAt(0);
 		
-		outVals[i] =  rand.nextf(minVal, maxVal);
+		outVals[i] =  ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
 	}
 	
 	out->setFloatValues(outVals);
@@ -1690,8 +1688,7 @@ void RandomNumber::updateInt(Numeric *min, Numeric *max, Numeric *out){
 	int minVal = min->intValueAt(0);
 	int maxVal = max->intValueAt(0);
 	
-	Imath::Rand32 rand;
-	int outVal = rand.nextf(minVal, maxVal);
+	int outVal = ((rand() / RAND_MAX) * (maxVal - minVal)) + minVal;
 	out->setIntValueAt(0, outVal);
 }
 
@@ -1707,8 +1704,7 @@ void RandomNumber::updateIntArray(Numeric *min, Numeric *max, Numeric *out){
 		int minVal = min->intValueAt(0);
 		int maxVal = max->intValueAt(0);
 		
-		Imath::Rand32 rand;
-		outVals[i] =  rand.nextf(minVal, maxVal);
+		outVals[i] =  ((rand() / RAND_MAX) * (maxVal - minVal)) + minVal;
 	}
 	
 	out->setIntValues(outVals);
@@ -2071,24 +2067,33 @@ _selectedOperation(0){
 	setAttributeAffect(_element, _outArray);
 	setAttributeAffect(_index, _outArray);
 	
-	std::vector<std::string> allowedSpecs;
-	allowedSpecs.push_back("Int");
-	allowedSpecs.push_back("Float");
-	allowedSpecs.push_back("Vec3");
-	allowedSpecs.push_back("Col4");
-	allowedSpecs.push_back("Matrix44");
+	std::vector<std::string> elementSpecs;
+	elementSpecs.push_back("Int");
+	elementSpecs.push_back("IntArray");
+	elementSpecs.push_back("Float");
+	elementSpecs.push_back("FloatArray");
+	elementSpecs.push_back("Vec3");
+	elementSpecs.push_back("Vec3Array");
+	elementSpecs.push_back("Col4");
+	elementSpecs.push_back("Col4Array");
+	elementSpecs.push_back("Matrix44");
+	elementSpecs.push_back("Matrix44Array");
 	
-	std::vector<std::string> allowedArraySpecs;
-	allowedArraySpecs.push_back("IntArray");
-	allowedArraySpecs.push_back("FloatArray");
-	allowedArraySpecs.push_back("Vec3Array");
-	allowedArraySpecs.push_back("Col4Array");
-	allowedArraySpecs.push_back("Matrix44Array");
+	std::vector<std::string> arraySpecs;
+	arraySpecs.push_back("IntArray");
+	arraySpecs.push_back("FloatArray");
+	arraySpecs.push_back("Vec3Array");
+	arraySpecs.push_back("Col4Array");
+	arraySpecs.push_back("Matrix44Array");
 	
-	setAttributeAllowedSpecializations(_array, allowedArraySpecs);
-	setAttributeAllowedSpecializations(_element, allowedSpecs);
-	setAttributeAllowedSpecialization(_index, "Int");
-	setAttributeAllowedSpecializations(_outArray, allowedArraySpecs);
+	std::vector<std::string> indexSpec;
+	indexSpec.push_back("Int");
+	indexSpec.push_back("IntArray");
+
+	setAttributeAllowedSpecializations(_array, arraySpecs);
+	setAttributeAllowedSpecializations(_element, elementSpecs);
+	setAttributeAllowedSpecializations(_index, indexSpec);
+	setAttributeAllowedSpecializations(_outArray, arraySpecs);
 	
 	addAttributeSpecializationLink(_array, _outArray);
 	addAttributeSpecializationLink(_element, _outArray);
@@ -2099,18 +2104,27 @@ void SetArrayElement::updateSpecializationLink(Attribute *attributeA, Attribute 
 		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
 	}
 	else{
-		if(specializationA.size() < specializationB.size()){
-			specializationB.resize(specializationA.size());
-			for(int i = 0; i < specializationA.size(); ++i){
-				specializationB[i] = specializationA[i] + "Array";
+		std::vector<std::string> newSpecA;
+		std::vector<std::string> newSpecB;
+		for(int i = 0; i < specializationA.size(); ++i){
+			std::string &specA = specializationA[i];
+			std::string typeA = stringUtils::strip(specA, "Array");
+			for(int j = 0; j < specializationB.size(); ++j){
+				std::string &specB = specializationB[j];
+				std::string typeB = stringUtils::strip(specB, "Array");
+				if(typeA == typeB){
+					if(!containerUtils::elementInContainer(specB, newSpecB)){
+						newSpecB.push_back(specB);
+					}
+					if(!containerUtils::elementInContainer(specA, newSpecA)){
+						newSpecA.push_back(specA);
+					}
+				}
 			}
 		}
-		else if(specializationB.size() < specializationA.size()){
-			specializationA.resize(specializationB.size());
-			for(int i = 0; i < specializationB.size(); ++i){
-				specializationA[i] = stringUtils::strip(specializationB[i], "Array");
-			}
-		}
+
+		specializationA = newSpecA;
+		specializationB = newSpecB;
 	}
 }
 
@@ -2139,55 +2153,75 @@ void SetArrayElement::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void SetArrayElement::updateInt(Numeric *array, int index, Numeric *element, Numeric *outArray){
+void SetArrayElement::updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
 	std::vector<int> values = array->intValues();
-	if(index >= 0 && index < values.size()){
-		values[index] = element->intValueAt(0);
+	int valuesSize = array->size();
+	for(int i = 0; i < index.size(); ++i){
+		int currentIndex = index[i];
+		if(currentIndex >= 0 && currentIndex < valuesSize){
+			values[currentIndex] = element->intValueAt(i);
+		}
 	}
-	
+
 	outArray->setIntValues(values);
 }
 
-void SetArrayElement::updateFloat(Numeric *array, int index, Numeric *element, Numeric *outArray){
+void SetArrayElement::updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
 	std::vector<float> values = array->floatValues();
-	if(index >= 0 && index < values.size()){
-		values[index] = element->floatValueAt(0);
+	int valuesSize = array->size();
+	for(int i = 0; i < index.size(); ++i){
+		int currentIndex = index[i];
+		if(currentIndex >= 0 && currentIndex < valuesSize){
+			values[currentIndex] = element->floatValueAt(i);
+		}
 	}
-	
+
 	outArray->setFloatValues(values);
 }
 
-void SetArrayElement::updateVec3(Numeric *array, int index, Numeric *element, Numeric *outArray){
+void SetArrayElement::updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
 	std::vector<Imath::V3f> values = array->vec3Values();
-	if(index >= 0 && index < values.size()){
-		values[index] = element->vec3ValueAt(0);
+	int valuesSize = array->size();
+	for(int i = 0; i < index.size(); ++i){
+		int currentIndex = index[i];
+		if(currentIndex >= 0 && currentIndex < valuesSize){
+			values[currentIndex] = element->vec3ValueAt(i);
+		}
 	}
-	
+
 	outArray->setVec3Values(values);
 }
 
-void SetArrayElement::updateCol4(Numeric *array, int index, Numeric *element, Numeric *outArray){
+void SetArrayElement::updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
 	std::vector<Imath::Color4f> values = array->col4Values();
-	if(index >= 0 && index < values.size()){
-		values[index] = element->col4ValueAt(0);
+	int valuesSize = array->size();
+	for(int i = 0; i < index.size(); ++i){
+		int currentIndex = index[i];
+		if(currentIndex >= 0 && currentIndex < valuesSize){
+			values[currentIndex] = element->col4ValueAt(i);
+		}
 	}
 
 	outArray->setCol4Values(values);
 }
 
-void SetArrayElement::updateMatrix44(Numeric *array, int index, Numeric *element, Numeric *outArray){
+void SetArrayElement::updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
 	std::vector<Imath::M44f> values = array->matrix44Values();
-	if(index >= 0 && index < values.size()){
-		values[index] = element->matrix44ValueAt(0);
+	int valuesSize = array->size();
+	for(int i = 0; i < index.size(); ++i){
+		int currentIndex = index[i];
+		if(currentIndex >= 0 && currentIndex < valuesSize){
+			values[currentIndex] = element->matrix44ValueAt(i);
+		}
 	}
-	
+
 	outArray->setMatrix44Values(values);
 }
 
 void SetArrayElement::update(Attribute *attribute){
 	if(_selectedOperation){
 		Numeric *array = _array->value();
-		int index = _index->value()->intValueAt(0);
+		const std::vector<int> &index = _index->value()->intValues();
 		Numeric *element = _element->value();
 		Numeric *outArray = _outArray->outValue();
 		
@@ -2196,18 +2230,18 @@ void SetArrayElement::update(Attribute *attribute){
 }
 
 SetSimulationStep::SetSimulationStep(const std::string &name, Node *parent): Node(name, parent){	
-	_source = new NumericAttribute("source", this);
+	_storageKey = new StringAttribute("storageKey", this);
 	_data = new NumericAttribute("data", this);
 	_result = new NumericAttribute("result", this);
 	
-	addInputAttribute(_source);
+	addInputAttribute(_storageKey);
 	addInputAttribute(_data);
 	addOutputAttribute(_result);
 	
+	setAttributeAffect(_storageKey, _result);
 	setAttributeAffect(_data, _result);
 	
-	addAttributeSpecializationLink(_source, _data);
-	addAttributeSpecializationLink(_source, _result);
+	addAttributeSpecializationLink(_data, _result);
 }
 
 void SetSimulationStep::update(Attribute *attribute){
@@ -2215,22 +2249,24 @@ void SetSimulationStep::update(Attribute *attribute){
 		tbb::mutex::scoped_lock lock(_globalMutex);
 	#endif
 
-	int sourceId = _source->value()->id();
 	Numeric *data = _data->value();
 	
-	_globalNumericStorage[sourceId].copy(data);
+	_globalNumericStorage[_storageKey->value()->stringValue()].copy(data);
 	_result->outValue()->copy(data);
 }
 
 GetSimulationStep::GetSimulationStep(const std::string &name, Node *parent): Node(name, parent){	
+	_storageKey = new StringAttribute("storageKey", this);
 	_source = new NumericAttribute("source", this);
 	_step = new NumericAttribute("step", this);
 	_data = new NumericAttribute("data", this);
 	
+	addInputAttribute(_storageKey);
 	addInputAttribute(_source);
 	addInputAttribute(_step);
 	addOutputAttribute(_data);
 	
+	setAttributeAffect(_storageKey, _data);
 	setAttributeAffect(_source, _data);
 	setAttributeAffect(_step, _data);
 	
@@ -2247,26 +2283,26 @@ void GetSimulationStep::update(Attribute *attribute){
 		tbb::mutex::scoped_lock lock(_globalMutex);
 	#endif
 
+	std::string storageKey = _storageKey->value()->stringValue();
 	Numeric *source = _source->value();
-	int sourceId = source->id();
 	Numeric *step = _step->value();
 	if(step->type() == Numeric::numericTypeFloat){
 		float step = _step->value()->floatValueAt(0);
 	
-		if(step == 0.0 || _globalNumericStorage.find(sourceId) == _globalNumericStorage.end()){
-			_globalNumericStorage[sourceId].copy(source);
+		if(step == 0.0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+			_globalNumericStorage[storageKey].copy(source);
 		}
 	
-		_data->outValue()->copy(&_globalNumericStorage[sourceId]);
+		_data->outValue()->copy(&_globalNumericStorage[storageKey]);
 	}
 	else if(step->type() == Numeric::numericTypeInt){
 		int step = _step->value()->intValueAt(0);
 	
-		if(step == 0 || _globalNumericStorage.find(sourceId) == _globalNumericStorage.end()){
-			_globalNumericStorage[sourceId].copy(source);
+		if(step == 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+			_globalNumericStorage[storageKey].copy(source);
 		}
 	
-		_data->outValue()->copy(&_globalNumericStorage[sourceId]);
+		_data->outValue()->copy(&_globalNumericStorage[storageKey]);
 		
 	}
 }

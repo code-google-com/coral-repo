@@ -26,19 +26,27 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef CORALOBJECTACCESSOR_H
-#define CORALOBJECTACCESSOR_H
+#ifndef CORAL_PROCESSNODE_H
+#define CORAL_PROCESSNODE_H
 
-#include "Object.h"
+#include "../src/Node.h"
+#include "../src/NumericAttribute.h"
+#include "../src/EnumAttribute.h"
 
 namespace coral{
-	
-class ObjectAccessor{
+
+class ProcessSimulationNode : public Node{
 public:
-	static void _setIsDeleted(Object &self, bool value){
-		self.setIsDeleted(value);
-	}
+	ProcessSimulationNode(const std::string &name, Node *parent);
+	void addInputData();
+	void update(Attribute *attribute);
+
+private:
+	EnumAttribute *_getDataFrom;
+	NumericAttribute *_data0;
+	NumericAttribute *_out;
 };
 
 }
+
 #endif

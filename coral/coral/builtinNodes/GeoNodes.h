@@ -48,20 +48,16 @@ public:
 private:
 	EnumAttribute *_context;
 	GeoAttribute *_geo;
-	NumericAttribute *_points;
-	NumericAttribute *_indices;
+	NumericAttribute *_elements;
 	
 	std::string _currentContext;
 	std::vector<std::string> _contexts;
 	
-	void(GetGeoElements::*_contextualUpdate)(Geo *, std::vector<Imath::V3f>&, std::vector<int>&);
+	void(GetGeoElements::*_contextualUpdate)(Geo *, std::vector<int>&);
 	
-	void updateVertices(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
-	void updateEdges(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
-	void updateFaces(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
-	void updateNormalsPerVertex(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
-	void updateNormalsPerFace(Geo *geo, std::vector<Imath::V3f> &points, std::vector<int> &indices);
-	
+	void updateVertices(Geo *geo, std::vector<int> &elements);
+	void updateEdges(Geo *geo, std::vector<int> &elements);
+	void updateFaces(Geo *geo, std::vector<int> &elements);
 	static void contextChanged(Node *parentNode, Enum *enum_);
 };
 
@@ -74,14 +70,13 @@ private:
 	EnumAttribute *_context;
 	GeoAttribute *_geo;
 	NumericAttribute *_index;
-	NumericAttribute *_points;
-	NumericAttribute *_indices;
+	NumericAttribute *_subElements;
 
-	void(GetGeoSubElements::*_contextualUpdate)(Geo *, int, std::vector<Imath::V3f>&, std::vector<int>&);
+	void(GetGeoSubElements::*_contextualUpdate)(Geo *, const std::vector<int> &, std::vector<int>&);
 
-	void updateVertexNeighbours(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices);
-	void updateEdgeVertices(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices);
-	void updateFaceVertices(Geo *geo, int index, std::vector<Imath::V3f> &points, std::vector<int> &indices);
+	void updateVertexNeighbours(Geo *geo, const std::vector<int> &index, std::vector<int> &subElements);
+	void updateEdgeVertices(Geo *geo, const std::vector<int> &index, std::vector<int> &subElements);
+	void updateFaceVertices(Geo *geo, const std::vector<int> &index, std::vector<int> &subElements);
 
 	static void contextChanged(Node *parentNode, Enum *enum_);
 };
