@@ -19,12 +19,12 @@ public:
 	void addDynamicAttribute(Attribute *attribute);
 	void attributeDirtied(Attribute *attribute);
 	void update(Attribute *attribute);
+	std::string buildInfo();
 
 private:
 	void initCL();
 	void buildKernelSource();
 
-	NumericAttribute *_indexRange;
 	StringAttribute *_kernelSource;
 
 	cl::Context _context;
@@ -33,6 +33,7 @@ private:
 	std::vector<cl::Device> _devices;
 
 	bool _kernelReady;
+	std::string _buildMessage;
 };
 
 }

@@ -32,6 +32,7 @@
 #include <string>
 #include "Value.h"
 #include "Attribute.h"
+#include "stringUtils.h"
 
 namespace coral{
 
@@ -47,7 +48,8 @@ public:
 	}
 	
 	std::string asString(){
-		return _value;
+		std::string val = stringUtils::replace(_value, "\n", "\\n");
+		return val;
 	}
 	
 	void setFromString(const std::string &value){

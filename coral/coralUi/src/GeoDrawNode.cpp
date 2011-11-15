@@ -50,6 +50,7 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, 
 	_points = new BoolAttribute("points", this);
 	_normals = new BoolAttribute("normals", this);
 	// _ids = new BoolAttribute("ids", this);
+	_colors = new NumericAttribute("colors", this);
 	
 	addInputAttribute(_geo);
 	addInputAttribute(_smooth);
@@ -58,6 +59,7 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, 
 	addInputAttribute(_points);
 	addInputAttribute(_normals);
 	// addInputAttribute(_ids);
+	addInputAttribute(_colors);
 	
 	setAttributeAffect(_geo, (Attribute*)viewportOutputAttribute());
 	setAttributeAffect(_smooth, (Attribute*)viewportOutputAttribute());
@@ -66,23 +68,76 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, 
 	setAttributeAffect(_points, (Attribute*)viewportOutputAttribute());
 	setAttributeAffect(_normals, (Attribute*)viewportOutputAttribute());
 	// setAttributeAffect(_ids, (Attribute*)viewportOutputAttribute());
+	setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
 	
 	_smooth->outValue()->setBoolValueAt(0, true);
 }
 
 void GeoDrawNode::drawPoints(Geo *geo){
+
+	// Get attribute using this way at each draw?
+	Numeric *numeric = _colors->value();
+	Numeric::Type numType = numeric->type();
+	const std::vector<Imath::Color4f> &col4Values = numeric->col4Values();
+
+	if(numType == Numeric::numericTypeCol4){
+		glColor4f(col4Values[0].r, col4Values[0].g, col4Values[0].b, col4Values[0].a);
+	}
+	else{
+		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);	// default green
+	}
+
 	glDisable(GL_LIGHTING);
 	glShadeModel(GL_FLAT);
 	
 	const std::vector<Imath::V3f> &points = geo->points();
 	
 	glPointSize(5.f);
-	glColor3f(0.f, 1.f, 0.f);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, (GLvoid*)&points[0].x);
+
+	GLfloat colArray[points.size()*4];	// this need to be outside of the if{} do exists during glDrawArrays()
+
+	if(numType == Numeric::numericTypeCol4Array){
+
+		int index = 0;
+		// first step, put existing color in the array (color array can't be bigger than points.size() to avoid segfault)
+		for(int i=0; i<col4Values.size() && i<points.size(); i++){
+			colArray[index] = col4Values[i].r;
+			colArray[index+1] = col4Values[i].g;
+			colArray[index+2] = col4Values[i].b;
+			colArray[index+3] = col4Values[i].a;
+			index+=4;
+		}
+
+		// If more points than colors, use default green
+		int diff = points.size() - col4Values.size();
+
+		if(diff > 0){
+			for(int i=0; i<diff; i++){
+				colArray[index] = 0.0f;
+				colArray[index+1] = 1.0f;
+				colArray[index+2] = 0.0f;
+				colArray[index+3] = 1.0f;
+				index+=4;
+			}
+		}
+
+		glEnableClientState(GL_COLOR_ARRAY);
+		glColorPointer(4, GL_FLOAT, 0, (GLvoid*)&colArray);
+	}
+
 	glDrawArrays(GL_POINTS, 0, points.size());
+
+	if(numType == Numeric::numericTypeCol4Array){
+		glColorPointer(4, GL_FLOAT, 0, NULL);
+		glDisableClientState(GL_COLOR_ARRAY);
+	}
 	glDisableClientState(GL_VERTEX_ARRAY);
+
+
+
 }
 
 void GeoDrawNode::drawSmooth(Geo *geo){
@@ -90,9 +145,23 @@ void GeoDrawNode::drawSmooth(Geo *geo){
 	const std::vector<std::vector<int> > &faces = geo->rawFaces();
 	const std::vector<Imath::V3f> &verticesNormals = geo->verticesNormals();
 	
+	Numeric *numeric = _colors->value();
+	Numeric::Type numType = numeric->type();
+	const std::vector<Imath::Color4f> &col4Values = numeric->col4Values();
+
+	if(numType == Numeric::numericTypeCol4){
+		glColor4f(col4Values[0].r, col4Values[0].g, col4Values[0].b, col4Values[0].a);
+	}else{
+		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);	// default green
+	}
+
 	if(verticesNormals.empty() == false){
 		glEnable(GL_LIGHTING);
 		glShadeModel(GL_SMOOTH);
+
+		if(numType == Numeric::numericTypeCol4 || numType == Numeric::numericTypeCol4Array){
+			glDisable(GL_LIGHTING);
+		}
 
 		int facesCount = (int)faces.size();
 
@@ -102,9 +171,11 @@ void GeoDrawNode::drawSmooth(Geo *geo){
 			glBegin(GL_POLYGON);
 			for(unsigned int index = 0; index < face.size(); ++index){
 				int vertexID = face[index];
-
-				glNormal3fv(&verticesNormals[vertexID].x);
-				glVertex3fv(&points[vertexID].x);
+				if(numType == Numeric::numericTypeCol4Array){
+					glColor4f(col4Values[vertexID].r, col4Values[vertexID].g, col4Values[vertexID].b, col4Values[vertexID].a);
+				}
+				glNormal3f(verticesNormals[vertexID].x, verticesNormals[vertexID].y, verticesNormals[vertexID].z);
+				glVertex3f(points[vertexID].x, points[vertexID].y, points[vertexID].z);
 			}
 			glEnd();
 		}

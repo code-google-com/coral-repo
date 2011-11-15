@@ -36,7 +36,8 @@
 using namespace coral;
 
 void kernelNodeWrapper(){
-	pythonWrapperUtils::pythonWrapper<KernelNode, Node>("KernelNode");
+	pythonWrapperUtils::pythonWrapper<KernelNode, Node>("KernelNode")
+		.def("buildInfo", &KernelNode::buildInfo);
 }
 
 #endif

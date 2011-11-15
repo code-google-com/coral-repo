@@ -326,6 +326,10 @@ Value *Attribute::outValue(){
 void Attribute::clean(){
 	if(!_cleaningLocked){
 		if(_isClean == false){
+			if(_isInput){
+				_isClean = true;
+			}
+
 			_cleaningLocked = true;
 			
 			boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();

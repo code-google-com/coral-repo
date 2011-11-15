@@ -36,6 +36,7 @@
 #include <coral/src/Geo.h>
 #include <coral/src/GeoAttribute.h>
 #include <coral/src/BoolAttribute.h>
+#include <coral/src/NumericAttribute.h>
 #include "DrawNode.h"
 #include "coralUiDefinitions.h"
 
@@ -54,6 +55,7 @@ private:
 	coral::BoolAttribute *_points;
 	coral::BoolAttribute *_normals;
 	// coral::BoolAttribute *_ids;
+	coral::NumericAttribute *_colors;
 	
 	void drawNormals(coral::Geo *geo, bool shouldDrawFlat);
 	void drawWireframe(coral::Geo *geo);

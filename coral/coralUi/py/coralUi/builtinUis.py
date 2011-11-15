@@ -26,7 +26,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # </license>
 
-
+import sys
 import weakref
 from PyQt4 import QtGui, QtCore
 
@@ -41,6 +41,7 @@ from nodeEditor.connection import Connection
 from nodeEditor.nodeEditor import NodeEditor
 from nodeInspector.fields import IntValueField, FloatValueField, BoolValueField, StringValueField
 from nodeInspector.nodeInspector import NodeInspector, NodeInspectorWidget, AttributeInspectorWidget
+import mainWindow
 
 class GeoAttributeUi(AttributeUi):
     def __init__(self, coralAttribute, parentNodeUi):
@@ -272,6 +273,9 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
     def __init__(self, coralNode, parentWidget):
         NodeInspectorWidget.__init__(self, coralNode, parentWidget)
 
+        self._kernelSourceEdit = None
+        self._kernelBuildConsole = None
+
     def _addInputClicked(self):
         coralApp.createAttribute("NumericAttribute", "input", self.coralNode(), input = True)
         self.nodeInspector().refresh()
@@ -305,9 +309,57 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
             attr.removeSpecializationOverride()
             
         attr.forceSpecializationUpdate()
+    
+    def _setKernelSource(self):
+        if self._kernelSourceEdit:
+            kernelSource = str(self._kernelSourceEdit.toPlainText())
+            kernelSourceAttr = self.coralNode().findObject("_kernelSource")
+            kernelSourceAttr.value().setStringValue(kernelSource)
+            kernelSourceAttr.valueChanged()
+
+            self._kernelBuildConsole.setPlainText(self.coralNode().buildInfo())
+        
+    def _openTextEditor(self):
+        mainWin = mainWindow.MainWindow.globalInstance()
+        dialog = QtGui.QDialog(mainWin)
+        dialog.resize(500, 500)
+
+        vlayout = QtGui.QVBoxLayout(dialog)
+        vlayout.setContentsMargins(5, 5, 5, 5)
+        vlayout.setSpacing(5)
+        dialog.setLayout(vlayout)
+
+        self._kernelSourceEdit = QtGui.QPlainTextEdit(dialog)
+        self._kernelSourceEdit.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        vlayout.addWidget(self._kernelSourceEdit)
+
+        compileButton = QtGui.QPushButton("compile kernel", dialog)
+        vlayout.addWidget(compileButton)
+
+        dialog.connect(compileButton, QtCore.SIGNAL("clicked()"), self._setKernelSource)
+
+        kernelSource = self.coralNode().findObject("_kernelSource").value().stringValue()
+        self._kernelSourceEdit.setPlainText(kernelSource)
+
+        self._kernelBuildConsole = QtGui.QTextEdit(dialog)
+        vlayout.addWidget(self._kernelBuildConsole)
+        self._kernelBuildConsole.setReadOnly(True)
+        self._kernelBuildConsole.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        
+        palette = self._kernelBuildConsole.palette()
+        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(50, 55, 60))
+        self._kernelBuildConsole.setPalette(palette)
+        self._kernelBuildConsole.setTextColor(QtGui.QColor(200, 190, 200))
+
+        dialog.show()
 
     def build(self):
         NodeInspectorWidget.build(self)
+
+        openTextEditorButton = QtGui.QPushButton("edit kernel source", self)
+        self.layout().addWidget(openTextEditorButton)
+
+        self.connect(openTextEditorButton, QtCore.SIGNAL("clicked()"), self._openTextEditor)
 
         groupBox = QtGui.QGroupBox("attribute editor", self)
         vlayout = QtGui.QVBoxLayout()

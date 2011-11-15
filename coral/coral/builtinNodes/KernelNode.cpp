@@ -79,6 +79,25 @@ namespace {
 
 	    return std::string((index >= 0 && index < errorCount) ? errorString[index] : "");
 	}
+
+	int findMinorInputSize(const std::vector<Attribute*> &attrs){
+		int minorSize = -1;
+		for(int i = 0; i < attrs.size(); ++i){
+			Attribute *attr = attrs[i];
+			if(attr->isInput()){
+				Numeric *num = (Numeric*)attr->value();
+				int size = num->size();
+				if(size < minorSize || minorSize == -1){
+					minorSize = size;
+				}
+			}
+		}
+		if(minorSize == -1){
+			minorSize = 0;
+		}
+		
+		return minorSize;
+	}
 }
 
 KernelNode::KernelNode(const std::string &name, Node *parent): 
@@ -86,17 +105,17 @@ Node(name, parent),
 _kernelReady(false){
 	setAllowDynamicAttributes(true);
 
-	_indexRange = new NumericAttribute("indexRange", this);
 	_kernelSource = new StringAttribute("_kernelSource", this);
 
-	addInputAttribute(_indexRange);
 	addInputAttribute(_kernelSource);
 
 	catchAttributeDirtied(_kernelSource);
+
+	initCL();
 }
 
 void KernelNode::attributeDirtied(Attribute *attribute){
-	
+	buildKernelSource();
 }
 
 void KernelNode::addDynamicAttribute(Attribute *attribute){
@@ -140,7 +159,13 @@ void KernelNode::initCL(){
 	}
 }
 
+std::string KernelNode::buildInfo(){
+	return _buildMessage;
+}
+
 void KernelNode::buildKernelSource(){
+	_buildMessage.clear();
+
 	_kernelReady = false;
 	cl_int err = 0;
 	
@@ -155,32 +180,97 @@ void KernelNode::buildKernelSource(){
         program = cl::Program(_context, source);
     }
     catch(cl::Error er){
-        std::cerr << "OpenCL error: " << er.what() << " " << oclErrorString(er.err()) << std::endl;
+    	_buildMessage = "OpenCL error: " + std::string(er.what()) + " " + oclErrorString(er.err());
+        std::cerr << _buildMessage << std::endl;
+        return;
     }
 
     try{
     	err = program.build(_devices);
     }
     catch(cl::Error er){
-    	std::cerr << "OpenCL error: " << oclErrorString(er.err()) << std::endl;
-    	std::cerr << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(_devices[0]) << std::endl;
+    	_buildMessage = "OpenCL error: " + oclErrorString(er.err()) + "\n" + program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(_devices[0]);
+    	std::cerr << _buildMessage << std::endl;
     	return;
     }
 
     try{
-        _kernel = cl::Kernel(program, "main", &err);
-        if(err != 0){
+        _kernel = cl::Kernel(program, "mainKernel", &err);
+        if(!err){
         	_kernelReady = true;
+        	_buildMessage = "Successfully built.";
         }
     }
     catch (cl::Error er) {
-        std::cerr << "OpenCL error: " << er.what() << " " << oclErrorString(er.err()) << std::endl;
+    	std::string errStr = oclErrorString(er.err());
+
+    	_buildMessage = "OpenCL error: " + std::string(er.what()) + " " + errStr;
+
+    	if(errStr == "CL_INVALID_KERNEL_NAME"){
+    		_buildMessage += "\n\nKernel name should be 'mainKernel'";
+    	}
+
+        std::cerr << _buildMessage << std::endl;
+        return;
     }
 }
 
+
+
 void KernelNode::update(Attribute *attribute){
 	if(_kernelReady){
+		std::vector<Attribute*> dynAttrs = dynamicAttributes();
+		int size = findMinorInputSize(dynAttrs);
 
+		if(size == 0){
+			return;
+		}
+
+		cl::Event event;
+		int argId = 0;
+		std::map<int, cl::Buffer> buffers;
+		std::map<int, Numeric*> values;
+		for(int i = 0; i < dynAttrs.size(); ++i){
+			Attribute *attr = dynAttrs[i];
+			int attrId = attr->id();
+			cl::Buffer &attrBuffer = buffers[attrId];
+
+			Numeric *val = (Numeric*)attr->value();
+			values[attrId] = val;
+			if(attr->isInput()){
+				attrBuffer = cl::Buffer(_context, CL_MEM_READ_ONLY, size, NULL);
+				_kernel.setArg(argId, attrBuffer);
+				argId ++;
+				
+				if(val->type() == Numeric::numericTypeFloatArray){
+					_queue.enqueueWriteBuffer(attrBuffer, CL_TRUE, 0, size, &val->floatValues()[0], NULL, &event);
+				}
+			}
+			else{
+				attrBuffer = cl::Buffer(_context, CL_MEM_WRITE_ONLY, size, NULL);
+				_kernel.setArg(argId, attrBuffer);
+				argId ++;
+			}
+		}
+
+		_queue.enqueueNDRangeKernel(_kernel, cl::NullRange, cl::NDRange(size), cl::NullRange, NULL, &event); 
+		_queue.finish();
+
+		const std::vector<Attribute*> &outAttrs = outputAttributes();
+		for(int i = 0; i < outAttrs.size(); ++i){
+			Attribute *attr = outAttrs[i];
+			int attrId = attr->id();
+
+			cl::Buffer &buffer = buffers[i];
+			Numeric *val = values[attrId];
+			
+			if(val->type() == Numeric::numericTypeFloatArray){
+				std::vector<float> outVal(size);
+				_queue.enqueueReadBuffer(buffer, CL_TRUE, 0, size, &outVal[0], NULL, &event);
+
+				val->setFloatValues(outVal);
+			}
+		}
 	}
 }
 
