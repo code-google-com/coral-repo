@@ -275,6 +275,7 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
 
         self._kernelSourceEdit = None
         self._kernelBuildConsole = None
+        self._attrOrderWidgets = []
 
     def _addInputClicked(self):
         coralApp.createAttribute("NumericAttribute", "input", self.coralNode(), input = True)
@@ -316,12 +317,12 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
             kernelSourceAttr = self.coralNode().findObject("_kernelSource")
             kernelSourceAttr.value().setStringValue(kernelSource)
             kernelSourceAttr.valueChanged()
-
             self._kernelBuildConsole.setPlainText(self.coralNode().buildInfo())
         
     def _openTextEditor(self):
         mainWin = mainWindow.MainWindow.globalInstance()
         dialog = QtGui.QDialog(mainWin)
+        dialog.setWindowTitle("kernel editor")
         dialog.resize(500, 500)
 
         vlayout = QtGui.QVBoxLayout(dialog)
@@ -331,6 +332,7 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
 
         self._kernelSourceEdit = QtGui.QPlainTextEdit(dialog)
         self._kernelSourceEdit.setLineWrapMode(QtGui.QPlainTextEdit.NoWrap)
+        self._kernelSourceEdit.setTabStopWidth(8)
         vlayout.addWidget(self._kernelSourceEdit)
 
         compileButton = QtGui.QPushButton("compile kernel", dialog)
@@ -351,7 +353,29 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
         self._kernelBuildConsole.setPalette(palette)
         self._kernelBuildConsole.setTextColor(QtGui.QColor(200, 190, 200))
 
+        palette = self._kernelSourceEdit.palette()
+        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(79, 87, 95))
+        palette.setColor(QtGui.QPalette.Text, QtGui.QColor(225, 225, 225))
+        self._kernelSourceEdit.setPalette(palette)
+
+        self._kernelBuildConsole.setPlainText("Kernel compiler console")
+
         dialog.show()
+    
+    def _attrOrderChanged(self, argId):
+        node = self.coralNode()
+        dynAttrs = node.dynamicAttributes()
+        node.clearDynamicAttributes()
+
+        orderedDynAttrs = {} 
+        for attrOrderWidget in self._attrOrderWidgets:
+            orderedDynAttrs[attrOrderWidget.value()] = attrOrderWidget._attr
+        
+        orderIds = orderedDynAttrs.keys()
+        orderIds.sort()
+
+        for orderId in orderIds:
+            node.addDynamicAttribute(orderedDynAttrs[orderId])
 
     def build(self):
         NodeInspectorWidget.build(self)
@@ -374,13 +398,30 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
         self.connect(addInAttrButton, QtCore.SIGNAL("clicked()"), self._addInputClicked)
         self.connect(addOutAttrButton, QtCore.SIGNAL("clicked()"), self._addOutputClicked)
 
+        order = 0
         for attr in self.coralNode().dynamicAttributes():
             hlayout = QtGui.QHBoxLayout()
 
+            attrOrder = QtGui.QSpinBox(groupBox)
+            self._attrOrderWidgets.append(attrOrder)
+            attrOrder._attr = attr
+            attrOrder.setMinimum(0)
+            attrOrder.setValue(order)
+            order += 1
+            hlayout.addWidget(attrOrder)
+            self.connect(attrOrder, QtCore.SIGNAL("valueChanged(int)"), self._attrOrderChanged)
+
             attrName = QtGui.QLineEdit(attr.name(), groupBox);
+            attrName.setMinimumWidth(60)
             hlayout.addWidget(attrName)
 
             specCombo = AttributeSpecializationComboBox(attr, groupBox)
+            attrSpec = attr.specialization()
+            if len(attrSpec) == 1:
+                specCombo.addItem(attrSpec[0])
+            else:
+                specCombo.addItem("none")
+
             specCombo.setShowPopupCallback(self._popupSpecCombo)
             specCombo.setCurrentItemChangedCallback(self._currentSpecChanged)
             hlayout.addWidget(specCombo)

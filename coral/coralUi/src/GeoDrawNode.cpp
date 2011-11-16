@@ -160,7 +160,8 @@ void GeoDrawNode::drawSmooth(Geo *geo){
 		glShadeModel(GL_SMOOTH);
 
 		if(numType == Numeric::numericTypeCol4 || numType == Numeric::numericTypeCol4Array){
-			glDisable(GL_LIGHTING);
+			glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+			glEnable(GL_COLOR_MATERIAL);
 		}
 
 		int facesCount = (int)faces.size();

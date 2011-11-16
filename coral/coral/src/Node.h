@@ -77,6 +77,7 @@ public:
 	void enableSpecializationPreset(const std::string &preset);
 	std::string enabledSpecializationPreset();
 	std::vector<std::string> specializationPresets();
+	void clearDynamicAttributes();
 	
 
 	//! Returns a python script to recreate all the nodes contained within this node.

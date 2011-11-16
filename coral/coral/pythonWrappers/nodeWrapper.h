@@ -361,6 +361,7 @@ void nodeWrapper(){
 		.def("specializationPresets", &Node::specializationPresets)
 		.def("enableSpecializationPreset", &Node::enableSpecializationPreset)
 		.def("enabledSpecializationPreset", &Node::enabledSpecializationPreset)
+		.def("clearDynamicAttributes", &Node::clearDynamicAttributes)
 	;
 	
 	Node::_addNodeCallback = node_addNodeCallback;

@@ -594,6 +594,10 @@ std::vector<Attribute*> Node::dynamicAttributes(){
 	return _dynamicAttributes;
 }
 
+void Node::clearDynamicAttributes(){
+	_dynamicAttributes.clear();
+}
+
 void Node::updateAttributeSpecialization(Attribute *attribute){
 	attribute->forceSpecializationUpdate();
 }

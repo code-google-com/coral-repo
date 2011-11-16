@@ -1,5 +1,6 @@
 
 #include "KernelNode.h"
+#include "../src/stringUtils.h"
 
 using namespace coral;
 
@@ -98,6 +99,63 @@ namespace {
 		
 		return minorSize;
 	}
+
+	typedef struct{
+		float x;
+		float y;
+		float z;
+	} CLVec3;
+
+	void writeNullBuffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+	}
+
+	void writeIntBuffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(int) * size;
+		buffer = cl::Buffer(context, CL_MEM_READ_ONLY, bufferSize, NULL);
+		queue.enqueueWriteBuffer(buffer, CL_TRUE, 0, bufferSize, &value->intValues()[0], NULL, &event);
+
+		kernel.setArg(argId, buffer);
+	}
+
+	void writeFloatBuffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(float) * size;
+		buffer = cl::Buffer(context, CL_MEM_READ_ONLY, bufferSize, NULL);
+		queue.enqueueWriteBuffer(buffer, CL_TRUE, 0, bufferSize, &value->floatValues()[0], NULL, &event);
+
+		kernel.setArg(argId, buffer);
+	}
+
+	void writeVec3Buffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(CLVec3) * size;
+		buffer = cl::Buffer(context, CL_MEM_READ_ONLY, bufferSize, NULL);
+		queue.enqueueWriteBuffer(buffer, CL_TRUE, 0, bufferSize, &value->vec3Values()[0], NULL, &event);
+
+		kernel.setArg(argId, buffer);
+	}
+
+	void readNullBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::CommandQueue &queue, cl::Event &event){
+	}
+
+	void readIntBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(int) * size;
+		std::vector<int> outVal(size);
+		queue.enqueueReadBuffer(buffer, CL_TRUE, 0, bufferSize, &outVal[0], NULL, &event);
+		value->setIntValues(outVal);
+	}
+
+	void readFloatBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(float) * size;
+		std::vector<float> outVal(size);
+		queue.enqueueReadBuffer(buffer, CL_TRUE, 0, bufferSize, &outVal[0], NULL, &event);
+		value->setFloatValues(outVal);
+	}
+
+	void readVec3Buffer(Numeric *value, cl::Buffer &buffer, int size, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(CLVec3) * size;
+		std::vector<float> outVal(size);
+		queue.enqueueReadBuffer(buffer, CL_TRUE, 0, bufferSize, &outVal[0], NULL, &event);
+		value->setFloatValues(outVal);
+	}
 }
 
 KernelNode::KernelNode(const std::string &name, Node *parent): 
@@ -127,6 +185,14 @@ void KernelNode::addDynamicAttribute(Attribute *attribute){
 			setAttributeAffect(inputAttrs[i], attribute);
 		}
 	}
+
+	std::vector<std::string> specs;
+	specs.push_back("IntArray");
+	specs.push_back("FloatArray");
+	specs.push_back("Vec3Array");
+	setAttributeAllowedSpecializations(attribute, specs);
+
+	cacheBufferReadWrite(attribute);
 }
 
 void KernelNode::initCL(){
@@ -215,10 +281,35 @@ void KernelNode::buildKernelSource(){
     }
 }
 
+void KernelNode::cacheBufferReadWrite(Attribute *attribute){
+	Numeric *val = (Numeric*)attribute->value();
+	int attrId = attribute->id();
+	if(val->type() == Numeric::numericTypeIntArray){
+		_writeBuffer[attrId] = writeIntBuffer;
+		_readBuffer[attrId] = readIntBuffer;
+	}
+	else if(val->type() == Numeric::numericTypeFloatArray){
+		_writeBuffer[attrId] = writeFloatBuffer;
+		_readBuffer[attrId] = readFloatBuffer;
+	}
+	else if(val->type() == Numeric::numericTypeVec3Array){
+		_writeBuffer[attrId] = writeVec3Buffer;
+		_readBuffer[attrId] = readVec3Buffer;
+	}
+	else{
+		_writeBuffer[attrId] = writeNullBuffer;
+		_readBuffer[attrId] = readNullBuffer;
+	}
+}
 
+void KernelNode::attributeSpecializationChanged(Attribute *attribute){
+	cacheBufferReadWrite(attribute);
+}
 
 void KernelNode::update(Attribute *attribute){
 	if(_kernelReady){
+		cl_int err = 0;
+
 		std::vector<Attribute*> dynAttrs = dynamicAttributes();
 		int size = findMinorInputSize(dynAttrs);
 
@@ -237,77 +328,30 @@ void KernelNode::update(Attribute *attribute){
 
 			Numeric *val = (Numeric*)attr->value();
 			values[attrId] = val;
-			if(attr->isInput()){
-				attrBuffer = cl::Buffer(_context, CL_MEM_READ_ONLY, size, NULL);
-				_kernel.setArg(argId, attrBuffer);
-				argId ++;
-				
-				if(val->type() == Numeric::numericTypeFloatArray){
-					_queue.enqueueWriteBuffer(attrBuffer, CL_TRUE, 0, size, &val->floatValues()[0], NULL, &event);
-				}
-			}
-			else{
-				attrBuffer = cl::Buffer(_context, CL_MEM_WRITE_ONLY, size, NULL);
-				_kernel.setArg(argId, attrBuffer);
-				argId ++;
-			}
+
+			_writeBuffer[attrId](val, attrBuffer, size, i, _kernel, _context, _queue, event);
 		}
 
-		_queue.enqueueNDRangeKernel(_kernel, cl::NullRange, cl::NDRange(size), cl::NullRange, NULL, &event); 
-		_queue.finish();
+		try{
+			err = _queue.enqueueNDRangeKernel(_kernel, cl::NullRange, cl::NDRange(size), cl::NullRange, NULL, &event);
+		}
+		catch(cl::Error er){
+			std::cerr << "OpenCL enqueueNDRangeKernel error: " << oclErrorString(err) << std::endl;
+			_queue.finish();
+			return;
+		}
 
 		const std::vector<Attribute*> &outAttrs = outputAttributes();
 		for(int i = 0; i < outAttrs.size(); ++i){
 			Attribute *attr = outAttrs[i];
 			int attrId = attr->id();
 
-			cl::Buffer &buffer = buffers[i];
+			cl::Buffer &buffer = buffers[attrId];
 			Numeric *val = values[attrId];
-			
-			if(val->type() == Numeric::numericTypeFloatArray){
-				std::vector<float> outVal(size);
-				_queue.enqueueReadBuffer(buffer, CL_TRUE, 0, size, &outVal[0], NULL, &event);
-
-				val->setFloatValues(outVal);
-			}
+			_readBuffer[attrId](val, buffer, size, _queue, event);
 		}
+
+		_queue.finish();
 	}
 }
 
- //    std::vector<float> aValues;
- //    aValues.push_back(1.0);
-
- //    std::vector<float> bValues;
- //    bValues.push_back(2.0);
-
- //    std::vector<float> cValues;
- //    cValues.push_back(0.0);
-
- //    size_t array_size = sizeof(float) * aValues.size();
-
- //    cl::Buffer cl_a = cl::Buffer(_context, CL_MEM_READ_ONLY, array_size, NULL, &err);
- //    cl::Buffer cl_b = cl::Buffer(_context, CL_MEM_READ_ONLY, array_size, NULL, &err);
- //    cl::Buffer cl_c = cl::Buffer(_context, CL_MEM_WRITE_ONLY, array_size, NULL, &err);
-
- //    cl::Event event;
- //    err = _queue.enqueueWriteBuffer(cl_a, CL_TRUE, 0, array_size, &aValues[0], NULL, &event);
- //    err = _queue.enqueueWriteBuffer(cl_b, CL_TRUE, 0, array_size, &bValues[0], NULL, &event);
- //    err = _queue.enqueueWriteBuffer(cl_c, CL_TRUE, 0, array_size, &cValues[0], NULL, &event);
-
- //    err = kernel.setArg(0, cl_a);
- //    err = kernel.setArg(1, cl_b);
- //    err = kernel.setArg(2, cl_c);
-
- //    _queue.finish();
-
- //    /// run kernel
- //    err = _queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(aValues.size()), cl::NullRange, NULL, &event); 
- //    _queue.finish();
-
- //    std::vector<float> res(1);
- //    err = _queue.enqueueReadBuffer(cl_c, CL_TRUE, 0, array_size, &res[0], NULL, &event);
-
- //    for(int i = 0; i < res.size(); ++i){
- //    	std::cout << res[i] << std::endl;
- //    }
-//}

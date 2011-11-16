@@ -60,6 +60,15 @@ def weakRef(object):
     
     return ref
 
+class callbackWithArgs(object):
+    def __init__(self, callback, *args):
+        self._callback = weakRef(callback)
+        self._args = args
+
+    def __call__(self, *args):
+        joinedArgs = args + self._args
+        self._callback(*joinedArgs)
+        
 def removeFromList(element, array):
     deleted = False
     if array.count(element):

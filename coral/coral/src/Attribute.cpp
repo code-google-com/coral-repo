@@ -875,6 +875,7 @@ bool Attribute::allowConnectionTo(Attribute *attribute){
 void Attribute::setAllowedSpecialization(const std::vector<std::string> &specialization){
 	_allowedSpecialization = specialization;
 	_specialization = specialization;
+
 	onSettingSpecialization(specialization);
 }
 
