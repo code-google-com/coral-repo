@@ -60,8 +60,8 @@ public:
 	void removeAttribute(Attribute *attribute);
 	bool containsNode(Node *node);
 	std::vector <Node*> nodes();
-	std::vector<Attribute*> inputAttributes();
-	std::vector<Attribute*> outputAttributes();
+	const std::vector<Attribute*> &inputAttributes();
+	const std::vector<Attribute*> &outputAttributes();
 	Node *findNode(const std::string &name);
 	Attribute *findAttribute(const std::string &name);
 	bool isInvalid();
@@ -72,7 +72,7 @@ public:
 	int computeTimeTicks();
 	int computeTimeMilliseconds();
 	int computeTimeSeconds();
-	std::vector<Attribute*> dynamicAttributes();
+	const std::vector<Attribute*> &dynamicAttributes();
 	bool allowDynamicAttributes();
 	void enableSpecializationPreset(const std::string &preset);
 	std::string enabledSpecializationPreset();
@@ -100,7 +100,8 @@ public:
 	virtual void attributeSpecializationChanged(Attribute *attribute);
 	virtual std::string debugInfo();
 	virtual void addDynamicAttribute(Attribute *attribute);
-	
+	virtual void removeDynamicAttribute(Attribute *attribute);
+
 	static void(*_addNodeCallback)(Node *self, Node *node);
 	static void(*_removeNodeCallback)(Node *self, Node *node);
 	static void(*_addInputAttributeCallback)(Node *self, Attribute *attribute);

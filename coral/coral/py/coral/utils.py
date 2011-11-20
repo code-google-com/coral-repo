@@ -60,7 +60,7 @@ def weakRef(object):
     
     return ref
 
-class callbackWithArgs(object):
+class CallbackWithArgs(object):
     def __init__(self, callback, *args):
         self._callback = weakRef(callback)
         self._args = args

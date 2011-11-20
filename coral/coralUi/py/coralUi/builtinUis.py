@@ -275,14 +275,18 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
 
         self._kernelSourceEdit = None
         self._kernelBuildConsole = None
-        self._attrOrderWidgets = []
+        self._attrOrderWidgets = {}
+        self._useSizeButtons = {}
+        self._attrNameWidgets = {}
 
     def _addInputClicked(self):
         coralApp.createAttribute("NumericAttribute", "input", self.coralNode(), input = True)
+        
         self.nodeInspector().refresh()
 
     def _addOutputClicked(self):
         coralApp.createAttribute("NumericAttribute", "output", self.coralNode(), output = True)
+        
         self.nodeInspector().refresh()
     
     def _popupSpecCombo(self, comboBox):
@@ -361,21 +365,62 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
         self._kernelBuildConsole.setPlainText("Kernel compiler console")
 
         dialog.show()
-    
+
     def _attrOrderChanged(self, argId):
         node = self.coralNode()
         dynAttrs = node.dynamicAttributes()
         node.clearDynamicAttributes()
 
         orderedDynAttrs = {} 
-        for attrOrderWidget in self._attrOrderWidgets:
-            orderedDynAttrs[attrOrderWidget.value()] = attrOrderWidget._attr
+        for attr in dynAttrs:
+            newOrder = self._attrOrderWidgets[attr.id()].value()
+
+            while newOrder in orderedDynAttrs.keys():
+                newOrder += 1
+
+            orderedDynAttrs[newOrder] = attr
         
         orderIds = orderedDynAttrs.keys()
         orderIds.sort()
 
         for orderId in orderIds:
             node.addDynamicAttribute(orderedDynAttrs[orderId])
+        
+    def _useSizeToggled(self, value):
+        node = self.coralNode()
+        dynAttrs = node.dynamicAttributes()
+
+        useSize = node.findObject("_useSize").value()
+
+        useSize.resize(len(dynAttrs))
+        i = 0
+        for attr in dynAttrs:
+            if attr.isInput():
+                checked = self._useSizeButtons[attr.id()].isChecked()
+                useSize.setBoolValueAt(i, checked)
+            i += 1
+    
+    def _attrNameChanged(self):
+        node = self.coralNode()
+        dynAttrs = node.dynamicAttributes()
+
+        for attr in dynAttrs:
+            widgetValue = str(self._attrNameWidgets[attr.id()].text())
+            if attr.name() != widgetValue:
+                attr.setName(widgetValue)
+
+    def _removeAttrClicked(self, button):
+        attr = button._attr()
+        node = self.coralNode()
+        node.removeAttribute(attr)
+
+        nodeUi = NodeEditor.findNodeUi(node.id())
+        attrUi = NodeEditor.findAttributeUi(attr.id())
+        nodeUi.removeAttributeUi(attrUi)
+        attrUi.setParentNodeUi(None)
+        nodeUi.updateLayout()
+
+        self.nodeInspector().refresh()
 
     def build(self):
         NodeInspectorWidget.build(self)
@@ -387,6 +432,8 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
 
         groupBox = QtGui.QGroupBox("attribute editor", self)
         vlayout = QtGui.QVBoxLayout()
+        vlayout.setSpacing(5)
+        vlayout.setContentsMargins(0, 0, 0, 0)
         groupBox.setLayout(vlayout)
         
         addInAttrButton = QtGui.QPushButton("Add Input", groupBox)
@@ -398,22 +445,29 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
         self.connect(addInAttrButton, QtCore.SIGNAL("clicked()"), self._addInputClicked)
         self.connect(addOutAttrButton, QtCore.SIGNAL("clicked()"), self._addOutputClicked)
 
+        useSize = self.coralNode().findObject("_useSize").outValue()
+
         order = 0
         for attr in self.coralNode().dynamicAttributes():
             hlayout = QtGui.QHBoxLayout()
+            hlayout.setSpacing(5)
+            hlayout.setContentsMargins(0, 0, 0, 0)
 
             attrOrder = QtGui.QSpinBox(groupBox)
-            self._attrOrderWidgets.append(attrOrder)
-            attrOrder._attr = attr
+            self._attrOrderWidgets[attr.id()] = attrOrder
             attrOrder.setMinimum(0)
             attrOrder.setValue(order)
-            order += 1
+            
             hlayout.addWidget(attrOrder)
             self.connect(attrOrder, QtCore.SIGNAL("valueChanged(int)"), self._attrOrderChanged)
 
             attrName = QtGui.QLineEdit(attr.name(), groupBox);
-            attrName.setMinimumWidth(60)
+            self._attrNameWidgets[attr.id()] = attrName
+            attrName.setFixedWidth(60)
+
             hlayout.addWidget(attrName)
+
+            self.connect(attrName, QtCore.SIGNAL("editingFinished()"), self._attrNameChanged)
 
             specCombo = AttributeSpecializationComboBox(attr, groupBox)
             attrSpec = attr.specialization()
@@ -426,7 +480,27 @@ class KernelNodeInspectorWidget(NodeInspectorWidget):
             specCombo.setCurrentItemChangedCallback(self._currentSpecChanged)
             hlayout.addWidget(specCombo)
 
+            useSizeButton = QtGui.QToolButton(self)
+            self._useSizeButtons[attr.id()] = useSizeButton
+            useSizeButton.setText("use size")
+            useSizeButton.setCheckable(True)
+            useSizeButton.setChecked(useSize.boolValueAt(order))
+            hlayout.addWidget(useSizeButton)
+
+            self.connect(useSizeButton, QtCore.SIGNAL("toggled(bool)"), self._useSizeToggled)
+
+            if attr.isOutput():
+                useSizeButton.setDisabled(True)
+        
+            removeButton = QtGui.QPushButton("remove", self)
+            removeButton._attr = weakref.ref(attr)
+            hlayout.addWidget(removeButton)
+
+            self.connect(removeButton, QtCore.SIGNAL("clicked()"), utils.CallbackWithArgs(self._removeAttrClicked, removeButton))
+
             vlayout.addLayout(hlayout)
+
+            order += 1
 
         self.layout().addWidget(groupBox)
 

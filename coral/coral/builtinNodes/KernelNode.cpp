@@ -81,23 +81,24 @@ namespace {
 	    return std::string((index >= 0 && index < errorCount) ? errorString[index] : "");
 	}
 
-	int findMinorInputSize(const std::vector<Attribute*> &attrs){
-		int minorSize = -1;
+	int findMinorInputSize(const std::vector<Attribute*> &attrs, const std::vector<bool> &useSize, std::map<int, Numeric*> &values){
+		int minorSize = INT_MAX;
+		int size = 0;
 		for(int i = 0; i < attrs.size(); ++i){
 			Attribute *attr = attrs[i];
-			if(attr->isInput()){
-				Numeric *num = (Numeric*)attr->value();
-				int size = num->size();
-				if(size < minorSize || minorSize == -1){
-					minorSize = size;
+			if(attr->isInput() && useSize[i]){
+				Numeric *num = values[attr->id()];
+				if(num->isArray()){
+					int currentSize = num->size();
+					if(currentSize < minorSize){
+						minorSize = currentSize;
+						size = minorSize;
+					}
 				}
 			}
 		}
-		if(minorSize == -1){
-			minorSize = 0;
-		}
-		
-		return minorSize;
+
+		return size;
 	}
 
 	typedef struct{
@@ -106,34 +107,37 @@ namespace {
 		float z;
 	} CLVec3;
 
-	void writeNullBuffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
-	}
-
-	void writeIntBuffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+	void createInputIntBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
 		size_t bufferSize = sizeof(int) * size;
-		buffer = cl::Buffer(context, CL_MEM_READ_ONLY, bufferSize, NULL);
+		buffer = cl::Buffer(context, CL_MEM_READ_WRITE, bufferSize, NULL);
 		queue.enqueueWriteBuffer(buffer, CL_TRUE, 0, bufferSize, &value->intValues()[0], NULL, &event);
-
-		kernel.setArg(argId, buffer);
 	}
 
-	void writeFloatBuffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+	void createInputFloatBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
 		size_t bufferSize = sizeof(float) * size;
-		buffer = cl::Buffer(context, CL_MEM_READ_ONLY, bufferSize, NULL);
+		buffer = cl::Buffer(context, CL_MEM_READ_WRITE, bufferSize, NULL);
 		queue.enqueueWriteBuffer(buffer, CL_TRUE, 0, bufferSize, &value->floatValues()[0], NULL, &event);
-
-		kernel.setArg(argId, buffer);
 	}
 
-	void writeVec3Buffer(Numeric *value, cl::Buffer &buffer, int size, int argId, cl::Kernel &kernel, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+	void createInputVec3Buffer(Numeric *value, cl::Buffer &buffer, int size, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
 		size_t bufferSize = sizeof(CLVec3) * size;
-		buffer = cl::Buffer(context, CL_MEM_READ_ONLY, bufferSize, NULL);
+		buffer = cl::Buffer(context, CL_MEM_READ_WRITE, bufferSize, NULL);
 		queue.enqueueWriteBuffer(buffer, CL_TRUE, 0, bufferSize, &value->vec3Values()[0], NULL, &event);
-
-		kernel.setArg(argId, buffer);
 	}
 
-	void readNullBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::CommandQueue &queue, cl::Event &event){
+	void createOutputIntBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(int) * size;
+		buffer = cl::Buffer(context, CL_MEM_READ_WRITE, bufferSize, NULL);
+	}
+
+	void createOutputFloatBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(float) * size;
+		buffer = cl::Buffer(context, CL_MEM_READ_WRITE, bufferSize, NULL);
+	}
+
+	void createOutputVec3Buffer(Numeric *value, cl::Buffer &buffer, int size, cl::Context &context, cl::CommandQueue &queue, cl::Event &event){
+		size_t bufferSize = sizeof(CLVec3) * size;
+		buffer = cl::Buffer(context, CL_MEM_READ_WRITE, bufferSize, NULL);
 	}
 
 	void readIntBuffer(Numeric *value, cl::Buffer &buffer, int size, cl::CommandQueue &queue, cl::Event &event){
@@ -156,19 +160,75 @@ namespace {
 		queue.enqueueReadBuffer(buffer, CL_TRUE, 0, bufferSize, &outVal[0], NULL, &event);
 		value->setFloatValues(outVal);
 	}
+
+	void collectNumericValues(const std::vector<Attribute*> &attributes, std::map<int, Numeric*> &numericValues){
+		for(int i = 0; i < attributes.size(); ++i){
+			Attribute *attr = attributes[i];
+			if(attr->isInput()){
+				numericValues[attr->id()] = (Numeric*)attr->value();
+			}
+			else{
+				numericValues[attr->id()] = (Numeric*)attr->outValue();
+			}
+		}
+	}
+
+	void collectKernelFunctionNames(const std::string &kernelSource, std::vector<std::string> &kernelFunctionNames){
+		std::vector<std::string> kernels;
+		stringUtils::split(kernelSource, kernels, "__kernel");
+
+		for(int i = 1; i < kernels.size(); ++i){
+			std::string &kernelFunc = kernels[i];
+			std::vector<std::string> funcElements;
+			stringUtils::split(kernelFunc, funcElements, "(");
+
+			if(funcElements.size()){
+				std::string &kernelFuncDecl = funcElements[0];
+				std::vector<std::string> funcDeclElements;
+				stringUtils::split(kernelFuncDecl, funcDeclElements, " ");
+
+				for(int j = funcDeclElements.size() - 1; j >= 0 ; --j){
+					std::string funcDeclElement = funcDeclElements[j];
+					if(funcDeclElement != " "){
+						kernelFunctionNames.push_back(funcDeclElement);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	void deviceEnumChanged(Node *node, Enum *){
+		KernelNode *kernelNode = (KernelNode*)node;
+		kernelNode->updateDeviceUsed();
+	}
 }
 
 KernelNode::KernelNode(const std::string &name, Node *parent): 
-Node(name, parent),
-_kernelReady(false){
+Node(name, parent){
 	setAllowDynamicAttributes(true);
 
+	_device = new EnumAttribute("device", this);
 	_kernelSource = new StringAttribute("_kernelSource", this);
+	_useSize = new BoolAttribute("_useSize", this);
 
+	addInputAttribute(_device);
 	addInputAttribute(_kernelSource);
+	addInputAttribute(_useSize);
+
+	setAttributeAllowedSpecialization(_useSize, "BoolArray");
 
 	catchAttributeDirtied(_kernelSource);
 
+	_device->outValue()->addEntry(0, "cpu");
+	_device->outValue()->addEntry(1, "gpu");
+	_device->outValue()->setCurrentIndex(0);
+	_device->outValue()->setCurrentIndexChangedCallback(this, deviceEnumChanged);
+
+	initCL();
+}
+
+void KernelNode::updateDeviceUsed(){
 	initCL();
 }
 
@@ -179,20 +239,49 @@ void KernelNode::attributeDirtied(Attribute *attribute){
 void KernelNode::addDynamicAttribute(Attribute *attribute){
 	Node::addDynamicAttribute(attribute);
 	
+	const std::vector<Attribute*> dynAttrs = dynamicAttributes();
+	Bool *useSize = _useSize->outValue();
+	useSize->resize(dynAttrs.size());
+
 	if(attribute->isOutput()){
 		std::vector<Attribute*> inputAttrs = inputAttributes();
 		for(int i = 0; i < inputAttrs.size(); ++i){
 			setAttributeAffect(inputAttrs[i], attribute);
 		}
+
+		useSize->setBoolValueAt(dynAttrs.size() - 1, false);
 	}
-
-	std::vector<std::string> specs;
-	specs.push_back("IntArray");
-	specs.push_back("FloatArray");
-	specs.push_back("Vec3Array");
-	setAttributeAllowedSpecializations(attribute, specs);
-
+	else{
+		useSize->setBoolValueAt(dynAttrs.size() - 1, true);
+	}
+	
 	cacheBufferReadWrite(attribute);
+}
+
+void KernelNode::removeDynamicAttribute(Attribute *attribute){
+	if(findObject("_useSize")){ // during deletion this overloaded method might be invoked after the deletion of _useSize
+		const std::vector<Attribute*> &dynAttrs = dynamicAttributes();
+		Bool *useSize = _useSize->outValue();
+
+		std::map<int, bool> useSizeMap;
+		for(int i = 0; i < dynAttrs.size(); ++i){
+			useSizeMap[dynAttrs[i]->id()] = useSize->boolValueAt(i);
+		}
+
+		Node::removeDynamicAttribute(attribute);
+
+		const std::vector<Attribute*> &dynAttrs2 = dynamicAttributes();
+		useSize->resize(dynAttrs2.size());
+		for(int i = 0; i < dynAttrs2.size(); ++i){
+			useSize->setBoolValueAt(i, useSizeMap[dynAttrs2[i]->id()]);
+		}
+
+		_readBuffer.erase(attribute->id());
+		_writeBuffer.erase(attribute->id());
+	}
+	else{
+		Node::removeDynamicAttribute(attribute);
+	}
 }
 
 void KernelNode::initCL(){
@@ -209,7 +298,17 @@ void KernelNode::initCL(){
     }
 
 	cl_context_properties properties[] = {CL_CONTEXT_PLATFORM, (cl_context_properties)(platforms[0])(), 0};
-	_context = cl::Context(CL_DEVICE_TYPE_CPU, properties);
+
+	cl_int device;
+	int deviceIndex = _device->outValue()->currentIndex();
+	if(deviceIndex == 0){
+		device = CL_DEVICE_TYPE_CPU;
+	}
+	else if(deviceIndex == 1){
+		device = CL_DEVICE_TYPE_GPU;
+	}
+
+	_context = cl::Context(device, properties);
 	_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
 
 	if(_devices.size() == 0){
@@ -230,9 +329,10 @@ std::string KernelNode::buildInfo(){
 }
 
 void KernelNode::buildKernelSource(){
+	_kernels.clear();
+
 	_buildMessage.clear();
 
-	_kernelReady = false;
 	cl_int err = 0;
 	
 	std::string kernelSource = _kernelSource->value()->stringValue();
@@ -260,45 +360,68 @@ void KernelNode::buildKernelSource(){
     	return;
     }
 
-    try{
-        _kernel = cl::Kernel(program, "mainKernel", &err);
-        if(!err){
-        	_kernelReady = true;
-        	_buildMessage = "Successfully built.";
-        }
-    }
-    catch (cl::Error er) {
-    	std::string errStr = oclErrorString(er.err());
+    std::vector<std::string> kernelFunctionNames;
+    collectKernelFunctionNames(kernelSource, kernelFunctionNames);
+    for(int i = 0; i < kernelFunctionNames.size(); ++i){
+    	std::string &kernelFunctionName = kernelFunctionNames[i];
 
-    	_buildMessage = "OpenCL error: " + std::string(er.what()) + " " + errStr;
-
-    	if(errStr == "CL_INVALID_KERNEL_NAME"){
-    		_buildMessage += "\n\nKernel name should be 'mainKernel'";
+    	cl::Kernel kernel;
+    	try{
+			kernel = cl::Kernel(program, kernelFunctionName.data(), &err);
+    	}
+    	catch(cl::Error er){
+    		std::string errStr = oclErrorString(er.err());
+    		_buildMessage = "OpenCL error while parsing source:\n" + std::string(er.what()) + "\n" + errStr;
+    		return;
     	}
 
-        std::cerr << _buildMessage << std::endl;
-        return;
+    	if(!err){
+    		_kernels.push_back(kernel);
+    	}
     }
+
+    _buildMessage = "Build successful.";
 }
 
 void KernelNode::cacheBufferReadWrite(Attribute *attribute){
 	Numeric *val = (Numeric*)attribute->value();
 	int attrId = attribute->id();
-	if(val->type() == Numeric::numericTypeIntArray){
-		_writeBuffer[attrId] = writeIntBuffer;
-		_readBuffer[attrId] = readIntBuffer;
+
+	Numeric::Type type = val->type();
+	if(type == Numeric::numericTypeInt || type == Numeric::numericTypeIntArray){
+		if(attribute->isInput()){
+			_writeBuffer[attrId] = createInputIntBuffer;
+		}
+		else{
+			_writeBuffer[attrId] = createOutputIntBuffer;
+			_readBuffer[attrId] = readIntBuffer;
+		}
 	}
-	else if(val->type() == Numeric::numericTypeFloatArray){
-		_writeBuffer[attrId] = writeFloatBuffer;
-		_readBuffer[attrId] = readFloatBuffer;
+	else if(type == Numeric::numericTypeFloat || type == Numeric::numericTypeFloatArray){
+		if(attribute->isInput()){
+			_writeBuffer[attrId] = createInputFloatBuffer;
+		}
+		else{
+			_writeBuffer[attrId] = createOutputFloatBuffer;
+			_readBuffer[attrId] = readFloatBuffer;
+		}
 	}
-	else if(val->type() == Numeric::numericTypeVec3Array){
-		_writeBuffer[attrId] = writeVec3Buffer;
-		_readBuffer[attrId] = readVec3Buffer;
+	else if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
+		if(attribute->isInput()){
+			_writeBuffer[attrId] = createInputVec3Buffer;
+		}
+		else{
+			_writeBuffer[attrId] = createOutputVec3Buffer;
+			_readBuffer[attrId] = readVec3Buffer;
+		}
 	}
 	else{
-		_writeBuffer[attrId] = writeNullBuffer;
-		_readBuffer[attrId] = readNullBuffer;
+		if(_writeBuffer.find(attrId) != _writeBuffer.end()){
+			_writeBuffer.erase(attrId);
+		}
+		if(_readBuffer.find(attrId) != _readBuffer.end()){
+			_readBuffer.erase(attrId);
+		}
 	}
 }
 
@@ -306,50 +429,81 @@ void KernelNode::attributeSpecializationChanged(Attribute *attribute){
 	cacheBufferReadWrite(attribute);
 }
 
+void KernelNode::writeBuffers(std::map<int, Numeric*> &values, std::map<int, cl::Buffer> &buffers, int size, const std::vector<Attribute*> &dynAttrs, cl::Event &event){
+	for(int i = 0; i < dynAttrs.size(); ++i){
+		Attribute *attr = dynAttrs[i];
+		int attrId = attr->id();
+
+		if(_writeBuffer.find(attrId) != _writeBuffer.end()){
+			cl::Buffer &attrBuffer = buffers[attrId];
+
+			_writeBuffer[attrId](values[attrId], attrBuffer, size, _context, _queue, event);
+
+			for(int j = 0; j < _kernels.size(); ++j){
+				_kernels[j].setArg(i, attrBuffer);
+			}
+		}
+	}
+}
+
+cl_int KernelNode::executeKernel(cl::Kernel &kernel, int size, cl::Event &event){
+	cl_int err = 0;
+
+	try{
+		err = _queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(size), cl::NullRange, NULL, &event);
+	}
+	catch(cl::Error er){
+		std::cerr << "OpenCL enqueueNDRangeKernel error: " << oclErrorString(err) << std::endl;
+		_queue.finish();
+	}
+
+	return err;
+}
+
+void KernelNode::readBuffers(std::map<int, Numeric*> &values, std::map<int, cl::Buffer> &buffers, int size, cl::Event &event){
+	const std::vector<Attribute*> &outAttrs = outputAttributes();
+	for(int i = 0; i < outAttrs.size(); ++i){
+		Attribute *attr = outAttrs[i];
+		int attrId = attr->id();
+
+		cl::Buffer &buffer = buffers[attrId];
+		Numeric *val = values[attrId];
+
+		if(_readBuffer.find(attrId) != _readBuffer.end()){
+			_readBuffer[attrId](val, buffer, size, _queue, event);
+			setAttributeIsClean(attr, true);
+		}
+	}
+}
+
 void KernelNode::update(Attribute *attribute){
-	if(_kernelReady){
-		cl_int err = 0;
+	if(_kernels.size()){
+		const std::vector<Attribute*> &dynAttrs = dynamicAttributes();
 
-		std::vector<Attribute*> dynAttrs = dynamicAttributes();
-		int size = findMinorInputSize(dynAttrs);
+		if(_writeBuffer.size() != dynAttrs.size()){
+			return;
+		}
 
+		std::map<int, Numeric*> values;
+		collectNumericValues(dynAttrs, values);
+
+		int size = findMinorInputSize(dynAttrs, _useSize->value()->boolValues(), values);
 		if(size == 0){
 			return;
 		}
 
 		cl::Event event;
-		int argId = 0;
 		std::map<int, cl::Buffer> buffers;
-		std::map<int, Numeric*> values;
-		for(int i = 0; i < dynAttrs.size(); ++i){
-			Attribute *attr = dynAttrs[i];
-			int attrId = attr->id();
-			cl::Buffer &attrBuffer = buffers[attrId];
+		writeBuffers(values, buffers, size, dynAttrs, event);
 
-			Numeric *val = (Numeric*)attr->value();
-			values[attrId] = val;
-
-			_writeBuffer[attrId](val, attrBuffer, size, i, _kernel, _context, _queue, event);
+		for(int i = 0; i < _kernels.size(); ++i){
+			cl_int err = executeKernel(_kernels[i], size, event);
+			if(err){
+				return;
+			}
 		}
 
-		try{
-			err = _queue.enqueueNDRangeKernel(_kernel, cl::NullRange, cl::NDRange(size), cl::NullRange, NULL, &event);
-		}
-		catch(cl::Error er){
-			std::cerr << "OpenCL enqueueNDRangeKernel error: " << oclErrorString(err) << std::endl;
-			_queue.finish();
-			return;
-		}
-
-		const std::vector<Attribute*> &outAttrs = outputAttributes();
-		for(int i = 0; i < outAttrs.size(); ++i){
-			Attribute *attr = outAttrs[i];
-			int attrId = attr->id();
-
-			cl::Buffer &buffer = buffers[attrId];
-			Numeric *val = values[attrId];
-			_readBuffer[attrId](val, buffer, size, _queue, event);
-		}
+		readBuffers(values, buffers, size, event);
 
 		_queue.finish();
 	}

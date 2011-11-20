@@ -47,13 +47,15 @@ void Bool::setBoolValueAt(unsigned int id, bool value){
 
 bool Bool::boolValueAt(unsigned int id){
 	bool value = false;
-	if(id < _boolValues.size())
+
+	if(id < _boolValues.size()){
 		value = _boolValues[id];
+	}
 		
 	return value;
 }
 
-std::vector<bool> Bool::boolValues(){
+const std::vector<bool> &Bool::boolValues(){
 	return _boolValues;
 }
 
@@ -75,7 +77,6 @@ void Bool::resize(unsigned int size){
 
 std::string Bool::asString(){
 	std::string script;
-	
 	if(_isArray){
 		script = "[";
 		for(int i = 0; i < _boolValues.size(); ++i){
@@ -155,15 +156,16 @@ Bool *BoolAttribute::outValue(){
 
 void BoolAttribute::onSettingSpecialization(const std::vector<std::string> &specialization){
 	Bool *boolVal = outValue();
+
 	boolVal->setIsArray(false);
 	if(boolVal->size() == 0){
 		boolVal->resize(1);
 		boolVal->setBoolValueAt(0, false);
 	}
-	
+
 	if(specialization.size() == 1){
 		if(specialization[0] == "BoolArray"){
-			outValue()->setIsArray(true);
+			boolVal->setIsArray(true);
 		}
 	}
 }

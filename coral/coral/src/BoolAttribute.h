@@ -43,7 +43,7 @@ public:
 	unsigned int size();
 	void setBoolValueAt(unsigned int id, bool value);
 	bool boolValueAt(unsigned int id);
-	std::vector<bool> boolValues();
+	const std::vector<bool> &boolValues();
 	void setBoolValues(const std::vector<bool> &values);
 	void setIsArray(bool value);
 	bool isArray();

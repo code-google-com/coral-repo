@@ -44,6 +44,7 @@ void boolWrapper(){
 		.def("boolValueAt", &Bool::boolValueAt)
 		.def("size", &Bool::size)
 		.def("isArray", &Bool::isArray)
+		.def("resize", &Bool::resize)
 		.def("createUnwrapped", pythonWrapperUtils::createUnwrapped<Bool>)
 		.staticmethod("createUnwrapped")
 	;

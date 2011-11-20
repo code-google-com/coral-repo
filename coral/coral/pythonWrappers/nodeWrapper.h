@@ -288,6 +288,18 @@ void node_setAllowDynamicAttributes(Node &self, bool value){
 	NodeAccessor::_setAllowDynamicAttributes(self, value);
 }
 
+std::vector<Attribute*> node_dynamicAttributes(Node &self){
+	return self.dynamicAttributes();
+}
+
+std::vector<Attribute*> node_inputAttributes(Node &self){
+	return self.inputAttributes();
+}
+
+std::vector<Attribute*> node_outputAttributes(Node &self){
+	return self.outputAttributes();
+}
+
 void node_updateAttributeSpecialization(Node &self, Attribute *attribute){
 	NodeAccessor::_updateAttributeSpecialization(self, attribute);
 }
@@ -328,8 +340,8 @@ void nodeWrapper(){
 		.def("containsNode", &Node::containsNode)
 		.def("update", &Node::update, &NodeWrapper::update_default)
 		.def("nodes", &Node::nodes)
-		.def("inputAttributes", &Node::inputAttributes)
-		.def("outputAttributes", &Node::outputAttributes)
+		.def("inputAttributes", node_inputAttributes)
+		.def("outputAttributes", node_outputAttributes)
 		.def("findNode", node_findNode)
 		.def("findAttribute", node_findAttribute)
 		.def("deleteIt", &Node::deleteIt, &NodeWrapper::deleteIt_default)
@@ -352,7 +364,7 @@ void nodeWrapper(){
 		.def("computeTimeMilliseconds", &Node::computeTimeMilliseconds)
 		.def("computeTimeSeconds", &Node::computeTimeSeconds)
 		.def("addDynamicAttribute", &Node::addDynamicAttribute)
-		.def("dynamicAttributes", &Node::dynamicAttributes)
+		.def("dynamicAttributes", node_dynamicAttributes)
 		.def("_setAllowDynamicAttributes", node_setAllowDynamicAttributes)
 		.def("allowDynamicAttributes", &Node::allowDynamicAttributes)
 		.def("_updateAttributeSpecialization", node_updateAttributeSpecialization)

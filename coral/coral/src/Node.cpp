@@ -129,7 +129,7 @@ void Node::removeAttribute(Attribute *attribute){
 	}
 	
 	if(containerUtils::elementInContainer(attribute, _dynamicAttributes)){
-		containerUtils::eraseElementInContainer(attribute, _dynamicAttributes);
+		removeDynamicAttribute(attribute);
 	}
 	
 	if(attribute->parent() == this){
@@ -253,11 +253,11 @@ std::vector <Node*> Node::nodes(){
 	return _nodes;
 }
 
-std::vector<Attribute*> Node::inputAttributes(){
+const std::vector<Attribute*> &Node::inputAttributes(){
 	return _inputAttributes;
 }
 
-std::vector<Attribute*> Node::outputAttributes(){
+const std::vector<Attribute*> &Node::outputAttributes(){
 	return _outputAttributes;
 }
 
@@ -372,6 +372,12 @@ void Node::addDynamicAttribute(Attribute *attribute){
 		if(containerUtils::elementInContainer(attribute, attributes()) && containerUtils::elementInContainer(attribute, _dynamicAttributes) == false){
 	        _dynamicAttributes.push_back(attribute);
 		}
+	}
+}
+
+void Node::removeDynamicAttribute(Attribute *attribute){
+	if(containerUtils::elementInContainer(attribute, _dynamicAttributes)){
+		containerUtils::eraseElementInContainer(attribute, _dynamicAttributes);
 	}
 }
 
@@ -590,7 +596,7 @@ int Node::computeTimeSeconds(){
 	return _computeTimeSeconds;
 }
 
-std::vector<Attribute*> Node::dynamicAttributes(){
+const std::vector<Attribute*> &Node::dynamicAttributes(){
 	return _dynamicAttributes;
 }
 
