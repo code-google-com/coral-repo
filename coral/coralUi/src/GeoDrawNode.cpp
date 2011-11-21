@@ -71,6 +71,11 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, 
 	setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
 	
 	_smooth->outValue()->setBoolValueAt(0, true);
+
+	std::vector<std::string> colorSpecializations;
+	colorSpecializations.push_back("Col4");
+	colorSpecializations.push_back("Col4Array");
+	setAttributeAllowedSpecializations(_colors, colorSpecializations);
 }
 
 void GeoDrawNode::drawPoints(Geo *geo){

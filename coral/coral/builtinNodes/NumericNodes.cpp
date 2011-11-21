@@ -297,15 +297,15 @@ Col4Node::Col4Node(const std::string &name, Node* parent): Node(name, parent){
 	colorSpecializations.push_back("Col4");
 	colorSpecializations.push_back("Col4Array");
 
-	setAttributeAllowedSpecializations(_r, colorSpecializations);
-	setAttributeAllowedSpecializations(_g, colorSpecializations);
-	setAttributeAllowedSpecializations(_b, colorSpecializations);
+	setAttributeAllowedSpecializations(_r, rgbaSpecializations);
+	setAttributeAllowedSpecializations(_g, rgbaSpecializations);
+	setAttributeAllowedSpecializations(_b, rgbaSpecializations);
 	setAttributeAllowedSpecializations(_color, colorSpecializations);
 
 	addAttributeSpecializationLink(_r, _color);
 	addAttributeSpecializationLink(_r, _g);
 	addAttributeSpecializationLink(_g, _b);
-	addAttributeSpecializationLink(_b, _a); // TODO: Please Andreas, check this :)
+	addAttributeSpecializationLink(_b, _a);
 
 	setSpecializationPreset("single", _r, "Float");
 	setSpecializationPreset("single", _g, "Float");
