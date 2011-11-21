@@ -326,7 +326,7 @@ Value *Attribute::outValue(){
 void Attribute::clean(){
 	if(!_cleaningLocked){
 		if(_isClean == false){
-			if(_isInput){
+			if(_isInput && _input == 0){
 				_isClean = true;
 			}
 

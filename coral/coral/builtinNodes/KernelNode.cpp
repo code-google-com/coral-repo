@@ -156,9 +156,9 @@ namespace {
 
 	void readVec3Buffer(Numeric *value, cl::Buffer &buffer, int size, cl::CommandQueue &queue, cl::Event &event){
 		size_t bufferSize = sizeof(CLVec3) * size;
-		std::vector<float> outVal(size);
+		std::vector<Imath::V3f> outVal(size);
 		queue.enqueueReadBuffer(buffer, CL_TRUE, 0, bufferSize, &outVal[0], NULL, &event);
-		value->setFloatValues(outVal);
+		value->setVec3Values(outVal);
 	}
 
 	void collectNumericValues(const std::vector<Attribute*> &attributes, std::map<int, Numeric*> &numericValues){
@@ -230,6 +230,7 @@ Node(name, parent){
 
 void KernelNode::updateDeviceUsed(){
 	initCL();
+	buildKernelSource();
 }
 
 void KernelNode::attributeDirtied(Attribute *attribute){
