@@ -1,4 +1,3 @@
-
 // <license>
 // Copyright (C) 2011 Andrea Interguglielmi, All rights reserved.
 // This file is part of the coral repository downloaded from http://code.google.com/p/coral-repo.
@@ -83,4 +82,3 @@ public:
 }
 
 #endif
-

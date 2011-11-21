@@ -984,10 +984,12 @@ Average::Average(const std::string &name, Node *parent):
 	std::vector<std::string> specialization;
 	specialization.push_back("IntArray");
 	specialization.push_back("FloatArray");
+	specialization.push_back("Vec3Array");
 
 	std::vector<std::string> outSpecialization;
 	outSpecialization.push_back("Int");
 	outSpecialization.push_back("Float");
+	outSpecialization.push_back("Vec3");
 
 	setAttributeAllowedSpecializations(_inNumber, specialization);
 	setAttributeAllowedSpecializations(_outNumber, outSpecialization);
@@ -1005,6 +1007,9 @@ void Average::attributeSpecializationChanged(Attribute *attribute){
 	}
 	else if( type == Numeric::numericTypeFloatArray){
 		_selectedOperation = &Average::average_float;
+	}
+	else if( type == Numeric::numericTypeVec3Array){
+		_selectedOperation = &Average::average_vec3;
 	}
 }
 
@@ -1034,6 +1039,19 @@ void Average::average_float(Numeric *inNumber, Numeric *outNumber){
 	outNumber->setFloatValues(outValue);
 }
 
+void Average::average_vec3(Numeric *inNumber, Numeric *outNumber){
+	std::vector<Imath::V3f> inValues = inNumber->vec3Values();
+	std::vector<Imath::V3f> outValue(1);
+
+	Imath::V3f av(0.0,0.0,0.0);
+	for(int i = 0; i < inValues.size(); ++i){
+		av += inValues[i];
+	}
+	outValue[0] = av/float(inValues.size());
+
+	outNumber->setVec3Values(outValue);
+}
+
 void Average::update(Attribute *attribute){
 	if(_selectedOperation){
 		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
@@ -1054,6 +1072,9 @@ void Average::updateSpecializationLink(Attribute *attributeA, Attribute *attribu
 			else if(specializationA[0] == "FloatArray"){
 				specializationB.push_back(outSpecializations[1]);
 			}
+			else if(specializationA[0] == "Vec3Array"){
+				specializationB.push_back(outSpecializations[2]);
+			}
 		}
 		else if(specializationB.size() == 1){
 			specializationA.clear();
@@ -1063,6 +1084,9 @@ void Average::updateSpecializationLink(Attribute *attributeA, Attribute *attribu
 			}
 			else if(specializationB[0] == "Float"){
 				specializationA.push_back(inSpecializations[1]);
+			}
+			else if(specializationB[0] == "Vec3"){
+				specializationA.push_back(inSpecializations[2]);
 			}
 		}
 	}
@@ -1193,6 +1217,80 @@ void Slerp::update(Attribute *attribute){
 	}
 
 	_outNumber->outValue()->setQuatValues(outValues);
+}
+
+QuatMultiply::QuatMultiply(const std::string &name, Node *parent): Node(name, parent){
+	_quat0 = new NumericAttribute("q0", this);
+	_quat1 = new NumericAttribute("q1", this);
+	_outQuat = new NumericAttribute("out", this);
+
+	addInputAttribute(_quat0);
+	addInputAttribute(_quat1);
+	addOutputAttribute(_outQuat);
+
+	setAttributeAffect(_quat0, _outQuat);
+	setAttributeAffect(_quat1, _outQuat);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Quat");
+	specialization.push_back("QuatArray");
+	setAttributeAllowedSpecializations(_quat0, specialization);
+	setAttributeAllowedSpecializations(_quat1, specialization);
+	setAttributeAllowedSpecializations(_outQuat, specialization);
+
+	addAttributeSpecializationLink(_quat0, _outQuat);
+	addAttributeSpecializationLink(_quat1, _outQuat);
+}
+
+void QuatMultiply::update(Attribute *attribute){
+	const std::vector<Imath::Quatf> &q0 = _quat0->value()->quatValues();
+	const std::vector<Imath::Quatf> &q1 = _quat1->value()->quatValues();
+
+	int size0 = q0.size();
+	int size1 = q1.size();
+
+	int minSize = size0;
+	if(size0 < size1){
+		minSize = size1;
+	}
+
+	std::vector<Imath::Quatf> outValues(minSize);
+
+	for(int i = 0; i < minSize; ++i){
+		outValues[i] = q1[i]*q0[i]*(~q1[i]);
+	}
+
+	_outQuat->outValue()->setQuatValues(outValues);
+}
+
+QuatNormalize::QuatNormalize(const std::string &name, Node *parent): Node(name, parent){
+	_quat0 = new NumericAttribute("q", this);
+	_normalized = new NumericAttribute("out", this);
+
+	addInputAttribute(_quat0);
+	addOutputAttribute(_normalized);
+
+	setAttributeAffect(_quat0, _normalized);
+
+	std::vector<std::string> specialization;
+	specialization.push_back("Quat");
+	specialization.push_back("QuatArray");
+	setAttributeAllowedSpecializations(_quat0, specialization);
+	setAttributeAllowedSpecializations(_normalized, specialization);
+
+	addAttributeSpecializationLink(_quat0, _normalized);
+}
+
+void QuatNormalize::update(Attribute *attribute){
+	const std::vector<Imath::Quatf> &q = _quat0->value()->quatValues();
+	int size = q.size();
+
+	std::vector<Imath::Quatf> normalizedValues(size);
+	for(int i = 0; i < size; ++i){
+		normalizedValues[i] = q[i].normalized();
+	}
+
+	_normalized->outValue()->setQuatValues(normalizedValues);
 }
 
 

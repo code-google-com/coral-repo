@@ -169,4 +169,3 @@ void BoolAttribute::onSettingSpecialization(const std::vector<std::string> &spec
 		}
 	}
 }
-

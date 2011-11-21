@@ -276,6 +276,7 @@ private:
 
 	void average_int(Numeric *inNumber, Numeric *outNumber);
 	void average_float(Numeric *inNumber, Numeric *outNumber);
+	void average_vec3(Numeric *inNumber, Numeric *outNumber);
 };
 
 class Slerp: public Node{
@@ -289,6 +290,27 @@ private:
 	NumericAttribute *_inQuat2;
 	NumericAttribute *_param;
 	NumericAttribute *_outNumber;
+};
+
+class QuatMultiply: public Node{
+public:
+	QuatMultiply(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_quat0;
+	NumericAttribute *_quat1;
+	NumericAttribute *_outQuat;
+};
+
+class QuatNormalize: public Node{
+public:
+	QuatNormalize(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_quat0;
+	NumericAttribute *_normalized;
 };
 
 

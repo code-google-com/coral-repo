@@ -4,6 +4,10 @@ import os
 import platform
 import sconsUtils
 
+msvc_version = ""
+if os.environ.has_key("MSVC_VERSION"):
+    msvc_version = os.environ["MSVC_VERSION"]
+
 sconsUtils.importBuildEnvs()
 
 coralPath = os.path.join(os.pardir, "coral")
@@ -39,6 +43,7 @@ env = Environment(
     sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
     sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH")],
   SHLIBPREFIX = "",
+  MSVC_VERSION=msvc_version,
   TARGET_ARCH = platform.machine())
 
 if sys.platform.startswith("linux"):

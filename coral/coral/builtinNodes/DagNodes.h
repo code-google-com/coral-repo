@@ -1,18 +1,18 @@
 // <license>
 // Copyright (C) 2011 Andrea Interguglielmi, All rights reserved.
 // This file is part of the coral repository downloaded from http://code.google.com/p/coral-repo.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //    * Redistributions of source code must retain the above copyright
 //      notice, this list of conditions and the following disclaimer.
-// 
+//
 //    * Redistributions in binary form must reproduce the above copyright
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 // IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -26,19 +26,45 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef CORALOBJECTACCESSOR_H
-#define CORALOBJECTACCESSOR_H
+#ifndef CORAL_DAGNODES_H
+#define CORAL_DAGNODES_H
 
-#include "Object.h"
+#include <vector>
+#include "../src/Node.h"
+#include "../src/Attribute.h"
+#include "../src/NumericAttribute.h"
+#include "../src/EnumAttribute.h"
+#include "../src/GeoAttribute.h"
 
 namespace coral{
-	
-class ObjectAccessor{
+
+class Transform: public Node{
 public:
-	static void _setIsDeleted(Object &self, bool value){
-		self.setIsDeleted(value);
-	}
+	Transform(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	//input attributes
+	NumericAttribute *_translate;
+	NumericAttribute *_rotate;
+	NumericAttribute *_scale;
+	NumericAttribute *_parent;
+	EnumAttribute *_rotateOrder;
+	NumericAttribute *_share;
+	NumericAttribute *_rotatePivot;
+	NumericAttribute *_rotatePivotTranslate;
+	NumericAttribute *_scalePivot;
+	NumericAttribute *_scalePivotTranslate;
+	NumericAttribute *_rotateAxis;
+	GeoAttribute *_ingeo;
+
+
+	//output attributes
+	NumericAttribute *_local;
+	NumericAttribute *_outWorld;
+	GeoAttribute *_outgeo;
 };
 
 }
+
 #endif
