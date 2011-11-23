@@ -40,11 +40,14 @@
 #include "DrawNode.h"
 #include "coralUiDefinitions.h"
 
+#include <GL/glew.h>
+
 namespace coralUi{
 
 class CORALUI_EXPORT GeoDrawNode : public DrawNode{
 public:
 	GeoDrawNode(const std::string &name, coral::Node *parent);
+	~GeoDrawNode();
 	void draw();
 
 private:
@@ -57,12 +60,20 @@ private:
 	// coral::BoolAttribute *_ids;
 	coral::NumericAttribute *_colors;
 	
+	void updateVBO(coral::Geo *geo);
+	void updateVBOWireframeIndex(coral::Geo *geo);
+	void updateShaders(coral::Geo *geo);
 	void drawNormals(coral::Geo *geo, bool shouldDrawFlat);
 	void drawWireframe(coral::Geo *geo);
 	void drawFlat(coral::Geo *geo);
 	void drawSmooth(coral::Geo *geo);
 	void drawPoints(coral::Geo *geo);
 	// void drawPointIds(coral::Geo *geo);
+
+	// OpenGL
+	GLuint _vtxBuffer;		// buffer of vertices: {0.35, 0.76, 0.48, 0.56, 0.37, etc...}
+	GLuint _nrmBuffer;		// buffer of normales: {0.0, 0.0, 1.0, 0.0, 0.0, 1.0, etc...}
+	GLuint _idxBuffer;		// buffer of indices: {0,1,2,3, 3,4,5,0, 4,6,7,5 etc...}
 };
 
 }
