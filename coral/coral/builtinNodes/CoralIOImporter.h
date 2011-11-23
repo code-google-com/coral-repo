@@ -38,9 +38,9 @@
 
 namespace coral{
 
-class CoralIOImporter : public Node{
+class ImportCIOTransforms: public Node{
 public:
-	CoralIOImporter(const std::string &name, Node *parent);
+	ImportCIOTransforms(const std::string &name, Node *parent);
 	void update(Attribute *attribute);
 
 private:
@@ -49,8 +49,18 @@ private:
 	NumericAttribute *_out;
 	std::string _cachedFilename;
 	std::map<int, std::vector<Imath::M44f> > _cachedMatrixValues;
-	std::map<int, std::vector<Imath::V3f> > _cachedVec3Values;
 };
+
+// class ImportCIOSkinWeights: public Node{
+// public:
+// 	ImportCIOSkinWeights(const std::string &name, Node *parent);
+// 	void update(Attribute *attribute);
+
+// private:
+// 	StringAttribute *_file;
+// 	NumericAttribute *_out;
+// 	std::string _cachedFilename;
+// };
 
 }
 

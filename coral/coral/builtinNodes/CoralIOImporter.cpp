@@ -144,7 +144,7 @@ void interpolateMatrixValues(const std::vector<Imath::M44f> &matrixValuesA, cons
 
 }
 
-CoralIOImporter::CoralIOImporter(const std::string &name, Node *parent): Node(name, parent){	
+ImportCIOTransforms::ImportCIOTransforms(const std::string &name, Node *parent): Node(name, parent){	
 	_file = new StringAttribute("file", this);
 	_time = new NumericAttribute("time", this);
 	_out = new NumericAttribute("out", this);
@@ -155,7 +155,6 @@ CoralIOImporter::CoralIOImporter(const std::string &name, Node *parent): Node(na
 	
 	setAttributeAllowedSpecialization(_time, "Float");
 	std::vector<std::string> outSpec;
-	//outSpec.push_back("Vec3Array");
 	outSpec.push_back("Matrix44Array");
 	setAttributeAllowedSpecializations(_out, outSpec);
 	
@@ -163,7 +162,7 @@ CoralIOImporter::CoralIOImporter(const std::string &name, Node *parent): Node(na
 	setAttributeAffect(_time, _out);
 }
 
-void CoralIOImporter::update(Attribute *attribute){
+void ImportCIOTransforms::update(Attribute *attribute){
 	std::string filename = _file->value()->stringValue();
 	Numeric *time = _time->value();
 	Numeric *out = _out->outValue();
@@ -171,7 +170,6 @@ void CoralIOImporter::update(Attribute *attribute){
 	if(filename != _cachedFilename){
 		_cachedFilename = filename;
 		_cachedMatrixValues.clear();
-		_cachedVec3Values.clear();
 		
 		std::string version;
 		std::string type;
@@ -183,11 +181,8 @@ void CoralIOImporter::update(Attribute *attribute){
 		parseFile(filename, version, type, elementsPerFrame, frames, matrixValues, vec3Values);
 		
 		if(version == "1.0"){
-			if(type == "matrix"){
+			if(type == "transform"){
 				cacheMatrixValues(frames, elementsPerFrame, matrixValues, _cachedMatrixValues);
-			}
-			else if(type == "vec3"){
-				// to be implemented
 			}
 		}
 	}

@@ -37,7 +37,7 @@
 using namespace coral;
 
 void coralIOWrapper(){
-	pythonWrapperUtils::pythonWrapper<CoralIOImporter, Node>("CoralIOImporter");
+	pythonWrapperUtils::pythonWrapper<ImportCIOTransforms, Node>("ImportCIOTransforms");
 }
 
 #endif

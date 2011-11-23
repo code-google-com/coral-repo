@@ -110,7 +110,7 @@ def loadPlugin():
     plugin.registerAttribute("StringAttribute", _coral.StringAttribute)
     plugin.registerNode("String", _coral.StringNode, tags = ["generic"])
     plugin.registerNode("Time", timeNode.TimeNode, tags = ["generic"])
-    plugin.registerNode("CoralIOImporter", _coral.CoralIOImporter, tags = ["generic"])
+    plugin.registerNode("ImportCIOTransforms", _coral.ImportCIOTransforms, tags = ["generic"])
     plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic", "loop"])
     plugin.registerNode("ProcessSimulation", _coral.ProcessSimulationNode, tags = ["generic", "simulation"])
     plugin.registerNode("KernelNode", _coral.KernelNode, tags = ["generic", "loop"])
