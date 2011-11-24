@@ -111,6 +111,7 @@ def loadPlugin():
     plugin.registerNode("String", _coral.StringNode, tags = ["generic"])
     plugin.registerNode("Time", timeNode.TimeNode, tags = ["generic"])
     plugin.registerNode("ImportCIOTransforms", _coral.ImportCIOTransforms, tags = ["generic"])
+    plugin.registerNode("ImportCIOSkinWeights", _coral.ImportCIOSkinWeights, tags = ["generic"])
     plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic", "loop"])
     plugin.registerNode("ProcessSimulation", _coral.ProcessSimulationNode, tags = ["generic", "simulation"])
     plugin.registerNode("KernelNode", _coral.KernelNode, tags = ["generic", "loop"])
@@ -124,5 +125,7 @@ def loadPlugin():
     plugin.registerNode("SplinePoint", _coral.SplinePoint, tags = ["curve"])
     
     plugin.registerNode("Transform", _coral.Transform, tags = ["dag"])
+
+    plugin.registerNode("SkinWeightDeformer", _coral.SkinWeightDeformer, tags = ["deformers"])
     
     return plugin

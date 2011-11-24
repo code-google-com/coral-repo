@@ -214,7 +214,9 @@ private:
 	bool _faceNormalsDirty;
 	bool _verticesNormalsDirty;
 	
-	tbb::mutex _localMutex;
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex _localMutex;
+	#endif
 };
 
 }

@@ -48,6 +48,7 @@ void Geo::copy(const Geo *other){
 	_rawFaces = other->_rawFaces;
 }
 
+
 const std::vector<Imath::V3f> &Geo::points(){
 	return _points;
 }

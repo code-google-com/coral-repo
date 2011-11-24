@@ -38,6 +38,7 @@ using namespace coral;
 
 void coralIOWrapper(){
 	pythonWrapperUtils::pythonWrapper<ImportCIOTransforms, Node>("ImportCIOTransforms");
+	pythonWrapperUtils::pythonWrapper<ImportCIOSkinWeights, Node>("ImportCIOSkinWeights");
 }
 
 #endif

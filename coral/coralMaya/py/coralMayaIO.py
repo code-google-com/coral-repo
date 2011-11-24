@@ -3,26 +3,20 @@ from maya import cmds, OpenMaya, OpenMayaAnim
 
 def exportSkeleton(topNode, filename):
     fileContent = "coralIO:1.0\n"
-    fileContent += "type:matrix\n"
+    fileContent += "type:transform\n"
     
     joints = cmds.listRelatives(topNode, allDescendents = True, type = "joint")
     
-    interestingJoints = []
-    for joint in joints:
-        childrenJoints = cmds.listRelatives(joint, children = True, type = "joint")
-        if childrenJoints is not None:
-            interestingJoints.append(joint)
+    fileContent += "transforms:" + str(len(joints)) + "\n"
     
-    fileContent += "elementsPerFrame:" + str(len(interestingJoints)) + "\n"
-    
-    start = cmds.playbackOptions(query = True, playbackStartTime = True)
-    end = cmds.playbackOptions(query = True, playbackEndTime = True)
+    start = cmds.playbackOptions(query = True, animationStartTime = True)
+    end = cmds.playbackOptions(query = True, animationEndTime = True)
     
     fileContent += "frames:" + str(int(end - start)) + "\n"
     
     for frame in range(start, end):
         cmds.currentTime(frame)
-        for joint in interestingJoints:
+        for joint in joints:
             xform = cmds.xform(joint, query = True, worldSpace = True, matrix = True)
             fileContent += str(xform).strip("[]").replace(", ", ",") + "\n"
     
@@ -32,7 +26,7 @@ def exportSkeleton(topNode, filename):
     
     print "coralIO: saved file " + filename
 
-def exportSkinWeights(skinClusterNode, filename):
+def exportSkinWeights(topNode, skinClusterNode, filename):
     fileContent = "coralIO:1.0\n"
     fileContent += "type:skinWeight\n"
 
@@ -47,6 +41,12 @@ def exportSkinWeights(skinClusterNode, filename):
 
     influences = OpenMaya.MDagPathArray()
     skinClusterFn.influenceObjects(influences)
+
+    joints = cmds.listRelatives(topNode, allDescendents = True, type = "joint", fullPath = True)
+
+    jointsMap = {}
+    for i in range(len(joints)):
+        jointsMap[joints[i]] = i
 
     geoIt = OpenMaya.MItGeometry(skinPath)
 
@@ -66,7 +66,9 @@ def exportSkinWeights(skinClusterNode, filename):
         for j in range(weights.length()):
             weight = weights[j]
             if weight > 0.0:
-                fileContent += "vertex:" + str(i) + ",deformer:" + str(j) + ",weight:" + str(weights[j]) + "\n"
+                influenceName = influences[j].fullPathName()
+                jointId = jointsMap[influenceName]
+                fileContent += "vertex:" + str(i) + ",deformer:" + str(jointId) + ",weight:" + str(weights[j]) + "\n"
 
         geoIt.next()
     

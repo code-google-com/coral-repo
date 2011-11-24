@@ -51,16 +51,18 @@ private:
 	std::map<int, std::vector<Imath::M44f> > _cachedMatrixValues;
 };
 
-// class ImportCIOSkinWeights: public Node{
-// public:
-// 	ImportCIOSkinWeights(const std::string &name, Node *parent);
-// 	void update(Attribute *attribute);
+class ImportCIOSkinWeights: public Node{
+public:
+	ImportCIOSkinWeights(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
 
-// private:
-// 	StringAttribute *_file;
-// 	NumericAttribute *_out;
-// 	std::string _cachedFilename;
-// };
+private:
+	StringAttribute *_file;
+	NumericAttribute *_vertices;
+	NumericAttribute *_deformers;
+	NumericAttribute *_weights;
+	std::string _cachedFilename;
+};
 
 }
 
