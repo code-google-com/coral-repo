@@ -6,6 +6,7 @@
 #include "CoralIOImporter.h"
 #include "../src/stringUtils.h"
 #include "../src/Numeric.h"
+#include "../src/NetworkManager.h"
 
 using namespace coral;
 
@@ -246,6 +247,8 @@ ImportCIOTransforms::ImportCIOTransforms(const std::string &name, Node *parent):
 
 void ImportCIOTransforms::update(Attribute *attribute){
 	std::string filename = _file->value()->stringValue();
+	filename = NetworkManager::resolveFilename(filename);
+
 	Numeric *time = _time->value();
 	Numeric *out = _out->outValue();
 	
@@ -309,6 +312,7 @@ ImportCIOSkinWeights::ImportCIOSkinWeights(const std::string &name, Node *parent
 
 void ImportCIOSkinWeights::update(Attribute *attribute){
 	std::string filename = _file->value()->stringValue();
+	filename = NetworkManager::resolveFilename(filename);
 
 	std::string version;
 	std::string type;

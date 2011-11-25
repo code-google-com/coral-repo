@@ -28,6 +28,7 @@
 #include "ObjImporter.h"
 #include "../src/GeoAttribute.h"
 #include "../src/StringAttribute.h"
+#include "../src/NetworkManager.h"
 
 #include <fstream>
 
@@ -211,13 +212,11 @@ void ObjImporter::update(Attribute *attribute){
 
 	// read
 	std::string filename = _fileName->value()->stringValue();
-
-	std::cout << "reading Obj... " << filename.c_str() << std::endl;
+	filename = NetworkManager::resolveFilename(filename);
 
 	std::ifstream stream(filename.c_str(), std::ios::in | std::ios::ate);
 	if(!stream || !stream.tellg()){
 		_geo->outValue()->clear();
-		setAttributeIsClean(_geo, true);
 		return;
 	}
 	
@@ -232,9 +231,6 @@ void ObjImporter::update(Attribute *attribute){
 
 	while(readLine(stream, vertices, normals, uvs, faces));
 	stream.close();
-
-	// build
+	
 	_geo->outValue()->build(vertices, faces);
-
-	setAttributeIsClean(_geo, true);
 }

@@ -52,6 +52,12 @@ void networkManagerWrapper(){
 		.staticmethod("connect")
 		.def("isCycle", &NetworkManager::isCycle)
 		.staticmethod("isCycle")
+		.def("resolveFilename", &NetworkManager::resolveFilename)
+		.staticmethod("resolveFilename")
+		.def("addSearchPath", &NetworkManager::addSearchPath)
+		.staticmethod("addSearchPath")
+		.def("removeSearchPath", &NetworkManager::removeSearchPath)
+		.staticmethod("removeSearchPath")
 	;
 }
 

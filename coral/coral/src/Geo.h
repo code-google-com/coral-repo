@@ -193,6 +193,7 @@ private:
 	void computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNormals);
 	void cacheTopologyStructures();
 	void cacheFaceNormals();
+	void cacheNormalsData();
 
 	std::vector<std::vector<int> > _rawFaces;
 	std::vector<Face> _faces;

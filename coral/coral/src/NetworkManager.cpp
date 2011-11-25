@@ -26,6 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#include <sys/stat.h>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/subgraph.hpp>
@@ -38,6 +40,13 @@
 #include "Attribute.h"
 #include "ErrorObject.h"
 #include "containerUtils.h"
+#include "stringUtils.h"
+
+#ifdef WIN32
+#define OS_SEP "\\"
+#else
+#define OS_SEP "/"
+#endif
 
 using namespace coral;
 
@@ -48,6 +57,14 @@ Graph _graph;
 
 int NetworkManager::_nextAvailableId = 0;
 std::map<int, Object *> NetworkManager::_objectsById;
+std::vector<std::string> NetworkManager::_searchPaths;
+
+namespace {
+	int fileExist(const std::string &filename){
+	  struct stat buffer;
+	  return (stat (filename.data(), &buffer) == 0);
+	}
+}
 
 class DownstreamVisitor : public boost::default_dfs_visitor{
 public:
@@ -319,3 +336,33 @@ bool NetworkManager::connect(Attribute *sourceAttribute, Attribute *destinationA
 	return success;
 }
 
+std::string NetworkManager::resolveFilename(const std::string &filename){
+	std::string resolvedFilename;
+	if(fileExist(filename)){
+		resolvedFilename = filename;
+	}
+	else{
+		std::string sep(OS_SEP);
+
+		for(int i = 0; i < _searchPaths.size(); ++i){
+			std::string newPath = _searchPaths[i] + sep + filename;
+			stringUtils::replace(newPath, sep + sep, sep); //fix possible crap
+		  	if(fileExist(newPath)){
+		  		resolvedFilename = newPath;
+		  		break;
+		  	}
+		}
+	}
+
+	return resolvedFilename;
+}
+
+void NetworkManager::addSearchPath(const std::string &path){
+	if(!containerUtils::elementInContainer(path, _searchPaths)){
+		_searchPaths.push_back(path);
+	}
+}
+
+void NetworkManager::removeSearchPath(const std::string &path){
+	containerUtils::eraseElementInContainer(path, _searchPaths);
+}

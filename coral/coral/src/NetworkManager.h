@@ -30,6 +30,7 @@
 #ifndef NODEMANAGER_H
 #define NODEMANAGER_H
 
+#include <string>
 #include <vector>
 #include <map>
 #include "coralDefinitions.h"
@@ -51,7 +52,10 @@ public:
 	static bool isCycle(Attribute *sourceAttribute, Attribute *destinationAttribute);
 	static void getDownstreamChain(Attribute *attribute, std::vector<Attribute*> &downstreamChain);
 	static void getUpstreamChain(Attribute *attribute, std::vector<Attribute*> &upstreamChain);
-	
+	static std::string resolveFilename(const std::string &filename);
+	static void addSearchPath(const std::string &path);
+	static void removeSearchPath(const std::string &path);
+
 private:
 	friend class Object;
 	friend class Attribute;
@@ -65,9 +69,9 @@ private:
 	static void getCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &cleanChain, std::map<int, std::vector<Attribute*> > &affectedInputs);
 	static void collectParentNodeConnectedInputs(Attribute *attribute, Node *parentNode, std::vector<Attribute*> &attributes);
 
-
 	static int _nextAvailableId;
 	static std::map<int, Object *> _objectsById;
+	static std::vector<std::string> _searchPaths;
 };
 
 }

@@ -154,9 +154,7 @@ void Geo::computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNorm
 }
 
 void Geo::cacheFaceNormals(){
-	if(_topologyStructuresDirty){
-		cacheTopologyStructures();
-	}
+	cacheNormalsData();
 	
 	std::vector<Imath::V3f> vertexPerFaceNormals;
 	computeVertexPerFaceNormals(vertexPerFaceNormals);
@@ -230,6 +228,32 @@ const std::vector<Imath::V3f> &Geo::verticesNormals(){
 	}
 	
 	return _verticesNormals;
+}
+
+void Geo::cacheNormalsData(){
+	int faceCount = _rawFaces.size();
+	_vertexIdOffset.resize(faceCount);
+	
+	int vertexCount = _points.size();
+	_vertexFaces.resize(vertexCount);
+	
+	int vertexIdOffset = 0;
+	
+	for(int i = 0; i < faceCount; ++i){
+		std::vector<int> &rawVerticesPerFace = _rawFaces[i];
+		
+		int verticesPerFaceCount = rawVerticesPerFace.size();
+		
+		_vertexIdOffset[i] = vertexIdOffset;
+		
+		for(int j = 0; j < verticesPerFaceCount; ++j){
+			int vertexId = rawVerticesPerFace[j];
+			
+			_vertexFaces[vertexId].push_back(i);
+			
+			vertexIdOffset += verticesPerFaceCount;
+		}
+	}
 }
 
 void Geo::cacheTopologyStructures(){

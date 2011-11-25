@@ -58,6 +58,7 @@ class CoralAppData:
     registeredNodeDescriptions = {}
     appendToLastCreatedNodes = False
     lastCreatedNodes = []
+    currentNetworkDir = ""
     
     #observer lists
     registeredNodeClassesObservers = ObserverCollector()
@@ -737,10 +738,15 @@ def openNetworkFile(filename):
     if filename:
         newNetwork()
         
-        file = open(filename)
+        file = open(filename, "rU")
     
         saveScript = file.read()
         file.close()
+
+        filePath = os.path.split(filename)[0]
+        CoralAppData.currentNetworkDir = filePath
+
+        _coral.NetworkManager.addSearchPath(filePath)
         
         _loadNetworkScript(saveScript, topNode = CoralAppData.rootNode.fullName())
         
@@ -796,6 +802,9 @@ def saveNetworkFile(filename):
 def newNetwork():
     CoralAppData.rootNode = RootNode("root")
     
+    _coral.NetworkManager.removeSearchPath(CoralAppData.currentNetworkDir)
+    CoralAppData.currentNetworkDir = ""
+
     _notifyInitializedNewNetworkObservers()
 
 def _convertCollapsedNodeToScript(collapsedNode):
@@ -857,7 +866,7 @@ def saveCollapsedNodeFile(collapsedNode, filename):
 
 def importCollapsedNodeFile(filename, topNode):
     if filename:
-        file = open(filename)
+        file = open(filename, "rU")
         saveScript = file.read()
         file.close()
         
