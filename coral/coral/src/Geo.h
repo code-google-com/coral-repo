@@ -178,6 +178,18 @@ public:
 	const std::vector<Imath::V3f> &points();
 	int pointsCount() const;
 	const std::vector<std::vector<int> > &rawFaces();
+
+	/*! Return a pointer to an array of packaged indices: {0,1,2,3, 1,4,5,2, 4,6,7,5, etc...}.
+	 * Should be used with rawIndexCounts()
+	 * \return A pointer to an array of indices
+	 */
+	const std::vector<int> &rawIndices();
+
+	/*! Return a pointer to an array of vertex counts for each polygon: {4,4,4,4,3,4,4,4,5,4,4, etc...}.
+	 * Should be used with rawIndices().
+	 * \return A pointer to an array of vertex counts for each polygon
+	 */
+	const std::vector<int> &rawIndexCounts();
 	int facesCount() const;
 	const std::vector<Imath::V3f> &faceNormals();
 	const std::vector<Imath::V3f> &verticesNormals();
@@ -195,6 +207,8 @@ private:
 	void cacheFaceNormals();
 
 	std::vector<std::vector<int> > _rawFaces;
+	std::vector<int> _rawIndices;
+	std::vector<int> _rawIndexCounts;
 	std::vector<Face> _faces;
 	std::vector<Face*> _facesPtr;
 	std::vector<Vertex> _vertices;

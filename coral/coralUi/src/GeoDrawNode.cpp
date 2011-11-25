@@ -26,6 +26,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 #include "GeoDrawNode.h"
+#include <coral/src/Attribute.h>
 #include <coral/src/Numeric.h>
 
 #include <GL/glew.h>
@@ -63,26 +64,42 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, 
 	// setAttributeAffect(_ids, (Attribute*)viewportOutputAttribute());
 	setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
 	
-	_smooth->outValue()->setBoolValueAt(0, true);
-
 	std::vector<std::string> colorSpecializations;
 	colorSpecializations.push_back("Col4");
 	colorSpecializations.push_back("Col4Array");
 	setAttributeAllowedSpecializations(_colors, colorSpecializations);
 
+	catchAttributeDirtied(_geo);
+	catchAttributeDirtied(_colors);
+
+	_smooth->outValue()->setBoolValueAt(0, true);
+
 	// generate OpenGL buffers
 	glGenBuffers(1, &_vtxBuffer);
 	glGenBuffers(1, &_nrmBuffer);
+	glGenBuffers(1, &_colBuffer);
 	glGenBuffers(1, &_idxBuffer);
 }
 
 GeoDrawNode::~GeoDrawNode(){
 	glDeleteBuffers(1, &_vtxBuffer);
 	glDeleteBuffers(1, &_nrmBuffer);
+	glDeleteBuffers(1, &_colBuffer);
 	glDeleteBuffers(1, &_idxBuffer);
 }
 
-void GeoDrawNode::updateVBO(Geo *geo){
+void GeoDrawNode::attributeDirtied(Attribute *attribute){
+	if(attribute == _geo){
+		updateGeoVBO();
+	}
+	else if(attribute == _colors){
+		updateColorVBO();
+	}
+}
+
+void GeoDrawNode::updateGeoVBO(){
+
+	Geo *geo = _geo->value();
 
 	const std::vector<Imath::V3f> &points = geo->points();
 	const std::vector<Imath::V3f> &vtxNormals = geo->verticesNormals();
@@ -99,33 +116,10 @@ void GeoDrawNode::updateVBO(Geo *geo){
 	}
 
 	// index buffer generation
-	int facesCount = (int)faces.size();
-
-	// count the total number of index element
-	int idxCount = 0;
-	for(int faceID = 0; faceID < facesCount; ++faceID){
-		const std::vector<int> &face = faces[faceID];
-		idxCount += face.size();
-	}
-
-	// create and feed the array of index
-	GLuint quadIndices[idxCount];
-
-	int idxOffset = 0;
-	for(int faceID = 0; faceID < facesCount; ++faceID){
-
-		const std::vector<int> &face = faces[faceID];
-
-		for(unsigned int index = 0; index < face.size(); ++index){
-
-			quadIndices[idxOffset] = face[index];
-			idxOffset++;
-		}
-	}
-
+	const std::vector<int> &indices = geo->rawIndices();
 	// send to GPU!
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _idxBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int)*indices.size(), &indices[0], GL_STATIC_DRAW);
 
 
 	// clean OpenGL states
@@ -133,6 +127,18 @@ void GeoDrawNode::updateVBO(Geo *geo){
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glEndList();
+}
+
+void GeoDrawNode::updateColorVBO(){
+
+	Numeric *col4Numeric = _colors->value();
+	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
+
+	// color buffer
+	if((col4Numeric->isArray()) && (col4Values.empty() == false)){
+		glBindBuffer(GL_ARRAY_BUFFER, _colBuffer);
+		glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*col4Values.size(), (GLvoid*)&col4Values[0].r, GL_STATIC_DRAW);
+	}
 }
 
 void GeoDrawNode::drawPoints(Geo *geo){
@@ -161,30 +167,33 @@ void GeoDrawNode::drawPoints(Geo *geo){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void GeoDrawNode::drawSmooth(Geo *geo){
-	const std::vector<Imath::V3f> &points = geo->points();
-	const std::vector<std::vector<int> > &faces = geo->rawFaces();
+void GeoDrawNode::drawSurface(Geo *geo, bool smooth){
+	const std::vector<int> &indexCounts = geo->rawIndexCounts();
 	const std::vector<Imath::V3f> &vtxNormals = geo->verticesNormals();
 
-	Numeric *numeric = _colors->value();
-	Numeric::Type numType = numeric->type();
-	const std::vector<Imath::Color4f> &col4Values = numeric->col4Values();
+	Numeric *col4Numeric = _colors->value();
+	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
 
-	if(numType == Numeric::numericTypeCol4){
-		glColor4f(col4Values[0].r, col4Values[0].g, col4Values[0].b, col4Values[0].a);
-	}else{
-		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);	// default green
+	bool useColVbo = false;
+	if(col4Numeric->type() == Numeric::numericTypeCol4Array){
+		useColVbo = true;
 	}
-
-	if(numType == Numeric::numericTypeCol4){
+	else if(col4Numeric->type() == Numeric::numericTypeCol4){
+		// simple color? use it for all the surface
 		glColor4f(col4Values[0].r, col4Values[0].g, col4Values[0].b, col4Values[0].a);
 	}else{
-		glColor4f(0.0f, 1.0f, 0.0f, 1.0f);	// default green
+		// nothing connected? Use default. TODO: should be removed. Default color should be in the color attribute of this node.
+		glColor4f(0.5f, 0.5f, 0.5f, 1.0f);	// default middle gray
 	}
 
 	if(vtxNormals.empty() == false){
 		glEnable(GL_LIGHTING);
-		glShadeModel(GL_SMOOTH);
+
+		if(smooth){
+			glShadeModel(GL_SMOOTH);
+		}else{
+			glShadeModel(GL_FLAT);
+		}
 
 		// prepare VBOs
 		glBindBuffer(GL_ARRAY_BUFFER, _vtxBuffer);
@@ -198,57 +207,37 @@ void GeoDrawNode::drawSmooth(Geo *geo){
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
 
-		// render
-		// draw polygon sending poly size (3 or 4+) and an offset in the GPU memory to the indice to use
-		int facesCount = (int)faces.size();
-		int idOffset = 0;
-		for(int faceID = 0; faceID < facesCount; ++faceID){
+		if(useColVbo){
+			glBindBuffer(GL_ARRAY_BUFFER, _colBuffer);
+			glColorPointer(4, GL_FLOAT, 0, NULL);
+			glEnableClientState(GL_COLOR_ARRAY);
+		}
 
-			const std::vector<int> &face = faces[faceID];
-			glDrawElements(GL_POLYGON, face.size(), GL_UNSIGNED_INT, (GLuint*)NULL+idOffset);
-			idOffset += face.size();
+		// material stuff
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+		glEnable(GL_COLOR_MATERIAL);
+
+		// render
+		// draw polygon sending poly size (3 or 4+ via indexCounts[i]) and an offset pointer in the GPU memory to the indices to use
+		int idOffset = 0;
+		for(int i = 0; i < indexCounts.size(); ++i){
+			glDrawElements(GL_POLYGON, indexCounts[i], GL_UNSIGNED_INT, (GLuint*)NULL+idOffset);
+			idOffset += indexCounts[i];	// 4+3+4+4+4+4+etc...
 		}
 
 		// clean OpenGL states
+		glDisable(GL_COLOR_MATERIAL);
+
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
+
+		if(useColVbo){
+			glDisableClientState(GL_COLOR_ARRAY);
+		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
-}
-
-void GeoDrawNode::drawFlat(Geo *geo){
-	
-		glEnable(GL_LIGHTING);
-		glShadeModel(GL_FLAT);
-
-		// prepare VBOs
-		glBindBuffer(GL_ARRAY_BUFFER, _vtxBuffer);
-		glVertexPointer(3, GL_FLOAT, 0, NULL);
-
-		glBindBuffer(GL_ARRAY_BUFFER, _nrmBuffer);
-		glNormalPointer(GL_FLOAT, 0, NULL);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_NORMAL_ARRAY);
-
-		// render tri
-		/*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _triIdxBuffer);
-
-		glDrawElements(GL_TRIANGLES, _triNumber*3, GL_UNSIGNED_INT, NULL);
-
-		// render quads
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _quadIdxBuffer);
-
-		glDrawElements(GL_QUADS, _quadNumber*4, GL_UNSIGNED_INT, NULL);*/
-
-		// clean OpenGL states
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void GeoDrawNode::drawWireframe(Geo *geo){
@@ -385,11 +374,20 @@ void GeoDrawNode::drawNormals(Geo *geo, bool shouldDrawFlat){
 void GeoDrawNode::draw(){
 	DrawNode::draw();
 
-	bool shouldUpdateVBO = false;
+	bool shouldUpdateGeoVBO = false;
+	bool shouldUpdateColorVBO = false;
+
 	// check something is connected in _geo and check it is resolved
 	if(_geo->input()){
 		if(_geo->input()->isClean() == false){
-			shouldUpdateVBO = true;
+			shouldUpdateGeoVBO = true;
+		}
+	}
+
+	// check something is connected in _colors and check it is resolved
+	if(_colors->input()){
+		if(_colors->input()->isClean() == false){
+			shouldUpdateColorVBO = true;
 		}
 	}
 
@@ -405,9 +403,11 @@ void GeoDrawNode::draw(){
 	if(geo->pointsCount() == 0)
 		return;
 
-	if(shouldUpdateVBO){
-		std::cout << "update VBO" << std::endl;
-		updateVBO(geo);
+	if(shouldUpdateGeoVBO){
+		updateGeoVBO();
+	}
+	if(shouldUpdateColorVBO){
+		updateColorVBO();
 	}
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_POINT_BIT);
@@ -423,11 +423,11 @@ void GeoDrawNode::draw(){
 		}
 		
 		if(shouldDrawSmooth){
-			drawSmooth(geo);
+			drawSurface(geo, true);
 		}
 		
 		if(shouldDrawFlat){
-			drawFlat(geo);
+			drawSurface(geo, false);
 		}
 	
 		if(shouldDrawWireframe || shouldDrawNormals){
