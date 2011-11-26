@@ -63,6 +63,10 @@ const std::vector<std::vector<int> > &Geo::rawFaces(){
 }
 
 const std::vector<int> &Geo::rawIndices(){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_localMutex);
+	#endif
+
 	if(_alignmentDataDirty){
 		cacheAlignmentData();
 	}
@@ -71,6 +75,10 @@ const std::vector<int> &Geo::rawIndices(){
 }
 
 const std::vector<int> &Geo::rawIndexCounts(){
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex::scoped_lock lock(_localMutex);
+	#endif
+	
 	if(_alignmentDataDirty){
 		cacheAlignmentData();
 	}
