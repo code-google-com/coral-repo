@@ -171,6 +171,7 @@ void Numeric::resize(unsigned int newSize){
 	}
 }
 
+// TODO: Really Useful? Never used...
 bool Numeric::isArrayType(Numeric::Type type){
 	bool arrayType = false;
 	if(

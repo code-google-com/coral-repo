@@ -38,7 +38,8 @@ using namespace containerUtils;
 Geo::Geo():
 _faceNormalsDirty(true),
 _verticesNormalsDirty(true),
-_topologyStructuresDirty(true){
+_topologyStructuresDirty(true),
+_alignmentDataDirty(true){
 }
 
 void Geo::copy(const Geo *other){
@@ -59,6 +60,22 @@ int Geo::pointsCount() const{
 
 const std::vector<std::vector<int> > &Geo::rawFaces(){
 	return _rawFaces;
+}
+
+const std::vector<int> &Geo::rawIndices(){
+	if(_alignmentDataDirty){
+		cacheAlignmentData();
+	}
+
+	return _rawIndices;
+}
+
+const std::vector<int> &Geo::rawIndexCounts(){
+	if(_alignmentDataDirty){
+		cacheAlignmentData();
+	}
+	
+	return _rawIndexCounts;
 }
 
 int Geo::facesCount() const{
@@ -104,6 +121,8 @@ void Geo::displacePoints(const std::vector<Imath::V3f> &displacedPoints){
 void Geo::clear(){
 	_points.clear();
 	_rawFaces.clear();
+	_rawIndices.clear();
+	_rawIndexCounts.clear();
 	_faces.clear();
 	_vertices.clear();
 	
@@ -114,6 +133,7 @@ void Geo::clear(){
 	_faceNormalsDirty = true;
 	_verticesNormalsDirty = true;
 	_topologyStructuresDirty = true;
+	_alignmentDataDirty = true;
 }
 
 void Geo::build(const std::vector<Imath::V3f> &points, const std::vector<std::vector<int> > &faces){
@@ -154,8 +174,10 @@ void Geo::computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNorm
 }
 
 void Geo::cacheFaceNormals(){
-	cacheNormalsData();
-	
+	if(_alignmentDataDirty){
+		cacheAlignmentData();
+	}
+
 	std::vector<Imath::V3f> vertexPerFaceNormals;
 	computeVertexPerFaceNormals(vertexPerFaceNormals);
 	
@@ -230,14 +252,25 @@ const std::vector<Imath::V3f> &Geo::verticesNormals(){
 	return _verticesNormals;
 }
 
-void Geo::cacheNormalsData(){
+void Geo::cacheAlignmentData(){
 	int faceCount = _rawFaces.size();
 	_vertexIdOffset.resize(faceCount);
-	
+	_rawIndexCounts.reserve(faceCount);
+
 	int vertexCount = _points.size();
 	_vertexFaces.resize(vertexCount);
 	
 	int vertexIdOffset = 0;
+
+	// count the total number of index element and reserve the vector size to avoid reallocation
+	int idxCount = 0;
+	for(int i = 0; i < faceCount; ++i){
+		std::vector<int> &rawVerticesPerFace = _rawFaces[i];
+		idxCount += rawVerticesPerFace.size();	// count 4+3+4+4+4+4+4+3+4+5+etc...
+	}
+
+	// reserve a size for the array and feed it of index
+	_rawIndices.reserve(idxCount);
 	
 	for(int i = 0; i < faceCount; ++i){
 		std::vector<int> &rawVerticesPerFace = _rawFaces[i];
@@ -245,22 +278,28 @@ void Geo::cacheNormalsData(){
 		int verticesPerFaceCount = rawVerticesPerFace.size();
 		
 		_vertexIdOffset[i] = vertexIdOffset;
+
+		_rawIndexCounts.push_back(verticesPerFaceCount);	// {4,4,4,4,3,4,4,4,4,5, etc...}
+		_vertexIdOffset[i] = vertexIdOffset;
 		
 		for(int j = 0; j < verticesPerFaceCount; ++j){
 			int vertexId = rawVerticesPerFace[j];
 			
+			_rawIndices.push_back(vertexId);	// {0,1,2,3, 1,4,5,2 4,6,7,5, etc...}.
 			_vertexFaces[vertexId].push_back(i);
 			
 			vertexIdOffset += verticesPerFaceCount;
 		}
 	}
+
+	_alignmentDataDirty = false;
 }
 
 void Geo::cacheTopologyStructures(){
 	int faceCount = _rawFaces.size();
 	_faces.resize(faceCount);
 	_facesPtr.resize(faceCount);
-	
+
 	int vertexCount = _points.size();
 	_vertices.resize(vertexCount);
 	_verticesPtr.resize(vertexCount);

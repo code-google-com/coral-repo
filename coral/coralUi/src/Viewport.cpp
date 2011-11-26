@@ -32,15 +32,7 @@
 #include <coral/src/containerUtils.h>
 #include "MainDrawRoutine.h"
 
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#if defined(WIN64) || defined(_WIN64) || defined(WIN32) || defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-#include <GL/gl.h>
-#endif
+#include <GL/glew.h>
 
 using namespace coralUi;
 
@@ -83,6 +75,16 @@ Viewport::~Viewport(){
 }
 
 void Viewport::initializeGL(){
+
+	/* init glew */
+	GLenum glewInitResult = glewInit();
+	if(glewInitResult != GLEW_OK){
+	    std::cout << "Impossible to init GLEW: " << glewGetErrorString(glewInitResult) << std::endl;
+	}
+
+	std::cout << "Using GLEW version: " << glewGetString(GLEW_VERSION) << std::endl;
+	std::cout << "OpenGL version used: " << glGetString(GL_VERSION) <<std::endl;
+
 	glClearColor(.3f, .3f, .3f, 1.f);
 	
 	glEnable(GL_DEPTH_TEST);

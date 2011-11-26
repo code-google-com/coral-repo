@@ -28,26 +28,31 @@ env = Environment(
     sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH"),
     sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"),
     sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"),
-    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH")],
+    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH"),
+    sconsUtils.getEnvVar("CORAL_GLEW_INCLUDES_PATH")],
   LIBS = [
     coralLib,
     sconsUtils.getEnvVar("CORAL_IMATH_LIB"),
     sconsUtils.getEnvVar("CORAL_IMATH_IEX_LIB"),
     sconsUtils.getEnvVar("CORAL_PYTHON_LIB"), 
     sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB"),
-    sconsUtils.getEnvVar("CORAL_TBB_LIB")],
+    sconsUtils.getEnvVar("CORAL_TBB_LIB"),
+    sconsUtils.getEnvVar("CORAL_GLEW_LIB")],
   LIBPATH = [
     coralPath,
     sconsUtils.getEnvVar("CORAL_IMATH_LIBS_PATH"),
     sconsUtils.getEnvVar("CORAL_PYTHON_LIBS_PATH"), 
     sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
-    sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH")],
+    sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH"),
+    sconsUtils.getEnvVar("CORAL_GLEW_LIBS_PATH")],
   SHLIBPREFIX = "",
   MSVC_VERSION=msvc_version,
   TARGET_ARCH = platform.machine())
 
 if sys.platform.startswith("linux"):
-    env.Append(LIBS = "glut")
+    env.Append(CPPPATH = sconsUtils.getEnvVar("CORAL_OPENGL_INCLUDES_PATH"))
+    env.Append(LIBS = sconsUtils.getEnvVar("CORAL_OPENGL_LIB"))
+    env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_OPENGL_LIBS_PATH"))
     
 elif sys.platform == "darwin":
     env["SHLIBSUFFIX"] = ".so"
@@ -57,6 +62,7 @@ elif sys.platform.startswith("win"):
     env.Append(CPPPATH = sconsUtils.getEnvVar("CORAL_OPENGL_INCLUDES_PATH"))
     env.Append(LIBS = sconsUtils.getEnvVar("CORAL_OPENGL_LIB"))
     env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_OPENGL_LIBS_PATH"))
+    
     env["SHLIBSUFFIX"] = ".pyd"
     env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj /MP")
     env["CCFLAGS"] = "-DCORAL_UI_COMPILE"
