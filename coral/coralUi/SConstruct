@@ -50,18 +50,13 @@ env = Environment(
   TARGET_ARCH = platform.machine())
 
 if sys.platform.startswith("linux"):
-    env.Append(CPPPATH = sconsUtils.getEnvVar("CORAL_OPENGL_INCLUDES_PATH"))
-    env.Append(LIBS = sconsUtils.getEnvVar("CORAL_OPENGL_LIB"))
-    env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_OPENGL_LIBS_PATH"))
+    pass
     
 elif sys.platform == "darwin":
     env["SHLIBSUFFIX"] = ".so"
     env["FRAMEWORKS"] = ["OpenGL"]
     
 elif sys.platform.startswith("win"):
-    env.Append(CPPPATH = sconsUtils.getEnvVar("CORAL_OPENGL_INCLUDES_PATH"))
-    env.Append(LIBS = sconsUtils.getEnvVar("CORAL_OPENGL_LIB"))
-    env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_OPENGL_LIBS_PATH"))
     
     env["SHLIBSUFFIX"] = ".pyd"
     env["CXXFLAGS"] = Split("/Zm800 -nologo /EHsc /DBOOST_PYTHON_DYNAMIC_LIB /Z7 /Od /Ob0 /GR /MD /wd4675 /Zc:forScope /Zc:wchar_t /bigobj /MP")
