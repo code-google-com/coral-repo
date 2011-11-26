@@ -201,7 +201,7 @@ private:
 	std::vector<Vertex> _vertices;
 	std::vector<Vertex*> _verticesPtr;
 	std::vector<Edge*> _edges;
-	std::map<int, std::map<int, Edge> > _edgesMap;
+	std::map<std::pair<int, int>, Edge> _edgesMap;
 	
 	std::vector<Imath::V3f> _points;
 	std::vector<Imath::V3f> _faceNormals;

@@ -260,17 +260,13 @@ void Geo::cacheTopologyStructures(){
 	int faceCount = _rawFaces.size();
 	_faces.resize(faceCount);
 	_facesPtr.resize(faceCount);
-	_vertexIdOffset.resize(faceCount);
 	
 	int vertexCount = _points.size();
 	_vertices.resize(vertexCount);
 	_verticesPtr.resize(vertexCount);
-	_vertexFaces.resize(vertexCount);
 	
 	_edges.clear();
 	_edgesMap.clear();
-	
-	int vertexIdOffset = 0;
 	
 	for(int i = 0; i < faceCount; ++i){
 		std::vector<int> &rawVerticesPerFace = _rawFaces[i];
@@ -283,16 +279,12 @@ void Geo::cacheTopologyStructures(){
 		
 		int verticesPerFaceCount = rawVerticesPerFace.size();
 		
-		_vertexIdOffset[i] = vertexIdOffset;
-		
 		face._vertices.resize(verticesPerFaceCount);
 		face._edges.resize(verticesPerFaceCount);
 		face._points.resize(verticesPerFaceCount);
 		
 		for(int j = 0; j < verticesPerFaceCount; ++j){
 			int vertexId = rawVerticesPerFace[j];
-			
-			_vertexFaces[vertexId].push_back(i);
 			
 			Imath::V3f &point = _points[vertexId];
 			
@@ -321,7 +313,7 @@ void Geo::cacheTopologyStructures(){
 				edgeVertexId1 = tmp;
 			}
 			
-			Edge &edge = _edgesMap[edgeVertexId1][edgeVertexId2];
+			Edge &edge = _edgesMap[std::pair<int, int>(edgeVertexId1, edgeVertexId2)];
 			
 			face._edges[j] = &edge;
 			edge._faces.push_back(&face);
@@ -332,7 +324,7 @@ void Geo::cacheTopologyStructures(){
 			Imath::V3f &point1 = _points[edgeVertexId1];
 			Imath::V3f &point2 = _points[edgeVertexId2];
 			
-			if(!containerUtils::elementInContainer(&edge, _edges)){
+			if(!edge._geo){
 				_edges.push_back(&edge);
 				
 				edge._geo = this;
@@ -358,8 +350,6 @@ void Geo::cacheTopologyStructures(){
 			if(!containerUtils::elementInContainer<Edge*>(&edge, vertex2._neighbourEdges)){
 				vertex2._neighbourEdges.push_back(&edge);
 			}
-			
-			vertexIdOffset += verticesPerFaceCount;
 		}
 	}
 	
