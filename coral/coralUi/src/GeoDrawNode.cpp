@@ -402,12 +402,15 @@ void GeoDrawNode::draw(){
 	if(geo->pointsCount() == 0)
 		return;
 
-	if(shouldUpdateGeoVBO){
+	// temporal fix to avoid segfault on Mac. (But reload every VBO at each frame)
+	/*if(shouldUpdateGeoVBO){
 		updateGeoVBO();
 	}
 	if(shouldUpdateColorVBO){
 		updateColorVBO();
-	}
+	}*/
+	updateGeoVBO();
+	updateColorVBO();
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_POINT_BIT);
 	
