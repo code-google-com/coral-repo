@@ -135,8 +135,36 @@ void GeoDrawNode::updateColorVBO(){
 
 	// color buffer
 	if((col4Numeric->isArray()) && (col4Values.empty() == false)){
+
+		// avoid empty color (and maybe crashs)
+		Geo *geo = _geo->value();
+		const std::vector<Imath::V3f> &points = geo->points();
+		int pointCount = (int)points.size();
+		int colorCount = (int)col4Values.size();
+
 		glBindBuffer(GL_ARRAY_BUFFER, _colBuffer);
-		glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*col4Values.size(), (GLvoid*)&col4Values[0].r, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*pointCount, (GLvoid*)&col4Values[0].r, GL_STATIC_DRAW);
+
+		if(colorCount < pointCount){
+			int emptyColCount = pointCount - colorCount;	// get the number of empty color to create in the buffer to match the number of vertex
+			
+			// create an array to feed
+			std::vector<Imath::Color4f> emptyColArray;
+			emptyColArray.reserve(emptyColCount);
+
+			for(int i = 0; i<emptyColCount; ++i){
+				emptyColArray.push_back(Imath::Color4f(0.0, 1.0, 0.0, 1.0));
+			}
+
+			GLintptr offset = 4*sizeof(GLfloat)*colorCount;
+			GLsizeiptr size = 4*sizeof(GLfloat)*emptyColCount;
+			glBufferSubData(GL_ARRAY_BUFFER, offset, size, (GLvoid*)&emptyColArray[0].r);
+
+		}
+
+		// clean OpenGL state
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	}
 }
 
