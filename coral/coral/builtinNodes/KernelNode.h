@@ -10,6 +10,7 @@
 
 #define __CL_ENABLE_EXCEPTIONS
 
+#include <stdlib.h>
 #include <map>
 #include <vector>
 #include <CL/cl.hpp>
