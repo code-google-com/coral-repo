@@ -35,7 +35,10 @@
 using namespace coral;
 using namespace coralUi;
 
-GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, parent){	
+GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): 
+DrawNode(name, parent),
+_shouldUpdateGeoVBO(true),
+_shouldUpdateColorVBO(true){	
 	_geo = new GeoAttribute("geo", this);
 	_smooth = new BoolAttribute("smooth", this);
 	_flat = new BoolAttribute("flat", this);
@@ -97,15 +100,14 @@ GeoDrawNode::~GeoDrawNode(){
 
 void GeoDrawNode::attributeDirtied(Attribute *attribute){
 	if(attribute == _geo){
-		updateGeoVBO();
+		_shouldUpdateGeoVBO = true;
 	}
 	else if(attribute == _colors){
-		updateColorVBO();
+		_shouldUpdateColorVBO = true;
 	}
 }
 
 void GeoDrawNode::updateGeoVBO(){
-
 	Geo *geo = _geo->value();
 
 	const std::vector<Imath::V3f> &points = geo->points();
@@ -137,7 +139,6 @@ void GeoDrawNode::updateGeoVBO(){
 }
 
 void GeoDrawNode::updateColorVBO(){
-
 	Numeric *col4Numeric = _colors->value();
 	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
 
@@ -172,7 +173,6 @@ void GeoDrawNode::updateColorVBO(){
 
 		// clean OpenGL state
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	}
 }
 
@@ -409,23 +409,6 @@ void GeoDrawNode::drawNormals(Geo *geo, bool shouldDrawFlat){
 void GeoDrawNode::draw(){
 	DrawNode::draw();
 
-	bool shouldUpdateGeoVBO = false;
-	bool shouldUpdateColorVBO = false;
-
-	// check something is connected in _geo and check it is resolved
-	if(_geo->input()){
-		if(_geo->input()->isClean() == false){
-			shouldUpdateGeoVBO = true;
-		}
-	}
-
-	// check something is connected in _colors and check it is resolved
-	if(_colors->input()){
-		if(_colors->input()->isClean() == false){
-			shouldUpdateColorVBO = true;
-		}
-	}
-
 	bool shouldDrawSmooth = _smooth->value()->boolValueAt(0);
 	bool shouldDrawFlat = _flat->value()->boolValueAt(0);
 	bool shouldDrawWireframe = _wireframe->value()->boolValueAt(0);
@@ -438,15 +421,15 @@ void GeoDrawNode::draw(){
 	if(geo->pointsCount() == 0)
 		return;
 
-	// temporal fix to avoid segfault on Mac. (But reload every VBO at each frame)
-	/*if(shouldUpdateGeoVBO){
+	if(_shouldUpdateGeoVBO){
 		updateGeoVBO();
+		_shouldUpdateGeoVBO = false;
 	}
-	if(shouldUpdateColorVBO){
+	
+	if(_shouldUpdateColorVBO){
 		updateColorVBO();
-	}*/
-	updateGeoVBO();
-	updateColorVBO();
+		_shouldUpdateColorVBO = false;
+	}
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_POINT_BIT);
 	

@@ -385,7 +385,7 @@ void Attribute::dirty(bool force){
 				attr->onDirtied();
 				
 				if(attr->_notifyParentNodeOnDirty){
-					Node *parentNode = parent();
+					Node *parentNode = attr->parent();
 					if(parentNode){
 						parentNode->attributeDirtied(attr);
 					}

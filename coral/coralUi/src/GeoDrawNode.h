@@ -62,8 +62,8 @@ private:
 	// coral::BoolAttribute *_ids;
 	coral::NumericAttribute *_colors;
 
-	bool shouldUpdateGeoVBO;
-	bool shouldUpdateColorVBO;
+	bool _shouldUpdateGeoVBO;
+	bool _shouldUpdateColorVBO;
 	
 	void updateGeoVBO();
 	void updateColorVBO();
