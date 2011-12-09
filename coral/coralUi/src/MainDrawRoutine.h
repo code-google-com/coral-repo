@@ -29,18 +29,16 @@
 #ifndef MAINDRAWROUTINE_H
 #define MAINDRAWROUTINE_H
 
-#include "DrawRoutine.h"
 #include <coral/src/Attribute.h>
 
 namespace coralUi{
 
 class DrawNode;
 
-class CORALUI_EXPORT MainDrawRoutine : public DrawRoutine{
+class MainDrawRoutine{
 public:
-	void draw();
-	
 	static void init();
+	static bool initialized();
 	static void addDrawNode(DrawNode *drawNode);
 	static void removeDrawNode(DrawNode *drawNode);
 	static void drawAll();

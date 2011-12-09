@@ -68,10 +68,16 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, 
 	colorSpecializations.push_back("Col4Array");
 	setAttributeAllowedSpecializations(_colors, colorSpecializations);
 
+	_smooth->outValue()->setBoolValueAt(0, true);
+
+	if(glContextExists()){
+		initGL();
+	}
+}
+
+void GeoDrawNode::initGL(){
 	catchAttributeDirtied(_geo);
 	catchAttributeDirtied(_colors);
-
-	_smooth->outValue()->setBoolValueAt(0, true);
 
 	// generate OpenGL buffers
 	glGenBuffers(1, &_vtxBuffer);
@@ -81,10 +87,12 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): DrawNode(name, 
 }
 
 GeoDrawNode::~GeoDrawNode(){
-	glDeleteBuffers(1, &_vtxBuffer);
-	glDeleteBuffers(1, &_nrmBuffer);
-	glDeleteBuffers(1, &_colBuffer);
-	glDeleteBuffers(1, &_idxBuffer);
+	if(glContextExists()){
+		glDeleteBuffers(1, &_vtxBuffer);
+		glDeleteBuffers(1, &_nrmBuffer);
+		glDeleteBuffers(1, &_colBuffer);
+		glDeleteBuffers(1, &_idxBuffer);
+	}
 }
 
 void GeoDrawNode::attributeDirtied(Attribute *attribute){

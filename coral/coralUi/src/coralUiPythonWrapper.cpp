@@ -30,7 +30,6 @@
 
 #include "viewportWrapper.h"
 #include "viewportOutputAttributeWrapper.h"
-#include "drawRoutineWrapper.h"
 #include "mainDrawRoutineWrapper.h"
 #include "drawNodeWrapper.h"
 #include "geoDrawNodeWrapper.h"
@@ -40,7 +39,6 @@ using namespace coralUi;
 
 BOOST_PYTHON_MODULE(_coralUi){
 	viewportOutputAttributeWrapper();
-	drawRoutineWrapper();
 	drawNodeWrapper();
 	geoDrawNodeWrapper();
 	numericDrawNodeWrapper();

@@ -45,14 +45,26 @@ namespace {
 std::vector<DrawNode*> _drawNodes;
 void(*MainDrawRoutine::_viewportRefreshCallback)(void) = 0;
 bool _renderScheduled = false;
+bool _initialized = false;
 
-void MainDrawRoutine::draw(){
-	drawAll();
+void MainDrawRoutine::init(){
+	if(!_initialized){
+		_initialized = true;
+
+		for(std::vector<DrawNode*>::const_iterator itDrawNode = _drawNodes.begin(); itDrawNode != _drawNodes.end(); ++itDrawNode){
+			(*itDrawNode)->initGL();
+		}
+	}
+}
+
+bool MainDrawRoutine::initialized(){
+	return _initialized;
 }
 
 void MainDrawRoutine::addDrawNode(DrawNode *drawNode){
-	if(!containerUtils::elementInContainer(drawNode, _drawNodes))
+	if(!containerUtils::elementInContainer(drawNode, _drawNodes)){
 		_drawNodes.push_back(drawNode);
+	}
 }
 
 void MainDrawRoutine::removeDrawNode(DrawNode *drawNode){
@@ -63,9 +75,10 @@ void MainDrawRoutine::removeDrawNode(DrawNode *drawNode){
 
 void MainDrawRoutine::drawAll(){
 	_renderScheduled = false;
-	
-	for(std::vector<DrawNode*>::const_iterator itDrawNode = _drawNodes.begin(); itDrawNode != _drawNodes.end(); ++itDrawNode){
-		(*itDrawNode)->draw();
+	if(_initialized){
+		for(std::vector<DrawNode*>::const_iterator itDrawNode = _drawNodes.begin(); itDrawNode != _drawNodes.end(); ++itDrawNode){
+			(*itDrawNode)->draw();
+		}
 	}
 }
 

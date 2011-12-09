@@ -44,7 +44,11 @@ void mainDrawRoutine_viewportRefreshCallback(){
 }
 
 void mainDrawRoutineWrapper(){
-	boost::python::class_<MainDrawRoutine, boost::shared_ptr<MainDrawRoutine>, boost::python::bases<DrawRoutine>, boost::noncopyable>("MainDrawRoutine")
+	boost::python::class_<MainDrawRoutine, boost::shared_ptr<MainDrawRoutine>, boost::noncopyable>("MainDrawRoutine")
+		.def("init", &MainDrawRoutine::init)
+		.staticmethod("init")
+		.def("initialized", &MainDrawRoutine::initialized)
+		.staticmethod("initialized")
 		.def("addDrawNode", &MainDrawRoutine::addDrawNode)
 		.staticmethod("addDrawNode")
 		.def("removeDrawNode", &MainDrawRoutine::removeDrawNode)

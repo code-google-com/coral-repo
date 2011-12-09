@@ -44,7 +44,10 @@ public:
 	void deleteIt();
 
 	virtual void draw();
+	virtual void initGL();
+
 	ViewportOutputAttribute *viewportOutputAttribute();
+	bool glContextExists();
 
 private:
 	ViewportOutputAttribute *_viewportOutput;

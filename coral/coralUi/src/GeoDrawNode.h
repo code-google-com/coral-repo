@@ -50,6 +50,7 @@ public:
 	~GeoDrawNode();
 	void attributeDirtied(coral::Attribute *attribute);
 	void draw();
+	void initGL();
 
 private:
 	coral::GeoAttribute *_geo;
@@ -60,6 +61,9 @@ private:
 	coral::BoolAttribute *_normals;
 	// coral::BoolAttribute *_ids;
 	coral::NumericAttribute *_colors;
+
+	bool shouldUpdateGeoVBO;
+	bool shouldUpdateColorVBO;
 	
 	void updateGeoVBO();
 	void updateColorVBO();

@@ -33,33 +33,34 @@
 #include <boost/python.hpp>
 #include "DrawNode.h"
 #include <coral/src/pythonWrapperUtils.h>
+#include <coral/src/PythonDataCollector.h>
 
 using namespace coralUi;
 
-class DrawNodeWrapper: public DrawNode, public boost::python::wrapper<DrawNode>{
-public:
-	DrawNodeWrapper(const std::string &name, Node *parent) : DrawNode(name, parent){
-	}
+// class DrawNodeWrapper: public DrawNode, public boost::python::wrapper<DrawNode>{
+// public:
+// 	DrawNodeWrapper(const std::string &name, Node *parent) : DrawNode(name, parent){
+// 	}
 
-	void draw(){
-		// return boost::python::call<void>(get_override("draw").ptr());
-		boost::python::object self = PythonDataCollector::findPyObject(id());
+// 	void draw(){
+// 		// return boost::python::call<void>(get_override("draw").ptr());
+// 		boost::python::object self = PythonDataCollector::findPyObject(id());
 
-		return boost::python::call_method<void>(self.ptr(), "draw");
-	}
+// 		return boost::python::call_method<void>(self.ptr(), "draw");
+// 	}
 
-	void draw_default(){
-		DrawNode::draw();
-	}
-};
+// 	void draw_default(){
+// 		DrawNode::draw();
+// 	}
+// };
 
 void drawNodeWrapper(){
-	boost::python::class_<DrawNodeWrapper, boost::shared_ptr<DrawNodeWrapper>, boost::python::bases<coral::Node>, boost::noncopyable>("DrawNode", boost::python::no_init)
-		.def("__init__", pythonWrapperUtils::__init__<DrawNodeWrapper, const std::string, coral::Node*>)
-		.def("draw", &DrawNode::draw, &DrawNodeWrapper::draw_default)
-		.def("createUnwrapped", pythonWrapperUtils::createUnwrapped2<DrawNodeWrapper, const std::string, coral::Node*>)
-		.staticmethod("createUnwrapped")
-	;
+	// boost::python::class_<DrawNodeWrapper, boost::shared_ptr<DrawNodeWrapper>, boost::python::bases<coral::Node>, boost::noncopyable>("DrawNode", boost::python::no_init)
+	// 	.def("__init__", pythonWrapperUtils::__init__<DrawNodeWrapper, const std::string, coral::Node*>)
+	// 	.def("draw", &DrawNode::draw, &DrawNodeWrapper::draw_default)
+	// 	.def("createUnwrapped", pythonWrapperUtils::createUnwrapped2<DrawNodeWrapper, const std::string, coral::Node*>)
+	// 	.staticmethod("createUnwrapped")
+	// ;
 }
 
 #endif

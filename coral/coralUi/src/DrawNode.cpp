@@ -55,3 +55,9 @@ ViewportOutputAttribute *DrawNode::viewportOutputAttribute(){
 	return _viewportOutput;
 }
 
+bool DrawNode::glContextExists(){
+	return MainDrawRoutine::initialized();
+}
+
+void DrawNode::initGL(){
+}
