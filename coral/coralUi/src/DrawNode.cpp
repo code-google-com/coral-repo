@@ -41,11 +41,14 @@ DrawNode::DrawNode(const std::string &name, Node *parent) : Node(name, parent){
 	setUpdateEnabled(false);
 	
 	MainDrawRoutine::addDrawNode(this);
+
+	MainDrawRoutine::_viewportRefreshCallback();
 }
 
 void DrawNode::deleteIt(){
 	MainDrawRoutine::removeDrawNode(this);
 	Node::deleteIt();
+	MainDrawRoutine::_viewportRefreshCallback();
 }
 
 void DrawNode::draw(){	
