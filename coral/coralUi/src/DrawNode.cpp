@@ -61,3 +61,7 @@ bool DrawNode::glContextExists(){
 
 void DrawNode::initGL(){
 }
+
+void DrawNode::attributeConnectionChanged(Attribute *attribute){
+	MainDrawRoutine::_viewportRefreshCallback();
+}

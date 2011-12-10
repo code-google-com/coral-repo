@@ -30,6 +30,8 @@
 #define CORALDRAWNODE_H
 
 #include <coral/src/Node.h>
+#include <coral/src/Attribute.h>
+
 #include "coralUiDefinitions.h"
 
 namespace coralUi{
@@ -45,6 +47,7 @@ public:
 
 	virtual void draw();
 	virtual void initGL();
+	virtual void attributeConnectionChanged(coral::Attribute *attribute);
 
 	ViewportOutputAttribute *viewportOutputAttribute();
 	bool glContextExists();

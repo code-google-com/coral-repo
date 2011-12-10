@@ -49,7 +49,7 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
         
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportUpdateGL"), QtCore.SLOT("updateGL()"))
-        
+    
     def minimumSizeHint(self):
         return QtCore.QSize(100, 100)
     
@@ -122,7 +122,11 @@ class ViewportWidget(QtGui.QWidget):
         self.setWindowTitle("viewport")
         
         self._viewportGlWidget = ViewportGlWidget(self)
-        
+        self._networkLoadingObserver = Observer()
+        self._networkLoadedObserver = Observer()
+        self._initializingNewNetworkObserver = Observer()
+        self._initializedNewNetworkObserver = Observer() 
+
         self.setLayout(QtGui.QVBoxLayout(self))
         self.setContentsMargins(0, 0, 0, 0)
         self.layout().setContentsMargins(5, 5, 5, 5)
@@ -130,7 +134,19 @@ class ViewportWidget(QtGui.QWidget):
         self.layout().addWidget(self._viewportGlWidget)
         
         _coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
+
+        coralApp.addInitializingNewNetworkObserver(self._initializingNewNetworkObserver, self._disable)
+        coralApp.addInitializedNewNetworkObserver(self._initializedNewNetworkObserver, self._enable)
+        coralApp.addNetworkLoadingObserver(self._networkLoadingObserver, self._disable)
+        coralApp.addNetworkLoadedObserver(self._networkLoadedObserver, self._enable)
         
         if not ViewportWidget._initialized:
             coralApp.addNetworkLoadedObserver(ViewportWidget._networkLoadedObserver, ViewportWidget.refreshViewports)
             ViewportWidget._initialized = True
+
+    def _disable(self):
+        _coral.setCallback("mainDrawRoutine_viewportRefresh", None)
+    
+    def _enable(self):
+        _coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
+        ViewportWidget.refreshViewports()

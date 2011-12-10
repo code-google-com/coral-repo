@@ -77,9 +77,11 @@ class CoralAppData:
     connectedInputObservers = ObserverCollector()
     attributeValueChangedObservers = ValueChangedObserverCollector()
     initializedNewNetworkObservers = ObserverCollector()
+    initializingNewNetworkObservers = ObserverCollector()
     generatingSaveScriptObservers = ObserverCollector()
     networkLoadedObservers = ObserverCollector()
     nodeConnectionChangedObservers = ObserverCollector()
+    networkLoadingObservers = ObserverCollector()
 
 def registeredNodeDescription(className):
     description = ""
@@ -122,6 +124,14 @@ def _notifyNetworkLoadedObservers(topNodeName):
         observer.setData("topNodeName", topNodeName)
         observer.notify()
 
+def addNetworkLoadingObserver(observer, callback):
+    CoralAppData.networkLoadingObservers.add(observer)
+    observer.setNotificationCallback(callback)
+
+def _notifyNetworkLoadingObservers():
+    for observer in CoralAppData.networkLoadingObservers.observers():
+        observer.notify()
+
 def addGeneratingSaveScriptObserver(observer, callback):
     CoralAppData.generatingSaveScriptObservers.add(observer)
     observer.setNotificationCallback(callback)
@@ -138,6 +148,14 @@ def addInitializedNewNetworkObserver(observer, callback):
 
 def _notifyInitializedNewNetworkObservers():
     for observer in CoralAppData.initializedNewNetworkObservers.observers():
+        observer.notify()
+
+def addInitializingNewNetworkObserver(observer, callback):
+    CoralAppData.initializingNewNetworkObservers.add(observer)
+    observer.setNotificationCallback(callback)
+
+def _notifyInitializingNewNetworkObservers():
+    for observer in CoralAppData.initializingNewNetworkObservers.observers():
         observer.notify()
 
 def addAttributeValueChangedObserver(observer, attribute, callback):
@@ -723,6 +741,8 @@ def _parseNetworkScript(saveScript):
     return locals() # this builtin function returns the vars in this function (and those collected executing the saveScript
 
 def _loadNetworkScript(networkScript, topNode = ""):
+    _notifyNetworkLoadingObservers()
+
     networkScriptData = _parseNetworkScript(networkScript)
     if networkScriptData["version"] != CoralAppData.version:
         logError("version mismatch")
@@ -800,6 +820,8 @@ def saveNetworkFile(filename):
             logInfo("saved network file: " + filename)
 
 def newNetwork():
+    _notifyInitializingNewNetworkObservers()
+
     CoralAppData.rootNode = RootNode("root")
     
     _coral.NetworkManager.removeSearchPath(CoralAppData.currentNetworkDir)
