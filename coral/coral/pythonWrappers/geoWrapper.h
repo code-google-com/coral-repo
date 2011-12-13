@@ -29,11 +29,21 @@
 #ifndef CORAL_GEOWRAPPER_H
 #define CORAL_GEOWRAPPER_H
 
+#include "../src/Geo.h"
 #include "../src/GeoAttribute.h"
 #include "../builtinNodes/GeoNodes.h"
 #include "../src/pythonWrapperUtils.h"
+#include "../src/GeoInstanceArray.h"
+#include "../src/GeoInstanceArrayAttribute.h"
+#include "../builtinNodes/GeoArrayInstanceNodes.h"
 
 void geoWrapper(){
+	boost::python::class_<Geo, boost::shared_ptr<Geo>, boost::python::bases<Value>, boost::noncopyable>("Geo", boost::python::no_init)
+		.def("__init__", pythonWrapperUtils::__init__<Geo>)
+		.def("createUnwrapped", pythonWrapperUtils::createUnwrapped<Geo>)
+		.staticmethod("createUnwrapped")
+	;
+
 	pythonWrapperUtils::pythonWrapper<GeoAttribute, Attribute>("GeoAttribute");
 	pythonWrapperUtils::pythonWrapper<GetGeoPoints, Node>("GetGeoPoints");
 	pythonWrapperUtils::pythonWrapper<SetGeoPoints, Node>("SetGeoPoints");
@@ -42,6 +52,15 @@ void geoWrapper(){
 	
 	pythonWrapperUtils::pythonWrapper<GetGeoElements, Node>("GetGeoElements");
 	pythonWrapperUtils::pythonWrapper<GetGeoSubElements, Node>("GetGeoSubElements");
+
+	boost::python::class_<GeoInstanceArray, boost::shared_ptr<GeoInstanceArray>, boost::python::bases<Value>, boost::noncopyable>("GeoInstanceArray", boost::python::no_init)
+		.def("__init__", pythonWrapperUtils::__init__<GeoInstanceArray>)
+		.def("createUnwrapped", pythonWrapperUtils::createUnwrapped<GeoInstanceArray>)
+		.staticmethod("createUnwrapped")
+	;
+
+	pythonWrapperUtils::pythonWrapper<GeoInstanceArrayAttribute, Attribute>("GeoInstanceArrayAttribute");
+	pythonWrapperUtils::pythonWrapper<GeoInstanceGenerator, Node>("GeoInstanceGenerator");
 }
 
 #endif

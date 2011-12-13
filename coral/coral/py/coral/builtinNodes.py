@@ -96,6 +96,7 @@ def loadPlugin():
     plugin.registerNode("QuatNormalize", _coral.QuatNormalize, tags = ["math"])
     
     plugin.registerAttribute("GeoAttribute", _coral.GeoAttribute)
+    plugin.registerAttribute("GeoInstanceArrayAttribute", _coral.GeoInstanceArrayAttribute)
     plugin.registerNode("SetGeoPoints", _coral.SetGeoPoints, tags = ["geometry"])
     plugin.registerNode("GetGeoPoints", _coral.GetGeoPoints, tags = ["geometry"])
     plugin.registerNode("GetGeoNormals", _coral.GetGeoNormals, tags = ["geometry"], description = "Get one normal vector per vertex.")
@@ -106,6 +107,7 @@ def loadPlugin():
     plugin.registerNode("GeoNeighbourPoints", _coral.GeoNeighbourPoints, tags = ["geometry"])
     plugin.registerNode("GetGeoElements", _coral.GetGeoElements, tags = ["geometry"])
     plugin.registerNode("GetGeoSubElements", _coral.GetGeoSubElements, tags = ["geometry"])
+    plugin.registerNode("GeoInstanceGenerator", _coral.GeoInstanceGenerator, tags = ["geometry"])
     
     plugin.registerAttribute("StringAttribute", _coral.StringAttribute)
     plugin.registerNode("String", _coral.StringNode, tags = ["generic"])
