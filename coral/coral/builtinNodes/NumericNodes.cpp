@@ -319,6 +319,11 @@ Col4Node::Col4Node(const std::string &name, Node* parent): Node(name, parent){
 	setSpecializationPreset("array", _a, "FloatArray");
 	setSpecializationPreset("array", _color, "Col4Array");
 	enableSpecializationPreset("single");
+
+	_r->outValue()->setFloatValueAt(0, 0.5);
+	_g->outValue()->setFloatValueAt(0, 0.5);
+	_b->outValue()->setFloatValueAt(0, 0.5);
+	_a->outValue()->setFloatValueAt(0, 1.0);
 }
 
 void Col4Node::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
