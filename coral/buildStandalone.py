@@ -48,7 +48,7 @@ buildMode = os.environ["CORAL_BUILD_MODE"]
 installDir = ARGUMENTS.get("install-dir", 0)
 
 if not installDir:
-    installDir = os.path.join(os.getcwd(), "build", "coralStandaloneApp")
+    installDir = os.path.join(os.getcwd(), "build", "coralStandaloneBuild")
 
 print "* Install Dir = " + installDir
 
