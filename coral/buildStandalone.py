@@ -98,8 +98,8 @@ def buildSdkHeaders(buildDir):
         if "CORALUI_EXPORT" in fileContent:
             shutil.copy(header, coralUiIncludesDir)
     
-    shutil.copytree(sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"), os.path.join(buildDir, "sdk", "Imath", "includes"))
-    shutil.copytree(sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"), os.path.join(buildDir, "sdk", "boost", "includes", "boost"))
+    shutil.copytree(sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"), os.path.join(buildDir, "Imath", "includes"))
+    shutil.copytree(sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"), os.path.join(buildDir, "boost", "includes", "boost"))
 
 def buildSdkLibs(coralLib, coralUiLib, buildDir):
     coralLibsDir = os.path.join(buildDir, "coral", "libs")
