@@ -41,26 +41,39 @@ if ARGUMENTS.get("mode", 0) == "release":
     print "* Building standalone app in release mode"
     os.environ["CORAL_BUILD_MODE"] = "RELEASE"
 else:
-    print "* Building standalne dev tree in debug mode"
+    print "* Building standalone dev tree in debug mode"
 
 buildMode = os.environ["CORAL_BUILD_MODE"]
 
+installDir = ARGUMENTS.get("install-dir", 0)
+
+if not installDir:
+    installDir = os.path.join(os.getcwd(), "build", "coralStandaloneApp")
+
+print "* Install Dir = " + installDir
+
+sdkInstallDir = ""
 buildSdk = False
 if buildMode == "RELEASE":
     buildSdk = True
 elif ARGUMENTS.get("build-sdk", 0) == "1":
     buildSdk = True
+    sdkInstallDir = ARGUMENTS.get("sdk-install-dir", 0)
+
+    if not sdkInstallDir:
+        sdkInstallDir = os.path.join(installDir, "sdk")
 
 if buildSdk:
     print "* Build Sdk = true"
+    print "* Sdk Install Dir = " + sdkInstallDir
 
 coralLib = SConscript(os.path.join("coral", "SConstruct"))
 coralUiLib = SConscript(os.path.join("coralUi", "SConstruct"), exports = {"coralLib": coralLib})
 imathLib = SConscript(os.path.join("imath", "SConstruct"))
 
 def buildSdkHeaders(buildDir):
-    coralIncludesDir = os.path.join(buildDir, "sdk", "coral", "includes", "coral")
-    coralUiIncludesDir = os.path.join(buildDir, "sdk", "coralUi", "includes", "coralUi")
+    coralIncludesDir = os.path.join(buildDir, "coral", "includes", "coral")
+    coralUiIncludesDir = os.path.join(buildDir, "coralUi", "includes", "coralUi")
     
     os.makedirs(coralIncludesDir)
     os.makedirs(coralUiIncludesDir)
@@ -89,10 +102,10 @@ def buildSdkHeaders(buildDir):
     shutil.copytree(sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"), os.path.join(buildDir, "sdk", "boost", "includes", "boost"))
 
 def buildSdkLibs(coralLib, coralUiLib, buildDir):
-    coralLibsDir = os.path.join(buildDir, "sdk", "coral", "libs")
-    coralUiLibsDir = os.path.join(buildDir, "sdk", "coralUi", "libs")
-    imathLibsDir = os.path.join(buildDir, "sdk", "Imath", "libs")
-    boostLibsDir = os.path.join(buildDir, "sdk", "boost", "libs")
+    coralLibsDir = os.path.join(buildDir, "coral", "libs")
+    coralUiLibsDir = os.path.join(buildDir, "coralUi", "libs")
+    imathLibsDir = os.path.join(buildDir, "Imath", "libs")
+    boostLibsDir = os.path.join(buildDir, "boost", "libs")
     
     os.makedirs(coralLibsDir)
     os.makedirs(coralUiLibsDir)
@@ -127,6 +140,8 @@ def buildSdkLibs(coralLib, coralUiLib, buildDir):
 
 def buildSdkTree(coralLib, coralUiLib, buildDir):
     print "* Building sdk..."
+    shutil.rmtree(buildDir, ignore_errors = True)
+
     buildSdkHeaders(buildDir)
     buildSdkLibs(coralLib, coralUiLib, buildDir)
 
@@ -152,13 +167,12 @@ def buildMainTree(coralLib, coralUiLib, imathLib, buildDir):
     compileall.compile_dir(buildDir, quiet = True)
     
     if buildSdk:
-        buildSdkTree(coralLib, coralUiLib, buildDir)
+        buildSdkTree(coralLib, coralUiLib, sdkInstallDir)
 
 def buildDevTree(coralLib, coralUiLib, imathLib):
-    buildDir = os.path.join("build", "coralStandaloneBuild")
-    shutil.rmtree(buildDir, ignore_errors = True)
+    shutil.rmtree(installDir, ignore_errors = True)
     
-    buildMainTree(coralLib, coralUiLib, imathLib, buildDir)
+    buildMainTree(coralLib, coralUiLib, imathLib, installDir)
     
     
 def buildOsXApp(coralLib, coralUiLib, imathLib):
