@@ -25,6 +25,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # </license>
+
 # To load this plugin in coral run the following script:
 # from coral import coralApp
 # coralApp.loadPlugin("pathToPlugin/jitterNodePlugin.py")
@@ -35,6 +36,6 @@ from jitterNode import JitterNode
 def loadPlugin():
     plugin = Plugin("jitterNodePlugin")
     
-    plugin.registerNode(JitterNode, tags = ["examples"])
+    plugin.registerNode("JitterNode", JitterNode, tags = ["examples"], description = "An example node to jitter points.")
     
     return plugin

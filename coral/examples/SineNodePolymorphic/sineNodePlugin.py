@@ -35,6 +35,6 @@ from sineNodePolymorphic import SineNodePolymorphic
 def loadPlugin():
     plugin = Plugin("sineNodePolymorphic")
     
-    plugin.registerNode(SineNodePolymorphic, tags = ["examples"])
+    plugin.registerNode("SineNodePolymorphic", SineNodePolymorphic, tags = ["examples"], description = "Exampe node with polymorphic attributes.")
     
     return plugin

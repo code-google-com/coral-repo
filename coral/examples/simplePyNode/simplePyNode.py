@@ -56,7 +56,7 @@ class SimplePyNode(Node):
 def loadPlugin():
     plugin = Plugin("simplePyNodePlugin")
     
-    plugin.registerNode(SimplePyNode, tags = ["examples"])
+    plugin.registerNode("SimplePyNode", SimplePyNode, tags = ["examples"], description = "Example python node")
     
     return plugin
 

@@ -45,19 +45,19 @@
 MTypeId CoralDrawNode::id(0x08102B);
 
 void CoralDrawNode::draw(M3dView & view, const MDagPath & path, M3dView::DisplayStyle style, M3dView::DisplayStatus status){
-	PyGILState_STATE state = PyGILState_Ensure(); // ensure python's threads won't fuck up maya
-	
 	view.beginGL();
 	
 	glPushAttrib( GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_PIXEL_MODE_BIT ); 
 	
+	PyGILState_STATE state = PyGILState_Ensure(); // ensure python's threads won't fuck up maya
+
 	coralUi::MainDrawRoutine::drawAll();
 	
+	PyGILState_Release(state);
+
 	glPopAttrib();
 	
 	view.endGL();
-	
-	PyGILState_Release(state);
 }
 
 void coralMaya_refreshViewport(){
@@ -71,5 +71,11 @@ void *CoralDrawNode::creator(){
 }
 
 MStatus CoralDrawNode::initialize(){
+	PyGILState_STATE state = PyGILState_Ensure();
+
+	coralUi::MainDrawRoutine::init();
+
+	PyGILState_Release(state);
+
 	return MS::kSuccess;
 }
