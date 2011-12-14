@@ -30,12 +30,13 @@
 #define MAINDRAWROUTINE_H
 
 #include <coral/src/Attribute.h>
+#include "coralUiDefinitions.h"
 
 namespace coralUi{
 
 class DrawNode;
 
-class MainDrawRoutine{
+class CORALUI_EXPORT MainDrawRoutine{
 public:
 	static void init();
 	static bool initialized();

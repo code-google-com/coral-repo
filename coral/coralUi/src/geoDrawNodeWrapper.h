@@ -38,7 +38,7 @@
 using namespace coralUi;
 
 void geoDrawNodeWrapper(){
-	coral::pythonWrapperUtils::pythonWrapper<GeoDrawNode, coral::Node>("GeoDrawNode");
+	coral::pythonWrapperUtils::pythonWrapper<GeoDrawNode, coralUi::DrawNode>("GeoDrawNode");
 }
 
 #endif

@@ -26,15 +26,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#if defined(WIN64) || defined(_WIN64) || defined(WIN32) || defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
-#include <GL/gl.h>
-#endif
+#include <GL/glew.h>
 
 #include <Python.h>
 #include "CoralDrawNode.h"

@@ -8,7 +8,7 @@
 
 namespace coral{
 
-class GeoInstanceArray: public Value{
+class CORAL_EXPORT GeoInstanceArray: public Value{
 public:
 	GeoInstanceArray();
 

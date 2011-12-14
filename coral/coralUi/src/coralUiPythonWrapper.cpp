@@ -28,12 +28,14 @@
 
 #include <boost/python.hpp>
 
+#include <coral/src/pythonWrapperUtils.h>
 #include "viewportWrapper.h"
 #include "viewportOutputAttributeWrapper.h"
 #include "mainDrawRoutineWrapper.h"
 #include "drawNodeWrapper.h"
 #include "geoDrawNodeWrapper.h"
 #include "numericDrawNodeWrapper.h"
+#include "DrawGeoInstance.h"
 
 using namespace coralUi;
 
@@ -44,4 +46,6 @@ BOOST_PYTHON_MODULE(_coralUi){
 	numericDrawNodeWrapper();
 	mainDrawRoutineWrapper();
 	viewportWrapper();
+
+	coral::pythonWrapperUtils::pythonWrapper<DrawGeoInstance, DrawNode>("DrawGeoInstance");
 }

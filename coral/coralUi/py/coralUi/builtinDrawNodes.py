@@ -35,5 +35,6 @@ def loadPlugin():
     import _coralUi
     plugin.registerNode("DrawGeo", _coralUi.GeoDrawNode, tags = ["draw"])
     plugin.registerNode("DrawNumeric", _coralUi.NumericDrawNode, tags = ["draw"])
+    plugin.registerNode("DrawGeoInstance", _coralUi.DrawGeoInstance, tags = ["draw"])
     
     return plugin

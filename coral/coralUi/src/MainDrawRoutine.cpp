@@ -26,6 +26,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#include <GL/glew.h>
 #include <tbb/mutex.h>
 #include <coral/src/NetworkManager.h>
 #include <coral/src/Attribute.h>
@@ -49,6 +50,12 @@ bool _initialized = false;
 
 void MainDrawRoutine::init(){
 	if(!_initialized){
+		GLenum glewInitResult = glewInit();
+		if(glewInitResult != GLEW_OK){
+		    std::cout << "Impossible to init GLEW: " << glewGetErrorString(glewInitResult) << std::endl;
+		    return;
+		}
+
 		_initialized = true;
 
 		for(std::vector<DrawNode*>::const_iterator itDrawNode = _drawNodes.begin(); itDrawNode != _drawNodes.end(); ++itDrawNode){

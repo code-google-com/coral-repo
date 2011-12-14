@@ -75,12 +75,7 @@ Viewport::~Viewport(){
 }
 
 void Viewport::initializeGL(){
-
-	/* init glew */
-	GLenum glewInitResult = glewInit();
-	if(glewInitResult != GLEW_OK){
-	    std::cout << "Impossible to init GLEW: " << glewGetErrorString(glewInitResult) << std::endl;
-	}
+	MainDrawRoutine::init();
 
 	glClearColor(.3f, .3f, .3f, 1.f);
 	
@@ -96,8 +91,6 @@ void Viewport::initializeGL(){
 	
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse);
-
-	MainDrawRoutine::init();
 }
 
 void Viewport::resizeGL(int width, int height){
