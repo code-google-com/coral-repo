@@ -7,7 +7,7 @@
 
 namespace coral{
 
-class GeoInstanceArrayAttribute: public Attribute{
+class CORAL_EXPORT GeoInstanceArrayAttribute: public Attribute{
 public:
 	GeoInstanceArrayAttribute(const std::string &name, Node* parent);
 	
