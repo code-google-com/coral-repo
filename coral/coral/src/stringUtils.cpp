@@ -34,6 +34,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <algorithm>
+#include <boost/lexical_cast.hpp>
 #include "stringUtils.h"
 
 
@@ -1046,11 +1047,11 @@ namespace stringUtils
     }
 
 	float parseFloat( const std::string & str ){
-		return atof(str.data());
+		return boost::lexical_cast<float>(str.data());
 	}
 	
 	int parseInt( const std::string & str ){
-		return atoi(str.data());
+		return boost::lexical_cast<int>(str.data());
 	}
 	
 	std::string boolToString(bool value){
