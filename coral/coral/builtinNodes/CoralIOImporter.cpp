@@ -33,8 +33,7 @@ namespace {
 		std::string line;
 		
 		int lineNumber = 0;
-		while(t){
-			std::getline(t, line);
+		while(std::getline(t, line)){
 			
 			if(lineNumber == 0){
 				std::vector<std::string> result;
