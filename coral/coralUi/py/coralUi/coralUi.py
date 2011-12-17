@@ -32,6 +32,7 @@ import os
 from PyQt4 import QtGui, QtCore
 
 from .. import coralApp
+from .. import utils
 from mainWindow import MainWindow
 
 
@@ -78,8 +79,6 @@ def init(configModule = None):
         configModule.apply()
     
     if os.environ.has_key("CORAL_STARTUP_SCRIPT"):
-        from .. import utils
-        
         startupScriptFile = os.environ["CORAL_STARTUP_SCRIPT"]
         if startupScriptFile:
             utils.runtimeImport(startupScriptFile)
@@ -122,6 +121,25 @@ def loadPluginUiModule(pluginUiModule):
 
     for nestedObjectClassName in pluginUi._registeredInspectorWidgets.keys():
         NodeInspector.registerInspectorWidget(nestedObjectClassName, pluginUi._registeredInspectorWidgets[nestedObjectClassName])
+
+def loadPluginUi(filename):
+    searchPaths = ["", os.getcwd()]
+    found = False
+    for searchPath in searchPaths:
+        path = os.path.join(searchPath, filename)
+        if os.path.isfile(path):
+            module = utils.runtimeImport(filename)
+            if module:
+                if hasattr(module, "loadPluginUi"):
+                    found = True
+                    loadPluginUiModule(module)
+                else:
+                    coralApp.logError("no loadPluginUi function found in file " + str(filename))
+                    
+            break
+    
+    if not found:
+        coralApp.logError("could not find file " + str(filename))
 
 def copyToClipboard(data):
     CoralUiData.clipboardData = data
