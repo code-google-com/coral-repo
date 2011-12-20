@@ -11,13 +11,13 @@ class GeoInstanceGenerator: public Node{
 public:
 	GeoInstanceGenerator(const std::string &name, Node *parent);
 	void update(Attribute *attribute);
+	void addInputGeo();
 
 private:
 	GeoAttribute *_geo;
 	NumericAttribute *_locations;
 	NumericAttribute *_selector;
 	GeoInstanceArrayAttribute *_geoInstance;
-	std::vector<GeoAttribute*> _inputGeos;
 };
 
 }

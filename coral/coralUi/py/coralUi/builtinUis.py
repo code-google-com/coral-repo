@@ -43,6 +43,13 @@ from nodeInspector.fields import IntValueField, FloatValueField, BoolValueField,
 from nodeInspector.nodeInspector import NodeInspector, NodeInspectorWidget, AttributeInspectorWidget
 import mainWindow
 
+class GeoInstanceArrayAttributeUi(AttributeUi):
+    def __init__(self, coralAttribute, parentNodeUi):
+        AttributeUi.__init__(self, coralAttribute, parentNodeUi)
+        
+    def hooksColor(self, specialization):
+        return QtGui.QColor(240, 230, 250)
+
 class GeoAttributeUi(AttributeUi):
     def __init__(self, coralAttribute, parentNodeUi):
         AttributeUi.__init__(self, coralAttribute, parentNodeUi)
@@ -268,6 +275,29 @@ class AttributeSpecializationComboBox(QtGui.QComboBox):
         QtGui.QComboBox.showPopup(self)
         
         self._currentItemChangedCallbackEnabled = True
+
+class GeoInstanceGeneratorInspectorWidget(NodeInspectorWidget):
+    def __init__(self, coralNode, parentWidget):
+        NodeInspectorWidget.__init__(self, coralNode, parentWidget)
+
+    def build(self):
+        NodeInspectorWidget.build(self)
+
+        addGeoButton = QtGui.QPushButton("add input geo", self)
+        self.layout().addWidget(addGeoButton)
+
+        self.connect(addGeoButton, QtCore.SIGNAL("clicked()"), self._addGeoButtonClicked)
+    
+    def _addGeoButtonClicked(self):
+        node = self.coralNode()
+        node.addInputGeo();
+
+        newAttr = node.inputAttributes()[-1]
+        
+        nodeUi = NodeEditor.findNodeUi(node.id())
+        newAttrUi = NodeEditor._createAttributeUi(newAttr, nodeUi)
+        nodeUi.addInputAttributeUi(newAttrUi)
+        nodeUi.updateLayout()
 
 class KernelNodeInspectorWidget(NodeInspectorWidget):
     def __init__(self, coralNode, parentWidget):
@@ -674,6 +704,7 @@ class CollapsedNodeUi(NodeUi):
 def loadPluginUi():
     plugin = PluginUi("builtinUis")
     
+    plugin.registerAttributeUi("GeoInstanceArrayAttribute", GeoInstanceArrayAttributeUi)
     plugin.registerAttributeUi("GeoAttribute", GeoAttributeUi)
     plugin.registerAttributeUi("NumericAttribute", NumericAttributeUi)
     plugin.registerAttributeUi("PassThroughAttribute", PassThroughAttributeUi)
@@ -693,5 +724,6 @@ def loadPluginUi():
     plugin.registerInspectorWidget("EnumAttribute", EnumAttributeInspectorWidget)
     plugin.registerInspectorWidget("ProcessSimulation", ProcessSimulationNodeInspectorWidget)
     plugin.registerInspectorWidget("KernelNode", KernelNodeInspectorWidget)
+    plugin.registerInspectorWidget("GeoInstanceGenerator", GeoInstanceGeneratorInspectorWidget)
     
     return plugin

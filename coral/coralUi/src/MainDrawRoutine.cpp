@@ -50,6 +50,7 @@ bool _initialized = false;
 
 void MainDrawRoutine::init(){
 	if(!_initialized){
+		glewExperimental = GL_TRUE;
 		GLenum glewInitResult = glewInit();
 		if(glewInitResult != GLEW_OK){
 		    std::cout << "Impossible to init GLEW: " << glewGetErrorString(glewInitResult) << std::endl;

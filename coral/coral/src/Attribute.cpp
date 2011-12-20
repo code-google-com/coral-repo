@@ -475,8 +475,6 @@ void Attribute::setInput(Attribute *attribute){
 			if(_input->_passThrough){
 				initValueFromPassThroughFirstOutput(_input);
 			}
-			
-			dirty();
 		}
 	}
 }
@@ -499,6 +497,9 @@ bool Attribute::connectTo(Attribute *attribute, ErrorObject *errorObject){
 	
 	if(_connectToCallback && !isDeleted())
 		_connectToCallback(this, attribute);
+	
+	bool forceDirty = true;
+	dirty(forceDirty);
 	
 	return success;
 }

@@ -12,14 +12,17 @@ class CORAL_EXPORT GeoInstanceArray: public Value{
 public:
 	GeoInstanceArray();
 
-	void setSelector(const std::vector<int> &selector);
-	void setLocations(const std::vector<Imath::M44f> &locations);
-	void setSourceGeos(const std::vector<Geo*> &sourceGeos);
+	void setData(const std::vector<Geo*> &sourceGeos, const std::vector<Imath::M44f> &locations, const std::vector<int> &selector);
+	const std::vector<Geo*> &sourceGeos();
+	const std::vector<Imath::M44f> &locations();
+	const std::vector<int> &selector();
+	const std::vector<std::vector<Imath::M44f> > &selectedLocations();
 
 private:
 	std::vector<Geo*> _sourceGeos;
 	std::vector<Imath::M44f> _locations;
 	std::vector<int> _selector;
+	std::vector<std::vector<Imath::M44f> > _selectedLocations;
 };
 
 }

@@ -60,7 +60,8 @@ void geoWrapper(){
 	;
 
 	pythonWrapperUtils::pythonWrapper<GeoInstanceArrayAttribute, Attribute>("GeoInstanceArrayAttribute");
-	pythonWrapperUtils::pythonWrapper<GeoInstanceGenerator, Node>("GeoInstanceGenerator");
+	pythonWrapperUtils::pythonWrapper<GeoInstanceGenerator, Node>("GeoInstanceGenerator")
+		.def("addInputGeo", &GeoInstanceGenerator::addInputGeo);
 }
 
 #endif

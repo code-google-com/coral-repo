@@ -1680,8 +1680,8 @@ void RandomNumber::updateFloatArray(Numeric *min, Numeric *max, Numeric *out){
 	
 	std::vector<float> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
-		float minVal = min->floatValueAt(0);
-		float maxVal = max->floatValueAt(0);
+		float minVal = min->floatValueAt(i);
+		float maxVal = max->floatValueAt(i);
 		
 		outVals[i] =  ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
 	}
@@ -1693,7 +1693,8 @@ void RandomNumber::updateInt(Numeric *min, Numeric *max, Numeric *out){
 	int minVal = min->intValueAt(0);
 	int maxVal = max->intValueAt(0);
 	
-	int outVal = ((rand() / RAND_MAX) * (maxVal - minVal)) + minVal;
+	int outVal = minVal + (int) (maxVal - minVal + 1)*(rand() / (RAND_MAX + 1.0));
+
 	out->setIntValueAt(0, outVal);
 }
 
@@ -1706,10 +1707,10 @@ void RandomNumber::updateIntArray(Numeric *min, Numeric *max, Numeric *out){
 	
 	std::vector<int> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
-		int minVal = min->intValueAt(0);
-		int maxVal = max->intValueAt(0);
+		int minVal = min->intValueAt(i);
+		int maxVal = max->intValueAt(i);
 		
-		outVals[i] =  ((rand() / RAND_MAX) * (maxVal - minVal)) + minVal;
+		outVals[i] = minVal + (int) (maxVal - minVal + 1)*(rand() / (RAND_MAX + 1.0));
 	}
 	
 	out->setIntValues(outVals);
