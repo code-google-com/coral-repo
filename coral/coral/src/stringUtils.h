@@ -41,7 +41,7 @@
 #include <sstream>
 
 //CORAL_EXPORT
-
+#include "coralDefinitions.h"
 
 // originally called pystring, the namespace has been modified to fit in nicely.
 namespace stringUtils
@@ -177,7 +177,7 @@ namespace stringUtils
     /// @brief Return a copy of the string with all occurrences of substring old replaced by new. If
     /// the optional argument count is given, only the first count occurrences are replaced.
     ///
-    std::string replace( const std::string & str, const std::string & oldstr, const std::string & newstr, int count = -1);
+    CORAL_EXPORT std::string replace( const std::string & str, const std::string & oldstr, const std::string & newstr, int count = -1);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     /// @brief Return the highest index in the string where substring sub is found, such that sub is
