@@ -76,7 +76,7 @@ void DrawGeoInstance::initShader(){
 
 	int shaderStatus;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &shaderStatus);
-	if(shaderStatus == FALSE){
+	if(!shaderStatus){
 		std::cout << "error while compiling vertex shader" << std::endl; 
 	}
 
