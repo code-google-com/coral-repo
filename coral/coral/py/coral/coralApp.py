@@ -26,8 +26,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # </license>
 
-
-
 ##@package coral.coralApp
 # Main module to perform the most basic operations.
 import traceback

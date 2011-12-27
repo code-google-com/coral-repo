@@ -356,6 +356,8 @@ void Attribute::clean(){
 
 void Attribute::cleanSelf(){
 	if(_isClean == false){
+		_isClean = true;
+
 		Node *parentNode = parent();
 		if(parentNode){
 			std::vector<Attribute*> inputsToClean = _inputsCleanChain[id()];
@@ -367,8 +369,6 @@ void Attribute::cleanSelf(){
 				parentNode->doUpdate(this);
 			}
 		}
-		
-		_isClean = true;
 	}
 }
 

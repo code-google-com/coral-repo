@@ -1554,8 +1554,12 @@ void RangeLoop::updateInt(Numeric *start, Numeric *end, Numeric *step, Numeric *
 	int startVal = start->intValueAt(0);
 	int endVal = end->intValueAt(0);
 	int stepVal = step->intValueAt(0);
-	
-	int outVal = (stepVal + startVal) % endVal;
+
+	int outVal = 0;
+	if(endVal > 0){
+		outVal = (stepVal + startVal) % endVal;
+	}
+
 	out->setIntValueAt(0, outVal);
 }
 
@@ -1572,7 +1576,12 @@ void RangeLoop::updateIntArray(Numeric *start, Numeric *end, Numeric *step, Nume
 		int endVal = end->intValueAt(i);
 		int stepVal = step->intValueAt(i);
 
-		//outVals[i] = (stepVal + startVal) % endVal;
+		int outVal = 0;
+		if(endVal > 0){
+			outVal = (stepVal + startVal) % endVal;
+		}
+
+		outVals[i] = outVal;
 	}
 	
 	out->setIntValues(outVals);

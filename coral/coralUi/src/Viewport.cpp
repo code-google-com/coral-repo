@@ -61,7 +61,6 @@ Viewport::Viewport() :
 _initialized(false),
 _width(0), _height(0),
 _fov(60.0), _roll(0.0), _zNear(0.01), _zFar(1000.0),
-_nav(-1),				// orbit\pan\dolly (Alt + left\middle\right mouse click)
 _isProjDirty(true)
 {
 	_modelMatrix.setTranslation(Imath::V3f(0.f, 0.f, 10.f));
@@ -109,21 +108,21 @@ void Viewport::setupProjection(){
 	if(_isProjDirty){
 	        glLoadIdentity();
 	
-	        double height = _zNear * tan(_fov * PI / 360.0);
-	        double width = height;
+	        float height = _zNear * tan(_fov * PI / 360.0);
+	        float width = height;
 	
-	        double aspect = _width / (double)_height;
+	        float aspect = _width / (float)_height;
 	        if(aspect > 1.0)
 	            height /= aspect;
 	        else
 	            width = height * aspect;
 	
 	        glFrustum(-width, width, -height, height, _zNear, _zFar);
-	        glGetDoublev(GL_PROJECTION_MATRIX, _projectionMatrix);
+	        glGetFloatv(GL_PROJECTION_MATRIX, _projectionMatrix);
 	        _isProjDirty = false;
 	}
 	    else
-		glLoadMatrixd(_projectionMatrix);
+		glLoadMatrixf(_projectionMatrix);
 }
 
 void Viewport::prepareForDrawing(){
@@ -218,8 +217,8 @@ void Viewport::dolly(int deltaSide){
 }
 
 void Viewport::zoom(int deltaSide){
-	double newFov = _fov - (double)deltaSide * 0.5;
-	
+	float newFov = _fov - (float)deltaSide * 0.5;
+
 	if(newFov > 0){
 		_fov = newFov;
 		_isProjDirty = true;
@@ -278,11 +277,11 @@ void Viewport::drawAxis(){
 	glOrtho(-1, 1, -1, 1, -1, 1);
 	glViewport(0, 0, 50, 50);
 	
-	GLdouble mvm[16];
+	GLfloat mvm[16];
 	glMatrixMode(GL_MODELVIEW);
-	glGetDoublev(GL_MODELVIEW_MATRIX, mvm);
+	glGetFloatv(GL_MODELVIEW_MATRIX, mvm);
 	mvm[12] = mvm[13] = mvm[14] = 0.f;
-	glLoadMatrixd(mvm);
+	glLoadMatrixf(mvm);
 	
 	glLineWidth(2.f);
 	glBegin(GL_LINES);
@@ -303,3 +302,18 @@ void Viewport::drawAxis(){
 	glEnd();
 }
 
+Imath::M44f Viewport::modelMatrix(){
+	return _modelMatrix;
+}
+
+float Viewport::fov(){
+	return _fov;
+}
+
+float Viewport::zNear(){
+	return _zNear;
+}
+
+float Viewport::zFar(){
+	return _zFar;
+}

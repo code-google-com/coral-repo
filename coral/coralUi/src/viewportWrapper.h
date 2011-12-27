@@ -48,6 +48,10 @@ void viewportWrapper(){
 		.def("pan", &Viewport::pan)
 		.def("roll", &Viewport::roll)
 		.def("dolly", &Viewport::dolly)
+		.def("modelMatrix", &Viewport::modelMatrix)
+		.def("fov", &Viewport::fov)
+		.def("zNear", &Viewport::zNear)
+		.def("zFar", &Viewport::zFar)
 		;
 }
 

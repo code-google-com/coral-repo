@@ -27,12 +27,35 @@
 # </license>
 
 
+import weakref
 from PyQt4 import QtGui, QtCore, QtOpenGL
 import _coralUi
 from .. import _coral
 from ..observer import Observer
 from .. import coralApp
 import mainWindow
+
+class ViewportData:
+    _viewports = []
+    _cameraNodes = []
+
+def addCameraNode(node):
+    if hasattr(node, "cameraChanged"):
+        ViewportData._cameraNodes.append(weakref.ref(node))
+
+def removeCameraNode(node):
+    for nodeRef in ViewportData._cameraNodes:
+        currNode = nodeRef()
+        if currNode is node:
+            del ViewportData._cameraNodes[ViewportData._cameraNodes.index(nodeRef)]
+            break
+
+def instancedViewports():
+    vports = []
+    for viewport in ViewportData._viewports:
+        vports.append(viewport())
+    
+    return vports
 
 class ViewportGlWidget(QtOpenGL.QGLWidget):
     orbit = 1
@@ -49,6 +72,15 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
         
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportUpdateGL"), QtCore.SLOT("updateGL()"))
+
+        ViewportData._viewports.append(weakref.ref(self._viewport))
+    
+    def __del__(self):
+        for viewportRef in ViewportData._viewports:
+            viewport = viewportRef()
+            if viewport is self._viewport:
+                del ViewportData._viewports[ViewportData._viewports.index(viewportRef)]
+                break
     
     def minimumSizeHint(self):
         return QtCore.QSize(100, 100)
@@ -59,8 +91,12 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
     def initializeGL(self):
         self._viewport.initializeGL()
 
+        self._dirtyCameraNodes()
+
     def resizeGL(self, w, h):
         self._viewport.resizeGL(w, h)
+
+        self._dirtyCameraNodes()
 
     def paintGL(self):
         self._viewport.draw()
@@ -86,6 +122,8 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
     def mouseReleaseEvent(self, qMouseEvent):
         self._pressed = False
         self._mode = 0
+
+        self._dirtyCameraNodes()
         
     def mouseMoveEvent(self, qMouseEvent):
         if self._pressed:
@@ -106,6 +144,13 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
             self._viewport.dolly(int(qWheelEvent.delta() * -0.1))
             
             self.updateGL()
+
+            self._dirtyCameraNodes()
+    
+    def _dirtyCameraNodes(self):
+        for cameraNodeRef in ViewportData._cameraNodes:
+            cameraNode = cameraNodeRef()
+            cameraNode.cameraChanged()
 
 class ViewportWidget(QtGui.QWidget):
     _mainWin = mainWindow.MainWindow.globalInstance()

@@ -47,7 +47,11 @@ public:
 	void dolly(int deltaSide);
 	void zoom(int deltaSide);
 	void roll(int deltaSide);
-	
+	Imath::M44f modelMatrix();
+	float fov();
+	float zNear();
+	float zFar();
+
 private:
 	void prepareForDrawing();
 	void setupProjection();
@@ -56,10 +60,9 @@ private:
 	
 	Imath::V3f _target;
 	Imath::M44f _modelMatrix;
-	double _projectionMatrix[16];
-	double _fov, _roll, _zNear, _zFar;
+	float _projectionMatrix[16];
+	float _fov, _roll, _zNear, _zFar;
 	int _width, _height;
-	int _nav;
 	bool _initialized;
 	bool _isProjDirty;
 };

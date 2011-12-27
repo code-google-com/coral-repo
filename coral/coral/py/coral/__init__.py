@@ -26,5 +26,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # </license>
 
+# init Imath module, don't remove
+import Imath
 
 from _coral import *

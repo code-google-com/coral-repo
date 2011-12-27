@@ -99,7 +99,7 @@ public:
 	bool isArrayType(Numeric::Type type);
 	std::string asString();
 	void setFromString(const std::string &value);
-	
+
 private:
 	friend class NumericOperation;
 	
