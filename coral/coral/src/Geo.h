@@ -29,7 +29,9 @@
 #ifndef GEO_H
 #define GEO_H
 
-#include <tbb/mutex.h>
+#ifdef CORAL_PARALLEL_TBB
+	#include <tbb/mutex.h>
+#endif
 
 #include <map>
 #include <vector>

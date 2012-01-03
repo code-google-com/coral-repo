@@ -29,6 +29,8 @@
 #ifndef CORAL_ATTRIBUTEPARALLELALGOS_H
 #define CORAL_ATTRIBUTEPARALLELALGOS_H
 
+#ifdef CORAL_PARALLEL_TBB
+
 #include <tbb/blocked_range.h>
 
 namespace coral{
@@ -48,5 +50,7 @@ public:
 };
 
 }
+
+#endif // tbb
 
 #endif

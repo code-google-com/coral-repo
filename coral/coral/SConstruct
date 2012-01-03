@@ -16,22 +16,25 @@ env = Environment(
   CPPPATH = [
     sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"),
     sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH"), 
-    sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"),
-    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH")],
+    sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH")],
   LIBS = [
     sconsUtils.getEnvVar("CORAL_IMATH_LIB"),
     sconsUtils.getEnvVar("CORAL_IMATH_IEX_LIB"),
     sconsUtils.getEnvVar("CORAL_PYTHON_LIB"), 
-    sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB"),
-    sconsUtils.getEnvVar("CORAL_TBB_LIB")],
+    sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB")],
   LIBPATH = [
     sconsUtils.getEnvVar("CORAL_IMATH_LIBS_PATH"),
     sconsUtils.getEnvVar("CORAL_PYTHON_LIBS_PATH"), 
-    sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
-    sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH")],
+    sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH")],
   SHLIBPREFIX = "",
   MSVC_VERSION=msvc_version,
   TARGET_ARCH = platform.machine())
+
+if os.environ.has_key("CORAL_PARALLEL"):
+    if os.environ["CORAL_PARALLEL"] == "CORAL_PARALLEL_TBB":
+        env["CPPPATH"].append(sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH"))
+        env["LIBS"].append(sconsUtils.getEnvVar("CORAL_TBB_LIB"))
+        env["LIBPATH"].append(sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH"))
 
 if sys.platform.startswith("linux"):
     pass

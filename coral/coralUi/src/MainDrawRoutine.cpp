@@ -27,7 +27,10 @@
 // </license>
 
 #include <GL/glew.h>
-#include <tbb/mutex.h>
+#ifdef CORAL_PARALLEL_TBB
+	#include <tbb/mutex.h>
+#endif
+
 #include <coral/src/NetworkManager.h>
 #include <coral/src/Attribute.h>
 #include <coral/src/containerUtils.h>

@@ -25,11 +25,13 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
-#include <boost/python.hpp>
 
-#include <tbb/parallel_for.h>
-#include <tbb/task_scheduler_init.h>
-#include <tbb/mutex.h>
+#ifdef CORAL_PARALLEL_TBB
+	#include <tbb/parallel_for.h>
+	#include <tbb/task_scheduler_init.h>
+	#include <tbb/mutex.h>
+#endif
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 #include <map>
@@ -97,7 +99,9 @@ namespace {
 		return true;
 	}
 	
-	tbb::mutex _globalMutex;
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex _globalMutex;
+	#endif
 }
 
 Attribute::Attribute(const std::string &name, Node *parent):
@@ -343,6 +347,7 @@ void Attribute::clean(){
 			
 			for(std::map<int, std::vector<Attribute*> >::iterator i = _cleanChain.begin(); i != _cleanChain.end(); ++i){
 				std::vector<Attribute*> &outputAttributes = i->second;
+
 				#ifdef CORAL_PARALLEL_TBB
 					tbb::parallel_for(tbb::blocked_range<size_t>(0, outputAttributes.size()), attribute_parallelClean(&outputAttributes));
 				#else
