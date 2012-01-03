@@ -86,7 +86,6 @@ public:
 private:
 	std::map<std::string, int> _coralAttributeMap;
 	std::vector<MPlug> _inputPlugs;
-	std::vector<MPlug> _inputPlugsToPull;
 	MPlugArray _outputPlugs;
 	
 	std::vector<coral::Attribute*> findCoralMayaAttributes(coral::Node *coralNode);

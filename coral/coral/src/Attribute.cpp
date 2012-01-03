@@ -25,8 +25,10 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
+#include <boost/python.hpp>
 
 #include <tbb/parallel_for.h>
+#include <tbb/task_scheduler_init.h>
 #include <tbb/mutex.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
@@ -330,6 +332,11 @@ void Attribute::clean(){
 				_isClean = true;
 			}
 
+			#ifdef CORAL_PARALLEL_TBB
+				tbb::task_scheduler_init tbbinit(tbb::task_scheduler_init::deferred);
+				tbbinit.initialize();
+			#endif
+
 			_cleaningLocked = true;
 			
 			boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
@@ -350,6 +357,10 @@ void Attribute::clean(){
 			_computeTimeMilliseconds = boost::posix_time::time_period(startTime, endTime).length().total_milliseconds() % 1000;
 			
 			_cleaningLocked = false;
+
+			#ifdef CORAL_PARALLEL_TBB
+				tbbinit.terminate();
+			#endif
 		}
 	}
 }

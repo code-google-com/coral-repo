@@ -27,6 +27,7 @@
 // </license>
 
 #include <Python.h>
+
 #include "CoralNetworkNode.h"
 
 MTypeId CoralNetworkNode::id(0x80012);
@@ -74,7 +75,6 @@ void CoralNetworkNode::updateCoralAttributeMap(){
 	_coralAttributeMap.clear();
 	_inputPlugs.clear();
 	_outputPlugs.clear();
-	_inputPlugsToPull.clear();
 	
 	if(coralNodeObj){
 		coral::Node *coralNode = (coral::Node*)coralNodeObj;
@@ -85,10 +85,9 @@ void CoralNetworkNode::updateCoralAttributeMap(){
 			CoralMayaAttribute *coralMayaAttribute = dynamic_cast<CoralMayaAttribute*>(coralAttribute);
 			MPlug plug = thisNodeFn.findPlug(coralMayaAttribute->mayaAttribute().data());
 			if(!plug.isNull()){
-				_coralAttributeMap[plug.partialName().asChar()] = coralAttribute->id();
+				_coralAttributeMap[std::string(plug.partialName().asChar())] = coralAttribute->id();
 				if(coralAttribute->isOutput()){
 					_inputPlugs.push_back(plug);
-					_inputPlugsToPull.push_back(plug);
 				}
 				else{
 					coralMayaAttribute->setCanDirtyMayaAttribute(true);
@@ -102,36 +101,40 @@ void CoralNetworkNode::updateCoralAttributeMap(){
 void CoralNetworkNode::coralCanDirtyOutAttrs(bool value){
 	for(int i = 0; i < _outputPlugs.length(); ++i){
         MPlug outPlug = _outputPlugs[i];
-        std::string attrName = outPlug.partialName().asChar();
-        coral::Object *coralObject = coral::NetworkManager::findObjectById(_coralAttributeMap[attrName]);
-        if(coralObject){
-        	CoralMayaAttribute *coralMayaAttr = dynamic_cast<CoralMayaAttribute*>(coralObject);
-        	coralMayaAttr->setCanDirtyMayaAttribute(value);
-        }
+        if(!outPlug.isNull()){
+	        std::string attrName(outPlug.partialName().asChar());
+	        coral::Object *coralObject = coral::NetworkManager::findObjectById(_coralAttributeMap[attrName]);
+	        if(coralObject){
+	        	CoralMayaAttribute *coralMayaAttr = dynamic_cast<CoralMayaAttribute*>(coralObject);
+	        	coralMayaAttr->setCanDirtyMayaAttribute(value);
+	        }
+	    }
 	}
 }
 
-MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){
+MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){	
 	PyGILState_STATE state = PyGILState_Ensure(); // ensure python's threades won't fuck up maya
-	for(int i = 0; i < _inputPlugsToPull.size(); ++i){
-		MPlug inPlug = _inputPlugsToPull[i];
+
+	for(int i = 0; i < _inputPlugs.size(); ++i){
+		MPlug inPlug = _inputPlugs[i];
 		
-		if(!inPlug.isNull())
-		{
-			std::string attrName = inPlug.partialName().asChar();
+		if(!inPlug.isNull()){
+			std::string attrName(inPlug.partialName().asChar());
 			coral::Object *coralObject = coral::NetworkManager::findObjectById(_coralAttributeMap[attrName]);
+
 			if(coralObject){
 				CoralMayaAttribute *coralMayaAttr = dynamic_cast<CoralMayaAttribute*>(coralObject);
 				coralMayaAttr->transferValueFromMaya(inPlug, data);
+
 			}
 		}
 	}
-	
+
 	for(int i = 0; i < _outputPlugs.length(); ++i){
 		MPlug outPlug = _outputPlugs[i];
-		if(!outPlug.isNull())
-		{
-			std::string attrName = outPlug.partialName().asChar();
+		if(!outPlug.isNull()){
+			std::string attrName(outPlug.partialName().asChar());
+
 			coral::Object *coralObject = coral::NetworkManager::findObjectById(_coralAttributeMap[attrName]);
 			if(coralObject){
 				CoralMayaAttribute *coralMayaAttr = dynamic_cast<CoralMayaAttribute*>(coralObject);
@@ -144,8 +147,6 @@ MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){
 	
 	PyGILState_Release(state);
 	
-	_inputPlugsToPull.clear();
-	
     return MS::kSuccess;
 }
 
@@ -155,8 +156,6 @@ MStatus CoralNetworkNode::setDependentsDirty(MPlug const &inPlug, MPlugArray &af
 	}
 	
 	if(containerUtils::elementInContainer(inPlug, _inputPlugs)){
-		_inputPlugsToPull.push_back(inPlug);
-		
 		affectedPlugs = _outputPlugs;
 		for(int i = 0; i < _outputPlugs.length(); ++i){
 			int elements = _outputPlugs[i].numElements();

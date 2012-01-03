@@ -116,7 +116,6 @@ def loadPlugin():
     plugin.registerNode("ImportCIOSkinWeights", _coral.ImportCIOSkinWeights, tags = ["generic"])
     plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic", "loop"])
     plugin.registerNode("ProcessSimulation", _coral.ProcessSimulationNode, tags = ["generic", "simulation"])
-    plugin.registerNode("KernelNode", _coral.KernelNode, tags = ["generic", "loop"])
     
     plugin.registerAttribute("BoolAttribute", _coral.BoolAttribute)
     plugin.registerNode("Bool", _coral.BoolNode, tags = ["conditional"])

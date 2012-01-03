@@ -61,7 +61,6 @@
 #include "loopNodesWrapper.h"
 #include "enumWrapper.h"
 #include "processSimulationNodeWrapper.h"
-#include "kernelNodeWrapper.h"
 #include "dagNodesWrapper.h"
 #include "deformerNodesWrapper.h"
 
@@ -119,7 +118,6 @@ BOOST_PYTHON_MODULE(_coral)
 	coralIOWrapper();
 	enumWrapper();
 	processSimulationNodeWrapper();
-	kernelNodeWrapper();
 	dagNodesWrapper();
 	deformerNodesWrapper();
 	

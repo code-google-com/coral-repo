@@ -12,15 +12,12 @@ msvc_version = ""
 if os.environ.has_key("MSVC_VERSION"):
     msvc_version = os.environ["MSVC_VERSION"]
 
-
-
 env = Environment(
   CPPPATH = [
     sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"),
     sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH"), 
     sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"),
-    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH"),
-    sconsUtils.getEnvVar("CORAL_CL_INCLUDES_PATH")],
+    sconsUtils.getEnvVar("CORAL_TBB_INCLUDES_PATH")],
   LIBS = [
     sconsUtils.getEnvVar("CORAL_IMATH_LIB"),
     sconsUtils.getEnvVar("CORAL_IMATH_IEX_LIB"),
@@ -37,11 +34,10 @@ env = Environment(
   TARGET_ARCH = platform.machine())
 
 if sys.platform.startswith("linux"):
-    env.Append(LIBS = sconsUtils.getEnvVar("CORAL_CL_LIB"))
-    env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_CL_LIBS_PATH"))
+    pass
+
 elif sys.platform == "darwin":
     env["SHLIBSUFFIX"] = ".so"
-    env["FRAMEWORKS"] = ["OpenCL"]
     
 elif sys.platform.startswith("win"):
     env["SHLIBSUFFIX"] = ".pyd"
@@ -50,9 +46,6 @@ elif sys.platform.startswith("win"):
     env["LINKFLAGS"] = ["/MANIFEST:NO"]
     if os.environ.has_key("CORAL_OPENMP"):
         env["CCFLAGS"].append("-DCORAL_OPENMP")
-    
-    env.Append(LIBS = sconsUtils.getEnvVar("CORAL_CL_LIB"))
-    env.Append(LIBPATH = sconsUtils.getEnvVar("CORAL_CL_LIBS_PATH"))
 
 if os.environ.has_key("CORAL_PARALLEL"):
     parallel =  os.environ["CORAL_PARALLEL"]
