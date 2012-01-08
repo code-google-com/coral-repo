@@ -326,13 +326,18 @@ void DrawPointNode::drawPoints(){
 	glVertexAttribPointer(_pointIndexAttr, 3, GL_FLOAT, 0, 0, NULL);
 	glEnableVertexAttribArray(_pointIndexAttr);
 
-	glBindBuffer(GL_ARRAY_BUFFER, _sizeBuffer);
-	glVertexAttribPointer(_sizeIndexAttr, 1, GL_FLOAT, 0, 0, NULL);
-	glEnableVertexAttribArray(_sizeIndexAttr);
+	// do not set pointer if it use a single value. The value is already send via VBO
+	if(!_useSingleSize){
+		glBindBuffer(GL_ARRAY_BUFFER, _sizeBuffer);
+		glVertexAttribPointer(_sizeIndexAttr, 1, GL_FLOAT, 0, 0, NULL);
+		glEnableVertexAttribArray(_sizeIndexAttr);
+	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
-	glVertexAttribPointer(_colorIndexAttr, 4, GL_FLOAT, 0, 0, NULL);
-	glEnableVertexAttribArray(_colorIndexAttr);
+	if(!_useSingleColor){
+		glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
+		glVertexAttribPointer(_colorIndexAttr, 4, GL_FLOAT, 0, 0, NULL);
+		glEnableVertexAttribArray(_colorIndexAttr);
+	}
 
 	// render
 	glDrawArrays(GL_POINTS, 0, _pointCount);
