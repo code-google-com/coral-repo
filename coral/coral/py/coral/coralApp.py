@@ -342,8 +342,8 @@ def _instantiateNode(className, name, parent):
         coralNode.postInit()
     
     CoralAppData.instantiatedNodes.append(weakref.ref(coralNode))
-    
-    if coralNode.className() == "":
+
+    if coralNode.className() != className:
         coralNode.setClassName(className)
     
     return coralNode
