@@ -27,7 +27,7 @@
 // </license>
 
 #ifdef CORAL_PARALLEL_TBB
-	#include <python.h>
+	#include <Python.h>
 	#include <tbb/parallel_for.h>
 	#include <tbb/task_scheduler_init.h>
 	#include <tbb/mutex.h>
