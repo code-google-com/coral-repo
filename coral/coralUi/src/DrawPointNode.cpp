@@ -129,14 +129,14 @@ void DrawPointNode::initShader(){
 	// TODO gl_ModelViewProjectionMatrix is deprecated. We should send our own matrix: http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=283405
 	// and http://stackoverflow.com/questions/4202456/how-do-you-get-the-modelview-and-projection-matrices-in-opengl
 	std::string vertexShaderSource =
-		"\
+		"#version 120\n\
 		uniform bool un_useSingleColor;\n\
 		uniform bool un_useSingleSize;\n\
 		uniform vec4 un_singleColor;\n\
 		uniform float un_singleSize;\n\
-		in vec3 in_Position;\n\
-		in float in_Size;\n\
-		in vec4 in_Color;\n\
+		attribute vec3 in_Position;\n\
+		attribute float in_Size;\n\
+		attribute vec4 in_Color;\n\
 		void main() {\n\
 			if(un_useSingleColor){\n\
 				gl_FrontColor = un_singleColor;\n\
@@ -160,8 +160,24 @@ void DrawPointNode::initShader(){
 	// check compilation status
 	int shaderStatus;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &shaderStatus);
+
+	// output compilation error if one
 	if(!shaderStatus){
 		std::cout << "error while compiling vertex shader" << std::endl;
+
+		GLsizei logSize = 0;
+		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logSize);
+
+		char *log = new char[logSize];
+		if(log == NULL)
+		{
+			std::cout << "impossible to allocate memory for shader compilation log" << std::endl;
+		}
+
+		memset(log, '\0', logSize + 1);
+
+		glGetShaderInfoLog(vertexShader, logSize, &logSize, log);
+		std::cout << "shader compilation log:" << std::endl << log << std::endl;
 	}
 
 	_shaderProgram = glCreateProgram();
