@@ -28,7 +28,10 @@
 
 #include <map>
 #include <cmath>
-#include <tbb/mutex.h>
+
+#ifdef CORAL_PARALLEL_TBB
+	#include <tbb/mutex.h>
+#endif
 
 #include "NumericNodes.h"
 #include "../src/Numeric.h"
@@ -62,7 +65,10 @@ int findMinorNumericSize(NumericAttribute *attrs[], int numAttrs){
 }
 
 std::map<std::string, Numeric> _globalNumericStorage;
-tbb::mutex _globalMutex;
+
+#ifdef CORAL_PARALLEL_TBB
+	tbb::mutex _globalMutex;
+#endif
 }
 
 

@@ -133,8 +133,6 @@ void quatfWrapper()
 		.def("length", &Imath::Quatf::length)
 		.def("setAxisAngle", &Imath::Quatf::setAxisAngle, boost::python::return_self<>())
 		.def("setRotation", &Imath::Quatf::setRotation, boost::python::return_self<>())
-		.def("rotateVector", &Imath::Quatf::rotateVector)
-		.def("euclideanInnerProduct", &Imath::Quatf::euclideanInnerProduct)
 		.def("angle", &Imath::Quatf::angle)
 		.def("axis", &Imath::Quatf::axis)
 		.def("toMatrix44", &Imath::Quatf::toMatrix44)
@@ -148,7 +146,6 @@ void quatfWrapper()
 	boost::python::def("squad", Imath::squad<float>);
 	boost::python::def("spline", Imath::spline<float>);
 	boost::python::def("slerp", Imath::slerp<float>);
-	boost::python::def("slerpShortestArc", Imath::slerpShortestArc<float>);
 }
 
 #endif

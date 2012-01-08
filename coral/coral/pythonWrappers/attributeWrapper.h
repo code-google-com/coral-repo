@@ -76,12 +76,16 @@ boost::python::object attribute_parent(Attribute &self){
 }
 
 boost::python::object attribute_value(Attribute &self){
+	PyThreadState *state = PyEval_SaveThread();
+
 	boost::python::object valueObj;
 	
 	Value *value = self.value();
 	if(value){
 		valueObj = PythonDataCollector::findPyObject(value->id());
 	}
+
+	PyEval_RestoreThread(state);
 	
 	return valueObj;
 }

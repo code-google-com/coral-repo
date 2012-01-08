@@ -26,8 +26,13 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#include <tbb/parallel_for.h>
-#include <tbb/mutex.h>
+#ifdef CORAL_PARALLEL_TBB
+	#include <python.h>
+	#include <tbb/parallel_for.h>
+	#include <tbb/task_scheduler_init.h>
+	#include <tbb/mutex.h>
+#endif
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <string>
 #include <map>
@@ -95,7 +100,9 @@ namespace {
 		return true;
 	}
 	
-	tbb::mutex _globalMutex;
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::mutex _globalMutex;
+	#endif
 }
 
 Attribute::Attribute(const std::string &name, Node *parent):
@@ -330,12 +337,18 @@ void Attribute::clean(){
 				_isClean = true;
 			}
 
+			#ifdef CORAL_PARALLEL_TBB
+				tbb::task_scheduler_init tbbinit(tbb::task_scheduler_init::deferred);
+				tbbinit.initialize();
+			#endif
+
 			_cleaningLocked = true;
 			
 			boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
 			
 			for(std::map<int, std::vector<Attribute*> >::iterator i = _cleanChain.begin(); i != _cleanChain.end(); ++i){
 				std::vector<Attribute*> &outputAttributes = i->second;
+
 				#ifdef CORAL_PARALLEL_TBB
 					tbb::parallel_for(tbb::blocked_range<size_t>(0, outputAttributes.size()), attribute_parallelClean(&outputAttributes));
 				#else
@@ -350,6 +363,10 @@ void Attribute::clean(){
 			_computeTimeMilliseconds = boost::posix_time::time_period(startTime, endTime).length().total_milliseconds() % 1000;
 			
 			_cleaningLocked = false;
+
+			#ifdef CORAL_PARALLEL_TBB
+				tbbinit.terminate();
+			#endif
 		}
 	}
 }

@@ -118,3 +118,4 @@ class NodeUiScene(QtGui.QGraphicsScene):
         while y < rect.bottom():
             painter.drawLine(rect.left(), y, rect.right(), y)
             y += gridSize
+

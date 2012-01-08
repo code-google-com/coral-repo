@@ -70,6 +70,10 @@ public:
 	static void _setConstructorDone(Node &self, bool value){
 		self._constructorDone = value;
 	}
+
+	static void _catchAttributeDirtied(Node &self, Attribute *attribute, bool value){
+		self.catchAttributeDirtied(attribute, value);
+	}
 };
 
 }

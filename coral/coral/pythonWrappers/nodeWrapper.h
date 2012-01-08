@@ -63,6 +63,8 @@ public:
 	}
 	
 	void update(Attribute *attribute){
+		PyGILState_STATE state = PyGILState_Ensure();
+
 		boost::python::object attr = PythonDataCollector::findPyObject(attribute->id());
 		boost::python::object self = PythonDataCollector::findPyObject(id());
 		
@@ -72,6 +74,8 @@ public:
 		catch(...){
 			PyErr_Print();
 		}
+
+		PyGILState_Release(state);
 	}
 	
 	void update_default(Attribute *attribute){
@@ -129,11 +133,34 @@ public:
 	
 	void deleteIt(){
 		boost::python::object self = PythonDataCollector::findPyObject(id());
-		boost::python::call_method<void>(self.ptr(), "deleteIt");
+
+		try{
+			boost::python::call_method<void>(self.ptr(), "deleteIt");
+		}
+		catch(...){
+			PyErr_Print();
+		}
 	}
 	
 	void deleteIt_default(){
 		Node::deleteIt();
+	}
+
+	void attributeDirtied(Attribute *attribute){
+		boost::python::object self = PythonDataCollector::findPyObject(id());
+		boost::python::object attr = PythonDataCollector::findPyObject(attribute->id());
+
+		try{
+			boost::python::call_method<void>(self.ptr(), "attributeDirtied", attr);
+		}
+		catch(...){
+			PyErr_Print();
+		}
+
+	}
+
+	void attributeDirtied_default(Attribute *attribute){
+		Node::attributeDirtied(attribute);
 	}
 };
 
@@ -288,6 +315,10 @@ void node_setAllowDynamicAttributes(Node &self, bool value){
 	NodeAccessor::_setAllowDynamicAttributes(self, value);
 }
 
+void node_catchAttributeDirtied(Node &self, Attribute *attribute, bool value){
+	NodeAccessor::_catchAttributeDirtied(self, attribute, value);
+}
+
 std::vector<Attribute*> node_dynamicAttributes(Node &self){
 	return self.dynamicAttributes();
 }
@@ -374,6 +405,8 @@ void nodeWrapper(){
 		.def("enableSpecializationPreset", &Node::enableSpecializationPreset)
 		.def("enabledSpecializationPreset", &Node::enabledSpecializationPreset)
 		.def("clearDynamicAttributes", &Node::clearDynamicAttributes)
+		.def("_catchAttributeDirtied", node_catchAttributeDirtied)
+		.def("attributeDirtied", &Node::attributeDirtied, &NodeWrapper::attributeDirtied_default)
 	;
 	
 	Node::_addNodeCallback = node_addNodeCallback;

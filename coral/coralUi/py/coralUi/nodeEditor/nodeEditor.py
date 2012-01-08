@@ -45,7 +45,6 @@ class NodeEditor(QtGui.QWidget):
     _attributeUis = {}
     _attributeUiClasses = {}
     _nodeUiClasses = {}
-    _ = None
     _selectedNodesId = []
     _selectedAttributesId = []
     _selectedNodesChangedObservers = ObserverCollector()
@@ -64,6 +63,10 @@ class NodeEditor(QtGui.QWidget):
     _generatingSaveScriptObserver = Observer()
     _networkLoadedObserver = Observer()
     
+    @staticmethod
+    def instances():
+        return NodeEditor._instances
+
     @staticmethod
     def _addInstance(nodeEditor):
         NodeEditor._instances.append(nodeEditor)

@@ -336,7 +336,7 @@ class NodeInspector(QtGui.QWidget):
         mainWin.emit(QtCore.SIGNAL("coralExternalThreadActive(bool)"), value)
     
     @staticmethod
-    def registerInspectorWidget(nestedObjectClassName, inspectorWidgetClass):
+    def registerInspectorWidget(nestedObjectClassName, inspectorWidgetClass): 
         NodeInspector._inspectorWidgetClasses[nestedObjectClassName] = inspectorWidgetClass
     
     def __init__(self, parent):
@@ -392,10 +392,13 @@ class NodeInspector(QtGui.QWidget):
         if node:
             inspectorWidgetClass = NodeInspectorWidget
             
-            className = node.className()
-        
-            if NodeInspector._inspectorWidgetClasses.has_key(className):
-                inspectorWidgetClass = NodeInspector._inspectorWidgetClasses[className]
+            classNames = node.classNames()
+            classNames.reverse()
+
+            for className in classNames:
+                if NodeInspector._inspectorWidgetClasses.has_key(className):
+                    inspectorWidgetClass = NodeInspector._inspectorWidgetClasses[className]
+                    break
         
             self._inspectorWidget = inspectorWidgetClass(node, self)
             self._inspectorWidget.setNameEditable(True)
