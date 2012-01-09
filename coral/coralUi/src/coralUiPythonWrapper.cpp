@@ -36,7 +36,7 @@
 #include "geoDrawNodeWrapper.h"
 #include "numericDrawNodeWrapper.h"
 #include "DrawPointNode.h"
-//#include "DrawLineNode.h"
+#include "DrawLineNode.h"
 #include "DrawGeoInstance.h"
 
 using namespace coralUi;
@@ -50,6 +50,6 @@ BOOST_PYTHON_MODULE(_coralUi){
 	viewportWrapper();
 
 	coral::pythonWrapperUtils::pythonWrapper<DrawPointNode, DrawNode>("DrawPointNode");
-	//coral::pythonWrapperUtils::pythonWrapper<DrawLineNode, DrawNode>("DrawLineNode");
+	coral::pythonWrapperUtils::pythonWrapper<DrawLineNode, DrawNode>("DrawLineNode");
 	coral::pythonWrapperUtils::pythonWrapper<DrawGeoInstance, DrawNode>("DrawGeoInstance");
 }
