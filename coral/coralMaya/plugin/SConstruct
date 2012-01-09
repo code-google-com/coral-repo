@@ -40,19 +40,25 @@ env = Environment(
     os.path.join(os.pardir, os.pardir), 
     os.path.join(coralMayaPath, "src"), 
     sconsUtils.getEnvVar("CORAL_MAYA_INCLUDES_PATH"), 
-    sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH")], 
+    sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH"),
+    sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"), 
+    sconsUtils.getEnvVar("CORAL_GLEW_INCLUDES_PATH")], 
   LIBS = [
     coralLib, 
     coralUiLib, 
     coralMayaLib, 
-    sconsUtils.getEnvVar("CORAL_PYTHON_LIB"), 
+    sconsUtils.getEnvVar("CORAL_PYTHON_LIB"),
+    sconsUtils.getEnvVar("CORAL_GLEW_LIB"), 
+    sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB"),
     "Foundation", "OpenMaya", "OpenMayaAnim", "OpenMayaUI"],
   LIBPATH = [
     coralPath, 
     coralUiPath, 
     coralMayaPath, 
     sconsUtils.getEnvVar("CORAL_PYTHON_LIBS_PATH"), 
-    sconsUtils.getEnvVar("CORAL_MAYA_LIBS_PATH")])
+    sconsUtils.getEnvVar("CORAL_MAYA_LIBS_PATH"),
+    sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
+    sconsUtils.getEnvVar("CORAL_GLEW_LIBS_PATH")])
 
 targetName = "coralMayaPlugin"
 

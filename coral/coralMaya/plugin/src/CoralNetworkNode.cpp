@@ -29,6 +29,7 @@
 #include <Python.h>
 
 #include "CoralNetworkNode.h"
+#include <coral/src/pythonWrapperUtils.h>
 
 MTypeId CoralNetworkNode::id(0x80012);
 MObject CoralNetworkNode::coralNodeId;
@@ -112,8 +113,8 @@ void CoralNetworkNode::coralCanDirtyOutAttrs(bool value){
 	}
 }
 
-MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){	
-	PyGILState_STATE state = PyGILState_Ensure(); // ensure python's threades won't fuck up maya
+MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){
+	coral::pythonWrapperUtils::pyGILEnsured = true;
 
 	for(int i = 0; i < _inputPlugs.size(); ++i){
 		MPlug inPlug = _inputPlugs[i];
@@ -125,7 +126,6 @@ MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){
 			if(coralObject){
 				CoralMayaAttribute *coralMayaAttr = dynamic_cast<CoralMayaAttribute*>(coralObject);
 				coralMayaAttr->transferValueFromMaya(inPlug, data);
-
 			}
 		}
 	}
@@ -138,15 +138,21 @@ MStatus CoralNetworkNode::compute(const MPlug& plug, MDataBlock& data){
 			coral::Object *coralObject = coral::NetworkManager::findObjectById(_coralAttributeMap[attrName]);
 			if(coralObject){
 				CoralMayaAttribute *coralMayaAttr = dynamic_cast<CoralMayaAttribute*>(coralObject);
+
+				PyGILState_STATE state = PyGILState_Ensure();
+
 				coralMayaAttr->transferValueToMaya(outPlug, data);
+
+				PyGILState_Release(state);
+
 				coralMayaAttr->setCanDirtyMayaAttribute(true);
 				data.setClean(outPlug);
 			}
 		}
 	}
-	
-	PyGILState_Release(state);
-	
+
+	coral::pythonWrapperUtils::pyGILEnsured = false;
+
     return MS::kSuccess;
 }
 

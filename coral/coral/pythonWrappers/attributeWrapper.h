@@ -76,7 +76,10 @@ boost::python::object attribute_parent(Attribute &self){
 }
 
 boost::python::object attribute_value(Attribute &self){
-	PyThreadState *state = PyEval_SaveThread();
+	PyThreadState *state = 0;
+	if(!pythonWrapperUtils::pyGILEnsured){
+		state = PyEval_SaveThread();
+	}
 
 	boost::python::object valueObj;
 	
@@ -85,8 +88,10 @@ boost::python::object attribute_value(Attribute &self){
 		valueObj = PythonDataCollector::findPyObject(value->id());
 	}
 
-	PyEval_RestoreThread(state);
-	
+	if(state){
+		PyEval_RestoreThread(state);
+	}
+
 	return valueObj;
 }
 

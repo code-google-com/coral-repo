@@ -36,8 +36,10 @@
 
 //CORAL_EXPORT
 namespace coral{
-	
+
 namespace pythonWrapperUtils{
+	bool pyGILEnsured = false;
+
 	template <class T>
 	struct stdVectorToPythonList
 	{

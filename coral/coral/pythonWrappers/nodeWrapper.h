@@ -63,7 +63,13 @@ public:
 	}
 	
 	void update(Attribute *attribute){
-		PyGILState_STATE state = PyGILState_Ensure();
+		bool releaseGIL = false;
+		PyGILState_STATE state;
+		if(!pythonWrapperUtils::pyGILEnsured){
+			pythonWrapperUtils::pyGILEnsured = true;
+			releaseGIL = true;
+			state = PyGILState_Ensure();
+		}
 
 		boost::python::object attr = PythonDataCollector::findPyObject(attribute->id());
 		boost::python::object self = PythonDataCollector::findPyObject(id());
@@ -75,7 +81,10 @@ public:
 			PyErr_Print();
 		}
 
-		PyGILState_Release(state);
+		if(releaseGIL){
+			PyGILState_Release(state);
+			pythonWrapperUtils::pyGILEnsured = false;
+		}
 	}
 	
 	void update_default(Attribute *attribute){
