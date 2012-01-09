@@ -42,7 +42,8 @@ _shouldUpdateSizeValues(true),
 _shouldUpdateColorValues(true),
 _pointIndexAttr(0),
 _colorIndexAttr(1),
-_sizeIndexAttr(2){
+_sizeIndexAttr(2),
+_pointCount(0){
 	_points = new NumericAttribute("points", this);
 	_sizes = new NumericAttribute("sizes", this);
 	_colors = new NumericAttribute("colors", this);
@@ -203,11 +204,23 @@ void DrawPointNode::updatePointValues(){
 	Numeric *vec3Numeric = _points->value();
 	const std::vector<Imath::V3f> &vec3Values = vec3Numeric->vec3Values();
 
+	// search if a new allocation for points is needed (if the number of point have changed)
+	bool newPointAlloc = true;
+	if(_pointCount == vec3Values.size()){
+		newPointAlloc = false;
+	}
+
 	_pointCount = vec3Values.size();
 
 	// vertex buffer
 	glBindBuffer(GL_ARRAY_BUFFER, _pointBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*_pointCount, (GLvoid*)&vec3Values[0].x, GL_STATIC_DRAW);
+	if(newPointAlloc){
+		glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*_pointCount, (GLvoid*)&vec3Values[0].x, GL_STATIC_DRAW);
+	}
+	else {
+		glBufferSubData(GL_ARRAY_BUFFER, 0, 3*sizeof(GLfloat)*_pointCount, (GLvoid*)&vec3Values[0].x);
+	}
+
 
 	// clean OpenGL states
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -300,11 +313,11 @@ void DrawPointNode::updateColorValues(){
 void DrawPointNode::drawPoints(){
 
 	// prepare OpenGL rendering
-	glDisable(GL_LIGHTING);
+	/*glDisable(GL_LIGHTING);
 	glShadeModel(GL_FLAT);
 
 	glPointSize(5.f);
-	glColor3f(1.f, 1.f, 0.f);
+	glColor3f(1.f, 1.f, 0.f);*/
 
 	glUseProgram(_shaderProgram);
 

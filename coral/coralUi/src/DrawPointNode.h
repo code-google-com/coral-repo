@@ -74,9 +74,9 @@ private:
 	GLuint _pointBuffer;		// buffer of vertices: {0.35, 0.76, 0.48, 0.56, 0.37, etc...}
 	GLuint _sizeBuffer;		// buffer of sizes: {0.35, 0.76, 0.48, 0.56, 0.37, etc...}
 	GLuint _colorBuffer;		// buffer of color4: {0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 1.0, etc...}
-	GLsizei _pointCount;
+	GLsizei _pointCount;		// used for optimization to avoid to use glBufferData (new allocation) if _pointCount doesn't change (use glBufferSubData instead, no new allocation).
 
-	GLuint _shaderProgram;	// the maine shader program (only a vertex shader actually
+	GLuint _shaderProgram;	// the main shader program (only a vertex shader actually
 	GLuint _pointIndexAttr;	// uniform indices
 	GLuint _sizeIndexAttr;
 	GLuint _colorIndexAttr;
