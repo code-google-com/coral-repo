@@ -59,17 +59,13 @@ _pointCount(0){
 	pointSpecializations.push_back("Vec3Array");
 	setAttributeAllowedSpecializations(_points, pointSpecializations);
 
-	std::vector<std::string> sizeSpecializations;
-	sizeSpecializations.push_back("Float");
-	sizeSpecializations.push_back("Int");
-	setAttributeAllowedSpecializations(_thickness, sizeSpecializations);
+	setAttributeAllowedSpecialization(_thickness, "Float");
 
 	std::vector<std::string> colorSpecializations;
 	colorSpecializations.push_back("Col4");
 	colorSpecializations.push_back("Col4Array");
 	setAttributeAllowedSpecializations(_colors, colorSpecializations);
 
-	//setSpecializationPreset("single", _thickness, "Float");
 	_thickness->outValue()->setFloatValueAt(0, 1.0);
 
 	if(glContextExists()){

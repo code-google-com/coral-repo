@@ -66,7 +66,6 @@ public:
 		bool releaseGIL = false;
 		PyGILState_STATE state;
 		if(!pythonWrapperUtils::pyGILEnsured){
-			pythonWrapperUtils::pyGILEnsured = true;
 			releaseGIL = true;
 			state = PyGILState_Ensure();
 		}
