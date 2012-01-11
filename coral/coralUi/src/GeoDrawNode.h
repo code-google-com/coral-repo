@@ -80,6 +80,11 @@ private:
 	GLuint _nrmBuffer;		// buffer of normales: {0.0, 0.0, 1.0, 0.0, 0.0, 1.0, etc...}
 	GLuint _colBuffer;		// buffer of color4: {0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 1.0, etc...}
 	GLuint _idxBuffer;		// buffer of indices: {0,1,2,3, 3,4,5,0, 4,6,7,5 etc...}
+
+	GLsizei _vtxCount;		// the number of vtx/normal/col send (used for allocation optimization)
+	GLsizei _nrmCount;
+	GLsizei _colCount;		// col count is acutally a little special (more infos in the code)
+	GLsizei _idxCount;
 };
 
 }

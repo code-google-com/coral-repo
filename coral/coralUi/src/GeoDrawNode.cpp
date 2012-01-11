@@ -113,22 +113,72 @@ void GeoDrawNode::updateGeoVBO(){
 	const std::vector<Imath::V3f> &points = geo->points();
 	const std::vector<Imath::V3f> &vtxNormals = geo->verticesNormals();
 	const std::vector<std::vector<int> > &faces = geo->rawFaces();
+	const std::vector<int> &indices = geo->rawIndices();
 
+	/////////////////////////
 	// vertex buffer
-	glBindBuffer(GL_ARRAY_BUFFER, _vtxBuffer);
-	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*points.size(), (GLvoid*)&points[0].x, GL_STATIC_DRAW);
+	/////////////////////////
 
-	// normal buffer
-	if(vtxNormals.empty() == false){
-		glBindBuffer(GL_ARRAY_BUFFER, _nrmBuffer);
-		glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*vtxNormals.size(), (GLvoid*)&vtxNormals[0].x, GL_STATIC_DRAW);
+	// search if a new allocation for vertex is needed (if the number of vertex have changed)
+	bool newVtxAlloc = true;
+	if(_vtxCount == points.size()){
+		newVtxAlloc = false;
+	}
+	else {
+		_vtxCount = points.size();
 	}
 
+	glBindBuffer(GL_ARRAY_BUFFER, _vtxBuffer);
+	if(newVtxAlloc){
+		glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*_vtxCount, (GLvoid*)&points[0].x, GL_STATIC_DRAW);
+	}
+	else {
+		glBufferSubData(GL_ARRAY_BUFFER, 0, 3*sizeof(GLfloat)*_vtxCount, (GLvoid*)&points[0].x);
+	}
+
+	/////////////////////////
+	// normal buffer
+	/////////////////////////
+	if(vtxNormals.empty() == false){
+
+		// search if a new allocation for normal is needed (if the number of point have changed)
+		bool newNrmAlloc = true;
+		if(_nrmCount == vtxNormals.size()){
+			newNrmAlloc = false;
+		}
+		else {
+			_nrmCount = vtxNormals.size();
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, _nrmBuffer);
+		if(newNrmAlloc){
+			glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*_nrmCount, (GLvoid*)&vtxNormals[0].x, GL_STATIC_DRAW);
+		}
+		else {
+			glBufferSubData(GL_ARRAY_BUFFER, 0, 3*sizeof(GLfloat)*_nrmCount, (GLvoid*)&vtxNormals[0].x);
+		}
+
+	}
+
+	/////////////////////////
 	// index buffer generation
-	const std::vector<int> &indices = geo->rawIndices();
+	/////////////////////////
+	bool newIdxAlloc = true;
+	if(_idxCount == indices.size()){
+		newIdxAlloc = false;
+	}
+	else {
+		_idxCount = indices.size();
+	}
+
 	// send to GPU!
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _idxBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int)*indices.size(), &indices[0], GL_STATIC_DRAW);
+	if(newIdxAlloc){
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(int)*_idxCount, &indices[0], GL_STATIC_DRAW);
+	}
+	else {
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(int)*_idxCount, &indices[0]);
+	}
 
 
 	// clean OpenGL states
@@ -140,20 +190,36 @@ void GeoDrawNode::updateColorVBO(){
 	Numeric *col4Numeric = _colors->value();
 	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
 
+	/////////////////////////
 	// color buffer
+	/////////////////////////
 	if((col4Numeric->isArray()) && (col4Values.empty() == false)){
 
 		// avoid empty color (and maybe crashs)
 		Geo *geo = _geo->value();
 		const std::vector<Imath::V3f> &points = geo->points();
 		int pointCount = (int)points.size();
-		int colorCount = (int)col4Values.size();
+
+		// check if a whole new allocation is needed (if the number of color have changed)
+		bool newColAlloc = true;
+		if(_colCount == col4Values.size()){
+			newColAlloc = false;
+		}
+		else {
+			_colCount = col4Values.size();
+		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, _colBuffer);
-		glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*pointCount, (GLvoid*)&col4Values[0].r, GL_STATIC_DRAW);
+		if(newColAlloc){
+			// we need to alloc the whole number of point, that's why we use pointCount here.
+			glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*pointCount, (GLvoid*)&col4Values[0].r, GL_STATIC_DRAW);
+		}
+		else {
+			glBufferSubData(GL_ARRAY_BUFFER, 0, 4*sizeof(GLfloat)*_colCount, &col4Values[0].r);
+		}
 
-		if(colorCount < pointCount){
-			int emptyColCount = pointCount - colorCount;	// get the number of empty color to create in the buffer to match the number of vertex
+		if(_colCount < pointCount){
+			int emptyColCount = pointCount - _colCount;	// get the number of empty color to create in the buffer to match the number of vertex
 			
 			// create an array to feed
 			std::vector<Imath::Color4f> emptyColArray;
@@ -163,7 +229,7 @@ void GeoDrawNode::updateColorVBO(){
 				emptyColArray.push_back(Imath::Color4f(0.0, 1.0, 0.0, 1.0));
 			}
 
-			GLintptr offset = 4*sizeof(GLfloat)*colorCount;
+			GLintptr offset = 4*sizeof(GLfloat)*_colCount;
 			GLsizeiptr size = 4*sizeof(GLfloat)*emptyColCount;
 			glBufferSubData(GL_ARRAY_BUFFER, offset, size, (GLvoid*)&emptyColArray[0].r);
 
