@@ -30,7 +30,7 @@
 #include <coral/src/Numeric.h>
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
-
+#define OPENGL_CHECK_ERRORS { const GLenum errcode = glGetError(); if (errcode != GL_NO_ERROR) fprintf(stderr, "OpenGL Error code %i in '%s' line %i\n", errcode, __FILE__, __LINE__-1); }
 
 using namespace coral;
 using namespace coralUi;
@@ -47,6 +47,7 @@ _shouldUpdateColorVBO(true){
 	_normals = new BoolAttribute("normals", this);
 	// _ids = new BoolAttribute("ids", this);
 	_colors = new NumericAttribute("colors", this);
+	_image = new ImageAttribute("image", this);
 	
 	addInputAttribute(_geo);
 	addInputAttribute(_smooth);
@@ -56,6 +57,7 @@ _shouldUpdateColorVBO(true){
 	addInputAttribute(_normals);
 	// addInputAttribute(_ids);
 	addInputAttribute(_colors);
+	addInputAttribute(_image);
 	
 	setAttributeAffect(_geo, (Attribute*)viewportOutputAttribute());
 	setAttributeAffect(_smooth, (Attribute*)viewportOutputAttribute());
@@ -65,6 +67,7 @@ _shouldUpdateColorVBO(true){
 	setAttributeAffect(_normals, (Attribute*)viewportOutputAttribute());
 	// setAttributeAffect(_ids, (Attribute*)viewportOutputAttribute());
 	setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
+	setAttributeAffect(_image, (Attribute*)viewportOutputAttribute());
 	
 	std::vector<std::string> colorSpecializations;
 	colorSpecializations.push_back("Col4");
@@ -81,29 +84,39 @@ _shouldUpdateColorVBO(true){
 void GeoDrawNode::initGL(){
 	catchAttributeDirtied(_geo);
 	catchAttributeDirtied(_colors);
+	catchAttributeDirtied(_image);
 
 	// generate OpenGL buffers
 	glGenBuffers(1, &_vtxBuffer);
 	glGenBuffers(1, &_nrmBuffer);
+	glGenBuffers(1, &_uvBuffer);
 	glGenBuffers(1, &_colBuffer);
 	glGenBuffers(1, &_idxBuffer);
+	glGenTextures(1, &_texture);
 }
 
 GeoDrawNode::~GeoDrawNode(){
 	if(glContextExists()){
 		glDeleteBuffers(1, &_vtxBuffer);
 		glDeleteBuffers(1, &_nrmBuffer);
+		glDeleteBuffers(1, &_uvBuffer);
 		glDeleteBuffers(1, &_colBuffer);
 		glDeleteBuffers(1, &_idxBuffer);
+		glDeleteTextures(1, &_texture);
 	}
 }
 
 void GeoDrawNode::attributeDirtied(Attribute *attribute){
+	std::cout<<"attributeDirtied"<<std::endl;
 	if(attribute == _geo){
 		_shouldUpdateGeoVBO = true;
 	}
 	else if(attribute == _colors){
 		_shouldUpdateColorVBO = true;
+	}
+	else if(attribute == _image){
+		std::cout<<"attributeDirtied image"<<std::endl;
+		_shouldUpdateTexture = true;
 	}
 }
 
@@ -112,6 +125,7 @@ void GeoDrawNode::updateGeoVBO(){
 
 	const std::vector<Imath::V3f> &points = geo->points();
 	const std::vector<Imath::V3f> &vtxNormals = geo->verticesNormals();
+	const std::vector<Imath::V2f> &rawUvs = geo->rawUvs();
 	const std::vector<std::vector<int> > &faces = geo->rawFaces();
 	const std::vector<int> &indices = geo->rawIndices();
 
@@ -156,6 +170,35 @@ void GeoDrawNode::updateGeoVBO(){
 		}
 		else {
 			glBufferSubData(GL_ARRAY_BUFFER, 0, 3*sizeof(GLfloat)*_nrmCount, (GLvoid*)&vtxNormals[0].x);
+		}
+
+	}
+
+	/////////////////////////
+	// uv buffer
+	/////////////////////////
+	/*std::vector<Imath::V2f> vtxUvs;
+	vtxUvs.push_back(Imath::V2f(0.0, 0.0));
+	vtxUvs.push_back(Imath::V2f(0.0, 1.0));
+	vtxUvs.push_back(Imath::V2f(1.0, 1.0));
+	vtxUvs.push_back(Imath::V2f(1.0, 0.0));*/
+	if(rawUvs.empty() == false){
+
+		// search if a new allocation for normal is needed (if the number of point have changed)
+		bool newUvAlloc = true;
+		if(_uvCount == rawUvs.size()){
+			newUvAlloc = false;
+		}
+		else {
+			_uvCount = rawUvs.size();
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, _uvBuffer);
+		if(newUvAlloc){
+			glBufferData(GL_ARRAY_BUFFER, 2*sizeof(GLfloat)*_uvCount, (GLvoid*)&rawUvs[0].x, GL_STATIC_DRAW);
+		}
+		else {
+			glBufferSubData(GL_ARRAY_BUFFER, 0, 2*sizeof(GLfloat)*_uvCount, (GLvoid*)&rawUvs[0].x);
 		}
 
 	}
@@ -240,6 +283,25 @@ void GeoDrawNode::updateColorVBO(){
 	}
 }
 
+void GeoDrawNode::updateTexture(){
+	std::cout<<"updateTexture"<<std::endl;
+	Image *image = _image->value();
+
+	glBindTexture(GL_TEXTURE_2D, _texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//glPixelStoref(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, image->width(), image->height(), 0, GL_RGB, GL_FLOAT, image->pixels());
+	//glBindTexture(GL_TEXTURE_2D, 0);
+	OPENGL_CHECK_ERRORS
+
+}
+
 void GeoDrawNode::drawPoints(Geo *geo){
 
 	const std::vector<Imath::V3f> &points = geo->points();
@@ -269,6 +331,15 @@ void GeoDrawNode::drawPoints(Geo *geo){
 void GeoDrawNode::drawSurface(Geo *geo, bool smooth){
 	const std::vector<int> &indexCounts = geo->rawIndexCounts();
 	const std::vector<Imath::V3f> &vtxNormals = geo->verticesNormals();
+	const std::vector<Imath::V2f> &rawUvs = geo->rawUvs();
+
+	// check if there is uvs
+	std::cout<<"rawUvs.size() "<<rawUvs.size()<<std::endl;
+	std::cout<<"indexCounts.size() "<<indexCounts.size()<<std::endl;
+	bool useUvs = false;
+	if(rawUvs.size()){
+		useUvs = true;
+	}
 
 	Numeric *col4Numeric = _colors->value();
 	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
@@ -312,6 +383,16 @@ void GeoDrawNode::drawSurface(Geo *geo, bool smooth){
 			glEnableClientState(GL_COLOR_ARRAY);
 		}
 
+		if(useUvs){
+			glBindBuffer(GL_ARRAY_BUFFER, _uvBuffer);
+			glTexCoordPointer(2, GL_FLOAT, 0, NULL);
+			glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+			// texture stuff
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, _texture);
+		}
+
 		// material stuff
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 		glEnable(GL_COLOR_MATERIAL);
@@ -329,8 +410,15 @@ void GeoDrawNode::drawSurface(Geo *geo, bool smooth){
 
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 		if(useColVbo){
+			glDisableClientState(GL_COLOR_ARRAY);
+		}
+
+		if(useUvs){
+			glDisable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D, 0);
 			glDisableClientState(GL_COLOR_ARRAY);
 		}
 
@@ -495,8 +583,13 @@ void GeoDrawNode::draw(){
 		_shouldUpdateColorVBO = false;
 	}
 
+	if(_shouldUpdateTexture){
+		updateTexture();
+		_shouldUpdateTexture = false;
+	}
+
 	glPushAttrib(GL_POLYGON_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_POINT_BIT);
-	
+
 	if(shouldDrawPoints){
 		drawPoints(geo);
 	}

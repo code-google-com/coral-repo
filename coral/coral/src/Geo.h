@@ -177,8 +177,10 @@ public:
 	
 	void copy(const Geo *other);
 	void build(const std::vector<Imath::V3f> &points, const std::vector<std::vector<int> > &faces);
+	void build(const std::vector<Imath::V3f> &points, const std::vector<std::vector<int> > &faces, const std::vector<Imath::V2f> &uvs);
 	const std::vector<Imath::V3f> &points();
 	int pointsCount() const;
+	const std::vector<Imath::V2f> &rawUvs();
 	const std::vector<std::vector<int> > &rawFaces();
 
 	/*! Return a pointer to an array of packaged indices: {0,1,2,3, 1,4,5,2, 4,6,7,5, etc...}.
@@ -225,6 +227,7 @@ private:
 	std::vector<Imath::V3f> _points;
 	std::vector<Imath::V3f> _faceNormals;
 	std::vector<Imath::V3f> _verticesNormals;
+	std::vector<Imath::V2f> _rawUvs;
 	
 	// alignement data
 	std::vector<int> _rawIndices;

@@ -35,6 +35,7 @@
 #include <coral/src/Node.h>
 #include <coral/src/Geo.h>
 #include <coral/src/GeoAttribute.h>
+#include <coral/src/ImageAttribute.h>
 #include <coral/src/BoolAttribute.h>
 #include <coral/src/NumericAttribute.h>
 #include "DrawNode.h"
@@ -61,12 +62,15 @@ private:
 	coral::BoolAttribute *_normals;
 	// coral::BoolAttribute *_ids;
 	coral::NumericAttribute *_colors;
+	coral::ImageAttribute *_image;
 
 	bool _shouldUpdateGeoVBO;
 	bool _shouldUpdateColorVBO;
+	bool _shouldUpdateTexture;
 	
 	void updateGeoVBO();
 	void updateColorVBO();
+	void updateTexture();
 	void updateVBOWireframeIndex(coral::Geo *geo);
 	void updateShaders(coral::Geo *geo);
 	void drawNormals(coral::Geo *geo, bool shouldDrawFlat);
@@ -78,11 +82,14 @@ private:
 	// OpenGL
 	GLuint _vtxBuffer;		// buffer of vertices: {0.35, 0.76, 0.48, 0.56, 0.37, etc...}
 	GLuint _nrmBuffer;		// buffer of normales: {0.0, 0.0, 1.0, 0.0, 0.0, 1.0, etc...}
+	GLuint _uvBuffer;
 	GLuint _colBuffer;		// buffer of color4: {0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 1.0, etc...}
 	GLuint _idxBuffer;		// buffer of indices: {0,1,2,3, 3,4,5,0, 4,6,7,5 etc...}
+	GLuint _texture;
 
 	GLsizei _vtxCount;		// the number of vtx/normal/col send (used for allocation optimization)
 	GLsizei _nrmCount;
+	GLsizei _uvCount;
 	GLsizei _colCount;		// col count is acutally a little special (more infos in the code)
 	GLsizei _idxCount;
 };

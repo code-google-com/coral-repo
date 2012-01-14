@@ -58,6 +58,10 @@ int Geo::pointsCount() const{
 	return (int)_points.size();
 }
 
+const std::vector<Imath::V2f> &Geo::rawUvs(){
+	return _rawUvs;
+}
+
 const std::vector<std::vector<int> > &Geo::rawFaces(){
 	return _rawFaces;
 }
@@ -129,6 +133,7 @@ void Geo::displacePoints(const std::vector<Imath::V3f> &displacedPoints){
 void Geo::clear(){
 	_points.clear();
 	_rawFaces.clear();
+	_rawUvs.clear();
 	_rawIndices.clear();
 	_rawIndexCounts.clear();
 	_faces.clear();
@@ -149,6 +154,14 @@ void Geo::build(const std::vector<Imath::V3f> &points, const std::vector<std::ve
 	
 	_points = points;
 	_rawFaces = faces;
+}
+
+void Geo::build(const std::vector<Imath::V3f> &points, const std::vector<std::vector<int> > &faces, const std::vector<Imath::V2f> &uvs){
+	clear();
+
+	_points = points;
+	_rawFaces = faces;
+	_rawUvs = uvs;
 }
 
 void Geo::computeVertexPerFaceNormals(std::vector<Imath::V3f> &vertexPerFaceNormals){

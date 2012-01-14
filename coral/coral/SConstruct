@@ -16,16 +16,19 @@ env = Environment(
   CPPPATH = [
     sconsUtils.getEnvVar("CORAL_IMATH_INCLUDES_PATH"),
     sconsUtils.getEnvVar("CORAL_PYTHON_INCLUDES_PATH"), 
-    sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH")],
+    sconsUtils.getEnvVar("CORAL_BOOST_INCLUDES_PATH"),
+    sconsUtils.getEnvVar("CORAL_OIIO_INCLUDES_PATH")],
   LIBS = [
     sconsUtils.getEnvVar("CORAL_IMATH_LIB"),
     sconsUtils.getEnvVar("CORAL_IMATH_IEX_LIB"),
     sconsUtils.getEnvVar("CORAL_PYTHON_LIB"), 
-    sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB")],
+    sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB"),
+    sconsUtils.getEnvVar("CORAL_OIIO_LIB")],
   LIBPATH = [
     sconsUtils.getEnvVar("CORAL_IMATH_LIBS_PATH"),
     sconsUtils.getEnvVar("CORAL_PYTHON_LIBS_PATH"), 
-    sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH")],
+    sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"),
+    sconsUtils.getEnvVar("CORAL_OIIO_LIBS_PATH")],
   SHLIBPREFIX = "",
   MSVC_VERSION=msvc_version,
   TARGET_ARCH = platform.machine())
