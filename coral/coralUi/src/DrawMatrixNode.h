@@ -1,18 +1,18 @@
 // <license>
 // Copyright (C) 2011 Andrea Interguglielmi, All rights reserved.
 // This file is part of the coral repository downloaded from http://code.google.com/p/coral-repo.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
 // met:
-// 
+//
 //    * Redistributions of source code must retain the above copyright
 //      notice, this list of conditions and the following disclaimer.
-// 
+//
 //    * Redistributions in binary form must reproduce the above copyright
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 // IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 // THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
@@ -26,32 +26,51 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#include <boost/python.hpp>
+#ifndef CORALDRAWMATRIXNODE_H
+#define CORALDRAWMATRIXNODE_H
 
-#include <coral/src/pythonWrapperUtils.h>
-#include "viewportWrapper.h"
-#include "viewportOutputAttributeWrapper.h"
-#include "mainDrawRoutineWrapper.h"
-#include "drawNodeWrapper.h"
-#include "geoDrawNodeWrapper.h"
-#include "numericDrawNodeWrapper.h"
-#include "DrawPointNode.h"
-#include "DrawLineNode.h"
-#include "DrawMatrixNode.h"
-#include "DrawGeoInstance.h"
+#include <cstdio>
+#include <string.h>
 
-using namespace coralUi;
+#include <coral/src/Node.h>
+#include <coral/src/NumericAttribute.h>
+#include "DrawNode.h"
+#include "coralUiDefinitions.h"
 
-BOOST_PYTHON_MODULE(_coralUi){
-	viewportOutputAttributeWrapper();
-	drawNodeWrapper();
-	geoDrawNodeWrapper();	// TODO put every function that have only have one line here
-	numericDrawNodeWrapper();
-	mainDrawRoutineWrapper();
-	viewportWrapper();
+#include <GL/glew.h>
 
-	coral::pythonWrapperUtils::pythonWrapper<DrawPointNode, DrawNode>("DrawPointNode");
-	coral::pythonWrapperUtils::pythonWrapper<DrawLineNode, DrawNode>("DrawLineNode");
-	coral::pythonWrapperUtils::pythonWrapper<DrawMatrixNode, DrawNode>("DrawMatrixNode");
-	coral::pythonWrapperUtils::pythonWrapper<DrawGeoInstance, DrawNode>("DrawGeoInstance");
+namespace coralUi{
+
+class CORALUI_EXPORT DrawMatrixNode : public DrawNode{
+public:
+	DrawMatrixNode(const std::string &name, coral::Node *parent);
+	~DrawMatrixNode();
+	void attributeConnectionChanged(coral::Attribute *attribute);
+	void attributeDirtied(coral::Attribute *attribute);
+	void draw();
+	void initGL();
+	void initShader();
+
+private:
+	coral::NumericAttribute *_matrix;
+	coral::NumericAttribute *_thickness;
+
+	bool _shouldUpdateMat44Values;
+
+	void updateMat44Values();
+	void drawMatrix();
+
+	// OpenGL
+	GLuint _gizmoBuffer;	// the gizmo geometry + color
+	GLuint _matrixBuffer;	// the matrix buffer
+	GLsizei _matrixCount;	// the number of matrix element (used for allocation optimisation
+
+	GLuint _shaderProgram;	// the main shader program (only a vertex shader actually
+	GLuint _pointAttrLoc;	// point and color attribut location
+	GLuint _colorAttrLoc;
+	GLuint _matrixAttrLoc;
+};
+
 }
+
+#endif
