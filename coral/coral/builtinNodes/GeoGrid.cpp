@@ -118,8 +118,6 @@ void GeoGrid::update(Attribute *attribute){
 		for(int col = 0; col <= widthSubdivisions; ++col){
 			float currentWidth = uvWidthStep * col;
 			float currentHeight = uvHeightStep * row;
-			std::cout<<"currentWidth "<<currentWidth<<std::endl;
-			std::cout<<"currentHeight "<<currentHeight<<std::endl;
 			uvs[i] = Imath::V2f(currentWidth, currentHeight);
 			i++;
 		}

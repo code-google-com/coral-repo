@@ -170,6 +170,22 @@ public:
 	void attributeDirtied_default(Attribute *attribute){
 		Node::attributeDirtied(attribute);
 	}
+
+	void addDynamicAttribute(Attribute *attribute){
+		boost::python::object self = PythonDataCollector::findPyObject(id());
+		boost::python::object attr = PythonDataCollector::findPyObject(attribute->id());
+
+		try{
+			boost::python::call_method<void>(self.ptr(), "addDynamicAttribute", attr);
+		}
+		catch(...){
+			PyErr_Print();
+		}
+	}
+
+	void addDynamicAttribute_default(Attribute *attribute){
+		Node::addDynamicAttribute(attribute);
+	}
 };
 
 boost::python::object node_parent(Node &self){
@@ -402,7 +418,7 @@ void nodeWrapper(){
 		.def("computeTimeTicks", &Node::computeTimeTicks)
 		.def("computeTimeMilliseconds", &Node::computeTimeMilliseconds)
 		.def("computeTimeSeconds", &Node::computeTimeSeconds)
-		.def("addDynamicAttribute", &Node::addDynamicAttribute)
+		.def("addDynamicAttribute", &Node::addDynamicAttribute, &NodeWrapper::addDynamicAttribute_default)
 		.def("dynamicAttributes", node_dynamicAttributes)
 		.def("_setAllowDynamicAttributes", node_setAllowDynamicAttributes)
 		.def("allowDynamicAttributes", &Node::allowDynamicAttributes)

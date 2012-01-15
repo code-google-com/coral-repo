@@ -48,8 +48,6 @@ Image::~Image(){
 }
 
 void Image::load(const char *filePath){
-	std::cout<<"opening image "<<filePath<<std::endl;
-
 	ImageInput *imgIn = ImageInput::create(filePath);
 
 	if(!imgIn)
@@ -63,16 +61,11 @@ void Image::load(const char *filePath){
 	_yres = imgSpec.height;
 	_channelCount = imgSpec.nchannels;
 
-	std::cout<<"spec.tile_width->"<<imgSpec.tile_width<<std::endl;
-	std::cout<<"spec.tile_height->"<<imgSpec.tile_height<<std::endl;
-	std::cout<<"spec.format->"<<imgSpec.format<<std::endl;
-
 	_pixels = new float [_xres*_yres*_channelCount];
 	imgIn->read_image(TypeDesc::FLOAT, _pixels);
 	imgIn->close();
 
 	delete imgIn;
-	std::cout<<"image x->"<<_xres<<" y->"<<_yres<<" nchannels->"<<_channelCount<<std::endl;
 }
 
 const float* Image::pixels(){

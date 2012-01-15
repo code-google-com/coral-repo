@@ -86,12 +86,15 @@ class AttributeField(ObjectField):
     
     def widgetValueChanged(self):
         value = self.getWidgetValue(self.valueWidget())
+        somethingChanged = False
         for sourceAttr in self._sourceAttributes:
             attr = sourceAttr()
             if self.getAttributeValue(attr) != value:
                 self.setAttributeValue(attr, value)
+                somethingChanged = True
         
-        self.coralObject().forceDirty()
+        if somethingChanged:
+            self.coralObject().forceDirty()
     
     def attributeValueChanged(self):
         value = self.getAttributeValue(self._sourceAttributes[0]())
@@ -227,7 +230,17 @@ class StringValueField(AttributeField):
     def __init__(self, coralAttribute, parentWidget):
         AttributeField.__init__(self, coralAttribute, parentWidget)
         
-        self.setAttributeWidget(QtGui.QLineEdit(self), "editingFinished()")
+        if coralAttribute.longString():
+            textEdit = QtGui.QTextEdit(self)
+            textEdit.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+            textEdit.setAcceptRichText(False)
+            textEdit.setMaximumHeight(100)
+
+            self.setAttributeWidget(textEdit, "textChanged()")
+
+            self.layout().setAlignment(textEdit, QtCore.Qt.AlignTop)
+        else:    
+            self.setAttributeWidget(QtGui.QLineEdit(self), "editingFinished()")
     
     def setAttributeValue(self, attribute, value):
         attribute.outValue().setStringValue(value)
@@ -236,10 +249,19 @@ class StringValueField(AttributeField):
         return attribute.value().stringValue()
     
     def setWidgetValue(self, widget, value):
-        widget.setText(value)
+        if type(widget) is QtGui.QTextEdit:
+            widget.setPlainText(value)
+        else:    
+            widget.setText(value)
     
     def getWidgetValue(self, widget):
-        return str(widget.text())
+        text = ""
+        if type(widget) is QtGui.QTextEdit:
+            text = widget.toPlainText()
+        else:
+            text = widget.text()
+
+        return str(text)
 
 class NameField(ObjectField):
     def __init__(self, coralNode, parentWidget):

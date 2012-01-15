@@ -46,7 +46,9 @@ void stringWrapper(){
 	;
 	
 	pythonWrapperUtils::pythonWrapper<StringNode, Node>("StringNode");
-	pythonWrapperUtils::pythonWrapper<StringAttribute, Attribute>("StringAttribute");
+	pythonWrapperUtils::pythonWrapper<StringAttribute, Attribute>("StringAttribute")
+		.def("setLongString", &StringAttribute::setLongString)
+		.def("longString", &StringAttribute::longString);
 }
 
 #endif

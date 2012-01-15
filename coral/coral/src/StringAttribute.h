@@ -78,6 +78,18 @@ public:
 	String *outValue(){
 		return (String*)Attribute::outValue();
 	}
+
+	/*! Will display this attribute in the NodeInspector as an aditable text box, rather then the usual one-line field.*/
+	void setLongString(bool value){
+		_longString = value;
+	}
+
+	bool longString(){
+		return _longString;
+	}
+
+private:
+	bool _longString;
 };
 
 }

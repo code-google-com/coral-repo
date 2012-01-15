@@ -39,6 +39,15 @@ from nodeView import NodeView
 from rootNodeUi import RootNodeUi
 from addressBar import AddressBar
 
+def _checkClassIsNodeUi(class_):
+    if NodeUi in class_.__bases__:
+       return True
+    else:
+        for baseClass in class_.__bases__:
+            val = _checkClassIsNodeUi(baseClass)
+            if val:
+                return val         
+
 class NodeEditor(QtGui.QWidget):
     _rootNodeUi = None
     _nodeUis = {}
@@ -174,7 +183,7 @@ class NodeEditor(QtGui.QWidget):
         
     @staticmethod
     def registerNodeUiClass(coralNodeClassName, nodeUiClass):
-        if NodeUi in nodeUiClass.__bases__:
+        if _checkClassIsNodeUi(nodeUiClass):
             NodeEditor._nodeUiClasses[coralNodeClassName] = nodeUiClass
         else:
             coralApp.logError("could not register nodeUi, expected NodeUi subclass: " + str(nodeUiClass))

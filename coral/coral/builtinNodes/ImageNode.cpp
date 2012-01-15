@@ -52,10 +52,8 @@ void ImageNode::update(Attribute *attribute){
 
 	// read
 	std::string filename = _fileName->value()->stringValue();
-	std::cout<<"first filepath "<<filename<<std::endl;
 	//filename = NetworkManager::resolveFilename(filename);
 
-	std::cout<<"whole filepath "<<filename<<std::endl;
 	_image->outValue()->load(filename.c_str());
 
 	/*float width = _width->value()->floatValueAt(0);

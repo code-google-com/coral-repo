@@ -107,7 +107,6 @@ GeoDrawNode::~GeoDrawNode(){
 }
 
 void GeoDrawNode::attributeDirtied(Attribute *attribute){
-	std::cout<<"attributeDirtied"<<std::endl;
 	if(attribute == _geo){
 		_shouldUpdateGeoVBO = true;
 	}
@@ -115,7 +114,6 @@ void GeoDrawNode::attributeDirtied(Attribute *attribute){
 		_shouldUpdateColorVBO = true;
 	}
 	else if(attribute == _image){
-		std::cout<<"attributeDirtied image"<<std::endl;
 		_shouldUpdateTexture = true;
 	}
 }
@@ -284,7 +282,6 @@ void GeoDrawNode::updateColorVBO(){
 }
 
 void GeoDrawNode::updateTexture(){
-	std::cout<<"updateTexture"<<std::endl;
 	Image *image = _image->value();
 
 	glBindTexture(GL_TEXTURE_2D, _texture);
@@ -334,8 +331,6 @@ void GeoDrawNode::drawSurface(Geo *geo, bool smooth){
 	const std::vector<Imath::V2f> &rawUvs = geo->rawUvs();
 
 	// check if there is uvs
-	std::cout<<"rawUvs.size() "<<rawUvs.size()<<std::endl;
-	std::cout<<"indexCounts.size() "<<indexCounts.size()<<std::endl;
 	bool useUvs = false;
 	if(rawUvs.size()){
 		useUvs = true;

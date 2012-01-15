@@ -31,6 +31,12 @@ import coralApp
 import utils
 from _coral import NetworkManager
 
+class CollapserData:
+    collapsedNodeClassName = "CollapsedNode"
+
+def setCollapsedNodeClassName(className):
+    CollapserData.collapsedNodeClassName = className
+
 def _checkNodesShareSameParent(nodes):
     parentNode = None
     
@@ -73,7 +79,7 @@ def collapseNodes(nodes, collapsedNode = None):
     parentNode = _checkNodesShareSameParent(nodes)
     
     if collapsedNode is None:
-        collapsedNode = coralApp.createNode("CollapsedNode", "CollapsedNode", parentNode)
+        collapsedNode = coralApp.createNode(CollapserData.collapsedNodeClassName, CollapserData.collapsedNodeClassName, parentNode)
     
     inPassAttrs = {}
     outPassAttrs = {}
