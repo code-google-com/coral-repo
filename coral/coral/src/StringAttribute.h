@@ -63,7 +63,9 @@ private:
 //! Stores a String value and allows for strings to be manipulated by a Node.	
 class CORAL_EXPORT StringAttribute: public Attribute{
 public:
-	StringAttribute(const std::string &name, Node *parent) : Attribute(name, parent){
+	StringAttribute(const std::string &name, Node *parent) : 
+		Attribute(name, parent),
+		_longString(false){
 		setClassName("StringAttribute");
 		setValuePtr(new String());
 		

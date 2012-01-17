@@ -472,6 +472,12 @@ def init():
     _coral.setCallback("attribute_specialization", _attribute_specialization)
     _coral.setCallback("attribute_valueChanged", _attribute_valueChanged)
 
+    if os.environ.has_key("CORAL_PLUGINS_PATH"):
+        path = os.environ["CORAL_PLUGINS_PATH"]
+        paths = path.replace(";", ":").split(":")
+        for path in paths:
+            addAutoLoadPath(path)
+
 def _attribute_valueChanged(attribute):
     _notifyAttributeValueChangedObservers(attribute)
 
@@ -546,7 +552,13 @@ def loadPlugin(filename):
     for searchPath in searchPaths:
         path = os.path.join(searchPath, filename)
         if os.path.isfile(path):
-            module = utils.runtimeImport(filename)
+            found = True
+            module = None
+            try:
+                module = utils.runtimeImport(filename)
+            except:
+                pass
+                
             if module:
                 if hasattr(module, "loadPlugin"):
                     found = True

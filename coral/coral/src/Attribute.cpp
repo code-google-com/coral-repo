@@ -516,7 +516,7 @@ bool Attribute::connectTo(Attribute *attribute, ErrorObject *errorObject){
 		_connectToCallback(this, attribute);
 	
 	bool forceDirty = true;
-	dirty(forceDirty);
+	attribute->dirty(forceDirty);
 	
 	return success;
 }

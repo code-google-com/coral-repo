@@ -34,6 +34,7 @@ import coralStandaloneConfig
 coralUi.init(configModule = coralStandaloneConfig)
 coralUi.mainWindow().show()
 coralApp.scanAutoLoadPaths()
+coralUi.scanAutoLoadPaths()
 coralUi.startApp()
 
 coralApp.finalize()

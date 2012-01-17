@@ -83,6 +83,17 @@ def init(configModule = None):
         if startupScriptFile:
             utils.runtimeImport(startupScriptFile)
 
+def scanPathForPlugins(path):
+    entries = os.listdir(path)
+    for entry in entries:
+        if entry.split(".")[-1] == "py":
+            filename = os.path.join(path, entry)
+            loadPluginUi(filename)
+
+def scanAutoLoadPaths():
+    for path in coralApp.CoralAppData.autoLoadPaths:
+        scanPathForPlugins(path)
+
 def application():
     return CoralUiData.app
 
@@ -128,7 +139,14 @@ def loadPluginUi(filename):
     for searchPath in searchPaths:
         path = os.path.join(searchPath, filename)
         if os.path.isfile(path):
-            module = utils.runtimeImport(filename)
+            found = True
+
+            module = None
+            try:
+                module = utils.runtimeImport(filename)
+            except:
+                pass
+
             if module:
                 if hasattr(module, "loadPluginUi"):
                     found = True
