@@ -31,10 +31,13 @@ private:
 	coral::NumericAttribute *_colors;
 
 	GLuint _shaderProgram;
-	GLuint _locationsBuffer;
+	GLint _matrixAttrLoc;	// the location of matrix
+
+	GLuint _locationsBuffer;	// vbos
 	GLuint _vtxBuffer;
 	GLuint _nrmBuffer;
 	GLuint _idxBuffer;
+
 	bool _geoInstanceDirtied;
 
 	void updateGeoVBO(coral::Geo *geo);

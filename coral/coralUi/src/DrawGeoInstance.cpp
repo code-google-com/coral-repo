@@ -6,6 +6,7 @@ using namespace coralUi;
 
 DrawGeoInstance::DrawGeoInstance(const std::string &name, Node *parent):
 DrawNode(name, parent),
+_matrixAttrLoc(-1),
 _geoInstanceDirtied(true){
 
 	_geoInstance = new GeoInstanceArrayAttribute("geoInstance", parent);
@@ -68,11 +69,11 @@ void DrawGeoInstance::initShader(){
 			gl_Position = (gl_ModelViewProjectionMatrix * location) * gl_Vertex;\n\
 		}";
 
-	GLuint vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 	GLchar *glVertexShaderSource = (GLchar*)vertexShaderSource.data();
-	glShaderSourceARB(vertexShader, 1, (const GLchar**) &glVertexShaderSource, NULL);
-	glCompileShaderARB(vertexShader);
+	glShaderSource(vertexShader, 1, (const GLchar**) &glVertexShaderSource, NULL);
+	glCompileShader(vertexShader);
 
 	int shaderStatus;
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &shaderStatus);
@@ -80,10 +81,10 @@ void DrawGeoInstance::initShader(){
 		std::cout << "error while compiling vertex shader" << std::endl; 
 	}
 
-	_shaderProgram = glCreateProgramObjectARB();
-	glAttachObjectARB(_shaderProgram, vertexShader);
+	_shaderProgram = glCreateProgram();
+	glAttachShader(_shaderProgram, vertexShader);
 
-	glLinkProgramARB(_shaderProgram);
+	glLinkProgram(_shaderProgram);
 }
 
 void DrawGeoInstance::initGL(){
@@ -95,27 +96,6 @@ void DrawGeoInstance::initGL(){
 	glGenBuffers(1, &_locationsBuffer);
 
 	initShader();
-
-	glBindBuffer(GL_ARRAY_BUFFER, _locationsBuffer);
-
-	// setup location attribute
-	GLuint attribPos = glGetAttribLocationARB(_shaderProgram, "location");
-	glEnableVertexAttribArrayARB(attribPos);
-	glEnableVertexAttribArrayARB(attribPos + 1);
-	glEnableVertexAttribArrayARB(attribPos + 2);
-	glEnableVertexAttribArrayARB(attribPos + 3);
-
-	glVertexAttribPointerARB(attribPos, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(0));
-	glVertexAttribPointerARB(attribPos + 1, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 4));
-	glVertexAttribPointerARB(attribPos + 2, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 8));
-	glVertexAttribPointerARB(attribPos + 3, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 12));
-
-	glVertexAttribDivisorARB(attribPos, 1);
-	glVertexAttribDivisorARB(attribPos + 1, 1);
-	glVertexAttribDivisorARB(attribPos + 2, 1);
-	glVertexAttribDivisorARB(attribPos + 3, 1);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void DrawGeoInstance::attributeDirtied(Attribute *attribute){
@@ -149,8 +129,6 @@ void DrawGeoInstance::updateGeoVBO(Geo *geo){
 	// clean OpenGL states
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	glEndList();
 }
 
 void DrawGeoInstance::updateLocationsVBO(const std::vector<Imath::M44f> &locations){
@@ -179,7 +157,26 @@ void DrawGeoInstance::draw(){
 			updateLocationsVBO(locations);
 			updateGeoVBO(geo);
 
-			glUseProgramObjectARB(_shaderProgram);
+			glUseProgram(_shaderProgram);
+
+			glBindBuffer(GL_ARRAY_BUFFER, _locationsBuffer);
+
+			// setup location attribute
+			_matrixAttrLoc = glGetAttribLocation(_shaderProgram, "location");
+			glEnableVertexAttribArray(_matrixAttrLoc);
+			glEnableVertexAttribArray(_matrixAttrLoc + 1);
+			glEnableVertexAttribArray(_matrixAttrLoc + 2);
+			glEnableVertexAttribArray(_matrixAttrLoc + 3);
+
+			glVertexAttribPointer(_matrixAttrLoc, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(0));
+			glVertexAttribPointer(_matrixAttrLoc + 1, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 4));
+			glVertexAttribPointer(_matrixAttrLoc + 2, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 8));
+			glVertexAttribPointer(_matrixAttrLoc + 3, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 12));
+
+			glVertexAttribDivisor(_matrixAttrLoc, 1);
+			glVertexAttribDivisor(_matrixAttrLoc + 1, 1);
+			glVertexAttribDivisor(_matrixAttrLoc + 2, 1);
+			glVertexAttribDivisor(_matrixAttrLoc + 3, 1);
 
 			// setup render
 			glEnable(GL_POLYGON_OFFSET_FILL);
@@ -217,7 +214,7 @@ void DrawGeoInstance::draw(){
 			// render
 			int idOffset = 0;
 			for(int i = 0; i < indexCounts.size(); ++i){
-				glDrawElementsInstancedARB(GL_POLYGON, indexCounts[i], GL_UNSIGNED_INT, (GLuint*)NULL+idOffset, locations.size());
+				glDrawElementsInstanced(GL_POLYGON, indexCounts[i], GL_UNSIGNED_INT, (GLuint*)NULL+idOffset, locations.size());
 
 				idOffset += indexCounts[i];	// 4+3+4+4+4+4+etc...
 			}
@@ -227,6 +224,11 @@ void DrawGeoInstance::draw(){
 
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_NORMAL_ARRAY);
+
+			glDisableVertexAttribArray(_matrixAttrLoc);
+			glDisableVertexAttribArray(_matrixAttrLoc + 1);
+			glDisableVertexAttribArray(_matrixAttrLoc + 2);
+			glDisableVertexAttribArray(_matrixAttrLoc + 3);
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
