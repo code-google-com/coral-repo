@@ -43,9 +43,9 @@ _gizmoBuffer(0),
 _matrixBuffer(0),
 _matrixCount(0),
 _shaderProgram(0),
-_pointAttrLoc(0),
-_colorAttrLoc(1),
-_matrixAttrLoc(2){
+_pointAttrLoc(-1),
+_colorAttrLoc(-1),
+_matrixAttrLoc(-1){
 	_matrix = new NumericAttribute("matrix", this);
 	_thickness = new NumericAttribute("thickness", this);
 
@@ -154,11 +154,6 @@ void DrawMatrixNode::initShader(){
 	_shaderProgram = glCreateProgram();
 	glAttachShader(_shaderProgram, vertexShader);
 
-	// prepare varing for future binding to VBOs
-	glBindAttribLocation(_shaderProgram, _pointAttrLoc, "in_Position");
-	glBindAttribLocation(_shaderProgram, _colorAttrLoc, "in_Color");
-	glBindAttribLocation(_shaderProgram, _matrixAttrLoc, "gizmoMatrixAttr");
-
 	glLinkProgram(_shaderProgram);
 
 	// check link status
@@ -167,6 +162,11 @@ void DrawMatrixNode::initShader(){
 	if(linkStatus == GL_FALSE){
 		std::cout << "error while linking shader program" << std::endl;
 	}
+
+	// get attribute location
+	_pointAttrLoc = glGetAttribLocation(_shaderProgram, "in_Position");
+	_colorAttrLoc = glGetAttribLocation(_shaderProgram, "in_Color");
+	_matrixAttrLoc = glGetAttribLocation(_shaderProgram, "gizmoMatrixAttr");
 }
 
 void DrawMatrixNode::updateMat44Values(){
@@ -231,6 +231,21 @@ void DrawMatrixNode::drawMatrix(){
 	// render
 	glDrawArraysInstanced(GL_LINES, 0, 6, _matrixCount);
 
+	// clean OpenGL state
+	glDisableVertexAttribArray(_matrixAttrLoc);
+	glDisableVertexAttribArray(_matrixAttrLoc+1);
+	glDisableVertexAttribArray(_matrixAttrLoc+2);
+	glDisableVertexAttribArray(_matrixAttrLoc+3);
+
+	glDisableVertexAttribArray(_pointAttrLoc);
+	glDisableVertexAttribArray(_colorAttrLoc);
+
+	glVertexAttribDivisor(_matrixAttrLoc, 0);
+	glVertexAttribDivisor(_matrixAttrLoc + 1, 0);
+	glVertexAttribDivisor(_matrixAttrLoc + 2, 0);
+	glVertexAttribDivisor(_matrixAttrLoc + 3, 0);
+
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glUseProgram(0);
@@ -242,7 +257,7 @@ void DrawMatrixNode::draw(){
 	Numeric *mat44Numeric = _matrix->value();
 
 	// if there is no matrices in input, there is no reason to draw anything...
-	if(mat44Numeric->size() < 1 ){
+	if(mat44Numeric->size() == 0 ){
 		return;
 	}
 

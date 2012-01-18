@@ -222,13 +222,24 @@ void DrawGeoInstance::draw(){
 			// clean OpenGL states
 			glDisable(GL_COLOR_MATERIAL);
 
+			glDisable(GL_POLYGON_OFFSET_FILL);
+
+			glDisable(GL_LIGHTING);
+
 			glDisableClientState(GL_VERTEX_ARRAY);
 			glDisableClientState(GL_NORMAL_ARRAY);
 
+			// disable every attribute location
 			glDisableVertexAttribArray(_matrixAttrLoc);
 			glDisableVertexAttribArray(_matrixAttrLoc + 1);
 			glDisableVertexAttribArray(_matrixAttrLoc + 2);
 			glDisableVertexAttribArray(_matrixAttrLoc + 3);
+
+			// don't forget to set divisors to zero!
+			glVertexAttribDivisor(_matrixAttrLoc, 0);
+			glVertexAttribDivisor(_matrixAttrLoc + 1, 0);
+			glVertexAttribDivisor(_matrixAttrLoc + 2, 0);
+			glVertexAttribDivisor(_matrixAttrLoc + 3, 0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

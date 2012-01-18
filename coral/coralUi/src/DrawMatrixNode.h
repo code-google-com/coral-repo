@@ -66,9 +66,9 @@ private:
 	GLsizei _matrixCount;	// the number of matrix element (used for allocation optimisation
 
 	GLuint _shaderProgram;	// the main shader program (only a vertex shader actually
-	GLuint _pointAttrLoc;	// point and color attribut location
-	GLuint _colorAttrLoc;
-	GLuint _matrixAttrLoc;
+	GLint _pointAttrLoc;	// point and color attribut location
+	GLint _colorAttrLoc;
+	GLint _matrixAttrLoc;
 };
 
 }
