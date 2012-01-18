@@ -173,10 +173,10 @@ void DrawGeoInstance::draw(){
 			glVertexAttribPointer(_matrixAttrLoc + 2, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 8));
 			glVertexAttribPointer(_matrixAttrLoc + 3, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), (void*)(sizeof(float) * 12));
 
-			glVertexAttribDivisor(_matrixAttrLoc, 1);
-			glVertexAttribDivisor(_matrixAttrLoc + 1, 1);
-			glVertexAttribDivisor(_matrixAttrLoc + 2, 1);
-			glVertexAttribDivisor(_matrixAttrLoc + 3, 1);
+			glVertexAttribDivisorARB(_matrixAttrLoc, 1);
+			glVertexAttribDivisorARB(_matrixAttrLoc + 1, 1);
+			glVertexAttribDivisorARB(_matrixAttrLoc + 2, 1);
+			glVertexAttribDivisorARB(_matrixAttrLoc + 3, 1);
 
 			// setup render
 			glEnable(GL_POLYGON_OFFSET_FILL);
@@ -214,7 +214,7 @@ void DrawGeoInstance::draw(){
 			// render
 			int idOffset = 0;
 			for(int i = 0; i < indexCounts.size(); ++i){
-				glDrawElementsInstanced(GL_POLYGON, indexCounts[i], GL_UNSIGNED_INT, (GLuint*)NULL+idOffset, locations.size());
+				glDrawElementsInstancedARB(GL_POLYGON, indexCounts[i], GL_UNSIGNED_INT, (GLuint*)NULL+idOffset, locations.size());
 
 				idOffset += indexCounts[i];	// 4+3+4+4+4+4+etc...
 			}
@@ -236,10 +236,10 @@ void DrawGeoInstance::draw(){
 			glDisableVertexAttribArray(_matrixAttrLoc + 3);
 
 			// don't forget to set divisors to zero!
-			glVertexAttribDivisor(_matrixAttrLoc, 0);
-			glVertexAttribDivisor(_matrixAttrLoc + 1, 0);
-			glVertexAttribDivisor(_matrixAttrLoc + 2, 0);
-			glVertexAttribDivisor(_matrixAttrLoc + 3, 0);
+			glVertexAttribDivisorARB(_matrixAttrLoc, 0);
+			glVertexAttribDivisorARB(_matrixAttrLoc + 1, 0);
+			glVertexAttribDivisorARB(_matrixAttrLoc + 2, 0);
+			glVertexAttribDivisorARB(_matrixAttrLoc + 3, 0);
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

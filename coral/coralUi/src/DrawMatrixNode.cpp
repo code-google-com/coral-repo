@@ -215,10 +215,10 @@ void DrawMatrixNode::drawMatrix(){
 	glVertexAttribPointer(_matrixAttrLoc+2, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), BUFFER_OFFSET(sizeof(GLfloat)*8));
 	glVertexAttribPointer(_matrixAttrLoc+3, 4, GL_FLOAT, GL_FALSE, sizeof(Imath::M44f), BUFFER_OFFSET(sizeof(GLfloat)*12));
 
-	glVertexAttribDivisor(_matrixAttrLoc, 1);
-	glVertexAttribDivisor(_matrixAttrLoc+1, 1);
-	glVertexAttribDivisor(_matrixAttrLoc+2, 1);
-	glVertexAttribDivisor(_matrixAttrLoc+3, 1);
+	glVertexAttribDivisorARB(_matrixAttrLoc, 1);
+	glVertexAttribDivisorARB(_matrixAttrLoc+1, 1);
+	glVertexAttribDivisorARB(_matrixAttrLoc+2, 1);
+	glVertexAttribDivisorARB(_matrixAttrLoc+3, 1);
 
 	// set geometry and color (which is just an pointer offset). A stride is used: (3 float) * 2
 	glBindBuffer(GL_ARRAY_BUFFER, _gizmoBuffer);
@@ -229,7 +229,7 @@ void DrawMatrixNode::drawMatrix(){
 	glEnableVertexAttribArray(_colorAttrLoc);
 
 	// render
-	glDrawArraysInstanced(GL_LINES, 0, 6, _matrixCount);
+	glDrawArraysInstancedARB(GL_LINES, 0, 6, _matrixCount);
 
 	// clean OpenGL state
 	glDisableVertexAttribArray(_matrixAttrLoc);
@@ -240,10 +240,10 @@ void DrawMatrixNode::drawMatrix(){
 	glDisableVertexAttribArray(_pointAttrLoc);
 	glDisableVertexAttribArray(_colorAttrLoc);
 
-	glVertexAttribDivisor(_matrixAttrLoc, 0);
-	glVertexAttribDivisor(_matrixAttrLoc + 1, 0);
-	glVertexAttribDivisor(_matrixAttrLoc + 2, 0);
-	glVertexAttribDivisor(_matrixAttrLoc + 3, 0);
+	glVertexAttribDivisorARB(_matrixAttrLoc, 0);
+	glVertexAttribDivisorARB(_matrixAttrLoc + 1, 0);
+	glVertexAttribDivisorARB(_matrixAttrLoc + 2, 0);
+	glVertexAttribDivisorARB(_matrixAttrLoc + 3, 0);
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
