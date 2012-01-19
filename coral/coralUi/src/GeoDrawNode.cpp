@@ -59,15 +59,15 @@ _shouldUpdateColorVBO(true){
 	addInputAttribute(_colors);
 	addInputAttribute(_image);
 	
-	setAttributeAffect(_geo, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_smooth, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_flat, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_wireframe, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_points, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_normals, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_ids, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_image, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_geo, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_smooth, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_flat, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_wireframe, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_points, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_normals, (Attribute*)viewportOutputAttribute());
+	// // setAttributeAffect(_ids, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_image, (Attribute*)viewportOutputAttribute());
 	
 	std::vector<std::string> colorSpecializations;
 	colorSpecializations.push_back("Col4");

@@ -56,8 +56,8 @@ void(*Attribute::_disconnectInputCallback)(Attribute *self) = 0;
 void(*Attribute::_disconnectOutputCallback)(Attribute *self, Attribute *other) = 0;
 void(*Attribute::_deleteItCallback)(Attribute *self) = 0;
 void(*Attribute::_specializationCallBack)(Attribute *self) = 0;
-void(*Attribute::_valueChangedCallback)(Attribute *self) = 0;
-std::vector<void(*)(Attribute *)> _dirtyingDoneCallbackQueue;
+// void(*Attribute::_valueChangedCallback)(Attribute *self) = 0;
+// std::vector<void(*)(Attribute *)> _dirtyingDoneCallbackQueue;
 bool _cleaningLocked = false;
 
 namespace {
@@ -114,7 +114,7 @@ Attribute::Attribute(const std::string &name, Node *parent):
 	_isOutput(false),
 	_isInput(false),
 	_passThrough(false),
-	_valueObserved(0),
+	// _valueObserved(0),
 	_computeTimeSeconds(0),
 	_computeTimeMilliseconds(0),
 	_notifyParentNodeOnDirty(false){
@@ -129,9 +129,9 @@ Attribute::~Attribute(){
 	}
 }
 
-void Attribute::setValueObserved(bool value){
-	_valueObserved = value;
-}
+// void Attribute::setValueObserved(bool value){
+// 	_valueObserved = value;
+// }
 
 void Attribute::setPassThrough(bool value){
 	_passThrough = value;
@@ -408,14 +408,14 @@ void Attribute::dirty(bool force){
 					}
 				}
 
-				if(attr->_valueObserved){
-					if(attr->_valueChangedCallback && !attr->isDeleted()){
-						attr->_valueChangedCallback(attr);
-					}
-				}
+				// if(attr->_valueObserved){
+				// 	if(attr->_valueChangedCallback && !attr->isDeleted()){
+				// 		attr->_valueChangedCallback(attr);
+				// 	}
+				// }
 			}
 
-			processDirtyingDoneCallbackQueue();
+			// processDirtyingDoneCallbackQueue();
 		}
 	}
 	
@@ -428,21 +428,21 @@ void Attribute::forceDirty(){
 	dirty(true);
 }
 
-void Attribute::processDirtyingDoneCallbackQueue(){
-	for(int i = 0; i < _dirtyingDoneCallbackQueue.size(); ++i){
-		_dirtyingDoneCallbackQueue[i](this);
-	}
+// void Attribute::processDirtyingDoneCallbackQueue(){
+// 	for(int i = 0; i < _dirtyingDoneCallbackQueue.size(); ++i){
+// 		_dirtyingDoneCallbackQueue[i](this);
+// 	}
 	
-	_dirtyingDoneCallbackQueue.clear();
-}
+// 	_dirtyingDoneCallbackQueue.clear();
+// }
 
-void Attribute::queueDirtyingDoneCallback(void(*callback)(Attribute *)){
-	#ifdef CORAL_PARALLEL_TBB
-		tbb::mutex::scoped_lock lock(_globalMutex);
-	#endif
+// void Attribute::queueDirtyingDoneCallback(void(*callback)(Attribute *)){
+// 	#ifdef CORAL_PARALLEL_TBB
+// 		tbb::mutex::scoped_lock lock(_globalMutex);
+// 	#endif
 	
-	_dirtyingDoneCallbackQueue.push_back(callback);
-}
+// 	_dirtyingDoneCallbackQueue.push_back(callback);
+// }
 
 Attribute *Attribute::findFirstOutputNotPassThrough(){
 	Attribute *attr = 0;

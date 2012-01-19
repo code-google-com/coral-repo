@@ -48,7 +48,7 @@ NumericDrawNode::NumericDrawNode(const std::string &name, Node *parent): DrawNod
 	
 	addInputAttribute(_numeric);
 	
-	setAttributeAffect(_numeric, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_numeric, (Attribute*)viewportOutputAttribute());
 }
 
 void NumericDrawNode::drawMatrix44(Numeric *numeric){

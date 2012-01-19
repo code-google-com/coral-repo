@@ -29,6 +29,8 @@
 
 import sys
 import os
+import traceback
+
 from PyQt4 import QtGui, QtCore
 
 from .. import coralApp
@@ -145,7 +147,10 @@ def loadPluginUi(filename):
             try:
                 module = utils.runtimeImport(filename)
             except:
-                pass
+                coralApp.logError("skipping pluginUi " + str(filename))
+                
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                traceback.print_exception(exc_type, exc_value, exc_traceback, limit = 2, file = sys.stdout)
 
             if module:
                 if hasattr(module, "loadPluginUi"):

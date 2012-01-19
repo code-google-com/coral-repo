@@ -30,7 +30,7 @@
 
 #include <coral/src/pythonWrapperUtils.h>
 #include "viewportWrapper.h"
-#include "viewportOutputAttributeWrapper.h"
+// #include "viewportOutputAttributeWrapper.h"
 #include "mainDrawRoutineWrapper.h"
 #include "drawNodeWrapper.h"
 #include "geoDrawNodeWrapper.h"
@@ -43,7 +43,7 @@
 using namespace coralUi;
 
 BOOST_PYTHON_MODULE(_coralUi){
-	viewportOutputAttributeWrapper();
+	// viewportOutputAttributeWrapper();
 	drawNodeWrapper();
 	geoDrawNodeWrapper();	// TODO put every function that have only have one line here
 	numericDrawNodeWrapper();

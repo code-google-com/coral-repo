@@ -52,8 +52,8 @@ _matrixAttrLoc(-1){
 	addInputAttribute(_matrix);
 	addInputAttribute(_thickness);
 
-	setAttributeAffect(_matrix, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_thickness, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_matrix, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_thickness, (Attribute*)viewportOutputAttribute());
 
 	std::vector<std::string> pointSpecializations;
 	pointSpecializations.push_back("Matrix44");

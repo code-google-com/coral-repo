@@ -71,9 +71,14 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
         self._mode = 0
         
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportUpdateGL"), QtCore.SLOT("updateGL()"))
+        #self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportUpdateGL"), QtCore.SLOT("updateGL()"))
 
         ViewportData._viewports.append(weakref.ref(self._viewport))
+
+        self._timer = self.startTimer(50)
+    
+    def timerEvent(self, event):
+        self.updateGL()
     
     def __del__(self):
         for viewportRef in ViewportData._viewports:
@@ -178,7 +183,7 @@ class ViewportWidget(QtGui.QWidget):
         self.layout().setSpacing(0)
         self.layout().addWidget(self._viewportGlWidget)
         
-        _coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
+        #_coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
 
         coralApp.addInitializingNewNetworkObserver(self._initializingNewNetworkObserver, self._disable)
         coralApp.addInitializedNewNetworkObserver(self._initializedNewNetworkObserver, self._enable)

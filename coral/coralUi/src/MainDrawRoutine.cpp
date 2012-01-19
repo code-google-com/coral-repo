@@ -47,7 +47,7 @@ namespace {
 }
 
 std::vector<DrawNode*> _drawNodes;
-void(*MainDrawRoutine::_viewportRefreshCallback)(void) = 0;
+// void(*MainDrawRoutine::_viewportRefreshCallback)(void) = 0;
 bool _renderScheduled = false;
 bool _initialized = false;
 
@@ -81,7 +81,7 @@ void MainDrawRoutine::addDrawNode(DrawNode *drawNode){
 void MainDrawRoutine::removeDrawNode(DrawNode *drawNode){
 	containerUtils::eraseElementInContainer(drawNode, _drawNodes);
 	
-	scheduleRender();
+	//scheduleRender();
 }
 
 void MainDrawRoutine::drawAll(){
@@ -93,21 +93,21 @@ void MainDrawRoutine::drawAll(){
 	}
 }
 
-void MainDrawRoutine::dirtyingDoneCallback(Attribute *attribute){
-	if(_viewportRefreshCallback){
-		_renderScheduled = false;
-		_viewportRefreshCallback();
-	}
-}
+// void MainDrawRoutine::dirtyingDoneCallback(Attribute *attribute){
+// 	if(_viewportRefreshCallback){
+// 		_renderScheduled = false;
+// 		_viewportRefreshCallback();
+// 	}
+// }
 
-void MainDrawRoutine::scheduleRender(){
-	if(!_renderScheduled){
-		#ifdef CORAL_PARALLEL_TBB
-			tbb::mutex::scoped_lock lock(_globalMutex);
-		#endif
-		_renderScheduled = true;
+// void MainDrawRoutine::scheduleRender(){
+// 	if(!_renderScheduled){
+// 		#ifdef CORAL_PARALLEL_TBB
+// 			tbb::mutex::scoped_lock lock(_globalMutex);
+// 		#endif
+// 		_renderScheduled = true;
 		
-		Attribute::queueDirtyingDoneCallback(&MainDrawRoutine::dirtyingDoneCallback);
-	}
-}
+// 		Attribute::queueDirtyingDoneCallback(&MainDrawRoutine::dirtyingDoneCallback);
+// 	}
+// }
 

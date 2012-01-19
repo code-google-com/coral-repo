@@ -322,18 +322,7 @@ class NodeInspectorHeader(QtGui.QWidget):
         return self._lockButton
 
 class NodeInspector(QtGui.QWidget):
-    _externalThreadActive = False
     _inspectorWidgetClasses = {}
-    
-    @staticmethod
-    def externalThreadActive():
-        return NodeInspector._externalThreadActive
-    
-    @staticmethod
-    def setExternalThreadActive(value = True):
-        NodeInspector._externalThreadActive = value
-        mainWin = mainWindow.MainWindow.globalInstance()
-        mainWin.emit(QtCore.SIGNAL("coralExternalThreadActive(bool)"), value)
     
     @staticmethod
     def registerInspectorWidget(nestedObjectClassName, inspectorWidgetClass): 

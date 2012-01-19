@@ -47,13 +47,13 @@ public:
 
 	virtual void draw();
 	virtual void initGL();
-	virtual void attributeConnectionChanged(coral::Attribute *attribute);
+	//virtual void attributeConnectionChanged(coral::Attribute *attribute);
 
-	ViewportOutputAttribute *viewportOutputAttribute();
+	//ViewportOutputAttribute *viewportOutputAttribute();
 	bool glContextExists();
 
 private:
-	ViewportOutputAttribute *_viewportOutput;
+	//ViewportOutputAttribute *_viewportOutput;
 };
 
 }

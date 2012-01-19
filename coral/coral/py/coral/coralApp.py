@@ -32,6 +32,7 @@ import traceback
 import os, sys
 import copy 
 import weakref
+import traceback
 
 import _coral
 import utils
@@ -73,7 +74,7 @@ class CoralAppData:
     collapsedNodeObservers = ObserverCollector()
     nameChangedObservers = ObserverCollector()
     connectedInputObservers = ObserverCollector()
-    attributeValueChangedObservers = ValueChangedObserverCollector()
+    # attributeValueChangedObservers = ValueChangedObserverCollector()
     initializedNewNetworkObservers = ObserverCollector()
     initializingNewNetworkObservers = ObserverCollector()
     generatingSaveScriptObservers = ObserverCollector()
@@ -156,13 +157,13 @@ def _notifyInitializingNewNetworkObservers():
     for observer in CoralAppData.initializingNewNetworkObservers.observers():
         observer.notify()
 
-def addAttributeValueChangedObserver(observer, attribute, callback):
-    CoralAppData.attributeValueChangedObservers.add(observer, attribute)
-    observer.setNotificationCallback(callback)
+# def addAttributeValueChangedObserver(observer, attribute, callback):
+#     CoralAppData.attributeValueChangedObservers.add(observer, attribute)
+#     observer.setNotificationCallback(callback)
 
-def _notifyAttributeValueChangedObservers(attribute):
-    for observer in CoralAppData.attributeValueChangedObservers.observers(attribute.id()):
-        observer.notify()
+# def _notifyAttributeValueChangedObservers(attribute):
+#     for observer in CoralAppData.attributeValueChangedObservers.observers(attribute.id()):
+#         observer.notify()
 
 def addConnectedInputObserver(observer, attribute, callback):
     CoralAppData.connectedInputObservers.add(observer, subject = attribute.id())
@@ -470,7 +471,7 @@ def init():
     _coral.setCallback("attribute_deleteIt", _attribute_deleteIt)
     _coral.setCallback("nestedObject_setName", _nestedobject_setName)
     _coral.setCallback("attribute_specialization", _attribute_specialization)
-    _coral.setCallback("attribute_valueChanged", _attribute_valueChanged)
+    #_coral.setCallback("attribute_valueChanged", _attribute_valueChanged)
 
     if os.environ.has_key("CORAL_PLUGINS_PATH"):
         path = os.environ["CORAL_PLUGINS_PATH"]
@@ -478,8 +479,8 @@ def init():
         for path in paths:
             addAutoLoadPath(path)
 
-def _attribute_valueChanged(attribute):
-    _notifyAttributeValueChangedObservers(attribute)
+# def _attribute_valueChanged(attribute):
+#     _notifyAttributeValueChangedObservers(attribute)
 
 def _nestedobject_setName(nestedObject, newName):
     _notifyNameChangedObservers(nestedObject)
@@ -557,7 +558,10 @@ def loadPlugin(filename):
             try:
                 module = utils.runtimeImport(filename)
             except:
-                pass
+                logError("skipping plugin " + str(filename))
+
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                traceback.print_exception(exc_type, exc_value, exc_traceback, limit = 2, file = sys.stdout)
                 
             if module:
                 if hasattr(module, "loadPlugin"):

@@ -26,16 +26,16 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#include "ViewportOutputAttribute.h"
-#include "MainDrawRoutine.h"
+// #include "ViewportOutputAttribute.h"
+// #include "MainDrawRoutine.h"
 
-using namespace coral;
-using namespace coralUi;
+// using namespace coral;
+// using namespace coralUi;
 
-ViewportOutputAttribute::ViewportOutputAttribute(const std::string &name, Node *parent): Attribute(name, parent){
-	setClassName("ViewportOutputAttribute");
-}
+// ViewportOutputAttribute::ViewportOutputAttribute(const std::string &name, Node *parent): Attribute(name, parent){
+// 	setClassName("ViewportOutputAttribute");
+// }
 
-void ViewportOutputAttribute::onDirtied(){
-	MainDrawRoutine::scheduleRender();
-}
+// void ViewportOutputAttribute::onDirtied(){
+// 	MainDrawRoutine::scheduleRender();
+// }

@@ -28,35 +28,35 @@
 #include "DrawNode.h"
 #include "MainDrawRoutine.h"
 #include "Viewport.h"
-#include "ViewportOutputAttribute.h"
+//#include "ViewportOutputAttribute.h"
 
 using namespace coral;
 using namespace coralUi;
 
 DrawNode::DrawNode(const std::string &name, Node *parent) : Node(name, parent){	
-	_viewportOutput = new ViewportOutputAttribute("_viewportOutput", this);
+	//_viewportOutput = new ViewportOutputAttribute("_viewportOutput", this);
 	
-	addOutputAttribute(_viewportOutput);
+	//addOutputAttribute(_viewportOutput);
 	
 	setUpdateEnabled(false);
 	
 	MainDrawRoutine::addDrawNode(this);
 
-	MainDrawRoutine::_viewportRefreshCallback();
+	//MainDrawRoutine::_viewportRefreshCallback();
 }
 
 void DrawNode::deleteIt(){
 	MainDrawRoutine::removeDrawNode(this);
 	Node::deleteIt();
-	MainDrawRoutine::_viewportRefreshCallback();
+	//MainDrawRoutine::_viewportRefreshCallback();
 }
 
 void DrawNode::draw(){	
 }
 
-ViewportOutputAttribute *DrawNode::viewportOutputAttribute(){
-	return _viewportOutput;
-}
+// ViewportOutputAttribute *DrawNode::viewportOutputAttribute(){
+// 	return _viewportOutput;
+// }
 
 bool DrawNode::glContextExists(){
 	return MainDrawRoutine::initialized();
@@ -65,6 +65,6 @@ bool DrawNode::glContextExists(){
 void DrawNode::initGL(){
 }
 
-void DrawNode::attributeConnectionChanged(Attribute *attribute){
-	MainDrawRoutine::_viewportRefreshCallback();
-}
+// void DrawNode::attributeConnectionChanged(Attribute *attribute){
+// 	MainDrawRoutine::_viewportRefreshCallback();
+// }

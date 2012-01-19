@@ -48,17 +48,6 @@ class ObjectField(QtGui.QWidget):
         self.setLayout(self._mainLayout)
         self._mainLayout.setContentsMargins(0, 0, 0, 0)
         self._mainLayout.addWidget(self._label)
-        
-        self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralExternalThreadActive(bool)"), self.setExternalThreadSpinning)
-    
-    def setExternalThreadSpinning(self, value, force = False):
-        if self.valueWidget().isEnabled() == False or force == True:
-            if value:
-                self.valueWidget().setVisible(False)
-                self.label().setText(self.label().text() + ": spinning")
-            else:
-                self.label().setText(str(self.label().text()).strip(": spinning"))
-                self.valueWidget().setVisible(True)
     
     def label(self):
         return self._label
@@ -79,11 +68,13 @@ class AttributeField(ObjectField):
     def __init__(self, coralAttribute, parentWidget):
         ObjectField.__init__(self, coralAttribute.name().split(":")[-1], coralAttribute, parentWidget)
         
-        self._valueChangedObserver = Observer()
         self._sourceAttributes = self._findSourceAttributes()
-        
-        coralApp.addAttributeValueChangedObserver(self._valueChangedObserver, self._sourceAttributes[0](), self.attributeValueChanged)
+        self._timer = self.startTimer(500)
     
+    def timerEvent(self, event):
+        if self.valueWidget().hasFocus() == False:
+            self.attributeValueChanged()
+
     def widgetValueChanged(self):
         value = self.getWidgetValue(self.valueWidget())
         somethingChanged = False
@@ -115,7 +106,7 @@ class AttributeField(ObjectField):
     
     def setAttributeWidget(self, widget, endOfEditSignal):
         ObjectField.setObjectWidget(self, widget, endOfEditSignal, self.widgetValueChanged)
-        
+
         attribute = self.coralObject()
         if attribute.input() or attribute.affectedBy():
             self.label().setText(">" + self.label().text())
@@ -144,7 +135,7 @@ class CustomDoubleSpinBox(QtGui.QDoubleSpinBox):
         QtGui.QDoubleSpinBox.__init__(self, parent)
         self.setDecimals(4)
         self._wheelCallback = None
-    
+
     def wheelEvent(self, wheelEvent):
         QtGui.QDoubleSpinBox.wheelEvent(self, wheelEvent)
         

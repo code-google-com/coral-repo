@@ -101,8 +101,6 @@ class NumericAttributeInspectorWidget(AttributeInspectorWidget):
         coralApp.addAttributeSpecializedObserver(self._attributeSpecializedObserver, coralAttribute, self._specialized)
         
         self._update()
-        if self._valueField:
-            self._valueField.setExternalThreadSpinning(NodeInspector.externalThreadActive())
         
     def _clear(self):
         for i in range(self.layout().count()):
@@ -341,14 +339,10 @@ class TimeNodeInspectorWidget(NodeInspectorWidget):
     
     def _playButtonToggled(self, play):
         if play:
-            NodeInspector.setExternalThreadActive(True)
-            self.attributeWidget("time").valueField().setExternalThreadSpinning(True, force = True)
             self.coralNode().play(True)
         else:
             self.coralNode().play(False)
-            self.attributeWidget("time").valueField().setExternalThreadSpinning(False, force = True)
-            NodeInspector.setExternalThreadActive(False)
-
+            
 class PassThroughAttributeUi(AttributeUi):
     def __init__(self, coralAttribute, parentNodeUi):
         AttributeUi.__init__(self, coralAttribute, parentNodeUi)

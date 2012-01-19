@@ -27,17 +27,17 @@
 // </license>
 
 
-#ifndef VIEWPORTOUTPUTATTRIBUTEWRAPPER_H
-#define VIEWPORTOUTPUTATTRIBUTEWRAPPER_H
+// #ifndef VIEWPORTOUTPUTATTRIBUTEWRAPPER_H
+// #define VIEWPORTOUTPUTATTRIBUTEWRAPPER_H
 
-#include <coral/src/pythonWrapperUtils.h>
+// #include <coral/src/pythonWrapperUtils.h>
 
-#include "ViewportOutputAttribute.h"
+// #include "ViewportOutputAttribute.h"
 
-using namespace coralUi;
+// using namespace coralUi;
 
-void viewportOutputAttributeWrapper(){
-	coral::pythonWrapperUtils::pythonWrapper<ViewportOutputAttribute, coral::Attribute>("ViewportOutputAttribute");
-}
+// void viewportOutputAttributeWrapper(){
+// 	coral::pythonWrapperUtils::pythonWrapper<ViewportOutputAttribute, coral::Attribute>("ViewportOutputAttribute");
+// }
 
-#endif
+// #endif

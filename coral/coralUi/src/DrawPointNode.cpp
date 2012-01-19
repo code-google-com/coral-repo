@@ -52,9 +52,9 @@ _pointCount(0){
 	addInputAttribute(_sizes);
 	addInputAttribute(_colors);
 	
-	setAttributeAffect(_points, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_sizes, (Attribute*)viewportOutputAttribute());
-	setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_points, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_sizes, (Attribute*)viewportOutputAttribute());
+	// setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
 	
 	std::vector<std::string> pointSpecializations;
 	pointSpecializations.push_back("Vec3");

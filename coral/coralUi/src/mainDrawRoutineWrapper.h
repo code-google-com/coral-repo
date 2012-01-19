@@ -37,11 +37,11 @@
 
 using namespace coralUi;
 
-void mainDrawRoutine_viewportRefreshCallback(){
-	if(coral::PythonDataCollector::hasCallback("mainDrawRoutine_viewportRefresh")){
-		coral::PythonDataCollector::findCallback("mainDrawRoutine_viewportRefresh")();
-	}
-}
+// void mainDrawRoutine_viewportRefreshCallback(){
+// 	if(coral::PythonDataCollector::hasCallback("mainDrawRoutine_viewportRefresh")){
+// 		coral::PythonDataCollector::findCallback("mainDrawRoutine_viewportRefresh")();
+// 	}
+// }
 
 void mainDrawRoutineWrapper(){
 	boost::python::class_<MainDrawRoutine, boost::shared_ptr<MainDrawRoutine>, boost::noncopyable>("MainDrawRoutine")
@@ -55,7 +55,7 @@ void mainDrawRoutineWrapper(){
 		.staticmethod("removeDrawNode")
 	;
 	
-	MainDrawRoutine::_viewportRefreshCallback = mainDrawRoutine_viewportRefreshCallback;
+	//MainDrawRoutine::_viewportRefreshCallback = mainDrawRoutine_viewportRefreshCallback;
 }
 
 #endif

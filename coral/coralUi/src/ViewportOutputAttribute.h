@@ -26,24 +26,24 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef CORAL_VIEWPORTOUTPUTATTRIBUTE_H
-#define CORAL_VIEWPORTOUTPUTATTRIBUTE_H
+// #ifndef CORAL_VIEWPORTOUTPUTATTRIBUTE_H
+// #define CORAL_VIEWPORTOUTPUTATTRIBUTE_H
 
-#include <coral/src/Node.h>
-#include <coral/src/Attribute.h>
-#include "coralUiDefinitions.h"
+// #include <coral/src/Node.h>
+// #include <coral/src/Attribute.h>
+// #include "coralUiDefinitions.h"
 
-namespace coralUi{
+// namespace coralUi{
 
-// This attribute orders a refresh everytime it gets dirtied,
-// it's used as output attribute of every DrawNode,
-// and each input attribute of a DrawNode has to affect this attribute in order to order a refresh to the viewport.
-class CORALUI_EXPORT ViewportOutputAttribute: public coral::Attribute{
-public:
-	ViewportOutputAttribute(const std::string &name, coral::Node *parent);
-	void onDirtied();
-};
+// // This attribute orders a refresh everytime it gets dirtied,
+// // it's used as output attribute of every DrawNode,
+// // and each input attribute of a DrawNode has to affect this attribute in order to order a refresh to the viewport.
+// class CORALUI_EXPORT ViewportOutputAttribute: public coral::Attribute{
+// public:
+// 	ViewportOutputAttribute(const std::string &name, coral::Node *parent);
+// 	void onDirtied();
+// };
 
-}
+// }
 
-#endif
+// #endif
