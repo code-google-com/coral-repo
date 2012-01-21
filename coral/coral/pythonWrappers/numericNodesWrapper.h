@@ -184,6 +184,7 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Vec3ToFloats, Node>("Vec3ToFloats");
 	pythonWrapperUtils::pythonWrapper<Col4Node, Node>("Col4Node");
 	pythonWrapperUtils::pythonWrapper<Col4ToFloats, Node>("Col4ToFloats");
+	pythonWrapperUtils::pythonWrapper<Col4Reverse, Node>("Col4Reverse");
 	pythonWrapperUtils::pythonWrapper<QuatNode, Node>("QuatNode");
 	pythonWrapperUtils::pythonWrapper<QuatToFloats, Node>("QuatToFloats");
 	pythonWrapperUtils::pythonWrapper<QuatToAxisAngle, Node>("QuatToAxisAngle");

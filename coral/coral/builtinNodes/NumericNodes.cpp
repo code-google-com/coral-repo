@@ -484,6 +484,76 @@ void Col4ToFloats::update(Attribute *attribute){
 	setAttributeIsClean(_a, true);
 }
 
+Col4Reverse::Col4Reverse(const std::string &name, Node* parent): Node(name, parent){
+	_inColor = new NumericAttribute("in", this);
+	_outColor = new NumericAttribute("out", this);
+
+	addInputAttribute(_inColor);
+	addOutputAttribute(_outColor);
+
+	setAttributeAffect(_inColor, _outColor);
+
+	std::vector<std::string> colorSpecializations;
+	colorSpecializations.push_back("Col4");
+	colorSpecializations.push_back("Col4Array");
+
+	setAttributeAllowedSpecializations(_inColor, colorSpecializations);
+	setAttributeAllowedSpecializations(_outColor, colorSpecializations);
+
+	addAttributeSpecializationLink(_inColor, _outColor);
+}
+
+void Col4Reverse::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(attributeA == _inColor && attributeB == _outColor){
+		std::vector<std::string> inColorSpecializations = _inColor->allowedSpecialization();
+		std::vector<std::string> outColorSpecializations = _outColor->allowedSpecialization();
+
+		if(specializationA.size() == 1){
+			specializationB.clear();
+
+			if(specializationA[0] == "Col4"){
+				specializationB.push_back(outColorSpecializations[0]);
+			}
+			else if(specializationA[0] == "Col4Array"){
+				specializationB.push_back(outColorSpecializations[1]);
+			}
+		}
+		else if(specializationB.size() == 1){
+			specializationA.clear();
+
+			if(specializationB[0] == "Col4"){
+				specializationA.push_back(inColorSpecializations[0]);
+			}
+			else if(specializationB[0] == "Col4Array"){
+				specializationA.push_back(inColorSpecializations[1]);
+			}
+		}
+	}
+	else{
+		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	}
+}
+
+void Col4Reverse::update(Attribute *attribute){
+	const std::vector<Imath::Color4f> &inCol4Values = _inColor->value()->col4Values();
+	int size = inCol4Values.size();
+
+	std::vector<Imath::Color4f> outCol4Values(size);
+
+	for(int i = 0; i < size; ++i){
+		const Imath::Color4f &inCol4 = inCol4Values[i];
+
+		outCol4Values[i].r = 1-inCol4.r;
+		outCol4Values[i].g = 1-inCol4.g;
+		outCol4Values[i].b = 1-inCol4.b;
+		outCol4Values[i].a = inCol4.a;
+	}
+
+	_outColor->outValue()->setCol4Values(outCol4Values);
+
+	setAttributeIsClean(_outColor, true);
+}
+
 QuatNode::QuatNode(const std::string &name, Node* parent): Node(name, parent)
 {
 	_r = new NumericAttribute("r", this);
