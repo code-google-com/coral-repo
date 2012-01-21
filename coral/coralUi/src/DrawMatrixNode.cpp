@@ -39,6 +39,7 @@ using namespace coralUi;
 DrawMatrixNode::DrawMatrixNode(const std::string &name, Node *parent):
 DrawNode(name, parent),
 _shouldUpdateMat44Values(true),
+_shouldUpdateMatrixGizmo(true),
 _gizmoBuffer(0),
 _matrixBuffer(0),
 _matrixCount(0),
@@ -47,10 +48,10 @@ _pointAttrLoc(-1),
 _colorAttrLoc(-1),
 _matrixAttrLoc(-1){
 	_matrix = new NumericAttribute("matrix", this);
-	_thickness = new NumericAttribute("thickness", this);
+	_size = new NumericAttribute("size mult", this);
 
 	addInputAttribute(_matrix);
-	addInputAttribute(_thickness);
+	addInputAttribute(_size);
 
 	// setAttributeAffect(_matrix, (Attribute*)viewportOutputAttribute());
 	// setAttributeAffect(_thickness, (Attribute*)viewportOutputAttribute());
@@ -60,9 +61,9 @@ _matrixAttrLoc(-1){
 	pointSpecializations.push_back("Matrix44Array");
 	setAttributeAllowedSpecializations(_matrix, pointSpecializations);
 
-	setAttributeAllowedSpecialization(_thickness, "Float");
+	setAttributeAllowedSpecialization(_size, "Float");
 
-	_thickness->outValue()->setFloatValueAt(0, 2.0);
+	_size->outValue()->setFloatValueAt(0, 1.0);
 
 	if(glContextExists()){
 		initGL();
@@ -71,22 +72,11 @@ _matrixAttrLoc(-1){
 
 void DrawMatrixNode::initGL(){
 	catchAttributeDirtied(_matrix);
-	catchAttributeDirtied(_thickness);
+	catchAttributeDirtied(_size);
 
 	// generate OpenGL buffers
 	glGenBuffers(1, &_gizmoBuffer);
 	glGenBuffers(1, &_matrixBuffer);
-
-	// generate and store the main gizmo array (which will be multiplied by user matrix in the shader, later)
-	GLfloat gizmoArray[36] = {0.0, 0.0, 0.0,	1.0, 0.0, 0.0,	// position*3, color*3
-					1.0, 0.0, 0.0,	1.0, 0.0, 0.0,
-					0.0, 0.0, 0.0,	0.0, 1.0, 0.0,
-					0.0, 1.0, 0.0,	0.0, 1.0, 0.0,
-					0.0, 0.0, 0.0,	0.0, 0.0, 1.0,
-					0.0, 0.0, 1.0,	0.0, 0.0, 1.0 };
-
-	glBindBuffer(GL_ARRAY_BUFFER, _gizmoBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(gizmoArray), (GLvoid*)&gizmoArray, GL_STATIC_DRAW);
 
 	initShader();
 }
@@ -102,11 +92,17 @@ void DrawMatrixNode::attributeConnectionChanged(Attribute *attribute){
 	if(attribute == _matrix){
 		_shouldUpdateMat44Values = true;
 	}
+	if(attribute == _size){
+		_shouldUpdateMatrixGizmo = true;
+	}
 }
 
 void DrawMatrixNode::attributeDirtied(Attribute *attribute){
 	if(attribute == _matrix){
 		_shouldUpdateMat44Values = true;
+	}
+	if(attribute == _size){
+		_shouldUpdateMatrixGizmo = true;
 	}
 }
 
@@ -192,14 +188,28 @@ void DrawMatrixNode::updateMat44Values(){
 	}
 }
 
+void DrawMatrixNode::updateMatrixGizmo(){
+
+	// get and set matrix gizmo size
+	Numeric *sizeNumeric = _size->value();
+	const std::vector<float> &floatValues = sizeNumeric->floatValues();
+	GLfloat size = (GLfloat) floatValues[0];
+
+	// generate and store the main gizmo array (which will be multiplied by user matrix in the shader, later)
+	GLfloat gizmoArray[36] = {0.0, 0.0, 0.0,	1.0, 0.0, 0.0,	// position*3, color*3
+					size, 0.0, 0.0,	1.0, 0.0, 0.0,
+					0.0, 0.0, 0.0,	0.0, 1.0, 0.0,
+					0.0, size, 0.0,	0.0, 1.0, 0.0,
+					0.0, 0.0, 0.0,	0.0, 0.0, 1.0,
+					0.0, 0.0, size,	0.0, 0.0, 1.0 };
+
+	glBindBuffer(GL_ARRAY_BUFFER, _gizmoBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(gizmoArray), (GLvoid*)&gizmoArray, GL_STATIC_DRAW);
+}
+
 void DrawMatrixNode::drawMatrix(){
 
-	// get and set line size
-	Numeric *thicknessNumeric = _thickness->value();
-	const std::vector<float> &floatValues = thicknessNumeric->floatValues();
-	GLfloat lineWith = (GLfloat) floatValues[0];
-
-	glLineWidth(lineWith);
+	glLineWidth(2.0);
 
 	glUseProgram(_shaderProgram);
 
@@ -249,6 +259,8 @@ void DrawMatrixNode::drawMatrix(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glUseProgram(0);
+
+	glLineWidth(1.0);
 }
 
 void DrawMatrixNode::draw(){
@@ -259,6 +271,11 @@ void DrawMatrixNode::draw(){
 	// if there is no matrices in input, there is no reason to draw anything...
 	if(mat44Numeric->size() == 0 ){
 		return;
+	}
+
+	if(_shouldUpdateMatrixGizmo){
+		updateMatrixGizmo();
+		_shouldUpdateMatrixGizmo = false;
 	}
 
 	if(_shouldUpdateMat44Values){

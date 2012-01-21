@@ -53,11 +53,13 @@ public:
 
 private:
 	coral::NumericAttribute *_matrix;
-	coral::NumericAttribute *_thickness;
+	coral::NumericAttribute *_size;
 
 	bool _shouldUpdateMat44Values;
+	bool _shouldUpdateMatrixGizmo;
 
 	void updateMat44Values();
+	void updateMatrixGizmo();
 	void drawMatrix();
 
 	// OpenGL
