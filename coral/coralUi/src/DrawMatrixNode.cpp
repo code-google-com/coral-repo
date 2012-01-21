@@ -41,6 +41,7 @@ DrawNode(name, parent),
 _shouldUpdateMat44Values(true),
 _shouldUpdateMatrixGizmo(true),
 _gizmoBuffer(0),
+_firstGizmoSendData(true),
 _matrixBuffer(0),
 _matrixCount(0),
 _shaderProgram(0),
@@ -204,7 +205,14 @@ void DrawMatrixNode::updateMatrixGizmo(){
 					0.0, 0.0, size,	0.0, 0.0, 1.0 };
 
 	glBindBuffer(GL_ARRAY_BUFFER, _gizmoBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(gizmoArray), (GLvoid*)&gizmoArray, GL_STATIC_DRAW);
+	if(_firstGizmoSendData){
+		glBufferData(GL_ARRAY_BUFFER, sizeof(gizmoArray), (GLvoid*)&gizmoArray, GL_STATIC_DRAW);
+		_firstGizmoSendData = false;
+	}
+	else {
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(gizmoArray), (GLvoid*)&gizmoArray);
+	}
+
 }
 
 void DrawMatrixNode::drawMatrix(){

@@ -64,6 +64,7 @@ private:
 
 	// OpenGL
 	GLuint _gizmoBuffer;	// the gizmo geometry + color
+	bool _firstGizmoSendData;	// first time the gizmo is sent to the GPU?
 	GLuint _matrixBuffer;	// the matrix buffer
 	GLsizei _matrixCount;	// the number of matrix element (used for allocation optimisation
 
