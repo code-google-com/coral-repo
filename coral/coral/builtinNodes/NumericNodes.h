@@ -110,6 +110,17 @@ private:
 	NumericAttribute *_a;
 };
 
+class Col4Reverse: public Node{
+public:
+	Col4Reverse(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+
+private:
+	NumericAttribute *_inColor;
+	NumericAttribute *_outColor;
+};
+
 class QuatNode: public Node{
 public:
 	QuatNode(const std::string &name, Node *parent);

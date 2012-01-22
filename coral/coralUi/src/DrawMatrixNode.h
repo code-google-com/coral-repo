@@ -53,15 +53,18 @@ public:
 
 private:
 	coral::NumericAttribute *_matrix;
-	coral::NumericAttribute *_thickness;
+	coral::NumericAttribute *_size;
 
 	bool _shouldUpdateMat44Values;
+	bool _shouldUpdateMatrixGizmo;
 
 	void updateMat44Values();
+	void updateMatrixGizmo();
 	void drawMatrix();
 
 	// OpenGL
 	GLuint _gizmoBuffer;	// the gizmo geometry + color
+	bool _firstGizmoSendData;	// first time the gizmo is sent to the GPU?
 	GLuint _matrixBuffer;	// the matrix buffer
 	GLsizei _matrixCount;	// the number of matrix element (used for allocation optimisation
 

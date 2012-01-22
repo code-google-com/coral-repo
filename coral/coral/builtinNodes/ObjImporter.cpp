@@ -104,7 +104,7 @@ void skipLine(std::istream& stream){
 	while((stream >> c) && (c != '\n'));	// stop skipping at new line
 }
 
-bool readLine(std::istream& stream, std::vector<Imath::V3f> &vertices, std::vector<Imath::V3f> &normals, std::vector<Imath::V3f> &uvs, std::vector<std::vector<int> > &faces){
+bool readLine(std::istream& stream, std::vector<Imath::V3f> &vertices, std::vector<Imath::V3f> &normals, std::vector<Imath::V2f> &uvs, std::vector<std::vector<int> > &faces){
 	char c;
 
 	while(stream >> std::skipws >> c && c == '#'){
@@ -123,10 +123,9 @@ bool readLine(std::istream& stream, std::vector<Imath::V3f> &vertices, std::vect
 	}
 
 	else if(s == "vt"){
-		float x, y, z;
-		stream >> x >> y >> z;
-		stream.clear();			// z not available
-		// uvs.push_back(Imath::V3f(x, y, z));
+		float u, v;
+		stream >> u >> v;
+		uvs.push_back(Imath::V2f(u, v));
 	}
 
 	else if(s == "vn"){
@@ -224,7 +223,7 @@ void ObjImporter::update(Attribute *attribute){
 	
 	std::vector<Imath::V3f> vertices;
 	std::vector<Imath::V3f> normals;
-	std::vector<Imath::V3f> uvs;
+	std::vector<Imath::V2f> uvs;
 	std::vector<std::vector<int> > faces;
 
 	_pattern = -1;
@@ -232,5 +231,5 @@ void ObjImporter::update(Attribute *attribute){
 	while(readLine(stream, vertices, normals, uvs, faces));
 	stream.close();
 	
-	_geo->outValue()->build(vertices, faces);
+	_geo->outValue()->build(vertices, faces, uvs);
 }
