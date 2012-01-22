@@ -233,7 +233,7 @@ private:
 	std::vector<int> _rawIndices;
 	std::vector<int> _rawIndexCounts;
 	std::vector<int> _vertexIdOffset;
-	std::vector<std::vector<int> > _vertexFaces;
+	std::map<int, std::vector<int> > _vertexFaces;
 	
 	#ifdef CORAL_PARALLEL_TBB
 		tbb::mutex _localMutex;

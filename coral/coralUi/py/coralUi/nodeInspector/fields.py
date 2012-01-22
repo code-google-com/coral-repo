@@ -217,6 +217,39 @@ class BoolValueField(AttributeField):
     def getWidgetValue(self, widget):
         return widget.isChecked()
 
+class CustomLineEdit(QtGui.QLineEdit):
+    def __init__(self, parent):
+        QtGui.QLineEdit.__init__(self, parent)
+
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls:
+            event.accept()
+        else:
+            event.ignore()
+    
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasUrls:
+            event.setDropAction(QtCore.Qt.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls:
+            event.setDropAction(QtCore.Qt.CopyAction)
+            event.accept()
+            
+            urls = event.mimeData().urls()
+            path = ""
+            if urls:
+                path = str(urls[0].toLocalFile())
+                self.setText(path)
+                self.emit(QtCore.SIGNAL("editingFinished()"))
+        else:
+            event.ignore()
+
 class StringValueField(AttributeField):
     def __init__(self, coralAttribute, parentWidget):
         AttributeField.__init__(self, coralAttribute, parentWidget)
@@ -231,7 +264,7 @@ class StringValueField(AttributeField):
 
             self.layout().setAlignment(textEdit, QtCore.Qt.AlignTop)
         else:    
-            self.setAttributeWidget(QtGui.QLineEdit(self), "editingFinished()")
+            self.setAttributeWidget(CustomLineEdit(self), "editingFinished()")
     
     def setAttributeValue(self, attribute, value):
         attribute.outValue().setStringValue(value)

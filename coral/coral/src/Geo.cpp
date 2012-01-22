@@ -279,7 +279,7 @@ void Geo::cacheAlignmentData(){
 	_rawIndexCounts.reserve(faceCount);
 
 	int vertexCount = _points.size();
-	_vertexFaces.resize(vertexCount);
+	//_vertexFaces.resize(vertexCount);
 	
 	int vertexIdOffset = 0;
 
@@ -307,6 +307,7 @@ void Geo::cacheAlignmentData(){
 			int vertexId = rawVerticesPerFace[j];
 			
 			_rawIndices.push_back(vertexId);	// {0,1,2,3, 1,4,5,2 4,6,7,5, etc...}.
+			
 			_vertexFaces[vertexId].push_back(i);
 			
 			vertexIdOffset += verticesPerFaceCount;
