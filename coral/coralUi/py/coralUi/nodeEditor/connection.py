@@ -119,7 +119,7 @@ class Connection(QtGui.QGraphicsItem):
         
         endHook = self._endHook()
         endPos = self.mapFromItem(endHook, 0.0, 0.0) + endHook.boundingRect().center()
-        tangentLength = (abs(endPos.x()) / 2.0) + 40.0
+        tangentLength = (abs(endPos.x()) / 2.0) * 1.5
         startTangent = QtCore.QPointF(tangentLength, 0.0)
         endTangent = QtCore.QPointF(endPos.x() - tangentLength, endPos.y())
         

@@ -64,6 +64,7 @@
 #include "processSimulationNodeWrapper.h"
 #include "dagNodesWrapper.h"
 #include "deformerNodesWrapper.h"
+#include "../builtinNodes/KdNodes.h"
 
 using namespace coral;
 
@@ -122,6 +123,7 @@ BOOST_PYTHON_MODULE(_coral)
 	processSimulationNodeWrapper();
 	dagNodesWrapper();
 	deformerNodesWrapper();
+	pythonWrapperUtils::pythonWrapper<FindPointsInRange, Node>("FindPointsInRange");
 	
 	boost::python::to_python_converter<std::vector<std::string>, pythonWrapperUtils::stdVectorToPythonList<std::string> >();
 	boost::python::to_python_converter<std::vector<Node*>, ObjectVectorToPythonList<Node> >();

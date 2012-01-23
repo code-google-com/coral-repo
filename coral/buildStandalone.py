@@ -194,6 +194,9 @@ def buildOsXApp(coralLib, coralUiLib, imathLib):
     resourcesDir = os.path.join(contentsDir, "Resources")
     os.mkdir(resourcesDir)
     
+    global sdkInstallDir
+    sdkInstallDir = os.path.join(contentsDir, "sdk")
+
     buildMainTree(coralLib, coralUiLib, imathLib, os.path.join(contentsDir, "coral"))
     
     # copy stuff over

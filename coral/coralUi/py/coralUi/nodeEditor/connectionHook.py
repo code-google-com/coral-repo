@@ -56,7 +56,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
         self._parentAttributeUi = weakref.ref(parentAttributeUi)
         self._isInput = isInput
         self._isOutput = isOutput
-        self._rect = QtCore.QRectF(0, 0, 10, 10)
+        self._rect = QtCore.QRectF(0, 0, 12, 12)
         self._color = QtGui.QColor(200, 200, 200)
         self._brush = QtGui.QBrush(self.color())
         self._pen = QtGui.QPen(QtCore.Qt.NoPen)
