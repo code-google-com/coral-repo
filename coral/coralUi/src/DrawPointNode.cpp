@@ -225,13 +225,14 @@ void DrawPointNode::updateSizeValues(){
 	Numeric *sizeNumeric = _sizes->value();
 	const std::vector<float> &sizeValues = sizeNumeric->floatValues();
 
-	// create the default color.
+	// create the default size value.
 	GLfloat defaultSize = 5.0;
 	if(sizeNumeric->size() == 1){
+		// if only one float is connected, we use it as default size
 		defaultSize = sizeValues[0];
 	}
 
-	int sizeCount = (int)sizeValues.size();
+	int sizeCount = (int)sizeNumeric->size();
 
 	glBindBuffer(GL_ARRAY_BUFFER, _sizeBuffer);
 	if(_newPointCount){
@@ -242,19 +243,15 @@ void DrawPointNode::updateSizeValues(){
 	}
 
 	if(sizeCount < _pointCount){
-		int emptyColCount = _pointCount - sizeCount;	// get the number of empty color to create in the buffer to match the number of vertex
+		int emptySizeCount = _pointCount - sizeCount;	// get the number of empty color to create in the buffer to match the number of vertex
 
 		// create an array to feed
-		std::vector<GLfloat> emptyColArray;
-		emptyColArray.reserve(emptyColCount);
-
-		for(int i = 0; i<emptyColCount; ++i){
-			emptyColArray.push_back(defaultSize);
-		}
+		std::vector<GLfloat> emptySizeArray;
+		emptySizeArray.resize(emptySizeCount, defaultSize);
 
 		GLintptr offset = sizeof(GLfloat)*sizeCount;
-		GLsizeiptr size = sizeof(GLfloat)*emptyColCount;
-		glBufferSubData(GL_ARRAY_BUFFER, offset, size, (GLvoid*)&emptyColArray[0]);
+		GLsizeiptr size = sizeof(GLfloat)*emptySizeCount;
+		glBufferSubData(GL_ARRAY_BUFFER, offset, size, (GLvoid*)&emptySizeArray[0]);
 	}
 
 	// clean OpenGL state
@@ -268,10 +265,11 @@ void DrawPointNode::updateColorValues(){
 	// create the default color.
 	Imath::Color4f defaultColor = Imath::Color4f(0.0, 1.0, 0.0, 1.0);
 	if(col4Numeric->size() == 1){
+		// if only one col4 is connected, we use it as default color
 		defaultColor = col4Values[0];
 	}
 
-	int colorCount = (int)col4Values.size();
+	int colorCount = (int)col4Numeric->size();
 
 	glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
 	if(_newPointCount){
@@ -284,13 +282,9 @@ void DrawPointNode::updateColorValues(){
 	if(colorCount < _pointCount){
 		int emptyColCount = _pointCount - colorCount;	// get the number of empty color to create in the buffer to match the number of vertex
 
-		// create an array to feed
+		// create an array and feed it with default color
 		std::vector<Imath::Color4f> emptyColArray;
-		emptyColArray.reserve(emptyColCount);
-
-		for(int i = 0; i<emptyColCount; ++i){
-			emptyColArray.push_back(defaultColor);
-		}
+		emptyColArray.resize(emptyColCount, defaultColor);
 
 		GLintptr offset = 4*sizeof(GLfloat)*colorCount;
 		GLsizeiptr size = 4*sizeof(GLfloat)*emptyColCount;
