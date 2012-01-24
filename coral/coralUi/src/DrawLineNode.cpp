@@ -224,13 +224,9 @@ void DrawLineNode::updateColorValues(){
 		if(colorCount < pointCount){
 			int emptyColCount = pointCount - colorCount;	// get the number of empty color to create in the buffer to match the number of vertex
 
-			// create an array to feed
+			// create an array to feed of green color
 			std::vector<Imath::Color4f> emptyColArray;
-			emptyColArray.reserve(emptyColCount);
-
-			for(int i = 0; i<emptyColCount; ++i){
-				emptyColArray.push_back(Imath::Color4f(0.0, 1.0, 0.0, 1.0));
-			}
+			emptyColArray.resize(emptyColCount, Imath::Color4f(0.0, 1.0, 0.0, 1.0));
 
 			GLintptr offset = 4*sizeof(GLfloat)*colorCount;
 			GLsizeiptr size = 4*sizeof(GLfloat)*emptyColCount;
