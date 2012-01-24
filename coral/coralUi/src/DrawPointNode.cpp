@@ -52,10 +52,6 @@ _pointCount(0){
 	addInputAttribute(_sizes);
 	addInputAttribute(_colors);
 	
-	// setAttributeAffect(_points, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_sizes, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
-	
 	std::vector<std::string> pointSpecializations;
 	pointSpecializations.push_back("Vec3");
 	pointSpecializations.push_back("Vec3Array");
@@ -70,6 +66,13 @@ _pointCount(0){
 	colorSpecializations.push_back("Col4");
 	colorSpecializations.push_back("Col4Array");
 	setAttributeAllowedSpecializations(_colors, colorSpecializations);
+
+	setSpecializationPreset("single size and color", _sizes, "Float");
+	setSpecializationPreset("single size and color", _colors, "Col4");
+
+	enableSpecializationPreset("single size and color");
+
+	_sizes->outValue()->setFloatValueAt(0, 3.0);
 
 	if(glContextExists()){
 		initGL();
@@ -114,6 +117,8 @@ void DrawPointNode::attributeConnectionChanged(Attribute *attribute){
 }
 
 void DrawPointNode::attributeDirtied(Attribute *attribute){
+	DrawNode::attributeDirtied(attribute);
+
 	if(attribute == _points){
 		_shouldUpdatePointValues = true;
 
@@ -263,7 +268,7 @@ void DrawPointNode::updateColorValues(){
 	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
 
 	// create the default color.
-	Imath::Color4f defaultColor = Imath::Color4f(0.0, 1.0, 0.0, 1.0);
+	Imath::Color4f defaultColor = Imath::Color4f(1.0, 1.0, 1.0, 1.0);
 	if(col4Numeric->size() == 1){
 		// if only one col4 is connected, we use it as default color
 		defaultColor = col4Values[0];

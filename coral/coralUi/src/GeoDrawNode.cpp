@@ -107,6 +107,8 @@ GeoDrawNode::~GeoDrawNode(){
 }
 
 void GeoDrawNode::attributeDirtied(Attribute *attribute){
+	DrawNode::attributeDirtied(attribute);
+	
 	if(attribute == _geo){
 		_shouldUpdateGeoVBO = true;
 	}

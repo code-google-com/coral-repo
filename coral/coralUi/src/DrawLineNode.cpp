@@ -93,6 +93,8 @@ DrawLineNode::~DrawLineNode(){
 }
 
 void DrawLineNode::attributeConnectionChanged(Attribute *attribute){
+	DrawNode::attributeConnectionChanged(attribute);
+
 	if(attribute == _points){
 		_shouldUpdatePointValues = true;
 	}
@@ -102,6 +104,8 @@ void DrawLineNode::attributeConnectionChanged(Attribute *attribute){
 }
 
 void DrawLineNode::attributeDirtied(Attribute *attribute){
+	DrawNode::attributeDirtied(attribute);
+
 	if(attribute == _points){
 		_shouldUpdatePointValues = true;
 	}
@@ -226,7 +230,7 @@ void DrawLineNode::updateColorValues(){
 
 			// create an array to feed of green color
 			std::vector<Imath::Color4f> emptyColArray;
-			emptyColArray.resize(emptyColCount, Imath::Color4f(0.0, 1.0, 0.0, 1.0));
+			emptyColArray.resize(emptyColCount, Imath::Color4f(1.0, 1.0, 1.0, 1.0));
 
 			GLintptr offset = 4*sizeof(GLfloat)*colorCount;
 			GLsizeiptr size = 4*sizeof(GLfloat)*emptyColCount;
@@ -246,7 +250,7 @@ void DrawLineNode::updateColorValues(){
 			_singleColor = col4Values[0];
 		}
 		else {
-			_singleColor = Imath::Color4f(0.0, 1.0, 0.0, 1.0);
+			_singleColor = Imath::Color4f(1.0, 1.0, 1.0, 1.0);
 		}
 	}
 }

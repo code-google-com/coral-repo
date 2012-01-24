@@ -42,6 +42,7 @@ from nodeEditor.nodeEditor import NodeEditor
 from nodeInspector.fields import IntValueField, FloatValueField, BoolValueField, StringValueField
 from nodeInspector.nodeInspector import NodeInspector, NodeInspectorWidget, AttributeInspectorWidget
 import mainWindow
+import viewport
 
 class GeoInstanceArrayAttributeUi(AttributeUi):
     def __init__(self, coralAttribute, parentNodeUi):
@@ -339,9 +340,11 @@ class TimeNodeInspectorWidget(NodeInspectorWidget):
     
     def _playButtonToggled(self, play):
         if play:
+            viewport.ViewportWidget._activateTimedRefresh()
             self.coralNode().play(True)
         else:
             self.coralNode().play(False)
+            viewport.ViewportWidget._activateImmediateRefresh()
             
 class PassThroughAttributeUi(AttributeUi):
     def __init__(self, coralAttribute, parentNodeUi):

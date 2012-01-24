@@ -47,7 +47,8 @@ public:
 
 	virtual void draw();
 	virtual void initGL();
-	//virtual void attributeConnectionChanged(coral::Attribute *attribute);
+	virtual void attributeDirtied(coral::Attribute *attribute);
+	virtual void attributeConnectionChanged(coral::Attribute *attribute);
 
 	//ViewportOutputAttribute *viewportOutputAttribute();
 	bool glContextExists();

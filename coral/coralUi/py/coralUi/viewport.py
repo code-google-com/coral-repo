@@ -60,6 +60,8 @@ def instancedViewports():
 class ViewportGlWidget(QtOpenGL.QGLWidget):
     orbit = 1
     pan = 2
+    timedRefresh = 0
+    immediateRefresh = 1
         
     def __init__(self, parent = None):
         QtOpenGL.QGLWidget.__init__(self, QtOpenGL.QGLFormat(QtOpenGL.QGL.SampleBuffers), parent)
@@ -71,12 +73,22 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
         self._mode = 0
         
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        #self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportUpdateGL"), QtCore.SLOT("updateGL()"))
+        self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportUpdateGL"), QtCore.SLOT("updateGL()"))
+        self.connect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportRefreshMode(int)"), self._changeRefreshMode)
 
         ViewportData._viewports.append(weakref.ref(self._viewport))
 
-        self._timer = self.startTimer(50)
-    
+        self._timer = -1
+
+    def _changeRefreshMode(self, mode):
+        if mode == ViewportGlWidget.timedRefresh:
+            if self._timer == -1:
+                self._timer = self.startTimer(50)
+        elif mode == ViewportGlWidget.immediateRefresh:
+            if self._timer != -1:
+                self.killTimer(self._timer)
+                self._timer = -1
+        
     def timerEvent(self, event):
         self.updateGL()
     
@@ -166,6 +178,25 @@ class ViewportWidget(QtGui.QWidget):
     def refreshViewports():
         ViewportWidget._mainWin.emit(QtCore.SIGNAL("coralViewportUpdateGL"))
     
+    @staticmethod
+    def _activateTimedRefresh():
+        ViewportWidget._disableRefreshCallback()
+        ViewportWidget._mainWin.emit(QtCore.SIGNAL("coralViewportRefreshMode(int)"), ViewportGlWidget.timedRefresh)
+    
+    @staticmethod
+    def _activateImmediateRefresh():
+        ViewportWidget._mainWin.emit(QtCore.SIGNAL("coralViewportRefreshMode(int)"), ViewportGlWidget.immediateRefresh)
+        ViewportWidget._enableRefreshcallback()
+    
+    @staticmethod
+    def _disableRefreshCallback():
+        _coral.setCallback("mainDrawRoutine_viewportRefresh", None)
+    
+    @staticmethod
+    def _enableRefreshcallback():
+        _coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
+        ViewportWidget.refreshViewports()
+        
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
         
@@ -183,20 +214,14 @@ class ViewportWidget(QtGui.QWidget):
         self.layout().setSpacing(0)
         self.layout().addWidget(self._viewportGlWidget)
         
-        #_coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
+        _coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
 
-        coralApp.addInitializingNewNetworkObserver(self._initializingNewNetworkObserver, self._disable)
-        coralApp.addInitializedNewNetworkObserver(self._initializedNewNetworkObserver, self._enable)
-        coralApp.addNetworkLoadingObserver(self._networkLoadingObserver, self._disable)
-        coralApp.addNetworkLoadedObserver(self._networkLoadedObserver, self._enable)
+        coralApp.addInitializingNewNetworkObserver(self._initializingNewNetworkObserver, ViewportWidget._disableRefreshCallback)
+        coralApp.addInitializedNewNetworkObserver(self._initializedNewNetworkObserver, ViewportWidget._enableRefreshcallback)
+        coralApp.addNetworkLoadingObserver(self._networkLoadingObserver, ViewportWidget._disableRefreshCallback)
+        coralApp.addNetworkLoadedObserver(self._networkLoadedObserver, ViewportWidget._enableRefreshcallback)
         
         if not ViewportWidget._initialized:
             coralApp.addNetworkLoadedObserver(ViewportWidget._networkLoadedObserver, ViewportWidget.refreshViewports)
             ViewportWidget._initialized = True
 
-    def _disable(self):
-        _coral.setCallback("mainDrawRoutine_viewportRefresh", None)
-    
-    def _enable(self):
-        _coral.setCallback("mainDrawRoutine_viewportRefresh", ViewportWidget.refreshViewports)
-        ViewportWidget.refreshViewports()

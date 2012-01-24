@@ -101,7 +101,6 @@ public:
 		attr->outValue()->setSomething(1);
 		attr->valueChanged();*/
 	void valueChanged();
-	// void setValueObserved(bool value);
 	
 	virtual std::string asScript();
 	virtual void deleteIt();
@@ -125,7 +124,7 @@ public:
 	static void(*_deleteItCallback)(Attribute *self);
 	static void(*_specializationCallBack)(Attribute *self);
 	// static void(*_valueChangedCallback)(Attribute *self);
-	// static void queueDirtyingDoneCallback(void(*callback)(Attribute *));
+	static void queueDirtyingDoneCallback(void(*callback)(Attribute *));
 	
 protected:
 	void setValuePtr(Value *value);
@@ -166,7 +165,7 @@ private:
 	void cacheDirtyChainUpstream();
 	void cacheCleanChainDownstream();
 	void cleanSelf();
-	// void processDirtyingDoneCallbackQueue();
+	void processDirtyingDoneCallbackQueue();
 	Attribute *findFirstOutputNotPassThrough();
 	void initValueFromPassThroughFirstOutput(Attribute *attribute);
 	void setNotifyParentNodeOnDirty(bool value);

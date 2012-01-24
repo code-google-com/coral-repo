@@ -52,11 +52,13 @@ void FindPointsInRange::update(Attribute *attribute){
 
 	std::vector<int> pointsInRange(kd_res_size(res));
 
+	int i = 0;
 	while(!kd_res_end(res)){
 		int pointIndex = *(int*)kd_res_item_data(res);
-		pointsInRange.push_back(pointIndex);
+		pointsInRange[i] = pointIndex;
 
 		kd_res_next(res);
+		i += 1;
 	}
 
 	kd_res_free(res);

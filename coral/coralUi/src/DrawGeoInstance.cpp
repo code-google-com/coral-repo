@@ -15,9 +15,6 @@ _geoInstanceDirtied(true){
 	addInputAttribute(_geoInstance);
 	addInputAttribute(_colors);
 
-	// setAttributeAffect(_geoInstance, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
-
 	std::vector<std::string> colorSpecializations;
 	colorSpecializations.push_back("Col4");
 	colorSpecializations.push_back("Col4Array");
@@ -99,6 +96,8 @@ void DrawGeoInstance::initGL(){
 }
 
 void DrawGeoInstance::attributeDirtied(Attribute *attribute){
+	DrawNode::attributeDirtied(attribute);
+	
 	if(attribute == _geoInstance){
 		_geoInstanceDirtied = true;
 	}

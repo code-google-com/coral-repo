@@ -3,21 +3,21 @@ version = 0.1
 
 def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'GeoGrid', name = 'GeoGrid', specializationPreset = 'none', parentNode = topNode)
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoGrid.width', value = '[20.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.GeoGrid.height', value = '[20.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoGrid.width', value = '[20] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.GeoGrid.height', value = '[20] 3')
     executeCommand('SetAttributeValue', attribute = topNode + '.GeoGrid.widthSubdivisions', value = '[20] 1')
     executeCommand('SetAttributeValue', attribute = topNode + '.GeoGrid.heightSubdivisions', value = '[20] 1')
     
     executeCommand('CreateNode', className = 'Matrix44', name = 'handle', specializationPreset = 'single', parentNode = topNode)
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.translateX', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.translateY', value = '[4.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.translateZ', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.eulerX', value = '[15.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.eulerY', value = '[24.799999] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.eulerZ', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.scaleX', value = '[1.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.scaleY', value = '[1.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.handle.scaleZ', value = '[1.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.translateX', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.translateY', value = '[4] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.translateZ', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.eulerX', value = '[15] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.eulerY', value = '[24.8] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.eulerZ', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.scaleX', value = '[1] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.scaleY', value = '[1] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.handle.scaleZ', value = '[1] 3')
     
     executeCommand('CreateNode', className = 'DrawGeo', name = 'DrawGeo', specializationPreset = 'none', parentNode = topNode)
     executeCommand('SetAttributeValue', attribute = topNode + '.DrawGeo.smooth', value = 'True')
@@ -27,9 +27,9 @@ def runScript(topNode = 'root'):
     executeCommand('SetAttributeValue', attribute = topNode + '.DrawGeo.normals', value = 'False')
     
     executeCommand('CreateNode', className = 'Vec3', name = 'center', specializationPreset = 'single', parentNode = topNode)
-    executeCommand('SetAttributeValue', attribute = topNode + '.center.x', value = '[-1.800000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.center.y', value = '[2.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.center.z', value = '[0.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.center.x', value = '[-1.8] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.center.y', value = '[2] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.center.z', value = '[0] 3')
     
     executeCommand('CreateNode', className = 'CollapsedNode', name = 'BindDeformer', specializationPreset = 'none', parentNode = topNode)
     executeCommand('CreateAttribute', name = '1:geo', className = 'PassThroughAttribute', parentNode = topNode + '.BindDeformer', input = True, specializationOverride = 'Geo')
@@ -38,7 +38,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateAttribute', name = '3:transformMatrix', className = 'PassThroughAttribute', parentNode = topNode + '.BindDeformer', input = True, specializationOverride = 'Matrix44')
     
     executeCommand('CreateNode', className = 'Float', name = 'radius', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.radius.out', value = '[11.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.radius.out', value = '[11] 3')
     
     executeCommand('CreateNode', className = 'Add', name = 'Add', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
@@ -47,22 +47,22 @@ def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'Vec3ToFloats', name = 'Vec3ToFloats', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
     executeCommand('CreateNode', className = 'Float', name = 'Float', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Float.out', value = '[1.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Float.out', value = '[1] 3')
     
     executeCommand('CreateNode', className = 'Bool', name = 'Bool', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Bool.bool', value = 'True')
     
     executeCommand('CreateNode', className = 'Matrix44', name = 'ParentSpace', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.ParentSpace.eulerX', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.ParentSpace.eulerY', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.ParentSpace.eulerZ', value = '[0.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.ParentSpace.eulerX', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.ParentSpace.eulerY', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.ParentSpace.eulerZ', value = '[0] 3')
     
     executeCommand('CreateNode', className = 'Sub', name = 'Sub', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
     executeCommand('CreateNode', className = 'GetGeoPoints', name = 'GetGeoPoints', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
     executeCommand('CreateNode', className = 'Float', name = 'Float5', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Float5.out', value = '[1.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Float5.out', value = '[1] 3')
     
     executeCommand('CreateNode', className = 'ConditionalValue', name = 'ConditionalValue', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
@@ -80,20 +80,21 @@ def runScript(topNode = 'root'):
     
     executeCommand('CreateNode', className = 'Matrix44Inverse', name = 'Matrix44Inverse', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
     
-    executeCommand('CreateNode', className = 'DrawNumeric', name = 'DrawNumeric', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
-    
     executeCommand('CreateNode', className = 'ConditionalValue', name = 'ConditionalValue', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
     
     executeCommand('CreateNode', className = 'Matrix44', name = 'nullMatrix', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.translateX', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.translateY', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.translateZ', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.eulerX', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.eulerY', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.eulerZ', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.scaleX', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.scaleY', value = '[0.000000] 3')
-    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.scaleZ', value = '[0.000000] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.translateX', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.translateY', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.translateZ', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.eulerX', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.eulerY', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.eulerZ', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.scaleX', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.scaleY', value = '[0] 3')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.nullMatrix.scaleZ', value = '[0] 3')
+    
+    executeCommand('CreateNode', className = 'DrawMatrix', name = 'DrawMatrix', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
+    executeCommand('SetAttributeValue', attribute = topNode + '.BindDeformer.Transform.DrawMatrix.size mult', value = '[4] 3')
     
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.matrix', destinationAttribute = topNode + '.BindDeformer.Transform.globalMatrix.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.parentMatrix', destinationAttribute = topNode + '.BindDeformer.Transform.globalMatrix.in1')
@@ -101,10 +102,10 @@ def runScript(topNode = 'root'):
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.globalMatrix.out', destinationAttribute = topNode + '.BindDeformer.Transform.Mul1.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.Mul1.out', destinationAttribute = topNode + '.BindDeformer.Transform.outGlobalMatrix')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.parentMatrix', destinationAttribute = topNode + '.BindDeformer.Transform.Matrix44Inverse.inMatrix')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.out', destinationAttribute = topNode + '.BindDeformer.Transform.DrawNumeric.numeric')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.draw', destinationAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.condition')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.globalMatrix.out', destinationAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.ifTrue')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.nullMatrix.matrix', destinationAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.ifFalse')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.out', destinationAttribute = topNode + '.BindDeformer.Transform.DrawMatrix.matrix')
     executeCommand('CreateNode', className = 'Div', name = 'Div', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
     executeCommand('CreateNode', className = 'Abs', name = 'Abs', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
@@ -189,9 +190,9 @@ def runScript(topNode = 'root'):
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.globalMatrix', data = {'pos': [-53.0, 1.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.Mul1', data = {'pos': [152.0, -108.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.Matrix44Inverse', data = {'pos': [-154.0, -108.0]})
-    executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.DrawNumeric', data = {'pos': [211.0, 312.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.ConditionalValue', data = {'pos': [78.0, 146.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.nullMatrix', data = {'pos': [-103.0, 270.0]})
+    executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.DrawMatrix', data = {'pos': [256.0, 216.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Div', data = {'pos': [174.54545454545467, 567.27272727272748]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Abs', data = {'pos': [510.00000000000017, 821.42857142857167]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.IfLessThan', data = {'pos': [495.64705882352962, -240.23529411764702]})

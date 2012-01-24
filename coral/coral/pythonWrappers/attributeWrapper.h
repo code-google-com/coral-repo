@@ -134,13 +134,6 @@ void attribute_specializationCallBack(Attribute *self){
 	}
 }
 
-// void attribute_valueChangedCallBack(Attribute *self){
-// 	if(PythonDataCollector::hasCallback("attribute_valueChanged")){
-// 		if(PythonDataCollector::hasPyObject(self->id()))
-// 			PythonDataCollector::findCallback("attribute_valueChanged")(PythonDataCollector::findPyObject(self->id()));
-// 	}
-// }
-
 void attribute__del__(Attribute &self){
 	if(!self.isDeleted()){
 		ObjectAccessor::_setIsDeleted(self, true);
@@ -234,7 +227,6 @@ void attributeWrapper(){
 	Attribute::_disconnectOutputCallback = attribute_disconnectOutputCallback;
 	Attribute::_deleteItCallback = attribute_deleteItCallback;
 	Attribute::_specializationCallBack = attribute_specializationCallBack;
-	// Attribute::_valueChangedCallback = attribute_valueChangedCallBack;
 }
 
 #endif

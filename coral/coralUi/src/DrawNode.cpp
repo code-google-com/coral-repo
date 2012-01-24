@@ -48,15 +48,13 @@ DrawNode::DrawNode(const std::string &name, Node *parent) : Node(name, parent){
 void DrawNode::deleteIt(){
 	MainDrawRoutine::removeDrawNode(this);
 	Node::deleteIt();
-	//MainDrawRoutine::_viewportRefreshCallback();
+	
+	MainDrawRoutine::_viewportRefreshCallback();
 }
 
 void DrawNode::draw(){	
 }
 
-// ViewportOutputAttribute *DrawNode::viewportOutputAttribute(){
-// 	return _viewportOutput;
-// }
 
 bool DrawNode::glContextExists(){
 	return MainDrawRoutine::initialized();
@@ -65,6 +63,10 @@ bool DrawNode::glContextExists(){
 void DrawNode::initGL(){
 }
 
-// void DrawNode::attributeConnectionChanged(Attribute *attribute){
-// 	MainDrawRoutine::_viewportRefreshCallback();
-// }
+void DrawNode::attributeDirtied(Attribute *attribute){
+	MainDrawRoutine::scheduleRender();
+}
+
+void DrawNode::attributeConnectionChanged(Attribute *attribute){
+	MainDrawRoutine::_viewportRefreshCallback();
+}

@@ -43,12 +43,12 @@ public:
 	static void addDrawNode(DrawNode *drawNode);
 	static void removeDrawNode(DrawNode *drawNode);
 	static void drawAll();
-	// static void scheduleRender();
+	static void scheduleRender();
 		
-	//static void(*_viewportRefreshCallback)(void);
+	static void(*_viewportRefreshCallback)(void);
 
 private:
-	//static void dirtyingDoneCallback(coral::Attribute *attribute);
+	static void dirtyingDoneCallback(coral::Attribute *attribute);
 };
 
 }

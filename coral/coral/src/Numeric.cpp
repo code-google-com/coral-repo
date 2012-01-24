@@ -55,7 +55,7 @@ Numeric::Numeric():
 	_matrix44Values[0] = Imath::identity44f;
 
 	_col4Values.resize(1);
-	_col4Values[0] = Imath::Color4f(0.0, 0.0, 0.0, 1.0);
+	_col4Values[0] = Imath::Color4f(1.0, 1.0, 1.0, 1.0);
 }
 
 void Numeric::copy(const Value *other){
@@ -287,7 +287,7 @@ Imath::Color4f Numeric::col4ValueAt(unsigned int id){
 		return _col4Values[size - 1];
 	}
 
-	return Imath::Color4f(0.0, 0.0, 0.0, 1.0);
+	return Imath::Color4f(1.0, 1.0, 1.0, 1.0);
 }
 
 Imath::Quatf Numeric::quatValueAt(unsigned int id){
