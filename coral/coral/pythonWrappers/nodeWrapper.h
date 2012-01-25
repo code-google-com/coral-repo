@@ -431,6 +431,7 @@ void nodeWrapper(){
 		.def("clearDynamicAttributes", &Node::clearDynamicAttributes)
 		.def("_catchAttributeDirtied", node_catchAttributeDirtied)
 		.def("attributeDirtied", &Node::attributeDirtied, &NodeWrapper::attributeDirtied_default)
+		.def("attributeSpecializationPreset", &Node::attributeSpecializationPreset)
 	;
 	
 	Node::_addNodeCallback = node_addNodeCallback;

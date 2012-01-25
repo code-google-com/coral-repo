@@ -140,10 +140,15 @@ class NodeInspectorWidget(QtGui.QWidget):
         combo = self._presetCombo._combo
         selectedPreset = str(combo.currentText())
         
-        coralNode.enableSpecializationPreset(selectedPreset)
+        if selectedPreset.endswith("(not allowed)") == False:
+            coralNode.enableSpecializationPreset(selectedPreset)
+        else:
+            coralNode.enableSpecializationPreset("none")
+            combo.setCurrentIndex(combo.count() - 1)
         
     def _populatePresetCombo(self):
         coralNode = self._coralNode()
+        coralNode.enableSpecializationPreset("none")
         
         combo = self._presetCombo._combo
         combo.clear()
@@ -151,7 +156,19 @@ class NodeInspectorWidget(QtGui.QWidget):
         presets = coralNode.specializationPresets()
         
         for preset in presets:
-            combo.addItem(preset)
+            presetAllowed = True
+            if preset != "none":
+                for attr in coralNode.attributes():
+                    presetSpecialization = coralNode.attributeSpecializationPreset(preset, attr)
+                    currentSpecialization = attr.specialization()
+                    if presetSpecialization not in currentSpecialization:
+                        presetAllowed = False
+                        break
+            
+            if presetAllowed:
+                combo.addItem(preset)
+            else:
+                combo.addItem(preset + " (not allowed)")
         
         currentPreset = coralNode.enabledSpecializationPreset()
         combo.setCurrentIndex(presets.index(currentPreset))
@@ -172,8 +189,8 @@ class NodeInspectorWidget(QtGui.QWidget):
             self._presetCombo._combo.setShowPopupCallback(self._populatePresetCombo)
             self._presetCombo._combo.setCurrentItemChangedCallback(self._presetComboItemChanged)
             
-            if self._nodeIsConnected(coralNode):
-                self._presetCombo._combo.setDisabled(True)
+            #if self._nodeIsConnected(coralNode):
+            #    self._presetCombo._combo.setDisabled(True)
     
     def _findFirstConnectedAtributeNonPassThrough(self, coralAttribute, processedAttributes):
         foundAttr = None

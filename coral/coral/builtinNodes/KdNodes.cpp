@@ -1,9 +1,6 @@
 
 #include "KdNodes.h"
 
-
-
-
 using namespace coral;
 
 FindPointsInRange::FindPointsInRange(const std::string &name, Node *parent): Node(name, parent){

@@ -661,6 +661,20 @@ std::vector<std::string> Node::specializationPresets(){
 	return presets;
 }
 
+std::string Node::attributeSpecializationPreset(const std::string &preset, Attribute *attribute){
+	std::string specializationPreset = "";
+
+	if(_specializationPresets.find(preset) != _specializationPresets.end()){
+		std::map<int, std::string> &attrsPreset = _specializationPresets[preset];
+		int attrId = attribute->id();
+		if(attrsPreset.find(attrId) != attrsPreset.end()){
+			specializationPreset = attrsPreset[attrId];
+		}
+	}
+
+	return specializationPreset;
+}
+
 void Node::catchAttributeDirtied(Attribute *attribute, bool value){
 	if(containerUtils::elementInContainer(attribute, attributes())){
 		attribute->setNotifyParentNodeOnDirty(value);

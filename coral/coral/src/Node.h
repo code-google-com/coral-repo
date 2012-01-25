@@ -76,7 +76,12 @@ public:
 	bool allowDynamicAttributes();
 	void enableSpecializationPreset(const std::string &preset);
 	std::string enabledSpecializationPreset();
+	
+	//!returns all the available presets for this node.
 	std::vector<std::string> specializationPresets();
+
+	//!returns the specialization for attribute should this node be set on preset.
+	std::string attributeSpecializationPreset(const std::string &preset, Attribute *attribute);
 	void clearDynamicAttributes();
 	
 
