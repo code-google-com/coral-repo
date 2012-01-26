@@ -742,7 +742,7 @@ bool Attribute::updateBranchSpecializations(bool reset){
 	int maxIter = 100;
 	int i = 0;
 	for(; i < maxIter; ++i){
-		bool complete = updateSpecialization2(specializationPairs, specializationLinks, specializationMap);
+		bool complete = updateSpecialization(specializationPairs, specializationLinks, specializationMap);
 		if(complete){
 			break;
 		}
