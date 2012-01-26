@@ -151,15 +151,10 @@ private:
 	void removeAffect(Attribute *attribute);
 	void setParent(Node *parent);
 	void resetInputValuesInChain();
-	void updateAllSpceializationLinks(std::vector<Attribute*> &processedAttributes, std::map<int, std::vector<std::string> > &specializationMap);
 	void removeSpecializationLink(SpecializationLink *specializationLink);
-	bool updateBranchSpecializations(ErrorObject *errorObject);
+	bool updateBranchSpecializations(bool reset);
 	void setSpecialization(const std::vector<std::string> &specialization);
-	bool updateSpecialization(const std::vector<std::string> &newSpecialization, std::map<int, std::vector<std::string> > &specializationMap, std::vector<Attribute*> &processedAttributes, ErrorObject *errorObject);
-	Attribute *findStrongerSpecializerInBranch(Attribute *attribute, bool linked, std::vector<Attribute*> &processedAttributes, std::map<int, std::vector<std::string> > &specializationMap);
-	void initSpecializationMap(std::map<int, std::vector<std::string> > &specializationMap);
 	bool specializationContainedOne(const std::vector<std::string> &specialization1, const std::vector<std::string> &specialization2);
-	Attribute* findSpecializerInBranch(std::map<int, std::vector<std::string> > &specializationMap);
 	void linkSpecializationTo(Attribute *attribute);
 	void cacheEvaluationChain();
 	void cacheDirtyChainUpstream();
@@ -169,6 +164,8 @@ private:
 	Attribute *findFirstOutputNotPassThrough();
 	void initValueFromPassThroughFirstOutput(Attribute *attribute);
 	void setNotifyParentNodeOnDirty(bool value);
+	void collectSpecializationBranch(std::vector<std::pair<Attribute*, Attribute*> > &specializationPairs, std::vector<std::pair<Attribute*, Attribute*> > &specializationLinks, std::map<int, std::vector<std::string> > &specializationMap, bool reset);
+	bool updateSpecialization(std::vector<std::pair<Attribute*, Attribute*> > &specializationPairs, std::vector<std::pair<Attribute*, Attribute*> > &specializationLinks, std::map<int, std::vector<std::string> > &specializationMap);
 
 	Attribute *_input;
 	std::vector<Attribute*> _outputs;

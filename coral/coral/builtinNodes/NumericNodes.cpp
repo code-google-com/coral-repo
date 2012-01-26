@@ -218,38 +218,33 @@ Vec3ToFloats::Vec3ToFloats(const std::string &name, Node* parent): Node(name, pa
 	setAttributeAllowedSpecializations(_z, xyzSpecializations);
 	
 	addAttributeSpecializationLink(_vector, _x);
-	addAttributeSpecializationLink(_x, _y);
-	addAttributeSpecializationLink(_y, _z);
+	addAttributeSpecializationLink(_vector, _y);
+	addAttributeSpecializationLink(_vector, _z);
 }
 
 void Vec3ToFloats::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
-	if(attributeA == _vector && attributeB == _x){
-		std::vector<std::string> vectorSpecializations = _vector->allowedSpecialization();
-		std::vector<std::string> xSpecializations = _x->allowedSpecialization();
-	
-		if(specializationA.size() == 1){
-			specializationB.clear();
+	std::vector<std::string> vectorSpecializations = attributeA->allowedSpecialization();
+	std::vector<std::string> xSpecializations = attributeB->allowedSpecialization();
 
-			if(specializationA[0] == "Vec3"){
-				specializationB.push_back(xSpecializations[0]);
-			}
-			else if(specializationA[0] == "Vec3Array"){
-				specializationB.push_back(xSpecializations[1]);
-			}
+	if(specializationA.size() == 1){
+		specializationB.clear();
+
+		if(specializationA[0] == "Vec3"){
+			specializationB.push_back(xSpecializations[0]);
 		}
-		else if(specializationB.size() == 1){
-			specializationA.clear();
-
-			if(specializationB[0] == "Float"){
-				specializationA.push_back(vectorSpecializations[0]);
-			}
-			else if(specializationB[0] == "FloatArray"){
-				specializationA.push_back(vectorSpecializations[1]);
-			}
+		else if(specializationA[0] == "Vec3Array"){
+			specializationB.push_back(xSpecializations[1]);
 		}
 	}
-	else{
-		Node::updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
+	else if(specializationB.size() == 1){
+		specializationA.clear();
+
+		if(specializationB[0] == "Float"){
+			specializationA.push_back(vectorSpecializations[0]);
+		}
+		else if(specializationB[0] == "FloatArray"){
+			specializationA.push_back(vectorSpecializations[1]);
+		}
 	}
 }
 

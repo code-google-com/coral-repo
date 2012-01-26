@@ -27,7 +27,6 @@
 // </license>
 
 #ifdef CORAL_PARALLEL_TBB
-	#include <Python.h>
 	#include <tbb/parallel_for.h>
 	#include <tbb/task_scheduler_init.h>
 	#include <tbb/mutex.h>
@@ -205,7 +204,8 @@ void Attribute::disconnectInput(){
 			resetInputValuesInChain();
 			cacheEvaluationChain();
 			
-			updateBranchSpecializations(error);
+			bool resetBranchSpecialization = true;
+			updateBranchSpecializations(resetBranchSpecialization);
 			
 			dirty();
 			
@@ -235,7 +235,8 @@ void Attribute::disconnectOutput(Attribute *attribute){
 			
 			cacheEvaluationChain();
 			
-			updateBranchSpecializations(error);
+			bool resetBranchSpecialization = true;
+			updateBranchSpecializations(resetBranchSpecialization);
 			
 			if(parent()){
 				parent()->_attributeConnectionChanged(this);
@@ -496,7 +497,8 @@ bool Attribute::connectTo(Attribute *attribute, ErrorObject *errorObject){
 	
 	cacheEvaluationChain();
 	
-	bool success = updateBranchSpecializations(errorObject);
+	bool resetBranchSpecialization = false;
+	bool success = updateBranchSpecializations(resetBranchSpecialization);
 	
 	if(parent()){
 		parent()->_attributeConnectionChanged(this);
@@ -517,7 +519,9 @@ bool Attribute::connectTo(Attribute *attribute, ErrorObject *errorObject){
 
 void Attribute::forceSpecializationUpdate(){
 	ErrorObject *error = new ErrorObject();
-	updateBranchSpecializations(error);
+
+	bool resetBranchSpecialization = true;
+	updateBranchSpecializations(resetBranchSpecialization);
 	delete error;
 }
 
@@ -608,159 +612,148 @@ std::vector<std::string> Attribute::allowedSpecialization(){
 	return _allowedSpecialization;
 }
 
-Attribute *Attribute::findStrongerSpecializerInBranch(Attribute *attribute, bool linked, std::vector<Attribute*> &processedAttributes, std::map<int, std::vector<std::string> > &specializationMap){
-	Attribute *strongerSpecializer = 0;
-
-	if(attribute != this){
-		if(attribute->isPassThrough() && specializationMap[attribute->id()].size() == 0){
-			strongerSpecializer = this;
-		}
-		else if(specializationContainedOne(specializationMap[id()], specializationMap[attribute->id()]) && linked == false){
-			if(specializationMap[id()].size() <= specializationMap[attribute->id()].size() && !sameSpecialization(specializationMap[id()], specializationMap[attribute->id()])){
-		        strongerSpecializer = this;
+void Attribute::collectSpecializationBranch(std::vector<std::pair<Attribute*, Attribute*> > &specializationPairs, std::vector<std::pair<Attribute*, Attribute*> > &specializationLinks, std::map<int, std::vector<std::string> > &specializationMap, bool reset){
+	int thisId = id();
+	if(specializationMap.find(thisId) == specializationMap.end()){
+		if(reset){
+			if(_specializationOverride.size() == 1){
+				specializationMap[thisId] = _specializationOverride;
 			}
-		}
-	}
-	
-	if(containerUtils::elementInContainer(this, processedAttributes) == false){
-		processedAttributes.push_back(this);
-		
-		for(int i = 0; i < _specializationLinks.size(); ++i){
-			Attribute *attributeA = _specializationLinks[i]->attributeA;
-			Attribute *attributeB = _specializationLinks[i]->attributeB;
-			
-			if(attributeA != this){
-				Attribute *newStrongerSpecializer = attributeA->findStrongerSpecializerInBranch(this, true, processedAttributes, specializationMap);
-				if(newStrongerSpecializer){
-					strongerSpecializer = newStrongerSpecializer;
-				}
+			else{
+				specializationMap[thisId] = _allowedSpecialization;
 			}
-			
-			if(attributeB != this){
-				Attribute *newStrongerSpecializer = attributeB->findStrongerSpecializerInBranch(this, true, processedAttributes, specializationMap);
-				if(newStrongerSpecializer){
-					strongerSpecializer = newStrongerSpecializer;
-				}
-			}
-		}
-		
-		if(_input){
-			Attribute *newStrongerSpecializer = _input->findStrongerSpecializerInBranch(this, false, processedAttributes, specializationMap);
-			if(newStrongerSpecializer){
-				strongerSpecializer = newStrongerSpecializer;
-			}
-		}
-
-		for(int i = 0; i < _outputs.size(); ++i){
-			Attribute *newStrongerSpecializer = _outputs[i]->findStrongerSpecializerInBranch(this, false, processedAttributes, specializationMap);
-			if(newStrongerSpecializer){
-				strongerSpecializer = newStrongerSpecializer;
-			}
-		}
-	}
-	
-	return strongerSpecializer;
-}
-
-void Attribute::initSpecializationMap(std::map<int, std::vector<std::string> > &specializationMap){
-	std::map<int, std::vector<std::string> >::iterator it = specializationMap.find(id());
-	
-	if(it == specializationMap.end()){
-		if(_specializationOverride.size() == 1){
-			specializationMap[id()] = _specializationOverride;
 		}
 		else{
-			specializationMap[id()] = _allowedSpecialization;
+			specializationMap[thisId] = _specialization;
 		}
 		
 		for(int i = 0; i < _specializationLinks.size(); ++i){
 			Attribute *attributeA = _specializationLinks[i]->attributeA;
 			Attribute *attributeB = _specializationLinks[i]->attributeB;
 
-			attributeA->initSpecializationMap(specializationMap);
-			attributeB->initSpecializationMap(specializationMap);
-		}
+			std::pair<Attribute*, Attribute*> specLink(attributeA, attributeB);
+			if(containerUtils::elementInContainer(specLink, specializationLinks) == false){
+				specializationLinks.push_back(specLink);
+			}
 
+			if(this != attributeA){
+				attributeA->collectSpecializationBranch(specializationPairs, specializationLinks, specializationMap, reset);
+			}
+			else{
+				attributeB->collectSpecializationBranch(specializationPairs, specializationLinks, specializationMap, reset);
+			}
+		}
+		
 		if(_input){
-			_input->initSpecializationMap(specializationMap);
+			std::pair<Attribute*, Attribute*> specPair(_input, this);
+			if(containerUtils::elementInContainer(specPair, specializationPairs) == false){
+				specializationPairs.push_back(specPair);
+			}
+
+			_input->collectSpecializationBranch(specializationPairs, specializationLinks, specializationMap, reset);
 		}
 
 		for(int i = 0; i < _outputs.size(); ++i){
-			_outputs[i]->initSpecializationMap(specializationMap);
+			std::pair<Attribute*, Attribute*> specPair(this, _outputs[i]);
+			if(containerUtils::elementInContainer(specPair, specializationPairs) == false){
+				specializationPairs.push_back(specPair);
+			}
+
+			_outputs[i]->collectSpecializationBranch(specializationPairs, specializationLinks, specializationMap, reset);
 		}
 	}
 }
 
-void Attribute::updateAllSpceializationLinks(std::vector<Attribute*> &processedAttributes, std::map<int, std::vector<std::string> > &specializationMap){
-	if(containerUtils::elementInContainer(this, processedAttributes) == false){
-		processedAttributes.push_back(this);
-		
-		for(int i = 0; i < _specializationLinks.size(); ++i){
-			Attribute *attributeA = _specializationLinks[i]->attributeA;
-			Attribute *attributeB = _specializationLinks[i]->attributeB;
-			
-			Node *parentNode = parent();
+bool Attribute::updateSpecialization(std::vector<std::pair<Attribute*, Attribute*> > &specializationPairs, std::vector<std::pair<Attribute*, Attribute*> > &specializationLinks, std::map<int, std::vector<std::string> > &specializationMap){
+	// solve links
+	std::vector<std::pair<Attribute*, Attribute*> >::iterator specLinksIt = specializationLinks.begin();
+	while(specLinksIt != specializationLinks.end()){
+		std::pair<Attribute*, Attribute*> &specLink = *specLinksIt;
+		Attribute *attrA = specLink.first;
+		Attribute *attrB = specLink.second;
+
+		std::vector<std::string> &specA = specializationMap[attrA->id()];
+		std::vector<std::string> &specB = specializationMap[attrB->id()];
+
+		if(specA.size() > 1 || specB.size() > 1){
+			Node *parentNode = attrA->parent();
 			if(parentNode){
-				parentNode->updateSpecializationLink(attributeA, attributeB, specializationMap[attributeA->id()], specializationMap[attributeB->id()]);
+				parentNode->updateSpecializationLink(attrA, attrB, specA, specB);
 			}
-			
-			attributeA->updateAllSpceializationLinks(processedAttributes, specializationMap);
-			attributeB->updateAllSpceializationLinks(processedAttributes, specializationMap);
-		}
-		
-		if(_input){
-			_input->updateAllSpceializationLinks(processedAttributes, specializationMap);
 		}
 
-		for(int i = 0; i < _outputs.size(); ++i){
-			_outputs[i]->updateAllSpceializationLinks(processedAttributes, specializationMap);
-		}
-	}
-}
-
-Attribute* Attribute::findSpecializerInBranch(std::map<int, std::vector<std::string> > &specializationMap){
-	std::vector<Attribute*> processedAttributes;
-	updateAllSpceializationLinks(processedAttributes, specializationMap);
-	processedAttributes.clear();
-	Attribute *specializer = findStrongerSpecializerInBranch(this, false, processedAttributes, specializationMap);
-	
-	return specializer;
-}
-
-bool Attribute::updateBranchSpecializations(ErrorObject *errorObject){
-	bool success = true;
-	std::map<int, std::vector<std::string> > specializationMap;
-	
-	// reset specializations
-	initSpecializationMap(specializationMap);
-	
-	// specialize untill nothing left to be specialized
-	Attribute* specializer = findSpecializerInBranch(specializationMap);
-	
-	int maxRecursion = 100;
-	int i = 0;
-	for(; i < maxRecursion; ++i){
-		if(specializer){
-			std::vector<Attribute*> processedAttributes;
-			bool allowed = specializer->updateSpecialization(specializationMap[specializer->id()], specializationMap, processedAttributes, errorObject);
-			if(!allowed){
-				success = false;
-				break;
-			}
-			
-			specializer = findSpecializerInBranch(specializationMap);
+		if(specA.size() == 1 && specB.size() == 1){
+			specLinksIt = specializationLinks.erase(specLinksIt);
 		}
 		else{
+			++specLinksIt;
+		}
+	}
+
+	// solve pairs
+	bool complete = true;
+	std::vector<std::pair<Attribute*, Attribute*> >::iterator specPairsIt = specializationPairs.begin();
+	while(specPairsIt != specializationPairs.end()){
+		std::pair<Attribute*, Attribute*> &specPair = *specPairsIt;
+
+		Attribute *attrA = specPair.first;
+		Attribute *attrB = specPair.second;
+
+		std::vector<std::string> &specA = specializationMap[attrA->id()];
+		std::vector<std::string> &specB = specializationMap[attrB->id()];
+
+		if(attrA->_passThrough && specA.size() == 0){
+			specA = specB;
+			complete = false;
+		}
+		else if(attrB->_passThrough && specB.size() == 0){
+			specB = specA;
+			complete = false;
+		}
+		else if(specA != specB){
+			std::vector<std::string> newSpec = intersectedSpecialization(specA, specB);
+			
+			specA = newSpec;
+			specB = newSpec;
+			complete = false;
+		}
+
+		if(specA.size() == 1 && specB.size() == 1){
+			specPairsIt = specializationPairs.erase(specPairsIt);
+		}
+		else{
+			++specPairsIt;
+		}
+	}
+
+	return complete;
+}
+
+bool Attribute::updateBranchSpecializations(bool reset){
+	bool success = true;
+
+	// collect
+	std::map<int, std::vector<std::string> > specializationMap;
+	std::vector<std::pair<Attribute*, Attribute*> > specializationPairs;
+	std::vector<std::pair<Attribute*, Attribute*> > specializationLinks;
+	collectSpecializationBranch(specializationPairs, specializationLinks, specializationMap, reset);
+
+	// specialize
+	int maxIter = 100;
+	int i = 0;
+	for(; i < maxIter; ++i){
+		bool complete = updateSpecialization2(specializationPairs, specializationLinks, specializationMap);
+		if(complete){
 			break;
 		}
 	}
-	
-	if(i == maxRecursion){
-		errorObject->setMessage("Maximum recursion reached during specialization.");
+
+	if(i == maxIter){
+		std::cout << "Maximum recursion reached during specialization." << std::endl;
 		success = false;
 	}
-	
-	// set collected specializations
+
+	// set resulting specialization
 	std::map<int, std::vector<std::string> >::iterator specializationMapIt = specializationMap.begin();
 	for(; specializationMapIt != specializationMap.end(); ++specializationMapIt){
 		int id = specializationMapIt->first;
@@ -772,7 +765,7 @@ bool Attribute::updateBranchSpecializations(ErrorObject *errorObject){
 			attribute->setSpecialization(newSpec);
 		}
 	}
-	
+
 	return success;
 }
 
@@ -790,7 +783,7 @@ void Attribute::setSpecialization(const std::vector<std::string> &specialization
 			parentNode->attributeSpecializationChanged(this);
 		}
 		
-		if(_specializationCallBack ){
+		if(_specializationCallBack){
 			_specializationCallBack(this);
 		}
 		
@@ -806,66 +799,6 @@ void Attribute::setSpecialization(const std::vector<std::string> &specialization
 
 std::vector<std::string> Attribute::specialization(){
 	return _specialization;
-}
-
-bool Attribute::updateSpecialization(const std::vector<std::string> &newSpecialization, std::map<int, std::vector<std::string> > &specializationMap, std::vector<Attribute*> &processedAttributes, ErrorObject *errorObject){
-	if(_passThrough && specializationMap[id()].size() == 0){
-		specializationMap[id()] = newSpecialization;
-	}
-	else if(specializationContainedOne(newSpecialization, specializationMap[id()])){
-		if(newSpecialization != specializationMap[id()]){
-			specializationMap[id()] = intersectedSpecialization(newSpecialization, specializationMap[id()]);
-		}
-	}
-	
-	if(containerUtils::elementInContainer(this, processedAttributes)){
-		return true;
-	}
-	
-	processedAttributes.push_back(this);
-	
-	if(_input){
-		bool allow = _input->updateSpecialization(specializationMap[id()], specializationMap, processedAttributes, errorObject);
-		if(!allow){
-			return false;
-		}
-	}
-	
-	for(int i = 0; i < _outputs.size(); ++i){
-		bool allow = _outputs[i]->updateSpecialization(specializationMap[id()], specializationMap, processedAttributes, errorObject);
-		if(!allow){
-			return false;
-		}
-	}
-	
-	Node *parentNode = parent();
-	if(parentNode){
-		for(int i = 0; i < _specializationLinks.size(); ++i){
-			Attribute *attributeA = _specializationLinks[i]->attributeA;
-			Attribute *attributeB = _specializationLinks[i]->attributeB;
-			
-			std::vector<std::string> specializationA = specializationMap[attributeA->id()];
-			std::vector<std::string> specializationB = specializationMap[attributeB->id()];
-			
-			parentNode->updateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
-			
-			if(attributeA != this){
-				bool allow = attributeA->updateSpecialization(specializationA, specializationMap, processedAttributes, errorObject);
-				if(!allow){
-					return false;
-				}
-			}
-			
-			if(attributeB != this){
-				bool allow = attributeB->updateSpecialization(specializationB, specializationMap, processedAttributes, errorObject);
-				if(!allow){
-					return false;
-				}
-			}
-		}
-	}
-	
-	return true;
 }
 
 bool Attribute::allowConnectionTo(Attribute *attribute){
