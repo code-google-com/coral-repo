@@ -39,6 +39,7 @@
 #include "DrawLineNode.h"
 #include "DrawMatrixNode.h"
 #include "DrawGeoInstance.h"
+#include "ShaderNode.h"
 
 using namespace coralUi;
 
@@ -54,4 +55,7 @@ BOOST_PYTHON_MODULE(_coralUi){
 	coral::pythonWrapperUtils::pythonWrapper<DrawLineNode, DrawNode>("DrawLineNode");
 	coral::pythonWrapperUtils::pythonWrapper<DrawMatrixNode, DrawNode>("DrawMatrixNode");
 	coral::pythonWrapperUtils::pythonWrapper<DrawGeoInstance, DrawNode>("DrawGeoInstance");
+	coral::pythonWrapperUtils::pythonWrapper<ShaderNode, DrawNode>("ShaderNode")
+		.def("recompileShader", &ShaderNode::recompileShader)
+		.def("recompileShaderLog", &ShaderNode::recompileShaderLog);
 }

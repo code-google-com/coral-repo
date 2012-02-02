@@ -74,6 +74,7 @@ class CoralAppData:
     collapsedNodeObservers = ObserverCollector()
     nameChangedObservers = ObserverCollector()
     connectedInputObservers = ObserverCollector()
+    removedAttributeObservers = ObserverCollector()
     # attributeValueChangedObservers = ValueChangedObserverCollector()
     initializedNewNetworkObservers = ObserverCollector()
     initializingNewNetworkObservers = ObserverCollector()
@@ -157,14 +158,6 @@ def _notifyInitializingNewNetworkObservers():
     for observer in CoralAppData.initializingNewNetworkObservers.observers():
         observer.notify()
 
-# def addAttributeValueChangedObserver(observer, attribute, callback):
-#     CoralAppData.attributeValueChangedObservers.add(observer, attribute)
-#     observer.setNotificationCallback(callback)
-
-# def _notifyAttributeValueChangedObservers(attribute):
-#     for observer in CoralAppData.attributeValueChangedObservers.observers(attribute.id()):
-#         observer.notify()
-
 def addConnectedInputObserver(observer, attribute, callback):
     CoralAppData.connectedInputObservers.add(observer, subject = attribute.id())
     observer.setNotificationCallback(callback)
@@ -202,6 +195,17 @@ def _notifyAddedAttributeObservers(parentNode, attributeAdded, input = False, ou
         observer.setData("input", input)
         observer.setData("output", output)
         observer.notify()
+
+def addRemovedAttributeObserver(observer, callback):
+    CoralAppData.removedAttributeObservers.add(observer)
+    observer.setNotificationCallback(callback)
+
+def _notifyRemovedAttributeObserver(parentNode, attributeRemoved):
+    for observer in CoralAppData.removedAttributeObservers.observers():
+        observer.setData("parentNodeId", parentNode.id())
+        observer.setData("attributeRemovedId", attributeRemoved.id())
+        observer.notify()
+
 
 def _notifyNodeConnectionChanged(node, attribute):
     for observer in CoralAppData.nodeConnectionChangedObservers.observers(node.id()):
@@ -466,12 +470,13 @@ def init():
     _coral.setCallback("attribute_disconnectInput", _attribute_disconnectInput)
     _coral.setCallback("node_addInputAttribute", _node_addInputAttribute)
     _coral.setCallback("node_addOutputAttribute", _node_addOutputAttribute)
+    _coral.setCallback("node_removeAttribute", _node_removeAttribute)
     _coral.setCallback("node_deleteIt", _node_deleteIt)
     _coral.setCallback("node_connectionChanged", _node_connectionChanged)
     _coral.setCallback("attribute_deleteIt", _attribute_deleteIt)
     _coral.setCallback("nestedObject_setName", _nestedobject_setName)
     _coral.setCallback("attribute_specialization", _attribute_specialization)
-    #_coral.setCallback("attribute_valueChanged", _attribute_valueChanged)
+
 
     if os.environ.has_key("CORAL_PLUGINS_PATH"):
         path = os.environ["CORAL_PLUGINS_PATH"]
@@ -497,6 +502,9 @@ def _node_deleteIt(node):
 
 def _node_addOutputAttribute(parentNode, attributeAdded):
     _notifyAddedAttributeObservers(parentNode, attributeAdded, output = True)
+
+def _node_removeAttribute(parentNode, attributeRemoved):
+    _notifyRemovedAttributeObserver(parentNode, attributeRemoved)
 
 def _node_connectionChanged(node, attribute):
     _notifyNodeConnectionChanged(node, attribute)

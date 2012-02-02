@@ -40,7 +40,7 @@ using namespace coralUi;
 #define DEGTORAD(x) ((x) * 0.01745329251994)		// (x * PI ) / 180.0
 #define RADTODEG(x) ((x) / 0.01745329251994)		// (x * 180.0) / PI
 
-GLfloat lightPosition[] = { 10.f, 7.f, 10.f, 1.f };
+GLfloat lightPosition[] = { 20.f, 50.f, 0.f, 1.f };
 
 GLfloat lightAmbient[] = { .4f, .4f, .4f };
 GLfloat lightDiffuse[] = { .8f, .8f, .8f };
@@ -162,7 +162,7 @@ void Viewport::draw(){
 	if(bHeadLight){
 		// constrain light to camera
 		lightPosition[0] = _modelMatrix.x[3][0];
-		lightPosition[1] = _modelMatrix.x[3][1];
+		lightPosition[1] = _modelMatrix.x[3][1] + 100.0;
 		lightPosition[2] = _modelMatrix.x[3][2];
 		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	}

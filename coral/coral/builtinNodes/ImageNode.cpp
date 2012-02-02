@@ -41,8 +41,6 @@ ImageNode::ImageNode(const std::string &name, Node *parent): Node(name, parent){
 	setAttributeAffect(_fileName, _image);
 
 	setAttributeAllowedSpecialization(_fileName, "String");
-
-	_fileName->outValue()->setStringValue("checker.jpeg");
 }
 ImageNode::~ImageNode(){
 

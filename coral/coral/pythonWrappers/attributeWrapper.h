@@ -75,6 +75,14 @@ boost::python::object attribute_parent(Attribute &self){
 	return parent;
 }
 
+std::vector<Attribute*> attribute_outputs(Attribute &self){
+	return self.outputs();
+}
+
+std::vector<Attribute*> attribute_affectedBy(Attribute &self){
+	return self.affectedBy();
+}
+
 boost::python::object attribute_value(Attribute &self){
 	PyThreadState *state = 0;
 	if(!pythonWrapperUtils::pyGILEnsured){
@@ -195,7 +203,7 @@ void attributeWrapper(){
 		.def("disconnectInput", &Attribute::disconnectInput)
 		.def("isConnectedTo", &Attribute::isConnectedTo)
 		.def("parent", attribute_parent)
-		.def("outputs", &Attribute::outputs)
+		.def("outputs", attribute_outputs)
 		.def("value", attribute_value)
 		.def("deleteIt", &Attribute::deleteIt)
 		.def("isOutput", &Attribute::isOutput)
@@ -203,13 +211,12 @@ void attributeWrapper(){
 		.def("valueChanged", &Attribute::valueChanged)
 		.def("_setValuePtr", attribute_setValuePtr)
 		.def("outValue", attributeoutValue) 
-		// .def("setValueObserved", &Attribute::setValueObserved)
 		.def("_setIsInput", atribute_setIsInput)
 		.def("_setIsOutput", atribute_setIsOutput)
 		.def("specialization", &Attribute::specialization)
 		.def("isPassThrough", &Attribute::isPassThrough)
 		.def("allowedSpecialization", &Attribute::allowedSpecialization)
-		.def("affectedBy", &Attribute::affectedBy)
+		.def("affectedBy", attribute_affectedBy)
 		.def("specializationLinkedTo", &Attribute::specializationLinkedTo)
 		.def("specializationLinkedBy", &Attribute::specializationLinkedBy)
 		.def("isAffectedBy", &Attribute::isAffectedBy)

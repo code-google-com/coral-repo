@@ -66,12 +66,12 @@ public:
     friend std::ostream& operator<<(std::ostream& str, Attribute *attribute);
 	
 	Attribute *input();
-	std::vector<Attribute*> outputs();
+	const std::vector<Attribute*> &outputs();
 	bool isClean();
 	bool isConnectedTo(Attribute *attribute);
 	bool isAffectedBy(Attribute *attribute);
-	std::vector<Attribute*> affectedBy();
-	std::vector<Attribute*> affecting();
+	const std::vector<Attribute*> &affectedBy();
+	const std::vector<Attribute*> &affecting();
 	Node* parent();
 	bool isPassThrough();
 	void disconnectInput();

@@ -36,11 +36,15 @@
 
 using namespace coral;
 
+std::string string_stringValue(String &self){
+	return self.stringValue();
+}
+
 void stringWrapper(){
 	boost::python::class_<String, boost::shared_ptr<String>, boost::python::bases<Value>, boost::noncopyable>("String", boost::python::no_init)
 		.def("__init__", pythonWrapperUtils::__init__<String>)
 		.def("setStringValue", &String::setStringValue)
-		.def("stringValue", &String::stringValue)
+		.def("stringValue", string_stringValue)
 		.def("createUnwrapped", pythonWrapperUtils::createUnwrapped<String>)
 		.staticmethod("createUnwrapped")
 	;

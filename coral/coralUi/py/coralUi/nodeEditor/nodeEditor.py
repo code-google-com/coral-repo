@@ -71,6 +71,7 @@ class NodeEditor(QtGui.QWidget):
     _collapsedNodeObserver = Observer()
     _generatingSaveScriptObserver = Observer()
     _networkLoadedObserver = Observer()
+    _removedAttributeObserver = Observer()
     
     @staticmethod
     def instances():
@@ -211,6 +212,7 @@ class NodeEditor(QtGui.QWidget):
         coralApp.addCollapsedNodeObserver(NodeEditor._collapsedNodeObserver, NodeEditor._coralCollapsedNodeCallback)
         coralApp.addGeneratingSaveScriptObserver(NodeEditor._generatingSaveScriptObserver, NodeEditor._coralGeneratingSaveScriptCallback)
         coralApp.addNetworkLoadedObserver(NodeEditor._networkLoadedObserver, NodeEditor._networkLoadedCallback)
+        coralApp.addRemovedAttributeObserver(NodeEditor._removedAttributeObserver, NodeEditor._removedAttributeCallback)
         
         import nodeEditorCommands
         coralApp.loadPluginModule(nodeEditorCommands)
@@ -274,14 +276,34 @@ class NodeEditor(QtGui.QWidget):
         attributeAddedId = NodeEditor._addedAttributeObserver.data("attributeAddedId")
         
         parentNodeUi = NodeEditor.findNodeUi(parentNodeId)
-        attributeAddedUi = NodeEditor.findAttributeUi(attributeAddedId)
         
-        if parentNodeUi and attributeAddedUi:
+        if parentNodeUi:
+            attributeAddedUi = NodeEditor.findAttributeUi(attributeAddedId)
+            if attributeAddedUi is None:
+                attr = coralApp.findObjectById(attributeAddedId)
+                attributeAddedUi = NodeEditor._createAttributeUi(attr, parentNodeUi)
+                parentNodeUi.addInputAttributeUi(attributeAddedUi)
+                parentNodeUi.updateLayout()
+                
             if NodeEditor._addedAttributeObserver.data("input"):
                 parentNodeUi.addInputAttributeUi(attributeAddedUi)
             else:
                 parentNodeUi.addOutputAttributeUi(attributeAddedUi)
+    
+    @staticmethod
+    def _removedAttributeCallback():
+        parentNodeId = NodeEditor._removedAttributeObserver.data("parentNodeId")
+        attributeAddedId = NodeEditor._removedAttributeObserver.data("attributeRemovedId")
         
+        parentNodeUi = NodeEditor.findNodeUi(parentNodeId)
+        attributeAddedUi = NodeEditor.findAttributeUi(attributeAddedId)
+
+        if parentNodeUi and attributeAddedUi:
+            parentNodeUi.removeAttributeUi(attributeAddedUi)
+            attributeAddedUi.setParentNodeUi(None)
+        
+        parentNodeUi.updateLayout()
+
     @staticmethod
     def _coralAddedNodeCallback():
         parentNodeId = NodeEditor._addedNodeObserver.data("parentNodeId")

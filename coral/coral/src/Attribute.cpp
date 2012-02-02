@@ -275,11 +275,11 @@ bool Attribute::isAffectedBy(Attribute *attribute){
 	return containerUtils::elementInContainer(attribute, _affectedBy);
 }
 
-std::vector<Attribute*> Attribute::affectedBy(){
+const std::vector<Attribute*> &Attribute::affectedBy(){
 	return _affectedBy;
 }
 
-std::vector<Attribute*> Attribute::affecting(){
+const std::vector<Attribute*> &Attribute::affecting(){
 	return _affect;
 }
 
@@ -525,7 +525,7 @@ void Attribute::forceSpecializationUpdate(){
 	delete error;
 }
 
-std::vector<Attribute*> Attribute::outputs(){
+const std::vector<Attribute*> &Attribute::outputs(){
 	return _outputs;
 }
 

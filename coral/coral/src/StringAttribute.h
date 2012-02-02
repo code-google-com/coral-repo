@@ -43,7 +43,7 @@ public:
 		_value = value;
 	}
 
-	std::string stringValue() const{
+	const std::string &stringValue(){
 		return _value;
 	}
 	

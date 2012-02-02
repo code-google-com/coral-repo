@@ -231,13 +231,7 @@ class ProcessSimulationNodeInspectorWidget(NodeInspectorWidget):
     def _addInputClicked(self):
         node = self.coralNode()
         node.addInputData()
-        newAttr = node.inputAttributes()[-1]
         
-        nodeUi = NodeEditor.findNodeUi(node.id())
-        newAttrUi = NodeEditor._createAttributeUi(newAttr, nodeUi)
-        nodeUi.addInputAttributeUi(newAttrUi)
-        nodeUi.updateLayout()
-
         self.nodeInspector().refresh()
 
 class AttributeSpecializationComboBox(QtGui.QComboBox):
@@ -291,12 +285,7 @@ class GeoInstanceGeneratorInspectorWidget(NodeInspectorWidget):
         node = self.coralNode()
         node.addInputGeo();
 
-        newAttr = node.inputAttributes()[-1]
-        
-        nodeUi = NodeEditor.findNodeUi(node.id())
-        newAttrUi = NodeEditor._createAttributeUi(newAttr, nodeUi)
-        nodeUi.addInputAttributeUi(newAttrUi)
-        nodeUi.updateLayout()
+        self.nodeInspector().refresh()
 
 class BuildArrayInspectorWidget(NodeInspectorWidget):
     def __init__(self, coralNode, parentWidget):
@@ -312,13 +301,7 @@ class BuildArrayInspectorWidget(NodeInspectorWidget):
     def _addInputClicked(self):
         node = self.coralNode()
         node.addNumericAttribute()
-        newAttr = node.inputAttributes()[-1]
         
-        nodeUi = NodeEditor.findNodeUi(node.id())
-        newAttrUi = NodeEditor._createAttributeUi(newAttr, nodeUi)
-        nodeUi.addInputAttributeUi(newAttrUi)
-        nodeUi.updateLayout()
-
         self.nodeInspector().refresh()
 
 class TimeNodeInspectorWidget(NodeInspectorWidget):
@@ -463,6 +446,49 @@ class CollapsedNodeUi(NodeUi):
                         finalPos = hookPos - (proxyAttr.inputHook().scenePos() - proxyAttr.scenePos())
                         proxyAttr.setPos(finalPos)
 
+class ShaderNodeInspectorWidget(NodeInspectorWidget):
+    def __init__(self, coralNode, parentWidget):
+        NodeInspectorWidget.__init__(self, coralNode, parentWidget)
+
+        self._log = None
+        self._logTimer = None
+    
+    def _compileShaderButtonClicked(self):
+        node = self.coralNode()
+
+        node.recompileShader()
+
+        self.nodeInspector().refresh()
+
+    def build(self):
+        NodeInspectorWidget.build(self)
+
+        layout = self.layout()
+
+        compileShaderButton = QtGui.QPushButton("compile shader", self)
+        layout.addWidget(compileShaderButton)
+        self.connect(compileShaderButton, QtCore.SIGNAL("clicked()"), self._compileShaderButtonClicked)
+
+        self._log = QtGui.QTextEdit(self)
+        layout.addWidget(self._log)
+        layout.setAlignment(self._log, QtCore.Qt.AlignTop)
+        self._log.setMaximumHeight(100)
+        self._log.setReadOnly(True)
+        self._log.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        
+        palette = self._log.palette()
+        palette.setColor(QtGui.QPalette.Base, QtGui.QColor(50, 55, 60))
+        self._log.setPalette(palette)
+        self._log.setTextColor(QtGui.QColor(200, 190, 200))
+
+        if self._logTimer is not None:
+            self.killTimer(self._logTimer)
+        
+        self._logTimer = self.startTimer(500)
+    
+    def timerEvent(self, event):
+        self._log.setText(self.coralNode().recompileShaderLog())
+
 def loadPluginUi():
     plugin = PluginUi("builtinUis")
     
@@ -486,5 +512,6 @@ def loadPluginUi():
     plugin.registerInspectorWidget("EnumAttribute", EnumAttributeInspectorWidget)
     plugin.registerInspectorWidget("ProcessSimulation", ProcessSimulationNodeInspectorWidget)
     plugin.registerInspectorWidget("GeoInstanceGenerator", GeoInstanceGeneratorInspectorWidget)
+    plugin.registerInspectorWidget("Shader", ShaderNodeInspectorWidget)
     
     return plugin

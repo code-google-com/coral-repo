@@ -415,7 +415,7 @@ std::string Node::asScript(){
 	
 	script += createNodeCmd.asScript() + "\n";
 	
-	if(_dynamicAttributes.size()){
+	if(_allowDynamicAttributes){
 		for(int i = 0; i < _dynamicAttributes.size(); ++i){
 			Attribute *attr = _dynamicAttributes[i];
 		
@@ -598,10 +598,6 @@ int Node::computeTimeSeconds(){
 
 const std::vector<Attribute*> &Node::dynamicAttributes(){
 	return _dynamicAttributes;
-}
-
-void Node::clearDynamicAttributes(){
-	_dynamicAttributes.clear();
 }
 
 void Node::updateAttributeSpecialization(Attribute *attribute){

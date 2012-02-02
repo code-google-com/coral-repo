@@ -81,9 +81,7 @@ public:
 	std::vector<std::string> specializationPresets();
 
 	//!returns the specialization for attribute should this node be set on preset.
-	std::string attributeSpecializationPreset(const std::string &preset, Attribute *attribute);
-	void clearDynamicAttributes();
-	
+	std::string attributeSpecializationPreset(const std::string &preset, Attribute *attribute);	
 
 	//! Returns a python script to recreate all the nodes contained within this node.
 	//! This method will invoke the asScript() virtual method for each contained node, in order to recreate the content of this node.

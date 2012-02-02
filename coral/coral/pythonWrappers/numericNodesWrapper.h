@@ -117,6 +117,16 @@ std::vector<float> numeric_floatValues(Numeric &self){
 	return self.floatValues();
 }
 
+void numeric_setFloatValues(Numeric &self, boost::python::list pyList){
+	std::vector<float> convertedList;
+	for(int i = 0; i < boost::python::len(pyList); ++i){
+		float val = boost::python::extract<float>(pyList[i]);
+		convertedList.push_back(val);
+	}
+
+	self.setFloatValues(convertedList);
+}
+
 std::vector<int> numeric_intValues(Numeric &self){
 	return self.intValues();
 }
@@ -151,7 +161,7 @@ void numericNodesWrapper(){
 		.def("quatValueAt", &Numeric::quatValueAt)
 		.def("matrix44ValueAt", &Numeric::matrix44ValueAt)
 		.def("setIntValues", &Numeric::setIntValues)
-		.def("setFloatValues", &Numeric::setFloatValues)
+		.def("setFloatValues", numeric_setFloatValues)
 		.def("setVec3Values", &Numeric::setVec3Values)
 		.def("setCol4Values", &Numeric::setCol4Values)
 		.def("setMatrix44Values", &Numeric::setMatrix44Values)

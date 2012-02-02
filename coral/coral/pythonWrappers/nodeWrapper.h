@@ -428,7 +428,6 @@ void nodeWrapper(){
 		.def("specializationPresets", &Node::specializationPresets)
 		.def("enableSpecializationPreset", &Node::enableSpecializationPreset)
 		.def("enabledSpecializationPreset", &Node::enabledSpecializationPreset)
-		.def("clearDynamicAttributes", &Node::clearDynamicAttributes)
 		.def("_catchAttributeDirtied", node_catchAttributeDirtied)
 		.def("attributeDirtied", &Node::attributeDirtied, &NodeWrapper::attributeDirtied_default)
 		.def("attributeSpecializationPreset", &Node::attributeSpecializationPreset)

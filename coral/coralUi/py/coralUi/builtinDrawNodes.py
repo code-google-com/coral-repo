@@ -42,5 +42,6 @@ def loadPlugin():
     plugin.registerNode("DrawMatrix", _coralUi.DrawMatrixNode, tags = ["draw"])
     plugin.registerNode("DrawGeoInstance", _coralUi.DrawGeoInstance, tags = ["draw"])
     plugin.registerNode("ViewportCamera", viewportCameraNode.ViewportCameraNode, tags = ["render"], description = "A node to extract informations from the viewport camera.")
+    plugin.registerNode("Shader", _coralUi.ShaderNode, tags = ["draw"])
 
     return plugin
