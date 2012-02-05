@@ -137,11 +137,11 @@ void Node::removeAttribute(Attribute *attribute){
 	}
 	
 	if(removed){
+		removeObject(attribute);
+		
 		if(_removeAttributeCallback && !isDeleted()){
 			_removeAttributeCallback(this, attribute);
 		}
-
-		removeObject(attribute);
 	}
 }
 

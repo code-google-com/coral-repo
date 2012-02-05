@@ -35,7 +35,7 @@
 #include <ImathVec.h>
 #include <pythonWrapperUtils.h>
 
-boost::shared_ptr<Imath::V3f> defaultInit()	{
+boost::shared_ptr<Imath::V3f> vec3_defaultInit()	{
 	return boost::shared_ptr<Imath::V3f>(new Imath::V3f(0.f, 0.f, 0.f));
 }
 
@@ -56,7 +56,7 @@ void vec3fWrapper(){
 	boost::python::to_python_converter<std::vector<Imath::V3f >, coral::pythonWrapperUtils::stdVectorToPythonList<Imath::V3f > >();
 
 	boost::python::class_<Imath::V3f>("Vec3f")
-		.def("__init__", boost::python::make_constructor(defaultInit))
+		.def("__init__", boost::python::make_constructor(vec3_defaultInit))
 		.def(boost::python::init<float, float, float>())
 		.def(boost::python::init<Imath::V3f>())
 		.def_readwrite("x", &Imath::V3f::x)

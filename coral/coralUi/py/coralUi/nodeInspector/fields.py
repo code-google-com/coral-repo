@@ -35,6 +35,7 @@ from .. import mainWindow
 from ... import coralApp
 from ... import utils
 from ...observer import Observer
+from ... import Imath
 
 class ObjectField(QtGui.QWidget):
     def __init__(self, label, coralObject, parentWidget):
@@ -55,11 +56,12 @@ class ObjectField(QtGui.QWidget):
     def valueWidget(self):
         return self._valueWidget
     
-    def setObjectWidget(self, widget, endOfEditSignal, endOfEditCallback):
+    def setObjectWidget(self, widget, endOfEditSignal = None, endOfEditCallback = None):
         self._valueWidget = widget
         self._mainLayout.addWidget(widget)
         
-        self.connect(self._valueWidget, QtCore.SIGNAL(endOfEditSignal), endOfEditCallback)
+        if endOfEditSignal:
+            self.connect(self._valueWidget, QtCore.SIGNAL(endOfEditSignal), endOfEditCallback)
     
     def coralObject(self):
         return self._coralObject()
@@ -104,7 +106,7 @@ class AttributeField(ObjectField):
     def setAttributeValue(self, attribute, value):
         pass
     
-    def setAttributeWidget(self, widget, endOfEditSignal):
+    def setAttributeWidget(self, widget, endOfEditSignal = None):
         ObjectField.setObjectWidget(self, widget, endOfEditSignal, self.widgetValueChanged)
 
         attribute = self.coralObject()
@@ -306,4 +308,66 @@ class NameField(ObjectField):
         newName = self.coralObject().name()
         if newName != str(self.valueWidget().text()):
             self.valueWidget().setText(newName)
+
+
+class ColorField(AttributeField):
+    def __init__(self, coralAttribute, parentWidget):
+        AttributeField.__init__(self, coralAttribute, parentWidget)
+
+        self._colorButton = QtGui.QPushButton(self)
+        self.setAttributeWidget(self._colorButton)
+
+        self.connect(self._colorButton, QtCore.SIGNAL("clicked()"), self._colButtonClicked)
+    
+    def _colorDialogChangedColor(self, color):
+        rgbStr = str(255*color.redF()) + "," + str(255*color.greenF()) + "," + str(255*color.blueF()) + "," + str(255*color.alphaF())
+        self._colorButton.setStyleSheet("background-color: rgba(" + rgbStr + ");")
+        self._colorButton.setText(str(round(color.redF(), 2)) + ", " + str(round(color.greenF(), 2)) + ", " + str(round(color.blueF(), 2)) + ", " + str(round(color.alphaF(), 2)))
         
+        self.widgetValueChanged()
+
+    def _colButtonClicked(self):
+        self.killTimer(self._timer)
+
+        col = self._colorButton.palette().background().color()
+        colDialog = QtGui.QColorDialog(col, self)
+        colDialog.setOption(QtGui.QColorDialog.DontUseNativeDialog, True)
+        colDialog.setOption(QtGui.QColorDialog.ShowAlphaChannel, True)
+        self.connect(colDialog, QtCore.SIGNAL("currentColorChanged(const QColor&)"), self._colorDialogChangedColor)
+        colDialog.exec_()
+
+        newCol = col
+        if colDialog.result():
+            newCol = colDialog.selectedColor()
+
+        rgbStr = str(255*newCol.redF()) + "," + str(255*newCol.greenF()) + "," + str(255*newCol.blueF()) + "," + str(255*newCol.alphaF())
+        self._colorButton.setStyleSheet("background-color: rgba(" + rgbStr + ");")
+        self._colorButton.setText(str(round(newCol.redF(), 2)) + ", " + str(round(newCol.greenF(), 2)) + ", " + str(round(newCol.blueF(), 2)) + ", " + str(round(newCol.alphaF(), 2)))
+        
+        self.widgetValueChanged()
+
+        self._timer = self.startTimer(500)
+
+    def setAttributeValue(self, attribute, value):
+        attribute.outValue().setCol4ValueAt(0, Imath.Color4f(value[0], value[1], value[2], value[3]))
+    
+    def getAttributeValue(self, attribute):
+        col = attribute.value().col4ValueAt(0)
+        return [col.r, col.g, col.b, col.a]
+    
+    def setWidgetValue(self, widget, value):
+        for i in range(4):
+            val = value[i]
+            if val < 0.0:
+                value[i] = 0.0
+            elif val > 1.0:
+                value[i] = 1.0
+        
+        rgbStr = str(255*value[0]) + "," + str(255*value[1]) + "," + str(255*value[2]) + "," + str(255.0*value[3])
+        self._colorButton.setStyleSheet("background-color: rgba(" + rgbStr + ");")
+        self._colorButton.setText(str(round(value[0], 2)) + ", " + str(round(value[1], 2)) + ", " + str(round(value[2], 2)) + ", " + str(round(value[3], 2)))
+    
+    def getWidgetValue(self, widget):
+        col = self._colorButton.palette().background().color()
+        return [col.redF(), col.greenF(), col.blueF(), col.alphaF()]
+

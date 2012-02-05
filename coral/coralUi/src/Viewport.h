@@ -51,6 +51,7 @@ public:
 	float fov();
 	float zNear();
 	float zFar();
+	void setGridVisible(bool value);
 
 private:
 	void prepareForDrawing();
@@ -65,6 +66,7 @@ private:
 	int _width, _height;
 	bool _initialized;
 	bool _isProjDirty;
+	bool _gridVisible;
 };
 
 }

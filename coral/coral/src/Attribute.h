@@ -125,9 +125,9 @@ public:
 	static void(*_specializationCallBack)(Attribute *self);
 	// static void(*_valueChangedCallback)(Attribute *self);
 	static void queueDirtyingDoneCallback(void(*callback)(Attribute *));
-	
-protected:
 	void setValuePtr(Value *value);
+protected:
+	
 	void setPassThrough(bool value);
 	void setIsOutput(bool value);
 	void setIsInput(bool value);

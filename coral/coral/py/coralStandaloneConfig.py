@@ -123,6 +123,17 @@ def _nodeBoxSearch():
     from coral.coralUi.nodeBox import NodeBox 
     NodeBox.enableQuickSearch()
 
+gridVisibilityToggle = True
+def _toggleGrid():
+    global gridVisibilityToggle
+    gridVisibilityToggle = not gridVisibilityToggle
+
+    from coral.coralUi import viewport
+    for v in viewport.instancedViewports():
+        v.setGridVisible(gridVisibilityToggle)
+    
+    viewport.ViewportWidget.refreshViewports()
+    
 def apply():
     #imports here to avoid cycles
     from coral.coralUi import coralUi
@@ -184,7 +195,8 @@ def apply():
         "G": _collapseClicked,
         "Ctrl+S": _saveNetworkClicked,
         "Ctrl+O": _openNetworkClicked,
-        "Shift+Tab": _nodeBoxSearch}
+        "Shift+Tab": _nodeBoxSearch,
+        "H": _toggleGrid}
     
     mainWin.setShortcutsMap(shprtcutsMap)
     

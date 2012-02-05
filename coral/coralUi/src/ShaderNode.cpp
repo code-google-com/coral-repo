@@ -106,26 +106,24 @@ namespace {
 
 		void update(){
 			glActiveTexture(GL_TEXTURE0 + 0);
-			glBindTexture(GL_TEXTURE_2D, _texture);
 
-			glUniform1i(_uniformLocation, 0);
+			GLuint unifLocation = glGetUniformLocation(_shaderProgram, _attribute->name().data());
+			glUniform1i(unifLocation, 0);
 
-			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, _texture);
 		}
 		
 		void dirtied(){
-			Image *image = (Image*)_attribute->value();
-
 			glActiveTexture(GL_TEXTURE0 + 0);
 			glBindTexture(GL_TEXTURE_2D, _texture);
 
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+			Image *image = (Image*)_attribute->value();
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, image->width(), image->height(), 0, GL_RGB, GL_FLOAT, image->pixels());
 		}
 
@@ -523,9 +521,9 @@ void ShaderNode::draw(){
 
 		glUseProgram(_shaderProgram);
 
-		updateUniforms();
-
 		enableShaderAttributes();
+
+		updateUniforms();
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(1.f, 1.f);
@@ -545,6 +543,8 @@ void ShaderNode::draw(){
 		glTexCoordPointer(2, GL_FLOAT, 0, NULL);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+		//glEnable(GL_TEXTURE_2D);
+
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
 
@@ -558,6 +558,10 @@ void ShaderNode::draw(){
 		}
 
 		glDisable(GL_COLOR_MATERIAL);
+
+		glDisable(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glDisableClientState(GL_COLOR_ARRAY);
 
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);

@@ -293,16 +293,16 @@ class NodeEditor(QtGui.QWidget):
     @staticmethod
     def _removedAttributeCallback():
         parentNodeId = NodeEditor._removedAttributeObserver.data("parentNodeId")
-        attributeAddedId = NodeEditor._removedAttributeObserver.data("attributeRemovedId")
-        
         parentNodeUi = NodeEditor.findNodeUi(parentNodeId)
-        attributeAddedUi = NodeEditor.findAttributeUi(attributeAddedId)
-
+        
         if parentNodeUi and attributeAddedUi:
+            attributeAddedId = NodeEditor._removedAttributeObserver.data("attributeRemovedId")
+            attributeAddedUi = NodeEditor.findAttributeUi(attributeAddedId)
+
             parentNodeUi.removeAttributeUi(attributeAddedUi)
             attributeAddedUi.setParentNodeUi(None)
         
-        parentNodeUi.updateLayout()
+            parentNodeUi.updateLayout()
 
     @staticmethod
     def _coralAddedNodeCallback():

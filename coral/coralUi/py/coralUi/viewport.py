@@ -79,7 +79,7 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
         ViewportData._viewports.append(weakref.ref(self._viewport))
 
         self._timer = -1
-
+    
     def _changeRefreshMode(self, mode):
         if mode == ViewportGlWidget.timedRefresh:
             if self._timer == -1:

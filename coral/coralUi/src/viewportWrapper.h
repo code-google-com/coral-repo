@@ -52,6 +52,7 @@ void viewportWrapper(){
 		.def("fov", &Viewport::fov)
 		.def("zNear", &Viewport::zNear)
 		.def("zFar", &Viewport::zFar)
+		.def("setGridVisible", &Viewport::setGridVisible)
 		;
 }
 

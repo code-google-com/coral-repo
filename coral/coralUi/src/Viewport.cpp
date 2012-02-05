@@ -61,7 +61,8 @@ Viewport::Viewport() :
 _initialized(false),
 _width(0), _height(0),
 _fov(60.0), _roll(0.0), _zNear(0.01), _zFar(1000.0),
-_isProjDirty(true)
+_isProjDirty(true),
+_gridVisible(true)
 {
 	_modelMatrix.setTranslation(Imath::V3f(0.f, 0.f, 10.f));
 	_target.setValue(0.f, 0.f, 0.f);
@@ -139,8 +140,11 @@ void Viewport::prepareForDrawing(){
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, defaultShininess);
 }
 
+void Viewport::setGridVisible(bool value){
+	_gridVisible = value;
+}
+
 void Viewport::draw(){
-	bool bGrid = true;
 	bool bHeadLight = true;
 	
 	glClearColor(0, 0, 0, 0);
@@ -151,7 +155,7 @@ void Viewport::draw(){
 	glDisable(GL_LIGHTING);
 	glShadeModel(GL_FLAT);
 	
-	if(bGrid)
+	if(_gridVisible)
 		drawGrid();
 	
 	drawAxis();

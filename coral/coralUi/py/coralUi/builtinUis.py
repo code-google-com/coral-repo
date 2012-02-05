@@ -39,7 +39,7 @@ from nodeEditor.attributeUi import AttributeUi
 from nodeEditor.connectionHook import ConnectionHook
 from nodeEditor.connection import Connection
 from nodeEditor.nodeEditor import NodeEditor
-from nodeInspector.fields import IntValueField, FloatValueField, BoolValueField, StringValueField
+from nodeInspector.fields import IntValueField, FloatValueField, BoolValueField, StringValueField, ColorField
 from nodeInspector.nodeInspector import NodeInspector, NodeInspectorWidget, AttributeInspectorWidget
 import mainWindow
 import viewport
@@ -132,6 +132,11 @@ class NumericAttributeInspectorWidget(AttributeInspectorWidget):
             elif specializationType == numericValue.numericTypeFloatArray:
                 if numericAttribute.value().size() == 1:
                     valueField = FloatValueField(attr, self)
+            elif specializationType == numericValue.numericTypeCol4:
+                valueField = ColorField(attr, self)
+            elif specializationType == numericValue.numericTypeCol4Array:
+                if numericAttribute.value().size() == 1:
+                    valueField = ColorField(attr, self)
         
             self._valueField = valueField
         
