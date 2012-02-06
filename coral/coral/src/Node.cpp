@@ -138,10 +138,6 @@ void Node::removeAttribute(Attribute *attribute){
 	
 	if(removed){
 		removeObject(attribute);
-		
-		if(_removeAttributeCallback && !isDeleted()){
-			_removeAttributeCallback(this, attribute);
-		}
 	}
 }
 
@@ -377,6 +373,10 @@ void Node::addDynamicAttribute(Attribute *attribute){
 
 void Node::removeDynamicAttribute(Attribute *attribute){
 	if(containerUtils::elementInContainer(attribute, _dynamicAttributes)){
+		if(_removeAttributeCallback && !isDeleted()){
+			_removeAttributeCallback(this, attribute);
+		}
+		
 		containerUtils::eraseElementInContainer(attribute, _dynamicAttributes);
 	}
 }
