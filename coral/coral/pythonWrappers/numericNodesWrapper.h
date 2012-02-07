@@ -142,6 +142,7 @@ void numericNodesWrapper(){
 		.def("type", numeric_type)
 		.def("isArray", &Numeric::isArray)
 		.def("size", &Numeric::size)
+		.def("resize", &Numeric::resize)
 		.def("setIntValueAt", &Numeric::setIntValueAt)
 		.def("setFloatValueAt", &Numeric::setFloatValueAt)
 		.def("setVec3ValueAt", &Numeric::setVec3ValueAt)

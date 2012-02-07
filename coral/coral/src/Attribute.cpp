@@ -665,6 +665,8 @@ void Attribute::collectSpecializationBranch(std::vector<std::pair<Attribute*, At
 }
 
 bool Attribute::updateSpecialization(std::vector<std::pair<Attribute*, Attribute*> > &specializationPairs, std::vector<std::pair<Attribute*, Attribute*> > &specializationLinks, std::map<int, std::vector<std::string> > &specializationMap){
+	int oldUnresolved = specializationLinks.size() + specializationPairs.size();
+
 	// solve links
 	std::vector<std::pair<Attribute*, Attribute*> >::iterator specLinksIt = specializationLinks.begin();
 	while(specLinksIt != specializationLinks.end()){
@@ -691,7 +693,6 @@ bool Attribute::updateSpecialization(std::vector<std::pair<Attribute*, Attribute
 	}
 
 	// solve pairs
-	bool complete = true;
 	std::vector<std::pair<Attribute*, Attribute*> >::iterator specPairsIt = specializationPairs.begin();
 	while(specPairsIt != specializationPairs.end()){
 		std::pair<Attribute*, Attribute*> &specPair = *specPairsIt;
@@ -704,18 +705,15 @@ bool Attribute::updateSpecialization(std::vector<std::pair<Attribute*, Attribute
 
 		if(attrA->_passThrough && specA.size() == 0){
 			specA = specB;
-			complete = false;
 		}
 		else if(attrB->_passThrough && specB.size() == 0){
 			specB = specA;
-			complete = false;
 		}
 		else if(specA != specB){
 			std::vector<std::string> newSpec = intersectedSpecialization(specA, specB);
 			
 			specA = newSpec;
 			specB = newSpec;
-			complete = false;
 		}
 
 		if(specA.size() == 1 && specB.size() == 1){
@@ -724,6 +722,13 @@ bool Attribute::updateSpecialization(std::vector<std::pair<Attribute*, Attribute
 		else{
 			++specPairsIt;
 		}
+	}
+
+	int currentUnresolved = specializationLinks.size() + specializationPairs.size();
+
+	bool complete = false;
+	if(oldUnresolved == currentUnresolved){
+		complete = true;
 	}
 
 	return complete;

@@ -55,12 +55,15 @@ private:
 	coral::NumericAttribute *_points;
 	coral::NumericAttribute *_thickness;
 	coral::NumericAttribute *_colors;
+	coral::NumericAttribute *_pointsPerStrand;
 
 	bool _shouldUpdatePointValues;
 	bool _shouldUpdateColorValues;
+	bool _shouldUpdateStrands;
 
 	void updatePointValues();
 	void updateColorValues();
+	void updateStrands();
 	void drawLines();
 
 	bool _useSingleColor;	// define if we use the color array store in VBO or the single color for everyone
@@ -74,6 +77,9 @@ private:
 	GLuint _shaderProgram;	// the main shader program (only a vertex shader actually
 	GLuint _pointIndexAttr;	// uniform indices
 	GLuint _colorIndexAttr;
+	std::vector<int> _strandsFirstPoint;
+	std::vector<int> _strandsPointCount;
+	int _strandsCount;
 };
 
 }
