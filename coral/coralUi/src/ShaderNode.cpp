@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 #include "ShaderNode.h"
 #include <coral/src/stringUtils.h>
