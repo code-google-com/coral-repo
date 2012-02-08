@@ -34,10 +34,14 @@
 
 #include "coralUiDefinitions.h"
 
+// Forward declaration of a namespace-ed class
+namespace coral {
+	class Attribute;
+}
+
 namespace coralUi{
 	
 class ViewportOutputAttribute;
-class coral::Attribute;
 
 //! Base class to nodes willing to draw OpenGL content in the viewport.
 class CORALUI_EXPORT DrawNode : public coral::Node{
