@@ -304,6 +304,7 @@ public:
 private:
 	NumericAttribute *_min;
 	NumericAttribute *_max;
+	NumericAttribute *_seed;
 	NumericAttribute *_out;
 	void(RandomNumber::*_selectedOperation)(Numeric *, Numeric *, Numeric *);
 	
@@ -454,6 +455,19 @@ public:
 private:
 	NumericAttribute *_quat;
 	NumericAttribute *_matrix;
+};
+
+class StrandsNode: public Node{
+public:
+	StrandsNode(const std::string &name, Node *parent);
+	void update(Attribute *attribute);
+
+private:
+	NumericAttribute *_subdivide;
+	NumericAttribute *_root;
+	NumericAttribute *_slice;
+	NumericAttribute *_strands;
+	NumericAttribute *_pointsPerStrand;
 };
 
 }

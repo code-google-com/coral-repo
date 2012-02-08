@@ -147,6 +147,8 @@ class MainWindow(QtGui.QMainWindow):
             self.move(geometry[0], geometry[1])
             self.resize(geometry[2], geometry[3])
         
+        self.restoreState(settings.value("mainWinState").toByteArray())
+        
         lastFileDialogDir = settings.value("lastFileDialogDir").toString()
         if lastFileDialogDir:
             MainWindow._lastFileDialogDir = lastFileDialogDir
@@ -165,6 +167,7 @@ class MainWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         settings = self.settings()
         settings.setValue("mainWinGeometry", str([self.pos().x(), self.pos().y(), self.size().width(), self.size().height()]))
+        settings.setValue("mainWinState", self.saveState())
         
         openWidgets = []
         for dockWidget in self.dockWidgets():
@@ -175,8 +178,8 @@ class MainWindow(QtGui.QMainWindow):
             dockWidget.closeEvent(event)
         
         settings.setValue("openWidgets", str(openWidgets))
-        
         settings.setValue("lastFileDialogDir", MainWindow._lastFileDialogDir)
+        settings.setValue("settingsStored", True)
         
         QtGui.QMainWindow.closeEvent(self, event)
 

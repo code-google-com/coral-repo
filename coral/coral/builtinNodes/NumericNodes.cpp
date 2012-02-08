@@ -1696,14 +1696,17 @@ RandomNumber::RandomNumber(const std::string &name, Node* parent):
 	_selectedOperation(0){	
 	_min = new NumericAttribute("min", this);
 	_max = new NumericAttribute("max", this);
+	_seed = new NumericAttribute("seed", this);
 	_out = new NumericAttribute("out", this);
 	
 	addInputAttribute(_min);
 	addInputAttribute(_max);
+	addInputAttribute(_seed);
 	addOutputAttribute(_out);
 	
 	setAttributeAffect(_min, _out);
 	setAttributeAffect(_max, _out);
+	setAttributeAffect(_seed, _out);
 	
 	std::vector<std::string> specialization;
 	specialization.push_back("Float");
@@ -1713,6 +1716,7 @@ RandomNumber::RandomNumber(const std::string &name, Node* parent):
 	
 	setAttributeAllowedSpecializations(_min, specialization);
 	setAttributeAllowedSpecializations(_max, specialization);
+	setAttributeAllowedSpecialization(_seed, "Int");
 	setAttributeAllowedSpecializations(_out, specialization);
 	
 	addAttributeSpecializationLink(_min, _out);
@@ -1745,6 +1749,11 @@ void RandomNumber::attributeSpecializationChanged(Attribute *attribute){
 void RandomNumber::updateFloat(Numeric *min, Numeric *max, Numeric *out){
 	float minVal = min->floatValueAt(0);
 	float maxVal = max->floatValueAt(0);
+
+	srand(_seed->value()->intValueAt(0));
+	for(float i = minVal; i < maxVal; ++i){
+		rand();
+	}
 	
 	float outVal = ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
 
@@ -1753,11 +1762,12 @@ void RandomNumber::updateFloat(Numeric *min, Numeric *max, Numeric *out){
 
 void RandomNumber::updateFloatArray(Numeric *min, Numeric *max, Numeric *out){
 	NumericAttribute *attrs[] = {_min, _max};
-			
+	
 	int minorSize = findMinorNumericSize(attrs, 2);
 	if(minorSize < 1)
 		minorSize = 1;
 	
+	srand(_seed->value()->intValueAt(0));
 	std::vector<float> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
 		float minVal = min->floatValueAt(i);
@@ -1772,7 +1782,12 @@ void RandomNumber::updateFloatArray(Numeric *min, Numeric *max, Numeric *out){
 void RandomNumber::updateInt(Numeric *min, Numeric *max, Numeric *out){
 	int minVal = min->intValueAt(0);
 	int maxVal = max->intValueAt(0);
-	
+
+	srand(_seed->value()->intValueAt(0));
+	for(int i = minVal; i < maxVal; ++i){
+		rand();
+	}
+
 	int outVal = minVal + (int) (maxVal - minVal + 1)*(rand() / (RAND_MAX + 1.0));
 
 	out->setIntValueAt(0, outVal);
@@ -1785,6 +1800,7 @@ void RandomNumber::updateIntArray(Numeric *min, Numeric *max, Numeric *out){
 	if(minorSize < 1)
 		minorSize = 1;
 	
+	srand(_seed->value()->intValueAt(0));
 	std::vector<int> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
 		int minVal = min->intValueAt(i);
@@ -2716,5 +2732,94 @@ void Matrix44ToQuat::update(Attribute *attribute)
 	setAttributeIsClean(_quat, true);
 }
 
+StrandsNode::StrandsNode(const std::string &name, Node *parent): Node(name, parent){
+	_subdivide = new NumericAttribute("subdivide", this);
+	_root = new NumericAttribute("root", this);
+	_slice = new NumericAttribute("slice", this);
+	_strands = new NumericAttribute("strands", this);
+	_pointsPerStrand = new NumericAttribute("pointsPerStrand", this);
 
+	addInputAttribute(_subdivide);
+	addInputAttribute(_root);
+	addInputAttribute(_slice);
+	addOutputAttribute(_strands);
+	addOutputAttribute(_pointsPerStrand);
+
+	setAttributeAllowedSpecialization(_subdivide, "Int");
+	setAttributeAllowedSpecialization(_root, "Vec3Array");
+	setAttributeAllowedSpecialization(_slice, "Vec3Array");
+	setAttributeAllowedSpecialization(_strands, "Vec3Array");
+	setAttributeAllowedSpecialization(_pointsPerStrand, "Int");
+
+	setAttributeAffect(_subdivide, _strands);
+	setAttributeAffect(_subdivide, _pointsPerStrand);
+	setAttributeAffect(_root, _strands);
+	setAttributeAffect(_root, _pointsPerStrand);
+	setAttributeAffect(_slice, _strands);
+	setAttributeAffect(_slice, _pointsPerStrand);
+	setAttributeAffect(_slice, _strands);
+	setAttributeAffect(_slice, _pointsPerStrand);
+}
+
+void StrandsNode::update(Attribute *attribute){
+	const std::vector<Attribute*> &dynAttrs = dynamicAttributes();
+
+	int totalSlices = 2 + dynAttrs.size();
+	std::vector<const std::vector<Imath::V3f>* > slices(totalSlices);
+	slices[0] = &_root->value()->vec3Values();
+	slices[1] = &_slice->value()->vec3Values();
+
+	int totalStrands = slices[0]->size();
+	if(slices[1]->size() < totalStrands){
+		totalStrands = slices[1]->size();
+	}
+
+	for(int i = 0; i < dynAttrs.size(); ++i){
+		slices[i + 2] = &((Numeric*)dynAttrs[i]->value())->vec3Values(); 
+		int pointsInSlice = slices[i + 2]->size();
+		if(pointsInSlice < totalStrands){
+			totalStrands = pointsInSlice;
+		}
+	}
+
+	int subdivide = _subdivide->value()->intValueAt(0);
+	if(subdivide < 0){
+		subdivide = 0;
+		_subdivide->outValue()->setIntValueAt(0, 0);
+	}
+
+	int pointsPerStrand = totalSlices + ((totalSlices - 1) * subdivide);
+	std::vector<Imath::V3f> strands(pointsPerStrand * totalStrands);
+	
+	float subdivStep = 1.0 / (subdivide + 1.0);
+		
+	int pointId = 0;
+	for(int strandId = 0; strandId < totalStrands; ++strandId){
+		for(int sliceId = 0; sliceId < totalSlices; ++sliceId){
+			const std::vector<Imath::V3f> slice = *slices[sliceId];
+
+			const Imath::V3f &pointA = slice[strandId];
+			strands[pointId] = pointA;
+			pointId += 1;
+			
+			if(subdivide){
+				if(sliceId < totalSlices - 1){
+					// populate subdivisions between slice and nextSlice
+					const std::vector<Imath::V3f> nextSlice = *slices[sliceId + 1];
+					const Imath::V3f &pointB = nextSlice[strandId];
+
+					Imath::V3f ab = pointB - pointA;
+
+					for(int subdiv = 0; subdiv < subdivide; ++subdiv){
+						strands[pointId] = pointA + (ab * (subdivStep * (subdiv + 1)));
+						pointId += 1;
+					}
+				}
+			}
+		}
+	}
+
+	_strands->outValue()->setVec3Values(strands);
+	_pointsPerStrand->outValue()->setIntValueAt(0, pointsPerStrand);
+}
 

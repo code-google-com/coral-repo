@@ -150,16 +150,18 @@ def apply():
     mainWin = MainWindow.globalInstance()
     mainWin.setWindowTitle("coral standalone")
     
-    nodeBox = NodeBox(mainWin)
-    nodeBoxDock = mainWin.dockWidget(nodeBox, QtCore.Qt.LeftDockWidgetArea)
+    settingsStored = mainWin.settings().value("settingsStored").toBool()
+    if not settingsStored:
+        nodeBox = NodeBox(mainWin)
+        nodeBoxDock = mainWin.dockWidget(nodeBox, QtCore.Qt.LeftDockWidgetArea)
+    
+        nodeInspector = NodeInspector(mainWin)
+        mainWin.dockWidget(nodeInspector, QtCore.Qt.RightDockWidgetArea)
     
     nodeEditor = NodeEditor(mainWin)
     mainWin.setCentralWidget(nodeEditor)
     nodeEditor.nodeView().centerOn(0.0, 0.0)
-    
-    nodeInspector = NodeInspector(mainWin)
-    mainWin.dockWidget(nodeInspector, QtCore.Qt.RightDockWidgetArea)
-    
+
     mainWin.registerWidget("node editor", NodeEditor)
     mainWin.registerWidget("node box", NodeBox)
     mainWin.registerWidget("node inspector", NodeInspector)

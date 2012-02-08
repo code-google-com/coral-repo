@@ -220,6 +220,7 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<SetArrayElement, Node>("SetArrayElement");
 	pythonWrapperUtils::pythonWrapper<GetSimulationStep, Node>("GetSimulationStep");
 	pythonWrapperUtils::pythonWrapper<SetSimulationStep, Node>("SetSimulationStep");
+	pythonWrapperUtils::pythonWrapper<StrandsNode, Node>("StrandsNode");
 }
 
 #endif

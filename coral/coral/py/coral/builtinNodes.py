@@ -67,6 +67,7 @@ def loadPlugin():
     plugin.registerNode("GetSimulationStep", _coral.GetSimulationStep, tags = ["numeric", "simulation"], description = "Get the values stored by SetSimulationStep and reuse them in the simulation step.\nWhen the step attribute is set to 0 the simulation is reset and the data is taken from the source.")
     plugin.registerNode("SetSimulationStep", _coral.SetSimulationStep, tags = ["numeric", "simulation"], description = "Set some numeric values and make them available to a GetSimulationStep node connected to the same source.\n")
     plugin.registerNode("FindPointsInRange", _coral.FindPointsInRange, tags = ["numeric"])
+    plugin.registerNode("Strands", _coral.StrandsNode, tags = ["numeric", "fur"])
 
     plugin.registerNode("Add", _coral.AddNode, tags = ["math"])
     plugin.registerNode("Sub", _coral.SubNode, tags = ["math"])
