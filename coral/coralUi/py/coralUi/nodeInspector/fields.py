@@ -74,8 +74,10 @@ class AttributeField(ObjectField):
         self._timer = self.startTimer(500)
     
     def timerEvent(self, event):
-        if self.valueWidget().hasFocus() == False:
-            self.attributeValueChanged()
+        valueWidget = self.valueWidget()
+        if valueWidget:
+            if valueWidget.hasFocus() == False:
+                self.attributeValueChanged()
 
     def widgetValueChanged(self):
         value = self.getWidgetValue(self.valueWidget())
