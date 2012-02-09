@@ -163,12 +163,14 @@ DrawNode(name, parent){
 }
 
 ShaderNode::~ShaderNode(){
-	glDeleteBuffers(1, &_vtxBuffer);
-	glDeleteBuffers(1, &_nrmBuffer);
-	glDeleteBuffers(1, &_idxBuffer);
-	glDeleteBuffers(1, &_uvBuffer);
+	if(glContextExists()){
+		glDeleteBuffers(1, &_vtxBuffer);
+		glDeleteBuffers(1, &_nrmBuffer);
+		glDeleteBuffers(1, &_idxBuffer);
+		glDeleteBuffers(1, &_uvBuffer);
 
-	clearDynamicGLData();
+		clearDynamicGLData();
+	}
 }
 
 std::string ShaderNode::recompileShaderLog(){
@@ -425,20 +427,22 @@ void ShaderNode::recompileShader(){
 void ShaderNode::attributeDirtied(Attribute *attribute){
 	DrawNode::attributeDirtied(attribute);
 
-	if(!_initialized){
-		if(attribute == _vertexShaderFilename || attribute == _fragmentShaderFilename){
-			std::string vertexShaderFilename = _vertexShaderFilename->value()->stringValue();
-			std::string fragmentShaderFilename = _fragmentShaderFilename->value()->stringValue();
+	if(glContextExists()){
+		if(!_initialized){
+			if(attribute == _vertexShaderFilename || attribute == _fragmentShaderFilename){
+				std::string vertexShaderFilename = _vertexShaderFilename->value()->stringValue();
+				std::string fragmentShaderFilename = _fragmentShaderFilename->value()->stringValue();
 
-			if(!vertexShaderFilename.empty() && !fragmentShaderFilename.empty()){
-				recompileShader();
-				_initialized = true;
+				if(!vertexShaderFilename.empty() && !fragmentShaderFilename.empty()){
+					recompileShader();
+					_initialized = true;
+				}
 			}
 		}
-	}
-	else{
-		if(_dirtiedUniforms.find(attribute) != _dirtiedUniforms.end()){
-			_dirtiedUniforms[attribute]->dirtied();
+		else{
+			if(_dirtiedUniforms.find(attribute) != _dirtiedUniforms.end()){
+				_dirtiedUniforms[attribute]->dirtied();
+			}
 		}
 	}
 }
