@@ -42,66 +42,17 @@ ImageNode::ImageNode(const std::string &name, Node *parent): Node(name, parent){
 
 	setAttributeAllowedSpecialization(_fileName, "String");
 }
+
 ImageNode::~ImageNode(){
 
 }
 
 void ImageNode::update(Attribute *attribute){
-
-	// read
 	std::string filename = _fileName->value()->stringValue();
-	//filename = NetworkManager::resolveFilename(filename);
+	filename = NetworkManager::resolveFilename(filename);
 
-	_image->outValue()->load(filename.c_str());
-
-	/*float width = _width->value()->floatValueAt(0);
-	float height = _height->value()->floatValueAt(0);
-	int widthSubdivisions = _widthSubdivisions->value()->intValueAt(0);
-	int heightSubdivisions = _heightSubdivisions->value()->intValueAt(0);
-
-	if(widthSubdivisions < 1){
-		_widthSubdivisions->outValue()->setIntValueAt(0, 1);
-		widthSubdivisions = 1;
+	if(!filename.empty()){
+		_image->outValue()->load(filename.c_str());
 	}
-	if(heightSubdivisions < 1){
-		_heightSubdivisions->outValue()->setIntValueAt(0, 1);
-		heightSubdivisions = 1;
-	}
-
-	int totalFaces = widthSubdivisions * heightSubdivisions;
-	int totalPoints = totalFaces + widthSubdivisions + heightSubdivisions + 1;
-
-	std::vector<Imath::V3f> points(totalPoints);
-	std::vector<std::vector<int> > faces(totalFaces);
-	std::vector<int> faceVertices(4);
-
-	float widthStep = width / widthSubdivisions;
-	float heightStep = - (height / heightSubdivisions);
-	float startWidth = - (width / 2.0);
-	float startHeight = height / 2.0;
-
-	int i = 0;
-	for(int row = 0; row <= heightSubdivisions; ++row){
-		for(int col = 0; col <= widthSubdivisions; ++col){
-			float currentWidth = startWidth + (widthStep * col);
-			float currentHeight = startHeight + (heightStep * row);
-
-			points[i] = Imath::V3f(currentWidth, 0.0, currentHeight);
-			i++;
-		}
-	}
-
-	for(int faceId = 0; faceId < totalFaces; ++faceId){
-		int row = faceId / widthSubdivisions;
-
-		faceVertices[0] = faceId + row;
-		faceVertices[1] = faceId + row + 1;
-		faceVertices[2] = faceId + row + widthSubdivisions + 2;
-		faceVertices[3] = faceId + row + widthSubdivisions + 1;
-
-		faces[faceId] = faceVertices;
-	}
-
-	_out->outValue()->build(points, faces);*/
 }
 
