@@ -372,8 +372,6 @@ class NodeEditor(QtGui.QWidget):
             parentNodeUi.addOutputAttributeUi(attributeUi)
             
         parentNodeUi.updateLayout()
-
-        NodeEditor._setSelection(attributes = [coralAttribute])
         
     @staticmethod
     def _coralConnectedAttributesCallback():
