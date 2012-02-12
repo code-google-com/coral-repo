@@ -42,7 +42,7 @@ namespace {
 
 	class ShaderAttributeFloat: public BaseShaderAttribute{
 	public:
-		ShaderAttributeFloat(NumericAttribute *attribute, GLuint shaderProgram): BaseShaderAttribute(attribute, shaderProgram){
+		ShaderAttributeFloat(NumericAttribute *attribute): BaseShaderAttribute(attribute){
 		}
 
 		void update(int pointsCount){
@@ -66,7 +66,7 @@ namespace {
 
 	class ShaderUniformFloat: public BaseShaderUniform{
 	public:
-		ShaderUniformFloat(Attribute *attribute, GLuint shaderProgram): BaseShaderUniform(attribute, shaderProgram){
+		ShaderUniformFloat(Attribute *attribute): BaseShaderUniform(attribute){
 		}
 
 		void update(){
@@ -77,7 +77,7 @@ namespace {
 
 	class ShaderUniformVec3: public BaseShaderUniform{
 	public:
-		ShaderUniformVec3(Attribute *attribute, GLuint shaderProgram): BaseShaderUniform(attribute, shaderProgram){
+		ShaderUniformVec3(Attribute *attribute): BaseShaderUniform(attribute){
 		}
 
 		void update(){
@@ -89,7 +89,7 @@ namespace {
 
 	class ShaderUniformVec4: public BaseShaderUniform{
 	public:
-		ShaderUniformVec4(Attribute *attribute, GLuint shaderProgram): BaseShaderUniform(attribute, shaderProgram){
+		ShaderUniformVec4(Attribute *attribute): BaseShaderUniform(attribute){
 		}
 
 		void update(){
@@ -101,8 +101,14 @@ namespace {
 
 	class ShaderUniformSampler2D: public BaseShaderUniform{
 	public:
-		ShaderUniformSampler2D(Attribute *attribute, GLuint shaderProgram): BaseShaderUniform(attribute, shaderProgram){
+		ShaderUniformSampler2D(Attribute *attribute): BaseShaderUniform(attribute){
+		}
+
+		void init(GLuint shaderProgram){
+			BaseShaderUniform::init(shaderProgram);
 			glGenTextures(1, &_texture);
+
+			dirtied();
 		}
 
 		void update(){
@@ -182,6 +188,8 @@ void ShaderNode::initGL(){
 	glGenBuffers(1, &_nrmBuffer);
 	glGenBuffers(1, &_idxBuffer);
 	glGenBuffers(1, &_uvBuffer);
+
+	recompileShader();
 }
 
 void ShaderNode::updateUniformsFromShader(const std::string &filename){
@@ -218,23 +226,23 @@ void ShaderNode::updateUniformsFromShader(const std::string &filename){
 			dynamicAttr = new NumericAttribute(name, this);
 			setAttributeAllowedSpecialization(dynamicAttr, "Float");
 
-			shaderUniform = new ShaderUniformFloat(dynamicAttr, _shaderProgram);
+			shaderUniform = new ShaderUniformFloat(dynamicAttr);
 		}
 		else if(type == "vec3"){
 			dynamicAttr = new NumericAttribute(name, this);
 			setAttributeAllowedSpecialization(dynamicAttr, "Vec3");
 			
-			shaderUniform = new ShaderUniformVec3(dynamicAttr, _shaderProgram);
+			shaderUniform = new ShaderUniformVec3(dynamicAttr);
 		}
 		else if(type == "vec4"){
 			dynamicAttr = new NumericAttribute(name, this);
 			setAttributeAllowedSpecialization(dynamicAttr, "Col4");
 			
-			shaderUniform = new ShaderUniformVec4(dynamicAttr, _shaderProgram);
+			shaderUniform = new ShaderUniformVec4(dynamicAttr);
 		}
 		else if(type == "sampler2D"){
 			dynamicAttr = new ImageAttribute(name, this);
-			shaderUniform = new ShaderUniformSampler2D(dynamicAttr, _shaderProgram);
+			shaderUniform = new ShaderUniformSampler2D(dynamicAttr);
 
 			_dirtiedUniforms[dynamicAttr] = shaderUniform;
 		}
@@ -282,7 +290,7 @@ void ShaderNode::initShaderAttributes(const std::string &filename){
 		std::vector<std::string> spec(2);
 		BaseShaderAttribute *shaderAttribute;
 		if(type == "float"){
-			shaderAttribute = new ShaderAttributeFloat(dynamicAttr, _shaderProgram);
+			shaderAttribute = new ShaderAttributeFloat(dynamicAttr);
 			spec[0] = "Float";
 			spec[1] = "FloatArray";
 		}
@@ -344,18 +352,50 @@ void ShaderNode::restoreConnections(std::vector<std::pair<Attribute*, std::strin
 	}
 }
 
+void ShaderNode::cacheVaues(std::map<std::string, std::string> &values){
+	const std::vector<Attribute*> &dynAttrs = dynamicAttributes();
+	for(int i = 0; i < dynAttrs.size(); ++i){
+		Attribute *dynAttr = dynAttrs[i];
+		if(!dynAttr->input()){
+			std::string valStr = dynAttr->value()->asString();
+			if(!valStr.empty()){
+				values[dynAttr->name()] = valStr;
+			}
+		}
+	}
+}
+
+void ShaderNode::restoreValues(std::map<std::string, std::string> &values){
+	const std::vector<Attribute*> &dynAttrs = dynamicAttributes();
+	for(int i = 0; i < dynAttrs.size(); ++i){
+		Attribute *dynAttr = dynAttrs[i];
+		if(!dynAttr->input()){
+			std::string attrName = dynAttr->name();
+			if(values.find(attrName) != values.end()){
+				dynAttr->value()->setFromString(values[attrName]);
+			}
+		}
+	}
+}
+
 void ShaderNode::updateDynamicDataFromShaders(const std::string &vertexShaderFilename, const std::string &fragmentShaderFilename){
 	// temporarily enable dynamic attributes
 	setAllowDynamicAttributes(true);
 
+	std::map<std::string, std::string> values;
+	cacheVaues(values);
+
 	std::vector<std::pair<Attribute*, std::string> > inputConnections;
 	cacheAndRemoveConnections(inputConnections);
+	
 	clearDynamicAttributes();
 	clearDynamicGLData();
 	initShaderAttributes(vertexShaderFilename);
 	updateUniformsFromShader(vertexShaderFilename);
 	updateUniformsFromShader(fragmentShaderFilename);
+	
 	restoreConnections(inputConnections);
+	restoreValues(values);
 
 	// disable dynamic attributes so they don't get saved in the network file and re-created on file load,
 	// they will be re-created anyway by this node during the initialization 
@@ -376,50 +416,60 @@ void ShaderNode::recompileShader(){
 		return;
 	}
 
-	std::ifstream ifs(vertexShaderFilename.data());
-    std::ostringstream ss; ss << ifs.rdbuf();
-    std::ifstream ifs1(fragmentShaderFilename.data());
-    std::ostringstream ss1; ss1 << ifs1.rdbuf();
-    ifs.close(); 
-    ifs1.close();
-
-    std::string vertexShaderSource = ss.str();
-    vertexShaderSource.erase(std::remove_if(vertexShaderSource.begin(), vertexShaderSource.end(), notAscii), vertexShaderSource.end());
-
-    std::string fragmentShaderSource = ss1.str();
-    fragmentShaderSource.erase(std::remove_if(fragmentShaderSource.begin(), fragmentShaderSource.end(), notAscii), fragmentShaderSource.end());
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER_ARB);
-
-	GLchar *glVertexShaderSource = (GLchar*)vertexShaderSource.data();
-	glShaderSource(vertexShader, 1, (const GLchar**) &glVertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	int shaderStatus;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &shaderStatus);
-	if(!shaderStatus){
-		_recompileShaderLog = "Error: failed compiling the vertex shader : /"; 
-		return;
-	}
-
-	GLchar *glFragmentShaderSource = (GLchar*)fragmentShaderSource.data();
-	glShaderSource(fragmentShader, 1, (const GLchar**) &glFragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &shaderStatus);
-	if(!shaderStatus){
-		_recompileShaderLog = "Error: failed compiling the fragment shader : ("; 
-		return;
-	}
-
-	_shaderProgram = glCreateProgram();
-	glAttachShader(_shaderProgram, vertexShader);
-	glAttachShader(_shaderProgram, fragmentShader);
-
-	glLinkProgram(_shaderProgram);
-
 	updateDynamicDataFromShaders(vertexShaderFilename, fragmentShaderFilename);
+
+	if(glContextExists()){
+		std::ifstream ifs(vertexShaderFilename.data());
+	    std::ostringstream ss; ss << ifs.rdbuf();
+	    std::ifstream ifs1(fragmentShaderFilename.data());
+	    std::ostringstream ss1; ss1 << ifs1.rdbuf();
+	    ifs.close(); 
+	    ifs1.close();
+
+	    std::string vertexShaderSource = ss.str();
+	    vertexShaderSource.erase(std::remove_if(vertexShaderSource.begin(), vertexShaderSource.end(), notAscii), vertexShaderSource.end());
+
+	    std::string fragmentShaderSource = ss1.str();
+	    fragmentShaderSource.erase(std::remove_if(fragmentShaderSource.begin(), fragmentShaderSource.end(), notAscii), fragmentShaderSource.end());
+
+	    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER_ARB);
+
+		GLchar *glVertexShaderSource = (GLchar*)vertexShaderSource.data();
+		glShaderSource(vertexShader, 1, (const GLchar**) &glVertexShaderSource, NULL);
+		glCompileShader(vertexShader);
+
+		int shaderStatus;
+		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &shaderStatus);
+		if(!shaderStatus){
+			_recompileShaderLog = "Error: failed compiling the vertex shader : /"; 
+			return;
+		}
+
+		GLchar *glFragmentShaderSource = (GLchar*)fragmentShaderSource.data();
+		glShaderSource(fragmentShader, 1, (const GLchar**) &glFragmentShaderSource, NULL);
+		glCompileShader(fragmentShader);
+
+		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &shaderStatus);
+		if(!shaderStatus){
+			_recompileShaderLog = "Error: failed compiling the fragment shader : ("; 
+			return;
+		}
+
+		_shaderProgram = glCreateProgram();
+		glAttachShader(_shaderProgram, vertexShader);
+		glAttachShader(_shaderProgram, fragmentShader);
+
+		glLinkProgram(_shaderProgram);
+
+		for(int i = 0; i < _shaderAttributes.size(); ++i){
+			_shaderAttributes[i]->init(_shaderProgram);
+		}
+
+		for(int i = 0; i < _shaderUniforms.size(); ++i){
+			_shaderUniforms[i]->init(_shaderProgram);
+		}
+	}
 
 	_recompileShaderLog = "Your shader is running, cool!";
 }
@@ -427,24 +477,23 @@ void ShaderNode::recompileShader(){
 void ShaderNode::attributeDirtied(Attribute *attribute){
 	DrawNode::attributeDirtied(attribute);
 
-	if(glContextExists()){
-		if(!_initialized){
-			if(attribute == _vertexShaderFilename || attribute == _fragmentShaderFilename){
-				std::string vertexShaderFilename = _vertexShaderFilename->value()->stringValue();
-				std::string fragmentShaderFilename = _fragmentShaderFilename->value()->stringValue();
+	if(!_initialized){
+		if(attribute == _vertexShaderFilename || attribute == _fragmentShaderFilename){
+			std::string vertexShaderFilename = _vertexShaderFilename->value()->stringValue();
+			std::string fragmentShaderFilename = _fragmentShaderFilename->value()->stringValue();
 
-				if(!vertexShaderFilename.empty() && !fragmentShaderFilename.empty()){
-					recompileShader();
-					_initialized = true;
-				}
-			}
-		}
-		else{
-			if(_dirtiedUniforms.find(attribute) != _dirtiedUniforms.end()){
-				_dirtiedUniforms[attribute]->dirtied();
+			if(!vertexShaderFilename.empty() && !fragmentShaderFilename.empty()){
+				recompileShader();
+				_initialized = true;
 			}
 		}
 	}
+	else if(glContextExists()){
+		if(_dirtiedUniforms.find(attribute) != _dirtiedUniforms.end()){
+			_dirtiedUniforms[attribute]->dirtied();
+		}
+	}
+	
 }
 
 void ShaderNode::addDynamicAttribute(Attribute *attribute){

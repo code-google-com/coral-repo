@@ -19,13 +19,15 @@ namespace coralUi{
 
 class BaseShaderAttribute{
 public:
-	BaseShaderAttribute(coral::NumericAttribute *attribute, GLuint shaderProgram){
+	BaseShaderAttribute(coral::NumericAttribute *attribute){
 		_attribute = attribute;
-		_shaderProgram = shaderProgram;
-		glGenBuffers(1, &_vbo);
-		_attributeLocation = glGetAttribLocation(_shaderProgram, attribute->name().data());
 	}
 
+	virtual void init(GLuint shaderProgram){
+		_shaderProgram = shaderProgram;
+		glGenBuffers(1, &_vbo);
+		_attributeLocation = glGetAttribLocation(_shaderProgram, _attribute->name().data());
+	};
 	virtual void update(int pointsCount){};
 	virtual void enable(){};
 	virtual void disable(){
@@ -44,11 +46,14 @@ protected:
 
 class BaseShaderUniform{
 public:
-	BaseShaderUniform(coral::Attribute *attribute, GLuint shaderProgram){
+	BaseShaderUniform(coral::Attribute *attribute){
 		_attribute = attribute;
-		_shaderProgram = shaderProgram;
-		_uniformLocation = glGetUniformLocation(_shaderProgram, attribute->name().data());
 	}
+
+	virtual void init(GLuint shaderProgram){
+		_shaderProgram = shaderProgram;
+		_uniformLocation = glGetUniformLocation(_shaderProgram, _attribute->name().data());
+	};
 
 	virtual void update(){};
 	virtual void dirtied(){};
@@ -98,6 +103,8 @@ private:
 	void updateDynamicDataFromShaders(const std::string &vertexShaderFilename, const std::string &fragmentShaderFilename);
 	void updateUniformsFromShader(const std::string &filename);
 	void updateUniforms();
+	void cacheVaues(std::map<std::string, std::string> &values);
+	void restoreValues(std::map<std::string, std::string> &values);
 };
 
 }

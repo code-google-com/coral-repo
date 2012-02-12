@@ -431,7 +431,7 @@ class NodeInspector(QtGui.QWidget):
         self._nodeConnectionChangedObserver = Observer()
         
         nodes = nodeEditor.NodeEditor.selectedNodes()
-        
+
         if nodes:
             node = nodes[0]
             self._node = weakref.ref(node)

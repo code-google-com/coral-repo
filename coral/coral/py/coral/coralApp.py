@@ -339,6 +339,9 @@ def _instantiateNode(className, name, parent):
         logError("failed to create node " + className + ".\n" + coralNode.invalidityMessage())
         return None
     
+    if coralNode.className() != className:
+        coralNode.setClassName(className)
+
     coralNode._postInit()
     
     parent.addNode(coralNode)
@@ -347,9 +350,6 @@ def _instantiateNode(className, name, parent):
         coralNode.postInit()
     
     CoralAppData.instantiatedNodes.append(weakref.ref(coralNode))
-
-    if coralNode.className() != className:
-        coralNode.setClassName(className)
     
     return coralNode
 

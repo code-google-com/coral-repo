@@ -33,6 +33,7 @@
 #include <vector>
 #include "../src/Node.h"
 #include "../src/NumericAttribute.h"
+#include "../src/EnumAttribute.h"
 
 namespace coral{
 
@@ -44,6 +45,7 @@ public:
 	void attributeSpecializationChanged(Attribute *attribute);
 	
 private:
+	EnumAttribute *_curveType;
 	NumericAttribute *_param;
 	NumericAttribute *_controlPoints;
 	NumericAttribute *_pointOnCurve;
@@ -54,7 +56,9 @@ private:
 	void updateArray();
 	void updateSingle();
 	void updateKnots();
-	Imath::V3f evaluatePointOnCurve(float param, int degree, const std::vector<Imath::V3f> &cvs, const std::vector<float> &knots);
+	void pointOnBezier(float param, int degree, const std::vector<Imath::V3f> &cvs, const std::vector<float> &knots, Imath::V3f &outPoint);
+	void pointOnCatmull(float param, const std::vector<Imath::V3f> &cvs, const Imath::V3f &firstPoint, const Imath::V3f &lastPoint, Imath::V3f &result);
+	void evalCatmull(const Imath::V3f &point0, const Imath::V3f &point1, const Imath::V3f &point2, const Imath::V3f &point3, float u, Imath::V3f &result);
 	float basis(int i, int degree, float param, const std::vector<float> &knots);
 };
 
