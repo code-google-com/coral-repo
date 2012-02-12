@@ -56,7 +56,7 @@ class NodeUiScene(QtGui.QGraphicsScene):
                 break
     
         QtGui.QGraphicsScene.helpEvent(self, event)
-            
+    
     def mouseReleaseEvent(self, event):
         QtGui.QGraphicsScene.mouseReleaseEvent(self, event)
         
@@ -65,9 +65,10 @@ class NodeUiScene(QtGui.QGraphicsScene):
                 from connectionHook import ConnectionHook
                 if ConnectionHook._outstandingDraggingConnection:
                     ConnectionHook._removeOutstandingDraggingConnection()  
+
             elif event.button() == QtCore.Qt.RightButton:
                 self._parentNodeUi().showRightClickMenu()
-
+        
         self._selectionChanged()
     
     def _selectionChanged(self):
@@ -80,7 +81,7 @@ class NodeUiScene(QtGui.QGraphicsScene):
             elif hasattr(item, "coralAttribute"):
                 attributes.append(item.coralAttribute())
         
-        nodeEditor.NodeEditor._setSelection(nodes, attributes)
+        nodeEditor.NodeEditor._setSelection(nodes, attributes, updateSelected = False)
         
     def setZoom(self, zoom):
         self._zoom = zoom

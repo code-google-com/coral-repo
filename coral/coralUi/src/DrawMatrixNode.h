@@ -45,7 +45,6 @@ class CORALUI_EXPORT DrawMatrixNode : public DrawNode{
 public:
 	DrawMatrixNode(const std::string &name, coral::Node *parent);
 	~DrawMatrixNode();
-	void attributeConnectionChanged(coral::Attribute *attribute);
 	void attributeDirtied(coral::Attribute *attribute);
 	void draw();
 	void initGL();

@@ -31,8 +31,9 @@ OF SUCH DAMAGE.
 #include <math.h>
 #include "kdtree.h"
 
-#if defined(WIN32) || defined(__WIN32__)
+#if defined(WIN32) || defined(__WIN32__) || defined(_WIN32)
 #include <malloc.h>
+#define alloca _alloca
 #endif
 
 #ifdef USE_LIST_NODE_ALLOCATOR

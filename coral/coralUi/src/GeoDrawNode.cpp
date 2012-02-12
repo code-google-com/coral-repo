@@ -55,19 +55,8 @@ _shouldUpdateColorVBO(true){
 	addInputAttribute(_wireframe);
 	addInputAttribute(_points);
 	addInputAttribute(_normals);
-	// addInputAttribute(_ids);
 	addInputAttribute(_colors);
 	addInputAttribute(_image);
-	
-	// setAttributeAffect(_geo, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_smooth, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_flat, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_wireframe, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_points, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_normals, (Attribute*)viewportOutputAttribute());
-	// // setAttributeAffect(_ids, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_colors, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_image, (Attribute*)viewportOutputAttribute());
 	
 	std::vector<std::string> colorSpecializations;
 	colorSpecializations.push_back("Col4");
@@ -83,9 +72,14 @@ _shouldUpdateColorVBO(true){
 
 void GeoDrawNode::initGL(){
 	catchAttributeDirtied(_geo);
+	catchAttributeDirtied(_smooth);
+	catchAttributeDirtied(_flat);
+	catchAttributeDirtied(_wireframe);
+	catchAttributeDirtied(_points);
+	catchAttributeDirtied(_normals);
 	catchAttributeDirtied(_colors);
 	catchAttributeDirtied(_image);
-
+	
 	// generate OpenGL buffers
 	glGenBuffers(1, &_vtxBuffer);
 	glGenBuffers(1, &_nrmBuffer);

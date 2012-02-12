@@ -125,13 +125,35 @@ class NodeEditor(QtGui.QWidget):
         return selectionUpdated
     
     @staticmethod
-    def _setSelection(nodes = [], attributes = []):
+    def _setSelection(nodes = [], attributes = [], updateSelected = True):
+        if updateSelected:
+            for nodeId in NodeEditor._selectedNodesId:
+                nodeUi = NodeEditor.findNodeUi(nodeId)
+                if nodeUi:
+                    nodeUi.setSelected(False)
+            
+            for attrId in NodeEditor._selectedAttributesId:
+                attrUi = NodeEditor.findAttributeUi(attrId)
+                if attrUi:
+                    attrUi.proxy().setSelected(False)
+        
         nodeSelUpdated = NodeEditor._setSelectedNodes(nodes)
         attrSelUpdated = NodeEditor._setSelectedAttributes(attributes)
         
         if nodeSelUpdated or attrSelUpdated:
             NodeEditor._notifySelectedNodesChangedObservers()
-    
+
+            if updateSelected:
+                for node in nodes:
+                    nodeUi = NodeEditor.findNodeUi(node.id())
+                    if nodeUi:
+                        nodeUi.setSelected(True)
+                
+                for attr in attributes:
+                    attrUi = NodeEditor.findAttributeUi(attr.id())
+                    if attrUi:
+                        attrUi.proxy().setSelected(True)
+        
     @staticmethod
     def selectedNodes():
         nodes = []
@@ -295,14 +317,15 @@ class NodeEditor(QtGui.QWidget):
         parentNodeId = NodeEditor._removedAttributeObserver.data("parentNodeId")
         parentNodeUi = NodeEditor.findNodeUi(parentNodeId)
         
-        if parentNodeUi and attributeAddedUi:
+        if parentNodeUi:
             attributeAddedId = NodeEditor._removedAttributeObserver.data("attributeRemovedId")
             attributeAddedUi = NodeEditor.findAttributeUi(attributeAddedId)
 
-            parentNodeUi.removeAttributeUi(attributeAddedUi)
-            attributeAddedUi.setParentNodeUi(None)
-        
-            parentNodeUi.updateLayout()
+            if attributeAddedUi:
+                parentNodeUi.removeAttributeUi(attributeAddedUi)
+                attributeAddedUi.setParentNodeUi(None)
+            
+                parentNodeUi.updateLayout()
 
     @staticmethod
     def _coralAddedNodeCallback():
@@ -349,6 +372,8 @@ class NodeEditor(QtGui.QWidget):
             parentNodeUi.addOutputAttributeUi(attributeUi)
             
         parentNodeUi.updateLayout()
+
+        NodeEditor._setSelection(attributes = [coralAttribute])
         
     @staticmethod
     def _coralConnectedAttributesCallback():
@@ -373,6 +398,7 @@ class NodeEditor(QtGui.QWidget):
         coralNode = coralApp.findObjectById(nodeId)
         
         NodeEditor._createNodeUi(coralNode)
+        NodeEditor._setSelection(nodes = [coralNode])
     
     @staticmethod
     def _createNodeUi(coralNode):

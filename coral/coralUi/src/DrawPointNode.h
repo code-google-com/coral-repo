@@ -45,7 +45,6 @@ class CORALUI_EXPORT DrawPointNode : public DrawNode{
 public:
 	DrawPointNode(const std::string &name, coral::Node *parent);
 	~DrawPointNode();
-	void attributeConnectionChanged(coral::Attribute *attribute);
 	void attributeDirtied(coral::Attribute *attribute);
 	void draw();
 	void initGL();

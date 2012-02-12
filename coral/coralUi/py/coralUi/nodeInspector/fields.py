@@ -206,8 +206,9 @@ class BoolValueField(AttributeField):
         AttributeField.__init__(self, coralAttribute, parentWidget)
         
         attrWidget = QtGui.QCheckBox(self)
-        attrWidget.setTristate(False)
+        
         self.setAttributeWidget(attrWidget, "stateChanged(int)")
+        attrWidget.setTristate(False)
         
     def setAttributeValue(self, attribute, value):
         attribute.outValue().setBoolValueAt(0, value)
@@ -217,7 +218,7 @@ class BoolValueField(AttributeField):
     
     def setWidgetValue(self, widget, value):
         widget.setCheckState(value)
-    
+
     def getWidgetValue(self, widget):
         return widget.isChecked()
 

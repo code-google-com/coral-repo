@@ -100,28 +100,11 @@ DrawPointNode::~DrawPointNode(){
 	}
 }
 
-// TODO remove duplicate code
-void DrawPointNode::attributeConnectionChanged(Attribute *attribute){
-	if(attribute == _points){
-		_shouldUpdatePointValues = true;
-
-		_shouldUpdateSizeValues = true;	// if the number of point as changed, we need to update the number of elements in buffer too
-		_shouldUpdateColorValues = true;
-	}
-	else if(attribute == _sizes){
-		_shouldUpdateSizeValues = true;
-	}
-	else if(attribute == _colors){
-		_shouldUpdateColorValues = true;
-	}
-}
-
 void DrawPointNode::attributeDirtied(Attribute *attribute){
 	DrawNode::attributeDirtied(attribute);
 
 	if(attribute == _points){
 		_shouldUpdatePointValues = true;
-
 		_shouldUpdateSizeValues = true;	// if the number of point as changed, we need to update the number of elements in buffer too
 		_shouldUpdateColorValues = true;
 	}

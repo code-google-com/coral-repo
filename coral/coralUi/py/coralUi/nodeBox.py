@@ -233,14 +233,14 @@ class NodeBox(QtGui.QWidget):
             if not str(className).startswith("::"):
                 itemData = self._itemData(item)
                 sceneItem = NodeBox._createFromItemData(itemData)
-                
-                nodeView = nodeEditor.NodeEditor.focusedInstance().nodeView()
-                if type(self.parent()) is NodeBoxMenu:
-                    pos = QtGui.QCursor.pos()
-                    scenePos = nodeView.mapToScene(nodeView.mapFromGlobal(pos))
-                    sceneItem.setPos(scenePos)
-                else:
-                    sceneItem.setPos(nodeView.mapToScene(nodeView.rect().center()))
+                if sceneItem:
+                    nodeView = nodeEditor.NodeEditor.focusedInstance().nodeView()
+                    if type(self.parent()) is NodeBoxMenu:
+                        pos = QtGui.QCursor.pos()
+                        scenePos = nodeView.mapToScene(nodeView.mapFromGlobal(pos))
+                        sceneItem.setPos(scenePos)
+                    else:
+                        sceneItem.setPos(nodeView.mapToScene(nodeView.rect().center()))
         
         self._nodeSearchField.setText("")
         self._rebuildNodeShelf()

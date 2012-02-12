@@ -95,21 +95,6 @@ DrawLineNode::~DrawLineNode(){
 	}
 }
 
-void DrawLineNode::attributeConnectionChanged(Attribute *attribute){
-	DrawNode::attributeConnectionChanged(attribute);
-
-	if(attribute == _points){
-		_shouldUpdatePointValues = true;
-		_shouldUpdateStrands = true;
-	}
-	else if(attribute == _colors){
-		_shouldUpdateColorValues = true;
-	}
-	else if(attribute == _pointsPerStrand){
-		_shouldUpdateStrands = true;
-	}
-}
-
 void DrawLineNode::attributeDirtied(Attribute *attribute){
 	DrawNode::attributeDirtied(attribute);
 

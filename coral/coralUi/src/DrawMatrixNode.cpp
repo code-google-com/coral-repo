@@ -89,17 +89,6 @@ DrawMatrixNode::~DrawMatrixNode(){
 	}
 }
 
-void DrawMatrixNode::attributeConnectionChanged(Attribute *attribute){
-	DrawNode::attributeConnectionChanged(attribute);
-	
-	if(attribute == _matrix){
-		_shouldUpdateMat44Values = true;
-	}
-	if(attribute == _size){
-		_shouldUpdateMatrixGizmo = true;
-	}
-}
-
 void DrawMatrixNode::attributeDirtied(Attribute *attribute){
 	DrawNode::attributeDirtied(attribute);
 	
