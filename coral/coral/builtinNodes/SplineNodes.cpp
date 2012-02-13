@@ -35,8 +35,8 @@ using namespace coral;
 SplinePoint::SplinePoint(const std::string &name, Node *parent): 
 Node(name, parent),
 _selectedOperation(0),
-_degree(4){
-	
+_degree(4),
+_oldCvsSize(0){
 	_curveType = new EnumAttribute("curveType", this);
 	_param = new NumericAttribute("param", this);
 	_controlPoints = new NumericAttribute("controlPoints", this);
@@ -150,11 +150,13 @@ float SplinePoint::basis(int i, int degree, float param, const std::vector<float
 }
 
 void SplinePoint::pointOnBezier(float param, int degree, const std::vector<Imath::V3f> &cvs, const std::vector<float> &knots, Imath::V3f &outPoint){
-	if(param < 0.0){
-		param = 0.0;
+	if(param <= 0.0){
+		outPoint = cvs[0];
+		return;
 	}
-	else if(param > 1.0){
-		param = 1.0;
+	else if(param >= 1.0){
+		outPoint = cvs[cvs.size() - 1];
+		return;
 	}
 	
 	float normalizedParam = param * abs(knots[0] - knots[knots.size() - 1]);
@@ -167,8 +169,7 @@ void SplinePoint::pointOnBezier(float param, int degree, const std::vector<Imath
 	
 	for(int i = 0; i < cvs.size(); ++i){
 		float b = basis(i, degree, normalizedParam, knots);
-		Imath::V3f p = cvs[i] * b;
-		outPoint += p;
+		outPoint += (cvs[i] * b);
 		rational += b;
 	}
 	
@@ -191,9 +192,11 @@ void SplinePoint::evalCatmull(const Imath::V3f &point0, const Imath::V3f &point1
 void SplinePoint::pointOnCatmull(float param, const std::vector<Imath::V3f> &cvs, const Imath::V3f &firstPoint, const Imath::V3f &lastPoint, Imath::V3f &result){
 	if(param <= 0.0){
 		result = cvs[0];
+		return;
 	}
 	else if(param >= 1.0){
 		result = cvs[cvs.size() - 1];
+		return;
 	}
 	else{
 		int cvsSize = cvs.size(); 
@@ -222,23 +225,28 @@ void SplinePoint::updateArray(){
 	
 	std::vector<Imath::V3f> pointsOnCurve(paramsSize);
 	
-	int curveType = _curveType->value()->currentIndex();
-	if(curveType == 0){ // bezier
-		updateKnots();
+	if(cvsSize){
+		int curveType = _curveType->value()->currentIndex();
+		if(curveType == 0){ // bezier
+			if(cvsSize != _oldCvsSize){
+				updateKnots();
+				_oldCvsSize = cvsSize;
+			}
 
-		for(int i = 0; i < paramsSize; ++i){
-			pointOnBezier(params[i], _degree, cvs, _knots, pointsOnCurve[i]);
+			for(int i = 0; i < paramsSize; ++i){
+				pointOnBezier(params[i], _degree, cvs, _knots, pointsOnCurve[i]);
+			}
+		}
+		else{ // catmull
+			Imath::V3f firstPoint = cvs[0] + (-(cvs[1] - cvs[0]));
+			Imath::V3f lastPoint = cvs[cvsSize - 1] + (cvs[cvsSize - 2] - cvs[cvsSize - 1]);
+
+			for(int i = 0; i < paramsSize; ++i){
+				pointOnCatmull(params[i], cvs, firstPoint, lastPoint, pointsOnCurve[i]);
+			}
 		}
 	}
-	else{ // catmull
-		Imath::V3f firstPoint = cvs[0] + (-(cvs[1] - cvs[0]));
-		Imath::V3f lastPoint = cvs[cvsSize - 1] + (cvs[cvsSize - 2] - cvs[cvsSize - 1]);
 
-		for(int i = 0; i < paramsSize; ++i){
-			pointOnCatmull(params[i], cvs, firstPoint, lastPoint, pointsOnCurve[i]);
-		}
-	}
-	
 	_pointOnCurve->outValue()->setVec3Values(pointsOnCurve);
 }
 
@@ -247,17 +255,24 @@ void SplinePoint::updateSingle(){
 	const std::vector<Imath::V3f> &cvs = _controlPoints->value()->vec3Values();
 	float param = _param->value()->floatValueAt(0);
 
+	int cvsSize = cvs.size();
+	
 	Imath::V3f pointOnCurve;
-	if(curveType == 0){ // bezier
-		updateKnots();
-		pointOnBezier(param, _degree, cvs, _knots, pointOnCurve);
-	}
-	else{ // catmull-rom
-		int cvsSize = cvs.size();
-		Imath::V3f firstPoint = cvs[0] + (-(cvs[1] - cvs[0]));
-		Imath::V3f lastPoint = cvs[cvsSize - 1] + (cvs[cvsSize - 2] - cvs[cvsSize - 1]);
+	if(cvsSize){
+		if(curveType == 0){ // bezier
+			if(cvsSize != _oldCvsSize){
+				updateKnots();
+				_oldCvsSize = cvsSize;
+			}
+			pointOnBezier(param, _degree, cvs, _knots, pointOnCurve);
+		}
+		else{ // catmull-rom
+			
+			Imath::V3f firstPoint = cvs[0] + (-(cvs[1] - cvs[0]));
+			Imath::V3f lastPoint = cvs[cvsSize - 1] + (cvs[cvsSize - 2] - cvs[cvsSize - 1]);
 
-		pointOnCatmull(param, cvs, firstPoint, lastPoint, pointOnCurve);
+			pointOnCatmull(param, cvs, firstPoint, lastPoint, pointOnCurve);
+		}
 	}
 
 	_pointOnCurve->outValue()->setVec3ValueAt(0, pointOnCurve);

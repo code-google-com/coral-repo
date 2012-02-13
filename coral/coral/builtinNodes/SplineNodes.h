@@ -51,6 +51,7 @@ private:
 	NumericAttribute *_pointOnCurve;
 	void(SplinePoint::*_selectedOperation)(void);
 	int _degree;
+	int _oldCvsSize;
 	std::vector<float> _knots;
 	
 	void updateArray();

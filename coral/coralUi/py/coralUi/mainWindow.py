@@ -99,9 +99,8 @@ class MainWindow(QtGui.QMainWindow):
         aboutBox.setWindowTitle("About Coral")
         
         aboutMsg = '<h2>Coral Version ' + coralApp.version() + '</h2>'
-        aboutMsg += '<p style="color: #333333; font-size: small;">created by Andrea Interguglielmi</p>'
-        aboutMsg += '<p style="color: #333333; font-size: small;">with contributions by Paolo Fazio (Windows porting, OpenGL Viewport, and more)</p>'
-        aboutMsg += '<p style="font-size: small;">Copriright 2011 Andrea Interguglielmi.</p>'
+        aboutMsg += '<p style="color: #333333; font-size: small;">Created by Andrea Interguglielmi</p>'
+        aboutMsg += '<p style="color: #333333; font-size: small;">Developed at <a href="http://code.google.com/p/coral-repo/">code.google.com/p/coral-repo</a></p>'
         
         aboutBox.setTextFormat(QtCore.Qt.RichText)
         aboutBox.setText(aboutMsg)

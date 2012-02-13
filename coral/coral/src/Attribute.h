@@ -85,6 +85,10 @@ public:
 	void forceSpecializationUpdate();
 	void forceDirty();
 
+	/*! Returns the first connected attribute found that is not a passThrough.
+		This method should be used whenever trying to access the internal value of this attribute wihtout knowing if it's a passThrough.*/
+	Attribute *connectedNonPassThrough();
+
 	/*! An array os strings that form the currently active specialization for this attribute.*/
 	std::vector<std::string> specialization();
 	
@@ -94,7 +98,6 @@ public:
 	
 	std::vector<Attribute*> specializationLinkedTo();
 	std::vector<Attribute*> specializationLinkedBy();
-	Attribute *inputSource();
 	
 	/*! Call this method after you perform modifications to the internal value of this attribute.
 		example: 
@@ -125,9 +128,9 @@ public:
 	static void(*_specializationCallBack)(Attribute *self);
 	// static void(*_valueChangedCallback)(Attribute *self);
 	static void queueDirtyingDoneCallback(void(*callback)(Attribute *));
-	void setValuePtr(Value *value);
-protected:
 	
+protected:
+	void setValuePtr(Value *value);
 	void setPassThrough(bool value);
 	void setIsOutput(bool value);
 	void setIsInput(bool value);
@@ -147,7 +150,7 @@ private:
 	void dirty(bool force = false);
 	void clean();
 	void addAffect(Attribute *attribute);
-	Attribute *findInputNotPass(Attribute *attribute);
+	Attribute *connectedInputNonPassThrough(Attribute *attribute);
 	void removeAffect(Attribute *attribute);
 	void setParent(Node *parent);
 	void resetInputValuesInChain();

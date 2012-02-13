@@ -132,22 +132,22 @@ class NodeView(QtGui.QGraphicsView):
             if oldNodeUi:
                 oldNodeUi.containedScene().clearSelection()
         
+        newScene = nodeUi.containedScene()
         self._currentNodeUi = weakref.ref(nodeUi)
-        self.setScene(nodeUi.containedScene())
+        self.setScene(newScene)
         
-        self.setZoom(nodeUi.containedScene().zoom())
-        
-        if nodeUi.containedScene()._firstTimeEntering:
-            nodeUi.containedScene().setCenterPos(nodeUi.containedScene().itemsBoundingRect().center())
-            nodeUi.containedScene()._firstTimeEntering = False
-        
-        newCenter = nodeUi.containedScene().centerPos()
+        self.setZoom(newScene.zoom())
+
+        newCenter = newScene.centerPos()
         self.centerOn(newCenter)
         self._currentCenterPoint = newCenter
         
-        nodeUi.containedScene().clearSelection()
-        
-        nodeUi.containedScene()._selectionChanged()
+        newScene.clearSelection()
+        newScene._selectionChanged()
+
+        if newScene._firstTimeEntering:
+            self.frameSceneContent()
+            newScene._firstTimeEntering = False
         
         self.emit(QtCore.SIGNAL("currentNodeUiChanged"))
     
@@ -182,6 +182,7 @@ class NodeView(QtGui.QGraphicsView):
     
     def setCenter(self, centerPoint):
         self._currentCenterPoint = centerPoint
+        self.scene().setCenterPos(centerPoint)
         self.centerOn(self._currentCenterPoint);
     
     def mousePressEvent(self, mouseEvent):

@@ -128,6 +128,9 @@ class ConnectionHook(QtGui.QGraphicsItem):
     def color(self):
         return QtGui.QColor(self._color)
     
+    def mixedColor(self):
+        return self._mixedColor
+    
     def setColorRef(self, color):
         self._color = color
     

@@ -54,6 +54,8 @@ class AttributeUi(QtGui.QGraphicsWidget):
         self._attributeSpecializedObserver = Observer()
         self._disconnectedInputObserver = Observer()
         self._nameChangedObserver = Observer()
+        self._labelSuffix = ""
+        self._labelText = ""
         
         if coralAttribute.isInput():
             self._inputHook = ConnectionHook(self, isInput = True)
@@ -61,7 +63,8 @@ class AttributeUi(QtGui.QGraphicsWidget):
             self._outputHook = ConnectionHook(self, isOutput = True)
         
         self._label.setBrush(parentNodeUi.labelsColor())
-        self._label.setText(coralAttribute.name().split(":")[-1])
+        self._labelText = coralAttribute.name().split(":")[-1]
+        self._label.setText(self._labelText)
         
         self.setHooksColor(self.hooksColor(self._coralAttribute().allowedSpecialization()))
         
@@ -82,7 +85,8 @@ class AttributeUi(QtGui.QGraphicsWidget):
     
     def _coralAttributeNameChanged(self):
         newName = self.coralAttribute().name().split(":")[-1]
-        self._label.setText(newName)
+        self._labelText = newName
+        self._label.setText(self._labelText + self._labelSuffix)
         
         self.parentNodeUi().updateLayout()
         parentNodeScene = self.parentNodeUi().scene()
@@ -90,7 +94,7 @@ class AttributeUi(QtGui.QGraphicsWidget):
             parentNodeScene.update()
         
         if self._proxy:
-            self._proxy()._label.setText(self.coralAttribute().name())
+            self._proxy()._label.setText(self._labelText + self._labelSuffix)
             self._proxy().updateLayout()
             self._proxy().scene().update()
     
@@ -170,25 +174,26 @@ class AttributeUi(QtGui.QGraphicsWidget):
     
     def hooksColor(self, specialization):
         return QtGui.QColor(255, 255, 255)
-    
+
     def _updateLabel(self):
         attr = self.coralAttribute()
-        label = self.label()
-        attrName = attr.name().split(":")[-1]
-        
-        if "[]" in str(label.text()):
-            self.label().setText(attrName)
-        
+
         val = attr.outValue()
         if attr.isPassThrough():
-            source = attr.inputSource()
+            source = attr.connectedNonPassThrough()
             if source:
                 val = source.outValue()
-                
+
+        self._labelSuffix = ""
         if hasattr(val, "isArray"):
             if val.isArray():
-                self.label().setText(attrName + "[]")
+                self._labelSuffix = "[]"
         
+        self.label().setText(self._labelText + self._labelSuffix)
+    
+    def labelSuffix(self):
+        return self._labelSuffix
+
     def specialized(self):
         self._updateLabel()
         

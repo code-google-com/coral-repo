@@ -584,7 +584,7 @@ bool Attribute::isOutput(){
 std::string Attribute::asScript(){
 	std::string script;
 	
-	if(_value && inputSource() == 0 && _affectedBy.size() == 0){
+	if(_value && connectedInputNonPassThrough(this) == 0 && _affectedBy.size() == 0){
 		std::string valueSaveScript = _value->asString();
 		if(valueSaveScript.empty() == false){
 			Command setAttributeValueCmd;
@@ -915,10 +915,31 @@ std::vector<Attribute*> Attribute::specializationLinkedBy(){
 	return attrs;
 }
 
-Attribute *Attribute::findInputNotPass(Attribute *attribute){
+Attribute *Attribute::connectedNonPassThrough(){
+    Attribute *input = _input;
+    while(input){
+    	if(!input->_passThrough){
+    		return input;
+    	}
+    	else{
+    		input = input->_input;
+    	}
+    }
+
+	for(int i = 0; i < _dirtyChain.size(); ++i){
+		Attribute *outAttr = _dirtyChain[i];
+		if(!outAttr->_passThrough){
+			return  outAttr;
+		}
+	} 
+
+    return 0;
+}
+
+Attribute *Attribute::connectedInputNonPassThrough(Attribute *attribute){
 	Attribute *input = 0;
 	if(attribute->_input){
-		input = findInputNotPass(attribute->_input);
+		input = connectedInputNonPassThrough(attribute->_input);
 	}
 
 	if(input == 0 && attribute != this && !attribute->_passThrough){
@@ -926,12 +947,6 @@ Attribute *Attribute::findInputNotPass(Attribute *attribute){
 	}
 	
 	return input;
-}
-
-Attribute *Attribute::inputSource(){
-	Attribute * source = findInputNotPass(this);
-	
-	return source;
 }
 
 void Attribute::setSpecializationOverride(const std::string &specialization){

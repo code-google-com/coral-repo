@@ -54,15 +54,15 @@ boost::python::object attribute_input(Attribute &self){
 	return input;
 }
 
-boost::python::object attribute_inputSource(Attribute &self){
-	boost::python::object obj;
-	
-	Attribute *inputSource = self.inputSource();
-	if(inputSource){
-		obj = PythonDataCollector::findPyObject(inputSource->id());
+boost::python::object attribute_connectedNonPassThrough(Attribute &self){
+	boost::python::object attrObj;
+
+	Attribute *attr = self.connectedNonPassThrough();
+	if(attr){
+		attrObj = PythonDataCollector::findPyObject(attr->id());
 	}
-	
-	return obj;
+
+	return attrObj;
 }
 
 boost::python::object attribute_parent(Attribute &self){
@@ -221,12 +221,12 @@ void attributeWrapper(){
 		.def("specializationLinkedBy", &Attribute::specializationLinkedBy)
 		.def("isAffectedBy", &Attribute::isAffectedBy)
 		.def("_setAllowedSpecialization", attribute_setAllowedSpecialization)
-		.def("inputSource", attribute_inputSource)
 		.def("setSpecializationOverride", &Attribute::setSpecializationOverride)
 		.def("removeSpecializationOverride", &Attribute::removeSpecializationOverride)
 		.def("forceSpecializationUpdate", &Attribute::forceSpecializationUpdate)
 		.def("specializationOverride", &Attribute::specializationOverride)
 		.def("forceDirty", &Attribute::forceDirty)
+		.def("connectedNonPassThrough", &attribute_connectedNonPassThrough)
 		;
 	
 	Attribute::_connectToCallback = attribute_connectToCallback;

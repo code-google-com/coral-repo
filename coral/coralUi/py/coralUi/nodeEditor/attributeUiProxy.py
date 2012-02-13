@@ -148,10 +148,15 @@ class AttributeUiProxy(QtGui.QGraphicsWidget):
         attributeUi = self._attributeUi()
         
         hookColor = QtGui.QColor(100, 100, 100)
+        hookMixedColor = hookColor
         if attributeUi.outputHook():
-            hookColor = attributeUi.outputHook().color()
+            hook = attributeUi.outputHook()
+            hookColor = hook.color()
+            hookMixedColor = hook.mixedColor()
         elif attributeUi.inputHook():
-            hookColor = attributeUi.inputHook().color()
+            hook = attributeUi.inputHook()
+            hookColor = hook.color()
+            hookMixedColor = hook.mixedColor()
         
         hook = None
         if self._outputHook:
@@ -160,7 +165,11 @@ class AttributeUiProxy(QtGui.QGraphicsWidget):
             hook = self._inputHook
         
         hook.setColor(hookColor)
-        
+        hook.setMixedColor(hookMixedColor)
+
+        self._label.setText(attributeUi._labelText + attributeUi._labelSuffix)
+
+        self.updateLayout()
         self.update()
     
     def itemChange(self, change, value):
