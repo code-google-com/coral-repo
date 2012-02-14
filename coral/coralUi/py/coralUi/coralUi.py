@@ -86,11 +86,16 @@ def init(configModule = None):
             utils.runtimeImport(startupScriptFile)
 
 def scanPathForPlugins(path):
+    verbLev = coralApp.verboseLevel()
+    coralApp.setVerboseLevel(0)
+
     entries = os.listdir(path)
     for entry in entries:
         if entry.split(".")[-1] == "py":
             filename = os.path.join(path, entry)
             loadPluginUi(filename)
+    
+    coralApp.setVerboseLevel(verbLev)
 
 def scanAutoLoadPaths():
     for path in coralApp.CoralAppData.autoLoadPaths:

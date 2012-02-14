@@ -40,6 +40,12 @@ from observer import Observer, ObserverCollector
 from rootNode import RootNode
 from valueChangedObserverCollector import ValueChangedObserverCollector
 
+class VerboseLevel:
+    logNothing = 0
+    logInfos = 1
+    logErrors = 2
+    logDebugs = 3
+
 class CoralAppData:
     version = 0.1
     nodeClasses = {}
@@ -58,6 +64,7 @@ class CoralAppData:
     appendToLastCreatedNodes = False
     lastCreatedNodes = []
     currentNetworkDir = ""
+    verboseLevel = VerboseLevel.logErrors
     
     #observer lists
     registeredNodeClassesObservers = ObserverCollector()
@@ -101,12 +108,23 @@ def addAutoLoadPath(path):
     if path not in CoralAppData.autoLoadPaths:
         CoralAppData.autoLoadPaths.append(path)
 
+def setVerboseLevel(level):
+    CoralAppData.verboseLevel = level
+
+def verboseLevel():
+    return CoralAppData.verboseLevel
+
 def scanPathForPlugins(path):
+    verbLev = verboseLevel()
+    setVerboseLevel(0)
+
     entries = os.listdir(path)
     for entry in entries:
         if entry.split(".")[-1] == "py":
             filename = os.path.join(path, entry)
             loadPlugin(filename)
+    
+    setVerboseLevel(verbLev)
 
 def scanAutoLoadPaths():
     for path in CoralAppData.autoLoadPaths:
@@ -319,12 +337,18 @@ def setShouldLogInfos(value = True):
 
 def logError(message):
     exc = Exception("# error: " + str(message))
-    print exc
+    if(CoralAppData.verboseLevel >= VerboseLevel.logErrors):
+        print exc
     
     return exc
 
 def logInfo(message):
-    print "# info: " + (message)
+    if(CoralAppData.verboseLevel >= VerboseLevel.logInfos):
+        print "# info: " + (message)
+
+def logDebug(message):
+    if(CoralAppData.verboseLevel >= VerboseLevel.logDebugs):
+        print "# debug: " + (message)
 
 def _instantiateNode(className, name, parent):
     coralNodeClass = findNodeClass(className)
@@ -575,6 +599,8 @@ def loadPlugin(filename):
                 if hasattr(module, "loadPlugin"):
                     found = True
                     loadPluginModule(module)
+                else:
+                    logError("no loadPlugin function found in file " + str(filename))
                     
             break
     
