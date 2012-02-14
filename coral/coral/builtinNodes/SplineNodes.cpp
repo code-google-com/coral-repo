@@ -203,7 +203,7 @@ void SplinePoint::pointOnCatmull(float param, const std::vector<Imath::V3f> &cvs
 		float step = 1.0 / float(cvsSize - 1);
 		int id = param / step;
 
-		float u = fmod(param / step, 1.0);
+		float u = fmod(param / step, 1.0f);
 		if(id <= 0){
 			evalCatmull(firstPoint, cvs[0], cvs[1], cvs[2], u, result);
 		}
