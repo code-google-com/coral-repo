@@ -504,7 +504,7 @@ def init():
 
     if os.environ.has_key("CORAL_PLUGINS_PATH"):
         path = os.environ["CORAL_PLUGINS_PATH"]
-        paths = path.replace(";", ":").split(":")
+        paths = path.split(os.pathsep)
         for path in paths:
             addAutoLoadPath(path)
 
