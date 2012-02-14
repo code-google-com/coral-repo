@@ -7,21 +7,35 @@ FindPointsInRange::FindPointsInRange(const std::string &name, Node *parent): Nod
 	_point = new NumericAttribute("point", this);
 	_range = new NumericAttribute("range", this);
 	_points = new NumericAttribute("points", this);
-	_pointsInRange = new NumericAttribute("neighboursPerPoint", this);
+	_pointsInRange = new NumericAttribute("pointsInRange", this);
+	_pointsInRangeId = new NumericAttribute("pointsInRangeId", this);
+	_pointsInRangeSize = new NumericAttribute("pointsInRangeSize", this);
 
 	addInputAttribute(_point);
 	addInputAttribute(_range);
 	addInputAttribute(_points);
 	addOutputAttribute(_pointsInRange);
+	addOutputAttribute(_pointsInRangeId);
+	addOutputAttribute(_pointsInRangeSize);
 
 	setAttributeAffect(_point, _pointsInRange);
+	setAttributeAffect(_point, _pointsInRangeId);
+	setAttributeAffect(_point, _pointsInRangeSize);
+
 	setAttributeAffect(_range, _pointsInRange);
+	setAttributeAffect(_range, _pointsInRangeId);
+	setAttributeAffect(_range, _pointsInRangeSize);
+
 	setAttributeAffect(_points, _pointsInRange);
+	setAttributeAffect(_points, _pointsInRangeId);
+	setAttributeAffect(_points, _pointsInRangeSize);
 
 	setAttributeAllowedSpecialization(_point, "Vec3");
 	setAttributeAllowedSpecialization(_range, "Float");
 	setAttributeAllowedSpecialization(_points, "Vec3Array");
-	setAttributeAllowedSpecialization(_pointsInRange, "IntArray");
+	setAttributeAllowedSpecialization(_pointsInRange, "Vec3Array");
+	setAttributeAllowedSpecialization(_pointsInRangeId, "IntArray");
+	setAttributeAllowedSpecialization(_pointsInRangeSize, "Int");
 }
 
 void FindPointsInRange::update(Attribute *attribute){
@@ -47,12 +61,15 @@ void FindPointsInRange::update(Attribute *attribute){
 	
 	kdres *res = kd_nearest_range3f(tree, point.x, point.y, point.z, range);
 
-	std::vector<int> pointsInRange(kd_res_size(res));
+	int resultSize = kd_res_size(res);
+	std::vector<Imath::V3f> pointsInRange(resultSize);
+	std::vector<int> pointsInRangeId(resultSize);
 
 	int i = 0;
 	while(!kd_res_end(res)){
 		int pointIndex = *(int*)kd_res_item_data(res);
-		pointsInRange[i] = pointIndex;
+		pointsInRange[i] = points[pointIndex];
+		pointsInRangeId[i] = pointIndex;
 
 		kd_res_next(res);
 		i += 1;
@@ -61,7 +78,13 @@ void FindPointsInRange::update(Attribute *attribute){
 	kd_res_free(res);
 	kd_free(tree);
 
-	_pointsInRange->outValue()->setIntValues(pointsInRange);
+	_pointsInRange->outValue()->setVec3Values(pointsInRange);
+	_pointsInRangeId->outValue()->setIntValues(pointsInRangeId);
+	_pointsInRangeSize->outValue()->setIntValueAt(0, resultSize);
+
+	setAttributeIsClean(_pointsInRange, true);
+	setAttributeIsClean(_pointsInRangeId, true);
+	setAttributeIsClean(_pointsInRangeSize, true);
 }
 
 

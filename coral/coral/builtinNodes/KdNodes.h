@@ -49,6 +49,8 @@ private:
 	NumericAttribute *_range;
 	NumericAttribute *_points;
 	NumericAttribute *_pointsInRange;
+	NumericAttribute *_pointsInRangeId;
+	NumericAttribute *_pointsInRangeSize;
 };
 
 }

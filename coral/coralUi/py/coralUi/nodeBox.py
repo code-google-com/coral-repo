@@ -318,7 +318,7 @@ class NodeBox(QtGui.QWidget):
             self._nodeShelfItemClicked(self._nodeShelf.currentItem())
             
     def sizeHint(self):
-        return QtCore.QSize(150, 400)
+        return QtCore.QSize(200, 400)
     
     def _searchTextChanged(self, text):
         self._rebuildNodeShelf(text)
