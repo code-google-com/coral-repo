@@ -112,10 +112,10 @@ Numeric::Type NumericAttribute::numericTypeFromString(const std::string &typeStr
 }
 
 std::string NumericAttribute::debugInfo(){
-	std::string info = Attribute::debugInfo() + "\n";
-	Numeric *value = outValue();
-	if(value->isArray()){
-		info += "array size: " + stringUtils::intToString(value->size());
+	std::string info = Attribute::debugInfo();
+	Numeric *val = value();
+	if(val->isArray()){
+		info += "array size: " + stringUtils::intToString(val->size()) + "\n";
 	}
 	
 	return info;

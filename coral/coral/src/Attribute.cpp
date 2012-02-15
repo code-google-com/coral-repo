@@ -179,11 +179,10 @@ void Attribute::resetInputValuesInChain(){
 		}
 	}
 	
-	if(_passThrough){
-		for(int i = 0; i < _outputs.size(); ++i){
-			_outputs[i]->resetInputValuesInChain();
-		}
+	for(int i = 0; i < _outputs.size(); ++i){
+		_outputs[i]->resetInputValuesInChain();
 	}
+	
 }
 
 void Attribute::disconnectInput(){
@@ -480,8 +479,12 @@ void Attribute::setInput(Attribute *attribute){
 			
 			_input = attribute;
 			_inputValue = _value;
-			
+
+			Node *sourceContainer = attribute->parent()->parent();
+			Node *destContainer = parent()->parent();
+
 			NetworkManager::addEdge(_input, this);
+			
 			resetInputValuesInChain();
 			
 			if(_input->_passThrough){

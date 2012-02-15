@@ -135,7 +135,9 @@ void ForLoopNode::collectLoopOperators(std::vector<LoopIteratorNode*> &loopOpera
 
 void ForLoopNode::getSubCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &subCleanChain){
 	std::vector<Attribute*> attributes;
-	NetworkManager::getUpstreamChain(attribute, attributes);
+	if(attribute->input()){
+		NetworkManager::getUpstreamChain(attribute->input(), attributes);
+	}
 	
 	int n = 0;
 	for(int i = 0; i < attributes.size(); ++i){
@@ -145,6 +147,7 @@ void ForLoopNode::getSubCleanChain(Attribute *attribute, std::map<int, std::vect
 			if(parentNode){
 				if(parentNode->parent() == this){
 					subCleanChain[n].push_back(attr);
+
 					n++;
 				}
 				
