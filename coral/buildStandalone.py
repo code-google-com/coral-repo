@@ -167,7 +167,7 @@ def buildMainTree(coralLib, coralUiLib, imathLib, buildDir):
     compileall.compile_dir(buildDir, quiet = True)
     
     if buildSdk:
-        buildSdkTree(coralLib, coralUiLib, sdkInstallDir)
+       buildSdkTree(coralLib, coralUiLib, sdkInstallDir)
 
 def buildDevTree(coralLib, coralUiLib, imathLib):
     shutil.rmtree(installDir, ignore_errors = True)
@@ -213,13 +213,27 @@ def buildOsXApp(coralLib, coralUiLib, imathLib):
             qtLib = os.environ[envName]
             shutil.copy(qtLib, macOsDir)
     
+    shutil.copy("/usr/local/lib/libboost_filesystem.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libboost_regex.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libboost_system.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libboost_thread.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libHalf.6.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libIex.6.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libImath.6.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libIlmThread.6.dylib", macOsDir)
+    shutil.copy("/usr/X11/lib/libpng15.15.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libtiff.5.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libjpeg.8.dylib", macOsDir)
+    shutil.copy("/usr/local/lib/libIlmImf.6.dylib", macOsDir)
+
+    glewLib = os.path.join(sconsUtils.getEnvVar("CORAL_GLEW_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_GLEW_LIB") + ".dylib")
+    shutil.copy(glewLib, macOsDir)
+
+    openImageIoLib = os.path.join(sconsUtils.getEnvVar("CORAL_OIIO_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_OIIO_LIB") + ".dylib")
+    shutil.copy(openImageIoLib, macOsDir)
+
     tbbLib = os.path.join(sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_TBB_LIB") + ".dylib")
     shutil.copy(tbbLib, macOsDir)
-    
-    imathReleaseLib = os.path.join(sconsUtils.getEnvVar("CORAL_IMATH_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_IMATH_LIB") + ".dylib")
-    imathIexLib = os.path.join(sconsUtils.getEnvVar("CORAL_IMATH_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_IMATH_IEX_LIB") + ".dylib")
-    shutil.copy(imathReleaseLib, macOsDir)
-    shutil.copy(imathIexLib, macOsDir)
     
     boostPythonLib = os.path.join(sconsUtils.getEnvVar("CORAL_BOOST_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_BOOST_PYTHON_LIB") + ".dylib")
     shutil.copy(boostPythonLib, macOsDir)

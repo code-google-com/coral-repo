@@ -115,11 +115,11 @@ class NodeUi(QtGui.QGraphicsWidget):
             if nodeView.NodeView._lastHoveredItem is not self:
                 if nodeView.NodeView._lastHoveredItem:
                     nodeView.NodeView._lastHoveredItem.hoverLeaveEvent(None)
-            
+                    
                 zoom = self.scene().zoom()
                 if zoom < 0.6:
                     factor =  0.7 / zoom
-                
+                    
                     self.setTransformOriginPoint(self.rect().center())
                     self._magnify(factor)
                 
@@ -312,12 +312,15 @@ class NodeUi(QtGui.QGraphicsWidget):
     def labelsColor(self):
         return QtGui.QColor(255, 255, 255)
     
+    def onSelected(self):
+        if self.isSelected():
+            self._shapePen.setStyle(QtCore.Qt.SolidLine)
+        else:
+            self._shapePen.setStyle(QtCore.Qt.NoPen)
+        
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
-            if self.isSelected():
-                self._shapePen.setStyle(QtCore.Qt.SolidLine)
-            else:
-                self._shapePen.setStyle(QtCore.Qt.NoPen)
+            self.onSelected()
             
         return value
     

@@ -41,6 +41,7 @@ class Connection(QtGui.QGraphicsItem):
         self._endHook = None
         self._color = startHook.colorRef()
         self._pen = QtGui.QPen(self._color)
+        self._pen.setWidth(1)
         self._isTempConnection = False
         self._path = QtGui.QPainterPath()
         

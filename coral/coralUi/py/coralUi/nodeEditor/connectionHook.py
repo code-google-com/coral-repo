@@ -69,7 +69,19 @@ class ConnectionHook(QtGui.QGraphicsItem):
         self.setFlags(QtGui.QGraphicsItem.ItemSendsScenePositionChanges)
     
         self._pen.setWidthF(1.0)
-        
+
+        self.setAcceptsHoverEvents(True)
+    
+    def hoverEnterEvent(self, event):
+        for conn in self._connections:
+            conn._pen.setWidth(2)
+            conn.update()
+
+    def hoverLeaveEvent(self, event):
+        for conn in self._connections:
+            conn._pen.setWidth(1)
+            conn.update()
+
     def setMixedColor(self, value = True):
         self._mixedColor = value
     
