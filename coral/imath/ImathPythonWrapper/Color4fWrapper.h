@@ -33,26 +33,12 @@
 #include <vector>
 
 #include <ImathColor.h>
-#include <pythonWrapperUtils.h>
 
-namespace{
-	boost::shared_ptr<Imath::Color4f> col4_defaultInit(){
-		return boost::shared_ptr<Imath::Color4f>(new Imath::Color4f(1.f, 1.f, 1.f, 1.f));
-	}
+namespace
+{
+	boost::shared_ptr<Imath::Color4f> col4_defaultInit();
 }
 
-void color4fWrapper(){
-	boost::python::to_python_converter<std::vector<Imath::Color4f >, coral::pythonWrapperUtils::stdVectorToPythonList<Imath::Color4f > >();
-
-	boost::python::class_<Imath::Color4f>("Color4f")
-		.def("__init__", boost::python::make_constructor(col4_defaultInit))
-		.def(boost::python::init<float, float, float, float>())
-		.def(boost::python::init<Imath::Color4f>())
-		.def_readwrite("r", &Imath::Color4f::r)
-		.def_readwrite("g", &Imath::Color4f::g)
-		.def_readwrite("b", &Imath::Color4f::b)
-		.def_readwrite("a", &Imath::Color4f::a)
-	;
-}
+void color4fWrapper();
 
 #endif
