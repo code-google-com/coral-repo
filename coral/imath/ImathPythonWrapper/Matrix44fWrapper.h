@@ -35,24 +35,6 @@
 #include <ImathMatrix.h>
 #include <pythonWrapperUtils.h>
 
-boost::python::tuple getX(Imath::M44f &self);
-
-void setX(Imath::M44f &self, const boost::python::object &x);
-
-void setXElement(Imath::M44f &self, int row, int column, float value);
-
-float getXElement(Imath::M44f &self, int row, int column);
-
-void invert(Imath::M44f &self);
-
-Imath::M44f inverse(Imath::M44f &self);
-
-void setEulerAngles(Imath::M44f &self, const Imath::V3f &r);
-
-void setAxisAngle(Imath::M44f &self, const Imath::V3f &ax, float ang);
-
-void setTranslation(Imath::M44f &self, const Imath::V3f &t);
-
 void matrix44fWrapper();
 
 #endif

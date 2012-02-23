@@ -258,7 +258,7 @@ class CustomLineEdit(QtGui.QLineEdit):
 class StringValueField(AttributeField):
     def __init__(self, coralAttribute, parentWidget):
         AttributeField.__init__(self, coralAttribute, parentWidget)
-        
+
         if coralAttribute.longString():
             textEdit = QtGui.QTextEdit(self)
             textEdit.setLineWrapMode(QtGui.QTextEdit.NoWrap)

@@ -26,6 +26,8 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#include <boost/python.hpp>
+
 #include "Vec3fWrapper.h"
 #include "Matrix44fWrapper.h"
 #include "QuatfWrapper.h"

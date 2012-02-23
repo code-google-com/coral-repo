@@ -32,14 +32,6 @@
 #include <boost/python.hpp>
 #include <ImathVec.h>
 
-boost::shared_ptr<Imath::V3f> vec3_defaultInit();
-
-boost::python::tuple getValue(Imath::V3f &self);
-
-void setValue(Imath::V3f &self, float a, float b, float c);
-
-Imath::V3f normalize(Imath::V3f &self);
-
 void vec3fWrapper();
 
 #endif

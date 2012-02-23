@@ -41,12 +41,7 @@ struct QuatIndexer
 	static void set(Imath::Quatf  &x, int i, const float &v);
 };
 
-std::string reprQuatf( Imath::Quatf &x );
-
-std::string strQuatf( Imath::Quatf &x );
-
-boost::shared_ptr<Imath::Quatf> defaultQuatfInit();
-
 void quatfWrapper();
+
 
 #endif

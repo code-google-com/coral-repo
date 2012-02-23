@@ -32,83 +32,84 @@
 #include <pythonWrapperUtils.h>
 #include "Matrix44fWrapper.h"
 
-boost::python::tuple getX(Imath::M44f &self)
-{
-	boost::python::tuple x =
-		boost::python::make_tuple(
-								  boost::python::make_tuple(self.x[0][0],
-															self.x[0][1],
-															self.x[0][2],
-															self.x[0][3]),
-								  boost::python::make_tuple(self.x[1][0],
-															self.x[1][1],
-															self.x[1][2],
-															self.x[1][3]),
-								  boost::python::make_tuple(self.x[2][0],
-															self.x[2][1],
-															self.x[2][2],
-															self.x[2][3]),
-								  boost::python::make_tuple(self.x[3][0],
-															self.x[3][1],
-															self.x[3][2],
-															self.x[3][3]));
-
-	return x;
-}
-
-void setX(Imath::M44f &self, const boost::python::object &x)
-{
-	boost::python::tuple tupleX = boost::python::tuple(x);
-
-	for(int i = 0; i < 4; i++)
+namespace{
+	boost::python::tuple getX(Imath::M44f &self)
 	{
-		boost::python::tuple row =
-			boost::python::extract<boost::python::tuple>(tupleX[i]);
-		for(int j = 0; j < 4; j++)
+		boost::python::tuple x =
+			boost::python::make_tuple(
+									  boost::python::make_tuple(self.x[0][0],
+																self.x[0][1],
+																self.x[0][2],
+																self.x[0][3]),
+									  boost::python::make_tuple(self.x[1][0],
+																self.x[1][1],
+																self.x[1][2],
+																self.x[1][3]),
+									  boost::python::make_tuple(self.x[2][0],
+																self.x[2][1],
+																self.x[2][2],
+																self.x[2][3]),
+									  boost::python::make_tuple(self.x[3][0],
+																self.x[3][1],
+																self.x[3][2],
+																self.x[3][3]));
+
+		return x;
+	}
+
+	void setX(Imath::M44f &self, const boost::python::object &x)
+	{
+		boost::python::tuple tupleX = boost::python::tuple(x);
+
+		for(int i = 0; i < 4; i++)
 		{
-			self.x[i][j] = boost::python::extract<float>(row[j]);
+			boost::python::tuple row =
+				boost::python::extract<boost::python::tuple>(tupleX[i]);
+			for(int j = 0; j < 4; j++)
+			{
+				self.x[i][j] = boost::python::extract<float>(row[j]);
+			}
 		}
 	}
+
+	void setXElement(Imath::M44f &self, int row, int column, float value)
+	{
+		self.x[row][column] = value;
+	}
+
+	float getXElement(Imath::M44f &self, int row, int column)
+	{
+		return self.x[row][column];
+	}
+
+
+	void invert(Imath::M44f &self)
+	{
+		bool singExc = false;
+		self.invert(singExc);
+	}
+
+	Imath::M44f inverse(Imath::M44f &self)
+	{
+		bool singExc = false;
+		return self.inverse(singExc);
+	}
+
+	void setEulerAngles(Imath::M44f &self, const Imath::V3f &r)
+	{
+		self.setEulerAngles(r);
+	}
+
+	void setAxisAngle(Imath::M44f &self, const Imath::V3f &ax, float ang)
+	{
+		self.setAxisAngle(ax, ang);
+	}
+
+	void setTranslation(Imath::M44f &self, const Imath::V3f &t)
+	{
+		self.setTranslation(t);
+	}
 }
-
-void setXElement(Imath::M44f &self, int row, int column, float value)
-{
-	self.x[row][column] = value;
-}
-
-float getXElement(Imath::M44f &self, int row, int column)
-{
-	return self.x[row][column];
-}
-
-
-void invert(Imath::M44f &self)
-{
-	bool singExc = false;
-	self.invert(singExc);
-}
-
-Imath::M44f inverse(Imath::M44f &self)
-{
-	bool singExc = false;
-	return self.inverse(singExc);
-}
-
-void setEulerAngles(Imath::M44f &self, const Imath::V3f &r)
-{
-	self.setEulerAngles(r);
-}
-
-void setAxisAngle(Imath::M44f &self, const Imath::V3f &ax, float ang)
-{
-	self.setAxisAngle(ax, ang);
-}
-
-void setTranslation(Imath::M44f &self, const Imath::V3f &t)
-{
-	self.setTranslation(t);
-}
-
 
 void matrix44fWrapper()
 {

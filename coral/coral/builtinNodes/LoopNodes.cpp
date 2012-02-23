@@ -172,6 +172,7 @@ void ForLoopNode::subClean(std::map<int, std::vector<Attribute*> > &subCleanChai
 
 void ForLoopNode::updateInt(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain){
 	const std::vector<int> &arrayValues = array->intValues();
+	
 	for(int i = 0; i < arrayValues.size(); ++i){
 		currentElement->setIntValueAt(0, arrayValues[i]);
 		currentIndex->setIntValueAt(0, i);
@@ -182,7 +183,9 @@ void ForLoopNode::updateInt(Numeric *array, Numeric *currentElement, Numeric *cu
 
 void ForLoopNode::updateFloat(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain){
 	const std::vector<float> &arrayValues = array->floatValues();
+	
 	for(int i = 0; i < arrayValues.size(); ++i){
+
 		currentElement->setFloatValueAt(0, arrayValues[i]);
 		currentIndex->setIntValueAt(0, i);
 

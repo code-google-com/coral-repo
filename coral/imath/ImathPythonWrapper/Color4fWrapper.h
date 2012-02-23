@@ -34,11 +34,6 @@
 
 #include <ImathColor.h>
 
-namespace
-{
-	boost::shared_ptr<Imath::Color4f> col4_defaultInit();
-}
-
 void color4fWrapper();
 
 #endif

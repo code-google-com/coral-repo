@@ -58,38 +58,40 @@ void QuatIndexer::set(Imath::Quatf  &x, int i, const float &v)
 	}
 }
 
-std::string reprQuatf( Imath::Quatf &x )
-{
-	std::stringstream s;
-	s << "Imath.Quatf" << "( ";
-	for( unsigned i=0; i<4; i++ )
+namespace {
+	std::string reprQuatf( Imath::Quatf &x )
 	{
-		s << x[i];
-		if( i!=3 )
+		std::stringstream s;
+		s << "Imath.Quatf" << "( ";
+		for( unsigned i=0; i<4; i++ )
 		{
-			s << ", ";
+			s << x[i];
+			if( i!=3 )
+			{
+				s << ", ";
+			}
 		}
+		s << " )";
+		return s.str();
 	}
-	s << " )";
-	return s.str();
-}
 
-std::string strQuatf( Imath::Quatf &x )
-{
-	std::stringstream s;
-	for( unsigned i=0; i<4; i++ )
+	std::string strQuatf( Imath::Quatf &x )
 	{
-		s << x[i];
-		if( i!=3 )
+		std::stringstream s;
+		for( unsigned i=0; i<4; i++ )
 		{
-			s << " ";
+			s << x[i];
+			if( i!=3 )
+			{
+				s << " ";
+			}
 		}
+		return s.str();
 	}
-	return s.str();
-}
 
-boost::shared_ptr<Imath::Quatf> defaultQuatfInit()	{
-	return boost::shared_ptr<Imath::Quatf>(new Imath::Quatf());
+	boost::shared_ptr<Imath::Quatf> defaultQuatfInit()	{
+		return boost::shared_ptr<Imath::Quatf>(new Imath::Quatf());
+	}
 }
 
 void quatfWrapper()
