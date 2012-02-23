@@ -26,49 +26,61 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef STRINGATTRIBUTE_H
-#define STRINGATTRIBUTE_H
+#include "StringAttribute.h"
 
-#include <string>
-#include "Value.h"
-#include "Attribute.h"
-#include "stringUtils.h"
+using namespace coral;
 
-namespace coral{
-
-	//! Wraps an std::string, used by StringAttribute.
-	class CORAL_EXPORT String : public Value{
-	public:
-		void setStringValue(std::string value);
-
-		const std::string &stringValue();
-	
-		std::string asString();
-	
-		void setFromString(const std::string &value);
-
-	private:
-		std::string _value;
-	};
-
-	//! Stores a String value and allows for strings to be manipulated by a Node.	
-	class CORAL_EXPORT StringAttribute: public Attribute{
-	public:
-		StringAttribute(const std::string &name, Node *parent);
-
-		String *value();
-
-		String *outValue();
-
-		/*! Will display this attribute in the NodeInspector as an aditable text box, rather then the usual one-line field.*/
-		void setLongString(bool value);
-
-		bool longString();
-
-	private:
-		bool _longString;
-	};
-
+void String::setStringValue(std::string value)
+{
+	_value = value;
 }
 
-#endif
+const std::string& String::stringValue()
+{
+	return _value;
+}
+
+std::string String::asString()
+{
+	std::string val = stringUtils::replace(_value, "\n", "\\n");
+	return val;
+}
+
+void String::setFromString(const std::string &value)
+{
+	_value = value;
+}
+
+StringAttribute::StringAttribute(const std::string &name, Node *parent)
+	: Attribute(name, parent)
+	, _longString(true)
+{
+	setClassName("StringAttribute");
+	String *ptr = new String();
+	ptr->setStringValue(name);
+	setValuePtr(ptr);
+	
+	std::vector<std::string> allowedSpecialization;
+	allowedSpecialization.push_back("String");
+	setAllowedSpecialization(allowedSpecialization);
+}
+
+String* StringAttribute::value()
+{
+	return (String*)Attribute::value();
+}
+
+String* StringAttribute::outValue()
+{
+	return (String*)Attribute::outValue();
+}
+
+void StringAttribute::setLongString(bool value)
+{
+	_longString = value;
+}
+
+bool StringAttribute::longString()
+{
+	return _longString;
+}

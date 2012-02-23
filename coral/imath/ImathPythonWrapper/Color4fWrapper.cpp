@@ -26,33 +26,31 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef MATRIX44FWRAPPER_H
-#define MATRIX44FWRAPPER_H
-
 #include <boost/python.hpp>
 #include <vector>
 
-#include <ImathMatrix.h>
+#include <ImathColor.h>
 #include <pythonWrapperUtils.h>
+#include "Color4fWrapper.h"
 
-boost::python::tuple getX(Imath::M44f &self);
+namespace{
+	boost::shared_ptr<Imath::Color4f> col4_defaultInit()
+	{
+		return boost::shared_ptr<Imath::Color4f>(new Imath::Color4f(1.f, 1.f, 1.f, 1.f));
+	}
+}
 
-void setX(Imath::M44f &self, const boost::python::object &x);
+void color4fWrapper()
+{
+	boost::python::to_python_converter<std::vector<Imath::Color4f >, coral::pythonWrapperUtils::stdVectorToPythonList<Imath::Color4f > >();
 
-void setXElement(Imath::M44f &self, int row, int column, float value);
-
-float getXElement(Imath::M44f &self, int row, int column);
-
-void invert(Imath::M44f &self);
-
-Imath::M44f inverse(Imath::M44f &self);
-
-void setEulerAngles(Imath::M44f &self, const Imath::V3f &r);
-
-void setAxisAngle(Imath::M44f &self, const Imath::V3f &ax, float ang);
-
-void setTranslation(Imath::M44f &self, const Imath::V3f &t);
-
-void matrix44fWrapper();
-
-#endif
+	boost::python::class_<Imath::Color4f>("Color4f")
+		.def("__init__", boost::python::make_constructor(col4_defaultInit))
+		.def(boost::python::init<float, float, float, float>())
+		.def(boost::python::init<Imath::Color4f>())
+		.def_readwrite("r", &Imath::Color4f::r)
+		.def_readwrite("g", &Imath::Color4f::g)
+		.def_readwrite("b", &Imath::Color4f::b)
+		.def_readwrite("a", &Imath::Color4f::a)
+	;
+}

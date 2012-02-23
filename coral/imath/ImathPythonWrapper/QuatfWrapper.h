@@ -33,119 +33,20 @@
 #include <vector>
 
 #include <ImathQuat.h>
-#include <pythonWrapperUtils.h>
 
 struct QuatIndexer
 {
-	static float get(const Imath::Quatf &x, int i)
-	{
-		// Do we want to handle backward indexing?
-		if ( i >= 0 && i < 4 )
-		{
-			return x[i];
-		}
-		else
-		{
-			throw std::out_of_range("");
-		}
+	static float get(const Imath::Quatf &x, int i);
 
-	}
-
-	static void set(Imath::Quatf  &x, int i, const float &v)
-	{
-		if ( i >= 0 && i < 4 )
-		{
-			x[i] = v;
-		}
-		else
-		{
-			throw std::out_of_range("");
-		}
-	}
+	static void set(Imath::Quatf  &x, int i, const float &v);
 };
 
-std::string reprQuatf( Imath::Quatf &x )
-{
-	std::stringstream s;
-	s << "Imath.Quatf" << "( ";
-	for( unsigned i=0; i<4; i++ )
-	{
-		s << x[i];
-		if( i!=3 )
-		{
-			s << ", ";
-		}
-	}
-	s << " )";
-	return s.str();
-}
+std::string reprQuatf( Imath::Quatf &x );
 
-std::string strQuatf( Imath::Quatf &x )
-{
-	std::stringstream s;
-	for( unsigned i=0; i<4; i++ )
-	{
-		s << x[i];
-		if( i!=3 )
-		{
-			s << " ";
-		}
-	}
-	return s.str();
-}
+std::string strQuatf( Imath::Quatf &x );
 
-boost::shared_ptr<Imath::Quatf> defaultQuatfInit()	{
-	return boost::shared_ptr<Imath::Quatf>(new Imath::Quatf());
-}
+boost::shared_ptr<Imath::Quatf> defaultQuatfInit();
 
-void quatfWrapper()
-{
-	boost::python::to_python_converter<std::vector<Imath::Quatf >, coral::pythonWrapperUtils::stdVectorToPythonList<Imath::Quatf > >();
-
-	boost::python::class_<Imath::Quatf>("Quatf")
-		.def(boost::python::init<>())
-		.def(boost::python::init<Imath::Quatf >())
-		.def(boost::python::init<float, float, float, float>())
-		.def(boost::python::init<float, Imath::V3f >())
-		.def_readwrite("r", &Imath::Quatf::r)
-		.def_readwrite("v", &Imath::Quatf::v)
-
-		.def("__getitem__", &QuatIndexer::get)
-		.def("__setitem__", &QuatIndexer::set)
-
-		.def(boost::python::self ^ boost::python::self)
-		.def(boost::python::self *= boost::python::self)
-		.def(boost::python::self *= boost::python::other<float>())
-		.def(boost::python::self /= boost::python::self)
-		.def(boost::python::self /= boost::python::other<float>())
-		.def(boost::python::self += boost::python::self)
-		.def(boost::python::self -= boost::python::self)
-		.def(boost::python::self == boost::python::self)
-		.def(boost::python::self != boost::python::self)
-		.def( boost::python::self * boost::python::self )
-		.def( ~boost::python::self )
-
-		.def("identity", &Imath::Quatf::identity).staticmethod("identity")
-		.def("invert", &Imath::Quatf::invert, boost::python::return_self<>())
-		.def("inverse", &Imath::Quatf::inverse)
-		.def("normalize", &Imath::Quatf::normalize, boost::python::return_self<>())
-		.def("normalized", &Imath::Quatf::normalized)
-		.def("length", &Imath::Quatf::length)
-		.def("setAxisAngle", &Imath::Quatf::setAxisAngle, boost::python::return_self<>())
-		.def("setRotation", &Imath::Quatf::setRotation, boost::python::return_self<>())
-		.def("angle", &Imath::Quatf::angle)
-		.def("axis", &Imath::Quatf::axis)
-		.def("toMatrix44", &Imath::Quatf::toMatrix44)
-		.def("log", &Imath::Quatf::log)
-		.def("exp", &Imath::Quatf::exp)
-
-		.def("__str__", &strQuatf)
-		.def("__repr__", &reprQuatf)
-	;
-
-	boost::python::def("squad", Imath::squad<float>);
-	boost::python::def("spline", Imath::spline<float>);
-	boost::python::def("slerp", Imath::slerp<float>);
-}
+void quatfWrapper();
 
 #endif

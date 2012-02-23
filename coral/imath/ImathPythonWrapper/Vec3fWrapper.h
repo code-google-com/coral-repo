@@ -30,57 +30,16 @@
 #define VEC3FWRAPPER_H
 
 #include <boost/python.hpp>
-#include <vector>
-
 #include <ImathVec.h>
-#include <pythonWrapperUtils.h>
 
-boost::shared_ptr<Imath::V3f> vec3_defaultInit()	{
-	return boost::shared_ptr<Imath::V3f>(new Imath::V3f(0.f, 0.f, 0.f));
-}
+boost::shared_ptr<Imath::V3f> vec3_defaultInit();
 
-boost::python::tuple getValue(Imath::V3f &self)	{
-	return boost::python::make_tuple(self.x, self.y, self.z);
-}
+boost::python::tuple getValue(Imath::V3f &self);
 
-void setValue(Imath::V3f &self, float a, float b, float c){
-	self.setValue(a, b, c);
-}
+void setValue(Imath::V3f &self, float a, float b, float c);
 
-Imath::V3f normalize(Imath::V3f &self){
-	self.normalize();
-	return self;
-}
+Imath::V3f normalize(Imath::V3f &self);
 
-void vec3fWrapper(){
-	boost::python::to_python_converter<std::vector<Imath::V3f >, coral::pythonWrapperUtils::stdVectorToPythonList<Imath::V3f > >();
-
-	boost::python::class_<Imath::V3f>("Vec3f")
-		.def("__init__", boost::python::make_constructor(vec3_defaultInit))
-		.def(boost::python::init<float, float, float>())
-		.def(boost::python::init<Imath::V3f>())
-		.def_readwrite("x", &Imath::V3f::x)
-		.def_readwrite("y", &Imath::V3f::y)
-		.def_readwrite("z", &Imath::V3f::z)
-		.def(boost::python::self + boost::python::self)
-		.def(boost::python::self += boost::python::self)
-		.def(boost::python::self - boost::python::self)
-		.def(boost::python::self -= boost::python::self)
-		.def(boost::python::self * boost::python::self)
-		.def(boost::python::self *= boost::python::self)
-		.def(boost::python::self / boost::python::self)
-		.def(boost::python::self /= boost::python::self)
-		.def(boost::python::self * boost::python::other<float>())
-		.def(boost::python::self *= boost::python::other<float>())
-		.def(- boost::python::self)
-		.def("getValue", getValue)
-		.def("setValue", setValue)
-		.def("dot", &Imath::V3f::dot)
-		.def("cross", &Imath::V3f::cross)
-		.def("negate", &Imath::V3f::negate, boost::python::return_internal_reference<1>())
-		.def("normalize", &Imath::V3f::normalize, boost::python::return_internal_reference<1>())
-		.def("normalized", &Imath::V3f::normalized)
-		.def("length", &Imath::V3f::length);
-}
+void vec3fWrapper();
 
 #endif
