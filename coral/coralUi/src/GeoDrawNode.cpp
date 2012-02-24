@@ -35,10 +35,16 @@
 using namespace coral;
 using namespace coralUi;
 
-GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): 
-DrawNode(name, parent),
-_shouldUpdateGeoVBO(true),
-_shouldUpdateColorVBO(true){	
+GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent)
+  : DrawNode(name, parent)
+  , _shouldUpdateGeoVBO(true)
+  , _shouldUpdateColorVBO(true)
+  , _shouldUpdateTexture(false)
+  , _vtxCount(0)
+  , _nrmCount(0)
+  , _uvCount(0)
+  , _idxCount(0)
+{	
 	_geo = new GeoAttribute("geo", this);
 	_smooth = new BoolAttribute("smooth", this);
 	_flat = new BoolAttribute("flat", this);
