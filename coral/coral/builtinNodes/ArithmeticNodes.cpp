@@ -96,13 +96,13 @@ void ArithmeticNode::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void ArithmeticNode::update(Attribute *attribute){
+void ArithmeticNode::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_numericOperation.operationSelected()){
 		Numeric *in0 = _in0->value();
 		Numeric *in1 = _in1->value();
 		Numeric *out = _out->outValue();
 		
-		_numericOperation.executeSelectedOperation(in0, in1, out);
+		_numericOperation.executeSelectedOperation(in0, in1, out, slice);
 	}
 }
 

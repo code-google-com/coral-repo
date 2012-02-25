@@ -60,7 +60,6 @@ def loadPlugin():
     plugin.registerNode("Matrix44ToQuat", _coral.Matrix44ToQuat, tags = ["numeric"], description = "Get the quaternion from a matrix44.\nWorks with single or array values.")
     plugin.registerNode("RangeLoop", _coral.RangeLoop, tags = ["numeric"], description = "Generate a value that will loop in a given range of values.\nWorks with single or array values.")
     plugin.registerNode("RandomNumber", _coral.RandomNumber, tags = ["numeric"], description = "Generate a random number.\nWorks with single or array values.")
-    plugin.registerNode("NumericIterator", _coral.NumericIterator, tags = ["numeric", "loop"], description = "Use it inside a loop node to build an array of values.")
     plugin.registerNode("ArrayIndices", _coral.ArrayIndices, tags = ["numeric", "loop"], description = "Build an array composed by all the indexes extracted from the given input array.")
     plugin.registerNode("GetArrayElement", _coral.GetArrayElement, tags = ["numeric"], description = "Get a single element of an array.")
     plugin.registerNode("SetArrayElement", _coral.SetArrayElement, tags = ["numeric"], description = "Set a single element of an array.")
@@ -120,7 +119,11 @@ def loadPlugin():
     plugin.registerNode("Time", timeNode.TimeNode, tags = ["generic"])
     plugin.registerNode("ImportCIOTransforms", _coral.ImportCIOTransforms, tags = ["generic"])
     plugin.registerNode("ImportCIOSkinWeights", _coral.ImportCIOSkinWeights, tags = ["generic"])
-    plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["generic", "loop"])
+    
+    plugin.registerNode("LoopInput", _coral.LoopInputNode, tags = ["loop"])
+    plugin.registerNode("LoopOutput", _coral.LoopOutputNode, tags = ["loop"])
+    plugin.registerNode("ForLoop", _coral.ForLoopNode, tags = ["loop"])
+    
     plugin.registerNode("ProcessSimulation", _coral.ProcessSimulationNode, tags = ["generic", "simulation"])
     
     plugin.registerAttribute("BoolAttribute", _coral.BoolAttribute)
@@ -131,8 +134,6 @@ def loadPlugin():
     
     plugin.registerNode("SplinePoint", _coral.SplinePoint, tags = ["curve"])
     
-    plugin.registerNode("Transform", _coral.Transform, tags = ["dag"])
-
     plugin.registerNode("SkinWeightDeformer", _coral.SkinWeightDeformer, tags = ["deformers"])
     
     return plugin

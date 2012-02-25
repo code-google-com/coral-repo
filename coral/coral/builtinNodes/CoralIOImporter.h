@@ -41,7 +41,7 @@ namespace coral{
 class ImportCIOTransforms: public Node{
 public:
 	ImportCIOTransforms(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	StringAttribute *_file;
@@ -54,7 +54,7 @@ private:
 class ImportCIOSkinWeights: public Node{
 public:
 	ImportCIOSkinWeights(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	StringAttribute *_file;

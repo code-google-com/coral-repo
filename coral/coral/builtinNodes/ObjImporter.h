@@ -40,7 +40,7 @@ public:
 	ObjImporter(const std::string &name, Node *parent);
 	~ObjImporter();
 
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 	GeoAttribute *geo(){
 		return _geo;

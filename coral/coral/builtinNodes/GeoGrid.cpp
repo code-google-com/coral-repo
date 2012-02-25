@@ -59,7 +59,7 @@ GeoGrid::GeoGrid(const std::string &name, Node *parent): Node(name, parent){
 	_heightSubdivisions->outValue()->setIntValueAt(0, 4);
 }
 
-void GeoGrid::update(Attribute *attribute){
+void GeoGrid::updateSlice(Attribute *attribute, unsigned int slice){
 	float width = _width->value()->floatValueAt(0);
 	float height = _height->value()->floatValueAt(0);
 	int widthSubdivisions = _widthSubdivisions->value()->intValueAt(0);

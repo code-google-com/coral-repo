@@ -44,3 +44,6 @@ void Value::setFromString(const std::string &value){
 
 void Value::copy(const Value *other){
 }
+
+void Value::resizeSlices(unsigned int slices){
+}

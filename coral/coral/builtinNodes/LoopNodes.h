@@ -7,42 +7,52 @@
 
 namespace coral{
 
-class LoopIteratorNode: public Node{
+class LoopInputNode: public Node{
 public:
-	LoopIteratorNode(const std::string &name, Node *parent);
-	NumericAttribute *index();
-	virtual void loopStart(unsigned int loopRangeSize);
-	virtual void loopStep(unsigned int index);
-	virtual void loopEnd();
-	void update(Attribute *attribute);
+	LoopInputNode(const std::string &name, Node *parent);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void attributeSpecializationChanged(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
-	NumericAttribute *_index;
+	NumericAttribute *_globalArray;
+	NumericAttribute *_localIndex;
+	NumericAttribute *_localElement;
+	void(LoopInputNode::*_selectedOperation)(unsigned int, Numeric *, Numeric *);
+
+	void updateInt(unsigned int slice, Numeric *globalArray, Numeric *localElement);
+};
+
+class LoopOutputNode: public Node{
+public:
+	LoopOutputNode(const std::string &name, Node *parent);
+	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void attributeSpecializationChanged(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
+
+private:
+	NumericAttribute *_localElement;
+	NumericAttribute *_globalArray;
+	void(LoopOutputNode::*_selectedOperation)(unsigned int, Numeric *, Numeric *);
+	
+	void updateInt(unsigned int slice, Numeric *element, Numeric *array);
+	void updateFloat(unsigned int slice, Numeric *element, Numeric *array);
+	void updateVec3(unsigned int slice, Numeric *element, Numeric *array);
+	void updateCol4(unsigned int slice, Numeric *element, Numeric *array);
+	void updateMatrix44(unsigned int slice, Numeric *element, Numeric *array);
 };
 
 class ForLoopNode: public Node{
 public:
 	ForLoopNode(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
-	void addDynamicAttribute(Attribute *attribute);
-	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void attributeSpecializationChanged(Attribute *attribute);
+	//void addDynamicAttribute(Attribute *attribute);
+
+protected:
+	unsigned int computeSlices();
 
 private:
-	NumericAttribute *_array;
-	NumericAttribute *_currentElement;
-	NumericAttribute *_currentIndex;
+	NumericAttribute *_globalArray;
 	PassThroughAttribute *_out;
-	void(ForLoopNode::*_selectedOperation)(Numeric *, Numeric *, Numeric *, std::map<int, std::vector<Attribute*> > &);
-	
-	void collectLoopOperators(std::vector<LoopIteratorNode*> &loopOperators);
-	void getSubCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &subCleanChain);
-	void subClean(std::map<int, std::vector<Attribute*> > &subCleanChain);
-	void updateInt(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain);
-	void updateFloat(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain);
-	void updateVec3(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain);
-	void updateCol4(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain);
-	void updateMatrix44(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain);
 };
 
 }

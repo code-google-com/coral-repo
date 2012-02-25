@@ -35,6 +35,7 @@
 #include <coral/pythonWrapperUtils.h>
 #include <ImathVec.h>
 #include <ImathRandom.h>
+#include <coral/StringAttribute.h>
 
 using namespace coral;
 
@@ -44,11 +45,13 @@ public:
 		_points = new NumericAttribute("points", this);
 		_time = new NumericAttribute("time", this);
 		_scale = new NumericAttribute("scale", this);
+		_str = new NumericAttribute("str", this);
 		_outPoints = new NumericAttribute("outPoints", this);
 		
 		addInputAttribute(_points);
 		addInputAttribute(_time);
 		addInputAttribute(_scale);
+		addInputAttribute(_str);
 		addOutputAttribute(_outPoints);
 		
 		setAttributeAffect(_points, _outPoints);
@@ -92,6 +95,7 @@ private:
 	NumericAttribute *_points;
 	NumericAttribute *_time;
 	NumericAttribute *_scale;
+	StringAttribute *_str;
 	NumericAttribute *_outPoints;
 };
 

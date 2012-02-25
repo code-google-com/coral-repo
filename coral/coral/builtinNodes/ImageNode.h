@@ -39,7 +39,7 @@ class ImageNode: public Node{
 public:
 	ImageNode(const std::string &name, Node *parent);
 	~ImageNode();
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	StringAttribute *_fileName;

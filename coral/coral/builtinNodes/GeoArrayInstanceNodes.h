@@ -10,7 +10,7 @@ namespace coral{
 class GeoInstanceGenerator: public Node{
 public:
 	GeoInstanceGenerator(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void addInputGeo();
 
 private:

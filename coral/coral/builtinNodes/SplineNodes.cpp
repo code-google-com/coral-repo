@@ -300,7 +300,7 @@ void SplinePoint::updateKnots(){
 	}
 }
 
-void SplinePoint::update(Attribute *attribute){
+void SplinePoint::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		(this->*_selectedOperation)();
 	}

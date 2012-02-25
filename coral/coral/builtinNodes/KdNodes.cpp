@@ -38,14 +38,14 @@ FindPointsInRange::FindPointsInRange(const std::string &name, Node *parent): Nod
 	setAttributeAllowedSpecialization(_pointsInRangeSize, "Int");
 }
 
-void FindPointsInRange::update(Attribute *attribute){
-	const Imath::V3f &point = _point->value()->vec3Values()[0];
-	float range = _range->value()->floatValues()[0];
+void FindPointsInRange::updateSlice(Attribute *attribute, unsigned int slice){
+	const Imath::V3f &point = _point->value()->vec3ValuesSlice(slice)[0];
+	float range = _range->value()->floatValuesSlice(slice)[0];
 	if(range < 0.0){
 		range = 0.0;
 	}
 
-	const std::vector<Imath::V3f> &points = _points->value()->vec3Values();
+	const std::vector<Imath::V3f> &points = _points->value()->vec3ValuesSlice(slice);
 
 	int dimentions = 3;
 	kdtree *tree = kd_create(dimentions);
@@ -78,9 +78,9 @@ void FindPointsInRange::update(Attribute *attribute){
 	kd_res_free(res);
 	kd_free(tree);
 
-	_pointsInRange->outValue()->setVec3Values(pointsInRange);
-	_pointsInRangeId->outValue()->setIntValues(pointsInRangeId);
-	_pointsInRangeSize->outValue()->setIntValueAt(0, resultSize);
+	_pointsInRange->outValue()->setVec3ValuesSlice(slice, pointsInRange);
+	_pointsInRangeId->outValue()->setIntValuesSlice(slice, pointsInRangeId);
+	_pointsInRangeSize->outValue()->setIntValueAtSlice(slice, 0, resultSize);
 
 	setAttributeIsClean(_pointsInRange, true);
 	setAttributeIsClean(_pointsInRangeId, true);

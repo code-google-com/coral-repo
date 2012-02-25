@@ -40,7 +40,7 @@ namespace coral{
 class SplinePoint: public Node{
 public:
 	SplinePoint(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	void attributeSpecializationChanged(Attribute *attribute);
 	

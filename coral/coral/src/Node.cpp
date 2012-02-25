@@ -71,7 +71,12 @@ Node::Node(const std::string &name, Node *parent):
 	_computeTimeTicks(0),
 	_allowDynamicAttributes(false),
 	_constructorDone(false),
-	_specializationPreset("none"){
+	_specializationPreset("none"),
+	_slices(1),
+	_isSlicer(false),
+	_sliceable(true){
+	
+	_slicer = findParentSlicer();
 }
 
 Node::~Node(){
@@ -79,6 +84,30 @@ Node::~Node(){
 		setIsDeleted(true);
 		deleteIt();
 	}
+}
+
+void Node::setSliceable(bool value){
+	_sliceable = value;
+}
+
+bool Node::sliceable(){
+	return _sliceable;
+}
+
+Node *Node::findParentSlicer(){
+	Node *parentSlicer = 0;
+
+	Node *parentNode = parent();
+	while(parentNode){
+		if(parentNode->_isSlicer){
+			parentSlicer = parentNode;
+			break;
+		}
+
+		parentNode = parentNode->parent();
+	}
+
+	return parentSlicer;
 }
 
 void Node::setAllowDynamicAttributes(bool value){
@@ -180,7 +209,26 @@ void Node::addOutputAttribute(Attribute *attribute){
 void Node::doUpdate(Attribute *attribute){
 	boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
 	
-	update(attribute);
+	if(_slicer){ // this node is nested in a slicer node such as the ForLoop node and this node is supposed to be sliced
+
+		// here we resize the slices for the output attributes so that the node can put values in each slice.
+		unsigned int slices = _slicer->computeSlices();
+		if(slices != _slices){
+			for(int i = 0; i < _outputAttributes.size(); ++i){
+				_outputAttributes[i]->outValue()->resizeSlices(slices);
+			}
+
+			_slices = slices;
+		}
+
+		// update in parallel each slice
+		for(int i = 0; i < _slices; ++i){
+			updateSlice(attribute, i);
+		}
+	}
+	else{
+		updateSlice(attribute, 0);
+	}
 	
 	boost::posix_time::ptime endTime = boost::posix_time::microsec_clock::universal_time();
 	boost::posix_time::time_period enlapsed(startTime, endTime);
@@ -188,6 +236,9 @@ void Node::doUpdate(Attribute *attribute){
 	_computeTimeSeconds = enlapsed.length().total_seconds();
 	_computeTimeMilliseconds = enlapsed.length().total_milliseconds() % 1000;
 	_computeTimeTicks = enlapsed.length().ticks();
+}
+
+void Node::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 void Node::update(Attribute *attribute){
@@ -200,6 +251,8 @@ Node *Node::parent(){
 void Node::setParent(Node *parent){
 	// TODO : remove from old parent (if any), or make it private
 	setParentObject(parent);
+
+	_slicer = findParentSlicer();
 }
 
 void Node::addNode(Node *node){
@@ -678,4 +731,12 @@ void Node::catchAttributeDirtied(Attribute *attribute, bool value){
 }
 
 void Node::attributeDirtied(Attribute *attribute){
+}
+
+void Node::setIsSlicer(bool value){
+	_isSlicer = value;
+}
+
+unsigned int Node::computeSlices(){
+	return 1;
 }

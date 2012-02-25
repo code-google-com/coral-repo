@@ -43,6 +43,8 @@ public:
 	virtual void copy(const Value *other);
 	virtual std::string asString();
 	virtual void setFromString(const std::string &value);
+	virtual void resizeSlices(unsigned int slices);
+
 };
 
 }

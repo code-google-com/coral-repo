@@ -100,13 +100,13 @@ void GetGeoElements::updateFaces(Geo *geo, std::vector<int> &elements){
 	}
 }
 
-void GetGeoElements::update(Attribute *attribute){
+void GetGeoElements::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_contextualUpdate){
 		Geo *geo = _geo->value();
 		std::vector<int> elements;
 		(this->*_contextualUpdate)(geo, elements);
 		
-		_elements->outValue()->setIntValues(elements);
+		_elements->outValue()->setIntValuesSlice(slice, elements);
 	}
 }
 
@@ -203,15 +203,15 @@ void GetGeoSubElements::updateFaceVertices(Geo *geo, const std::vector<int> &ind
 	}
 }
 
-void GetGeoSubElements::update(Attribute *attribute){
+void GetGeoSubElements::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_contextualUpdate){
 		Geo *geo = _geo->value();
-		const std::vector<int> &index = _index->value()->intValues();
+		const std::vector<int> &index = _index->value()->intValuesSlice(slice);
 
 		std::vector<int> subElements;
 		(this->*_contextualUpdate)(geo, index, subElements);
 		
-		_subElements->outValue()->setIntValues(subElements);
+		_subElements->outValue()->setIntValuesSlice(slice, subElements);
 	}
 }
 
@@ -228,8 +228,8 @@ GetGeoPoints::GetGeoPoints(const std::string &name, Node *parent): Node(name, pa
 	setAttributeAllowedSpecialization(_points, "Vec3Array");
 }
 
-void GetGeoPoints::update(Attribute *attribute){
-	_points->outValue()->setVec3Values(_geo->value()->points());
+void GetGeoPoints::updateSlice(Attribute *attribute, unsigned int slice){
+	_points->outValue()->setVec3ValuesSlice(slice, _geo->value()->points());
 }
 
 SetGeoPoints::SetGeoPoints(const std::string &name, Node *parent): Node(name, parent){		
@@ -247,11 +247,11 @@ SetGeoPoints::SetGeoPoints(const std::string &name, Node *parent): Node(name, pa
 	setAttributeAllowedSpecialization(_points, "Vec3Array");
 }
 
-void SetGeoPoints::update(Attribute *attribute){
+void SetGeoPoints::updateSlice(Attribute *attribute, unsigned int slice){
 	Geo *outGeoValue = _outGeo->outValue();
 	
 	outGeoValue->copy(_inGeo->value());
-	outGeoValue->displacePoints(_points->value()->vec3Values());
+	outGeoValue->displacePoints(_points->value()->vec3ValuesSlice(slice));
 }
 
 GetGeoNormals::GetGeoNormals(const std::string &name, Node *parent): Node(name, parent){
@@ -266,8 +266,8 @@ GetGeoNormals::GetGeoNormals(const std::string &name, Node *parent): Node(name, 
 	setAttributeAllowedSpecialization(_normals, "Vec3Array");
 }
 
-void GetGeoNormals::update(Attribute *attribute){
-	_normals->outValue()->setVec3Values(_geo->value()->verticesNormals());
+void GetGeoNormals::updateSlice(Attribute *attribute, unsigned int slice){
+	_normals->outValue()->setVec3ValuesSlice(slice, _geo->value()->verticesNormals());
 }
 
 
@@ -292,23 +292,23 @@ GeoNeighbourPoints::GeoNeighbourPoints(const std::string &name, Node *parent): N
 	setAttributeAllowedSpecialization(_neighbourVertices, "IntArray");
 }
 
-void GeoNeighbourPoints::update(Attribute *attribute){
+void GeoNeighbourPoints::updateSlice(Attribute *attribute, unsigned int slice){
 	Geo *geo = _geo->value();
-	int vertexId = _vertex->value()->intValueAt(0);
+	int vertexId = _vertex->value()->intValueAtSlice(slice, 0);
 
 	const std::vector<Vertex*> &vertices = geo->vertices();
 	
 	if(vertexId < 0 || vertexId >= vertices.size()){
 		if(attribute == _neighbourPoints){
-			_neighbourPoints->outValue()->setVec3Values(std::vector<Imath::V3f>());
+			_neighbourPoints->outValue()->setVec3ValuesSlice(slice, std::vector<Imath::V3f>());
 		}
 		else{
-			_neighbourVertices->outValue()->setIntValues(std::vector<int>());
+			_neighbourVertices->outValue()->setIntValuesSlice(slice, std::vector<int>());
 		}
 	}
 	else{
 		if(attribute == _neighbourPoints){
-			_neighbourPoints->outValue()->setVec3Values(vertices[vertexId]->neighbourPoints());
+			_neighbourPoints->outValue()->setVec3ValuesSlice(slice, vertices[vertexId]->neighbourPoints());
 		}
 		else{
 			const std::vector<Vertex*> &neighbourVertices = vertices[vertexId]->neighbourVertices();
@@ -318,7 +318,7 @@ void GeoNeighbourPoints::update(Attribute *attribute){
 			for(int i = 0; i < neighboursSize; ++i){
 				neighbourIds[i] = neighbourVertices[i]->id();
 			}
-			_neighbourVertices->outValue()->setIntValues(neighbourIds);
+			_neighbourVertices->outValue()->setIntValuesSlice(slice, neighbourIds);
 		}
 	}	
 }

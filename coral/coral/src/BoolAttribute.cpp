@@ -31,36 +31,109 @@
 using namespace coral;
 
 Bool::Bool():
-	_isArray(false){
-	_boolValues.resize(1);
-	_boolValues[0] = false;
+_isArray(false),
+_slices(1){
+	_boolValuesSliced.resize(1);
+	_boolValuesSliced[0].resize(1);
+	_boolValuesSliced[0][0] = false;
+}
+
+unsigned int Bool::sizeSlice(unsigned int slice){
+	if(slice >= _slices){
+		slice = _slices - 1;
+	}
+
+	return _boolValuesSliced[slice].size();
 }
 
 unsigned int Bool::size(){
-	return _boolValues.size();
+	return _boolValuesSliced[0].size();
+}
+
+void Bool::resizeSlices(unsigned int slices){
+	if(slices == 0){
+		slices = 1;
+	}
+
+	if(slices != _slices){
+		_boolValuesSliced.resize(slices);
+
+		if(_isArray){
+			for(int i = 0; i < slices; ++i){
+				_boolValuesSliced.resize(slices);
+				std::vector<bool> &slicevec = _boolValuesSliced[i];
+				if(!slicevec.size()){
+					slicevec.resize(1);
+				}
+			}
+		}
+		
+		_slices = slices;
+	}
+}
+
+void Bool::setBoolValueAtSlice(unsigned int slice, unsigned int id, bool value){
+	if(slice < _boolValuesSliced.size()){
+		std::vector<bool> &slicevec = _boolValuesSliced[slice];
+		if(id < slicevec.size()){
+			slicevec[id] = value;
+		}
+	}
 }
 
 void Bool::setBoolValueAt(unsigned int id, bool value){
-	if(id < _boolValues.size())
-		_boolValues[id] = value;
+	if(id < _boolValuesSliced[0].size())
+		_boolValuesSliced[0][id] = value;
+}
+
+bool Bool::boolValueAtSlice(unsigned int slice, unsigned int id){
+	if(slice >= _boolValuesSliced.size()){
+		slice = _boolValuesSliced.size() - 1;
+	}
+
+	std::vector<bool> &slicevec = _boolValuesSliced[slice];
+
+	int size = slicevec.size();
+	if(id < size){
+		return slicevec[id];
+	}
+	else if(size){
+		return slicevec[size - 1];
+	}
+	
+	return false;
 }
 
 bool Bool::boolValueAt(unsigned int id){
 	bool value = false;
 
-	if(id < _boolValues.size()){
-		value = _boolValues[id];
+	if(id < _boolValuesSliced[0].size()){
+		value = _boolValuesSliced[0][id];
 	}
 		
 	return value;
 }
 
+const std::vector<bool> &Bool::boolValuesSlice(unsigned int slice){
+	if(slice >= _boolValuesSliced.size()){
+		slice = _boolValuesSliced.size() - 1;
+	}
+	
+	return _boolValuesSliced[slice];
+}
+
 const std::vector<bool> &Bool::boolValues(){
-	return _boolValues;
+	return _boolValuesSliced[0];
+}
+
+void Bool::setBoolValuesSlice(unsigned int slice, const std::vector<bool> &values){
+	if(slice < _boolValuesSliced.size()){
+		_boolValuesSliced[slice] = values;
+	}
 }
 
 void Bool::setBoolValues(const std::vector<bool> &values){
-	_boolValues = values;
+	_boolValuesSliced[0] = values;
 }
 
 void Bool::setIsArray(bool value){
@@ -72,16 +145,16 @@ bool Bool::isArray(){
 }
 
 void Bool::resize(unsigned int size){
-	_boolValues.resize(size);
+	_boolValuesSliced[0].resize(size);
 }
 
 std::string Bool::asString(){
 	std::string script;
 	if(_isArray){
 		script = "[";
-		for(int i = 0; i < _boolValues.size(); ++i){
+		for(int i = 0; i < _boolValuesSliced[0].size(); ++i){
 			std::string value = "False";
-			if(_boolValues[i]){
+			if(_boolValuesSliced[0][i]){
 				value = "True";
 			}
 		
@@ -113,26 +186,26 @@ void Bool::setFromString(const std::string &value){
 		std::vector<std::string> values;
 		stringUtils::split(valuesStr, values, ",");
 	
-		_boolValues.clear();
+		_boolValuesSliced[0].clear();
 		_isArray = true;
 		for(int i = 0; i < values.size(); ++i){
 			std::string valueStr = values[i];
 			if(valueStr == "True"){
-				_boolValues.push_back(true);
+				_boolValuesSliced[0].push_back(true);
 			}
 			else if(valueStr == "False"){
-				_boolValues.push_back(false);
+				_boolValuesSliced[0].push_back(false);
 			}
 		}
 	}
 	else{
 		_isArray = false;
-		_boolValues.resize(1);
+		_boolValuesSliced[0].resize(1);
 		if(value == "True"){
-			_boolValues[0] = true;
+			_boolValuesSliced[0][0] = true;
 		}
 		else if(value == "False"){
-			_boolValues[1] = false;
+			_boolValuesSliced[0][0] = false;
 		}
 	}
 }

@@ -207,7 +207,7 @@ bool readLine(std::istream& stream, std::vector<Imath::V3f> &vertices, std::vect
 	return true;
 }
 
-void ObjImporter::update(Attribute *attribute){
+void ObjImporter::updateSlice(Attribute *attribute, unsigned int slice){
 
 	// read
 	std::string filename = _fileName->value()->stringValue();

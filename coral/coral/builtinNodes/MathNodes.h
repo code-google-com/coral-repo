@@ -42,7 +42,7 @@ class Vec3Length: public Node{
 public:
 	Vec3Length(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_vector;
@@ -52,7 +52,7 @@ private:
 class Matrix44Inverse: public Node{
 public:
 	Matrix44Inverse(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_inMatrix;
@@ -63,21 +63,21 @@ class Abs: public Node{
 public:
 	Abs(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
 	NumericAttribute *_outNumber;
-	void(Abs::*_selectedOperation)(Numeric*, Numeric*);
+	void(Abs::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
 	
-	void abs_int(Numeric *inNumber, Numeric *outNumber);
-	void abs_float(Numeric *inNumber, Numeric *outNumber);
+	void abs_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
+	void abs_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
 };
 
 class Vec3Cross: public Node{
 public:
 	Vec3Cross(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_vector0;
@@ -89,7 +89,7 @@ class Vec3Dot: public Node{
 public:
 	Vec3Dot(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_vector0;
@@ -100,7 +100,7 @@ private:
 class Vec3Normalize: public Node{
 public:
 	Vec3Normalize(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_vector;
@@ -111,7 +111,7 @@ class TrigonometricFunctions: public Node{
 public:
 
 	TrigonometricFunctions(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -122,7 +122,7 @@ private:
 class Radians: public Node{
 public:
 	Radians(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -132,7 +132,7 @@ private:
 class Degrees: public Node{
 public:
 	Degrees(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -142,7 +142,7 @@ private:
 class Ceil: public Node{
 public:
 	Ceil(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -152,7 +152,7 @@ private:
 class Floor: public Node{
 public:
 	Floor(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -162,7 +162,7 @@ private:
 class Round: public Node{
 public:
 	Round(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -172,7 +172,7 @@ private:
 class Exp: public Node{
 public:
 	Exp(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -182,7 +182,7 @@ private:
 class Log: public Node{
 public:
 	Log(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -192,7 +192,7 @@ private:
 class Pow: public Node{
 public:
 	Pow(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_base;
@@ -203,7 +203,7 @@ private:
 class Log10: public Node{
 public:
 	Log10(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -213,7 +213,7 @@ private:
 class Sqrt: public Node{
 public:
 	Sqrt(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
@@ -223,7 +223,7 @@ private:
 class Atan2: public Node{
 public:
 	Atan2(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumberX;
@@ -236,30 +236,30 @@ public:
 	Min(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
 	NumericAttribute *_outNumber;
-	void(Min::*_selectedOperation)(Numeric*, Numeric*);
+	void(Min::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
 
-	void min_int(Numeric *inNumber, Numeric *outNumber);
-	void min_float(Numeric *inNumber, Numeric *outNumber);
+	void min_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
+	void min_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
 };
 class Max: public Node{
 public:
 	Max(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
 	NumericAttribute *_outNumber;
-	void(Max::*_selectedOperation)(Numeric*, Numeric*);
+	void(Max::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
 
-	void max_int(Numeric *inNumber, Numeric *outNumber);
-	void max_float(Numeric *inNumber, Numeric *outNumber);
+	void max_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
+	void max_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
 };
 
 class Average: public Node{
@@ -267,23 +267,23 @@ public:
 	Average(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inNumber;
 	NumericAttribute *_outNumber;
-	void(Average::*_selectedOperation)(Numeric*, Numeric*);
+	void(Average::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
 
-	void average_int(Numeric *inNumber, Numeric *outNumber);
-	void average_float(Numeric *inNumber, Numeric *outNumber);
-	void average_vec3(Numeric *inNumber, Numeric *outNumber);
+	void average_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
+	void average_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
+	void average_vec3(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
 };
 
 class Slerp: public Node{
 public:
 	Slerp(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_inQuat1;
@@ -295,7 +295,7 @@ private:
 class QuatMultiply: public Node{
 public:
 	QuatMultiply(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_quat0;
@@ -306,7 +306,7 @@ private:
 class QuatNormalize: public Node{
 public:
 	QuatNormalize(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_quat0;

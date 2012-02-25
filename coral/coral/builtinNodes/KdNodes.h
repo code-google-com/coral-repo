@@ -42,7 +42,7 @@ namespace coral
 class FindPointsInRange: public Node{
 public:
 	FindPointsInRange(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_point;

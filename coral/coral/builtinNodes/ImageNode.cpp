@@ -47,7 +47,7 @@ ImageNode::~ImageNode(){
 
 }
 
-void ImageNode::update(Attribute *attribute){
+void ImageNode::updateSlice(Attribute *attribute, unsigned int slice){
 	std::string filename = _fileName->value()->stringValue();
 	filename = NetworkManager::resolveFilename(filename);
 

@@ -36,9 +36,9 @@ void GeoInstanceGenerator::addInputGeo(){
 	addDynamicAttribute(attr);
 }
 
-void GeoInstanceGenerator::update(Attribute *attribute){
-	const std::vector<Imath::M44f> &locations = _locations->value()->matrix44Values();
-	const std::vector<int> &selector = _selector->value()->intValues();
+void GeoInstanceGenerator::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::M44f> &locations = _locations->value()->matrix44ValuesSlice(slice);
+	const std::vector<int> &selector = _selector->value()->intValuesSlice(slice);
 
 	std::vector<Geo*> sourceGeos;
 	sourceGeos.push_back(_geo->value());

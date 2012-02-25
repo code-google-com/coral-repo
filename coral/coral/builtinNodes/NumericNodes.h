@@ -35,7 +35,6 @@
 #include "../src/NumericAttribute.h"
 #include "../src/PassThroughAttribute.h"
 #include "../src/StringAttribute.h"
-#include "LoopNodes.h"
 
 namespace coral{
 class Numeric;
@@ -59,7 +58,7 @@ private:
 class Vec3Node: public Node{
 public:
 	Vec3Node(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 
 private:
@@ -72,7 +71,7 @@ private:
 class Vec3ToFloats: public Node{
 public:
 	Vec3ToFloats(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	
 private:
@@ -85,7 +84,7 @@ private:
 class Col4Node: public Node{
 public:
 	Col4Node(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 
 private:
@@ -99,7 +98,7 @@ private:
 class Col4ToFloats: public Node{
 public:
 	Col4ToFloats(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 
 private:
@@ -113,7 +112,7 @@ private:
 class Col4Reverse: public Node{
 public:
 	Col4Reverse(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 
 private:
@@ -125,7 +124,7 @@ class QuatNode: public Node{
 public:
 	QuatNode(const std::string &name, Node *parent);
 
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 
 private:
@@ -139,7 +138,7 @@ private:
 class QuatToFloats: public Node{
 public:
 	QuatToFloats(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 
 private:
@@ -153,7 +152,7 @@ private:
 class Matrix44Node: public Node{
 public:
 	Matrix44Node(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 
 private:
@@ -172,7 +171,7 @@ private:
 class ConstantArray: public Node{
 public:
 	ConstantArray(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	
 private:
@@ -184,7 +183,7 @@ private:
 class ArraySize: public Node{
 public:
 	ArraySize(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_array;
@@ -196,17 +195,17 @@ public:
 	BuildArray(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	void addNumericAttribute();
 	
 private:
 	NumericAttribute *_array;
-	void(BuildArray::*_selectedOperation)(const std::vector<Attribute*>&, int, Numeric*);
-	void updateInt(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
-	void updateFloat(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
-	void updateVec3(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
-	void updateCol4(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
-	void updateMatrix44(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array);
+	void(BuildArray::*_selectedOperation)(const std::vector<Attribute*>&, int, Numeric*, unsigned int);
+	void updateInt(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice);
+	void updateFloat(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice);
+	void updateVec3(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice);
+	void updateCol4(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice);
+	void updateMatrix44(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice);
 };
 
 class RangeArray: public Node{
@@ -214,12 +213,12 @@ public:
 	RangeArray(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
-	void(RangeArray::*_selectedOperation)(Numeric*, Numeric*, int, Numeric*);
-	void updateInt(Numeric *start, Numeric *end, int steps, Numeric *array);
-	void updateFloat(Numeric *start, Numeric *end, int steps, Numeric *array);
+	void(RangeArray::*_selectedOperation)(Numeric*, Numeric*, int, Numeric*, unsigned int);
+	void updateInt(Numeric *start, Numeric *end, int steps, Numeric *array, unsigned int slice);
+	void updateFloat(Numeric *start, Numeric *end, int steps, Numeric *array, unsigned int slice);
 	NumericAttribute *_start;
 	NumericAttribute *_end;
 	NumericAttribute *_steps;
@@ -230,7 +229,7 @@ class Matrix44Translation: public Node{
 public:
 	Matrix44Translation(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_matrix;
@@ -241,7 +240,7 @@ class Matrix44RotationAxis: public Node{
 public:
 	Matrix44RotationAxis(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_matrix;
@@ -254,7 +253,7 @@ class Matrix44EulerRotation: public Node{
 public:
 	Matrix44EulerRotation(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_matrix;
@@ -265,7 +264,7 @@ class Matrix44FromVectors: public Node{
 public:
 	Matrix44FromVectors(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_translation;
@@ -280,64 +279,44 @@ class RangeLoop: public Node{
 public:
 	RangeLoop(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_start;
 	NumericAttribute *_end;
 	NumericAttribute *_step;
 	NumericAttribute *_valueInRange;
-	void(RangeLoop::*_selectedOperation)(Numeric *, Numeric *, Numeric *, Numeric *);
+	void(RangeLoop::*_selectedOperation)(Numeric *, Numeric *, Numeric *, Numeric *, unsigned int);
 	
-	void updateFloat(Numeric *start, Numeric *end, Numeric *step, Numeric *out);
-	void updateFloatArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out);
-	void updateInt(Numeric *start, Numeric *end, Numeric *step, Numeric *out);
-	void updateIntArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out);
+	void updateFloat(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice);
+	void updateFloatArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice);
+	void updateInt(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice);
+	void updateIntArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice);
 };
 
 class RandomNumber: public Node{
 public:
 	RandomNumber(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_min;
 	NumericAttribute *_max;
 	NumericAttribute *_seed;
 	NumericAttribute *_out;
-	void(RandomNumber::*_selectedOperation)(Numeric *, Numeric *, Numeric *);
+	void(RandomNumber::*_selectedOperation)(Numeric *, Numeric *, Numeric *, unsigned int);
 	
-	void updateFloat(Numeric *min, Numeric *max, Numeric *out);
-	void updateFloatArray(Numeric *min, Numeric *max, Numeric *out);
-	void updateInt(Numeric *min, Numeric *max, Numeric *out);
-	void updateIntArray(Numeric *min, Numeric *max, Numeric *out);
-};
-
-class NumericIterator: public LoopIteratorNode{
-public:
-	NumericIterator(const std::string &name, Node *parent);
-	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void attributeSpecializationChanged(Attribute *attribute);
-	void loopStart(unsigned int loopRangeSize);
-	void loopStep(unsigned int index);
-
-private:
-	NumericAttribute *_element;
-	NumericAttribute *_array;
-	void(NumericIterator::*_selectedOperation)(unsigned int, Numeric *, Numeric *);
-	
-	void stepInt(unsigned int index, Numeric *element, Numeric *array);
-	void stepFloat(unsigned int index, Numeric *element, Numeric *array);
-	void stepVec3(unsigned int index, Numeric *element, Numeric *array);
-	void stepCol4(unsigned int index, Numeric *element, Numeric *array);
-	void stepMatrix44(unsigned int index, Numeric *element, Numeric *array);
+	void updateFloat(Numeric *min, Numeric *max, Numeric *out, unsigned int slice);
+	void updateFloatArray(Numeric *min, Numeric *max, Numeric *out, unsigned int slice);
+	void updateInt(Numeric *min, Numeric *max, Numeric *out, unsigned int slice);
+	void updateIntArray(Numeric *min, Numeric *max, Numeric *out, unsigned int slice);
 };
 
 class ArrayIndices: public Node{
 public:
 	ArrayIndices(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_array;
@@ -349,19 +328,19 @@ public:
 	GetArrayElement(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void update(Attribute *attribute);	
+	void updateSlice(Attribute *attribute, unsigned int slice);	
 
 private:
 	NumericAttribute *_array;
 	NumericAttribute *_index;
 	NumericAttribute *_element;
-	void(GetArrayElement::*_selectedOperation)(Numeric *, const std::vector<int> &, Numeric *);
+	void(GetArrayElement::*_selectedOperation)(Numeric *, const std::vector<int> &, Numeric *, unsigned int);
 	
-	void updateInt(Numeric *array, const std::vector<int> &index, Numeric *element);
-	void updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element);
-	void updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element);
-	void updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element);
-	void updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element);
+	void updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, unsigned int slice);
+	void updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element, unsigned int slice);
+	void updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element, unsigned int slice);
+	void updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, unsigned int slice);
+	void updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element, unsigned int slice);
 };
 
 class SetArrayElement: public Node{
@@ -369,26 +348,26 @@ public:
 	SetArrayElement(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void update(Attribute *attribute);	
+	void updateSlice(Attribute *attribute, unsigned int slice);	
 	
 private:
 	NumericAttribute *_array;
 	NumericAttribute *_index;
 	NumericAttribute *_element;
 	NumericAttribute *_outArray;
-	void(SetArrayElement::*_selectedOperation)(Numeric *, const std::vector<int> &, Numeric *, Numeric *);
+	void(SetArrayElement::*_selectedOperation)(Numeric *, const std::vector<int> &, Numeric *, Numeric *, unsigned int);
 
-	void updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
-	void updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
-	void updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
-	void updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
-	void updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray);
+	void updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice);
+	void updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice);
+	void updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice);
+	void updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice);
+	void updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice);
 };
 
 class SetSimulationStep: public Node{
 public:
 	SetSimulationStep(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	StringAttribute *_storageKey;
@@ -399,7 +378,7 @@ private:
 class GetSimulationStep: public Node{
 public:
 	GetSimulationStep(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	StringAttribute *_storageKey;
@@ -413,7 +392,7 @@ class QuatToAxisAngle: public Node
 public:
 	QuatToAxisAngle(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_quat;
@@ -426,7 +405,7 @@ class QuatToEulerRotation: public Node
 public:
 	QuatToEulerRotation(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_quat;
@@ -438,7 +417,7 @@ class QuatToMatrix44: public Node
 public:
 	QuatToMatrix44(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_quat;
@@ -450,7 +429,7 @@ class Matrix44ToQuat: public Node
 public:
 	Matrix44ToQuat(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_quat;
@@ -460,7 +439,7 @@ private:
 class StrandsNode: public Node{
 public:
 	StrandsNode(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_subdivide;

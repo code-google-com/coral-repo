@@ -39,7 +39,7 @@ namespace coral{
 class GeoCube: public Node{
 public:
 	GeoCube(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	void buildDepthForHeightFaces(int widthSubdivisions, int depthSubdivisions, int heightSubdivisions, int totalPoints, bool otherSide, std::vector<std::vector<int> > &faces);

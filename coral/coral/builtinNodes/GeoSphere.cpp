@@ -54,7 +54,7 @@ GeoSphere::GeoSphere(const std::string &name, Node *parent): Node(name, parent){
 	_sectors->outValue()->setIntValueAt(0, 10);
 }
 
-void GeoSphere::update(Attribute *attribute){
+void GeoSphere::updateSlice(Attribute *attribute, unsigned int slice){
 	float radius = _radius->value()->floatValueAt(0);
 	int rings = _rings->value()->intValueAt(0);
 	int sectors = _sectors->value()->intValueAt(0);

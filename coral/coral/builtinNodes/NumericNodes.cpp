@@ -46,12 +46,12 @@ using namespace coral;
 
 namespace {
 
-int findMinorNumericSize(NumericAttribute *attrs[], int numAttrs){
+int findMinorNumericSize(NumericAttribute *attrs[], int numAttrs, unsigned int slice){
 	int minorSize = -1;
 	for(int i = 0; i < numAttrs; ++i){
 		if(attrs[i]->input()){
 			Numeric *num = attrs[i]->value();
-			int size = num->size();
+			int size = num->sizeSlice(slice);
 			if(size < minorSize || minorSize == -1){
 				minorSize = size;
 			}
@@ -73,13 +73,15 @@ std::map<std::string, Numeric> _globalNumericStorage;
 
 
 IntNode::IntNode(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(false);
+	
 	_out = new NumericAttribute("out", this);
 	addOutputAttribute(_out);
 	
 	setAttributeAllowedSpecialization(_out, "Int");
 	
 	_out->outValue()->resize(1);
-	_out->outValue()->setFloatValueAt(0, 0.0);
+	_out->outValue()->setFloatValueAtSlice(0, 0, 0.0);
 }
 
 FloatNode::FloatNode(const std::string &name, Node* parent): Node(name, parent){
@@ -89,7 +91,7 @@ FloatNode::FloatNode(const std::string &name, Node* parent): Node(name, parent){
 	setAttributeAllowedSpecialization(_out, "Float");
 	
 	_out->outValue()->resize(1);
-	_out->outValue()->setIntValueAt(0, 0.0);
+	_out->outValue()->setIntValueAtSlice(0, 0, 0.0);
 }
 
 Vec3Node::Vec3Node(const std::string &name, Node* parent): Node(name, parent){
@@ -167,13 +169,13 @@ void Vec3Node::updateSpecializationLink(Attribute *attributeA, Attribute *attrib
 	}
 }
 
-void Vec3Node::update(Attribute *attribute){
+void Vec3Node::updateSlice(Attribute *attribute, unsigned int slice){
 	Numeric *x = _x->value();
 	Numeric *y = _y->value();
 	Numeric *z = _z->value();
 	
 	NumericAttribute *attrs[] = {_x, _y, _z};
-	int minorSize = findMinorNumericSize(attrs, 3);
+	int minorSize = findMinorNumericSize(attrs, 3, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 	
@@ -181,12 +183,12 @@ void Vec3Node::update(Attribute *attribute){
 
 	for(int i = 0; i < minorSize; ++i){
 		Imath::V3f *vec = &outArray[i];
-		vec->x = x->floatValueAt(i);
-		vec->y = y->floatValueAt(i);
-		vec->z = z->floatValueAt(i);
+		vec->x = x->floatValueAtSlice(slice, i);
+		vec->y = y->floatValueAtSlice(slice, i);
+		vec->z = z->floatValueAtSlice(slice, i);
 	}
 	
-	_vector->outValue()->setVec3Values(outArray);
+	_vector->outValue()->setVec3ValuesSlice(slice, outArray);
 }
 
 Vec3ToFloats::Vec3ToFloats(const std::string &name, Node* parent): Node(name, parent){	
@@ -248,8 +250,8 @@ void Vec3ToFloats::updateSpecializationLink(Attribute *attributeA, Attribute *at
 	}
 }
 
-void Vec3ToFloats::update(Attribute *attribute){
-	const std::vector<Imath::V3f> &vec3Values = _vector->value()->vec3Values();
+void Vec3ToFloats::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::V3f> &vec3Values = _vector->value()->vec3ValuesSlice(slice);
 	int size = vec3Values.size();
 	
 	std::vector<float> xValues(size);
@@ -263,9 +265,9 @@ void Vec3ToFloats::update(Attribute *attribute){
 		zValues[i] = vec.z;
 	}
 	
-	_x->outValue()->setFloatValues(xValues);
-	_y->outValue()->setFloatValues(yValues);
-	_z->outValue()->setFloatValues(zValues);
+	_x->outValue()->setFloatValuesSlice(slice, xValues);
+	_y->outValue()->setFloatValuesSlice(slice, yValues);
+	_z->outValue()->setFloatValuesSlice(slice, zValues);
 	
 	setAttributeIsClean(_x, true);
 	setAttributeIsClean(_y, true);
@@ -321,10 +323,10 @@ Col4Node::Col4Node(const std::string &name, Node* parent): Node(name, parent){
 	setSpecializationPreset("array", _color, "Col4Array");
 	enableSpecializationPreset("single");
 
-	_r->outValue()->setFloatValueAt(0, 0.5);
-	_g->outValue()->setFloatValueAt(0, 0.5);
-	_b->outValue()->setFloatValueAt(0, 0.5);
-	_a->outValue()->setFloatValueAt(0, 1.0);
+	_r->outValue()->setFloatValueAtSlice(0, 0, 0.5);
+	_g->outValue()->setFloatValueAtSlice(0, 0, 0.5);
+	_b->outValue()->setFloatValueAtSlice(0, 0, 0.5);
+	_a->outValue()->setFloatValueAtSlice(0, 0, 1.0);
 }
 
 void Col4Node::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
@@ -358,14 +360,14 @@ void Col4Node::updateSpecializationLink(Attribute *attributeA, Attribute *attrib
 	}
 }
 
-void Col4Node::update(Attribute *attribute){
+void Col4Node::updateSlice(Attribute *attribute, unsigned int slice){
 	Numeric *r = _r->value();
 	Numeric *g = _g->value();
 	Numeric *b = _b->value();
 	Numeric *a = _a->value();
 
 	NumericAttribute *attrs[] = {_r, _g, _b, _a};
-	int minorSize = findMinorNumericSize(attrs, 4);
+	int minorSize = findMinorNumericSize(attrs, 4, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 
@@ -373,13 +375,13 @@ void Col4Node::update(Attribute *attribute){
 
 	for(int i = 0; i < minorSize; ++i){
 		Imath::Color4f *col = &outArray[i];
-		col->r = r->floatValueAt(i);
-		col->g = g->floatValueAt(i);
-		col->b = b->floatValueAt(i);
-		col->a = a->floatValueAt(i);
+		col->r = r->floatValueAtSlice(slice, i);
+		col->g = g->floatValueAtSlice(slice, i);
+		col->b = b->floatValueAtSlice(slice, i);
+		col->a = a->floatValueAtSlice(slice, i);
 	}
 
-	_color->outValue()->setCol4Values(outArray);
+	_color->outValue()->setCol4ValuesSlice(slice, outArray);
 }
 
 Col4ToFloats::Col4ToFloats(const std::string &name, Node* parent): Node(name, parent){
@@ -451,8 +453,8 @@ void Col4ToFloats::updateSpecializationLink(Attribute *attributeA, Attribute *at
 	}
 }
 
-void Col4ToFloats::update(Attribute *attribute){
-	const std::vector<Imath::Color4f> &col4Values = _color->value()->col4Values();
+void Col4ToFloats::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::Color4f> &col4Values = _color->value()->col4ValuesSlice(slice);
 	int size = col4Values.size();
 
 	std::vector<float> rValues(size);
@@ -468,10 +470,10 @@ void Col4ToFloats::update(Attribute *attribute){
 		aValues[i] = col.a;
 	}
 
-	_r->outValue()->setFloatValues(rValues);
-	_g->outValue()->setFloatValues(gValues);
-	_b->outValue()->setFloatValues(bValues);
-	_a->outValue()->setFloatValues(aValues);
+	_r->outValue()->setFloatValuesSlice(slice, rValues);
+	_g->outValue()->setFloatValuesSlice(slice, gValues);
+	_b->outValue()->setFloatValuesSlice(slice, bValues);
+	_a->outValue()->setFloatValuesSlice(slice, aValues);
 
 	setAttributeIsClean(_r, true);
 	setAttributeIsClean(_g, true);
@@ -529,8 +531,8 @@ void Col4Reverse::updateSpecializationLink(Attribute *attributeA, Attribute *att
 	}
 }
 
-void Col4Reverse::update(Attribute *attribute){
-	const std::vector<Imath::Color4f> &inCol4Values = _inColor->value()->col4Values();
+void Col4Reverse::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::Color4f> &inCol4Values = _inColor->value()->col4ValuesSlice(slice);
 	int size = inCol4Values.size();
 
 	std::vector<Imath::Color4f> outCol4Values(size);
@@ -544,7 +546,7 @@ void Col4Reverse::update(Attribute *attribute){
 		outCol4Values[i].a = inCol4.a;
 	}
 
-	_outColor->outValue()->setCol4Values(outCol4Values);
+	_outColor->outValue()->setCol4ValuesSlice(slice, outCol4Values);
 
 	setAttributeIsClean(_outColor, true);
 }
@@ -620,14 +622,14 @@ void QuatNode::updateSpecializationLink(Attribute *attributeA, Attribute *attrib
 	}
 }
 
-void QuatNode::update(Attribute *attribute){
+void QuatNode::updateSlice(Attribute *attribute, unsigned int slice){
 	Numeric *r = _r->value();
 	Numeric *x = _x->value();
 	Numeric *y = _y->value();
 	Numeric *z = _z->value();
 
 	NumericAttribute *attrs[] = {_r,_x, _y, _z};
-	int minorSize = findMinorNumericSize(attrs, 4);
+	int minorSize = findMinorNumericSize(attrs, 4, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 
@@ -635,13 +637,13 @@ void QuatNode::update(Attribute *attribute){
 
 	for(int i = 0; i < minorSize; ++i){
 		Imath::Quatf *vec = &outArray[i];
-		vec->r = r->floatValueAt(i);
-		vec->v.x = x->floatValueAt(i);
-		vec->v.y = y->floatValueAt(i);
-		vec->v.z = z->floatValueAt(i);
+		vec->r = r->floatValueAtSlice(slice, i);
+		vec->v.x = x->floatValueAtSlice(slice, i);
+		vec->v.y = y->floatValueAtSlice(slice, i);
+		vec->v.z = z->floatValueAtSlice(slice, i);
 	}
 
-	_quat->outValue()->setQuatValues(outArray);
+	_quat->outValue()->setQuatValuesSlice(slice, outArray);
 }
 
 QuatToFloats::QuatToFloats(const std::string &name, Node* parent): Node(name, parent){
@@ -715,8 +717,8 @@ void QuatToFloats::updateSpecializationLink(Attribute *attributeA, Attribute *at
 	}
 }
 
-void QuatToFloats::update(Attribute *attribute){
-	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+void QuatToFloats::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValuesSlice(slice);
 	int size = quatValues.size();
 
 	std::vector<float> rValues(size);
@@ -732,10 +734,10 @@ void QuatToFloats::update(Attribute *attribute){
 		zValues[i] = vec.v.z;
 	}
 
-	_r->outValue()->setFloatValues(rValues);
-	_x->outValue()->setFloatValues(xValues);
-	_y->outValue()->setFloatValues(yValues);
-	_z->outValue()->setFloatValues(zValues);
+	_r->outValue()->setFloatValuesSlice(slice, rValues);
+	_x->outValue()->setFloatValuesSlice(slice, xValues);
+	_y->outValue()->setFloatValuesSlice(slice, yValues);
+	_z->outValue()->setFloatValuesSlice(slice, zValues);
 
 	setAttributeIsClean(_r, true);
 	setAttributeIsClean(_x, true);
@@ -830,9 +832,9 @@ Matrix44Node::Matrix44Node(const std::string &name, Node* parent): Node(name, pa
 	
 	enableSpecializationPreset("single");
 	
-	_scaleX->outValue()->setFloatValueAt(0, 1.0);
-	_scaleY->outValue()->setFloatValueAt(0, 1.0);
-	_scaleZ->outValue()->setFloatValueAt(0, 1.0);
+	_scaleX->outValue()->setFloatValueAtSlice(0, 0, 1.0);
+	_scaleY->outValue()->setFloatValueAtSlice(0, 0, 1.0);
+	_scaleZ->outValue()->setFloatValueAtSlice(0, 0, 1.0);
 }
 
 void Matrix44Node::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
@@ -858,7 +860,7 @@ void Matrix44Node::updateSpecializationLink(Attribute *attributeA, Attribute *at
 	}
 }
 
-void Matrix44Node::update(Attribute *attribute){
+void Matrix44Node::updateSlice(Attribute *attribute, unsigned int slice){
 	Numeric *translateX = _translateX->value();
 	Numeric *translateY = _translateY->value();
 	Numeric *translateZ = _translateZ->value();
@@ -880,7 +882,7 @@ void Matrix44Node::update(Attribute *attribute){
 			_scaleY,
 			_scaleZ};
 			
-	int minorSize = findMinorNumericSize(attrs, 9);
+	int minorSize = findMinorNumericSize(attrs, 9, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 	
@@ -888,19 +890,19 @@ void Matrix44Node::update(Attribute *attribute){
 	float radian = (M_PI / 180);
 	for(int i = 0; i < minorSize; ++i){
 		Imath::M44f matrix;
-		Imath::V3f vec(translateX->floatValueAt(i), translateY->floatValueAt(i), translateZ->floatValueAt(i));
+		Imath::V3f vec(translateX->floatValueAtSlice(slice, i), translateY->floatValueAtSlice(slice, i), translateZ->floatValueAtSlice(slice, i));
 		matrix.translate(vec);
 		
-		vec.setValue(radian * eulerX->floatValueAt(i), radian * eulerY->floatValueAt(i), radian * eulerZ->floatValueAt(i));
+		vec.setValue(radian * eulerX->floatValueAtSlice(slice, i), radian * eulerY->floatValueAtSlice(slice, i), radian * eulerZ->floatValueAtSlice(slice, i));
 		matrix.rotate(vec);
 		
-		vec.setValue(scaleX->floatValueAt(i), scaleY->floatValueAt(i), scaleZ->floatValueAt(i));
+		vec.setValue(scaleX->floatValueAtSlice(slice, i), scaleY->floatValueAtSlice(slice, i), scaleZ->floatValueAtSlice(slice, i));
 		matrix.scale(vec);
 		
 		newMatrixValues[i] = matrix;
 	}
 	
-	_matrix->outValue()->setMatrix44Values(newMatrixValues);
+	_matrix->outValue()->setMatrix44ValuesSlice(slice, newMatrixValues);
 }
 
 ConstantArray::ConstantArray(const std::string &name, Node *parent): Node(name, parent){	
@@ -957,55 +959,55 @@ void ConstantArray::updateSpecializationLink(Attribute *attributeA, Attribute *a
 	}
 }
 
-void ConstantArray::update(Attribute *attribute){
+void ConstantArray::updateSlice(Attribute *attribute, unsigned int slice){
 	Numeric *constant = _constant->value();
 	if(constant->type() != Numeric::numericTypeAny){
-		int size = _size->value()->intValueAt(0);
+		int size = _size->value()->intValueAtSlice(slice, 0);
 		if(size < 0){
 			size = 0;
-			_size->outValue()->setIntValueAt(0, 0);
+			_size->outValue()->setIntValueAtSlice(slice, 0, 0);
 		}
 		
 		Numeric *array = _array->outValue();
 		if(constant->type() == Numeric::numericTypeInt){
-			int constantValue = constant->intValueAt(0);
+			int constantValue = constant->intValueAtSlice(slice, 0);
 			std::vector<int> values(size);
 			for(int i = 0; i < size; ++i){
 				values[i] = constantValue;
 			}
-			array->setIntValues(values);
+			array->setIntValuesSlice(slice, values);
 		}
 		else if(constant->type() == Numeric::numericTypeFloat){
-			float constantValue = constant->floatValueAt(0);
+			float constantValue = constant->floatValueAtSlice(slice, 0);
 			std::vector<float> values(size);
 			for(int i = 0; i < size; ++i){
 				values[i] = constantValue;
 			}
-			array->setFloatValues(values);
+			array->setFloatValuesSlice(slice, values);
 		}
 		else if(constant->type() == Numeric::numericTypeVec3){
-			Imath::V3f constantValue = constant->vec3ValueAt(0);
+			Imath::V3f constantValue = constant->vec3ValueAtSlice(slice, 0);
 			std::vector<Imath::V3f> values(size);
 			for(int i = 0; i < size; ++i){
 				values[i] = constantValue;
 			}
-			array->setVec3Values(values);
+			array->setVec3ValuesSlice(slice, values);
 		}
 		else if(constant->type() == Numeric::numericTypeCol4){
-			Imath::Color4f constantValue = constant->col4ValueAt(0);
+			Imath::Color4f constantValue = constant->col4ValueAtSlice(slice, 0);
 			std::vector<Imath::Color4f> values(size);
 			for(int i = 0; i < size; ++i){
 				values[i] = constantValue;
 			}
-			array->setCol4Values(values);
+			array->setCol4ValuesSlice(slice, values);
 		}
 		else if(constant->type() == Numeric::numericTypeMatrix44){
-			Imath::M44f constantValue = constant->matrix44ValueAt(0);
+			Imath::M44f constantValue = constant->matrix44ValueAtSlice(slice, 0);
 			std::vector<Imath::M44f> values(size);
 			for(int i = 0; i < size; ++i){
 				values[i] = constantValue;
 			}
-			array->setMatrix44Values(values);
+			array->setMatrix44ValuesSlice(slice, values);
 		}
 	}
 	else{
@@ -1033,10 +1035,10 @@ ArraySize::ArraySize(const std::string &name, Node *parent): Node(name, parent){
 	setAttributeAllowedSpecialization(_size, "Int");
 }
 
-void ArraySize::update(Attribute *attribute){
+void ArraySize::updateSlice(Attribute *attribute, unsigned int slice){
 	Numeric *array = _array->value();
 	if(array->type() != Numeric::numericTypeAny){
-		_size->outValue()->setIntValueAt(0, array->size());
+		_size->outValue()->setIntValueAtSlice(slice, 0, array->sizeSlice(slice));
 	}
 	else{
 		setAttributeIsClean(_size, false);
@@ -1114,63 +1116,63 @@ void BuildArray::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void BuildArray::updateInt(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array){
+void BuildArray::updateInt(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice){
 	std::vector<int> arrayValues(arraySize);
 	for(int i = 0; i < arraySize; ++i){
 		Numeric *inNum = (Numeric*)inAttrs[i]->value();
-		arrayValues[i] = inNum->intValueAt(0);
+		arrayValues[i] = inNum->intValueAtSlice(slice, 0);
 	}
 	
-	array->setIntValues(arrayValues);
+	array->setIntValuesSlice(slice, arrayValues);
 }
 
-void BuildArray::updateFloat(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array){
+void BuildArray::updateFloat(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice){
 	std::vector<float> arrayValues(arraySize);
 	for(int i = 0; i < arraySize; ++i){
 		Numeric *inNum = (Numeric*)inAttrs[i]->value();
-		arrayValues[i] = inNum->floatValueAt(0);
+		arrayValues[i] = inNum->floatValueAtSlice(slice, 0);
 	}
 	
-	array->setFloatValues(arrayValues);
+	array->setFloatValuesSlice(slice, arrayValues);
 }
 
-void BuildArray::updateVec3(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array){
+void BuildArray::updateVec3(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice){
 	std::vector<Imath::V3f> arrayValues(arraySize);
 	for(int i = 0; i < arraySize; ++i){
 		Numeric *inNum = (Numeric*)inAttrs[i]->value();
-		arrayValues[i] = inNum->vec3ValueAt(0);
+		arrayValues[i] = inNum->vec3ValueAtSlice(slice, 0);
 	}
 	
-	array->setVec3Values(arrayValues);
+	array->setVec3ValuesSlice(slice, arrayValues);
 }
 
-void BuildArray::updateCol4(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array){
+void BuildArray::updateCol4(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice){
 	std::vector<Imath::Color4f> arrayValues(arraySize);
 	for(int i = 0; i < arraySize; ++i){
 		Numeric *inNum = (Numeric*)inAttrs[i]->value();
-		arrayValues[i] = inNum->col4ValueAt(0);
+		arrayValues[i] = inNum->col4ValueAtSlice(slice, 0);
 	}
 
-	array->setCol4Values(arrayValues);
+	array->setCol4ValuesSlice(slice, arrayValues);
 }
 
-void BuildArray::updateMatrix44(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array){
+void BuildArray::updateMatrix44(const std::vector<Attribute*> &inAttrs, int arraySize, Numeric *array, unsigned int slice){
 	std::vector<Imath::M44f> arrayValues(arraySize);
 	for(int i = 0; i < arraySize; ++i){
 		Numeric *inNum = (Numeric*)inAttrs[i]->value();
-		arrayValues[i] = inNum->matrix44ValueAt(0);
+		arrayValues[i] = inNum->matrix44ValueAtSlice(slice, 0);
 	}
 	
-	array->setMatrix44Values(arrayValues);
+	array->setMatrix44ValuesSlice(slice, arrayValues);
 }
 
-void BuildArray::update(Attribute *attribute){
+void BuildArray::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		std::vector<Attribute*> inAttrs = inputAttributes();
 		int arraySize = inAttrs.size();
 		Numeric *array = _array->outValue();
 		
-		(this->*_selectedOperation)(inAttrs, arraySize, array);
+		(this->*_selectedOperation)(inAttrs, arraySize, array, slice);
 	}
 }
 
@@ -1240,9 +1242,9 @@ void RangeArray::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void RangeArray::updateInt(Numeric *start, Numeric *end, int steps, Numeric *array){
-	int startValue = start->intValueAt(0);
-	int endValue = end->intValueAt(0);
+void RangeArray::updateInt(Numeric *start, Numeric *end, int steps, Numeric *array, unsigned int slice){
+	int startValue = start->intValueAtSlice(slice, 0);
+	int endValue = end->intValueAtSlice(slice, 0);
 	
 	float totalRange = endValue - startValue;
 	int incrStep = totalRange / steps;
@@ -1254,12 +1256,12 @@ void RangeArray::updateInt(Numeric *start, Numeric *end, int steps, Numeric *arr
 		currentStep += incrStep;
 	}
 	
-	array->setIntValues(arrayValues);
+	array->setIntValuesSlice(slice, arrayValues);
 }
 
-void RangeArray::updateFloat(Numeric *start, Numeric *end, int steps, Numeric *array){
-	float startValue = start->floatValueAt(0);
-	float endValue = end->floatValueAt(0);
+void RangeArray::updateFloat(Numeric *start, Numeric *end, int steps, Numeric *array, unsigned int slice){
+	float startValue = start->floatValueAtSlice(slice, 0);
+	float endValue = end->floatValueAtSlice(slice, 0);
 	
 	float totalRange = endValue - startValue;
 	float incrStep = totalRange / float(steps);
@@ -1272,22 +1274,22 @@ void RangeArray::updateFloat(Numeric *start, Numeric *end, int steps, Numeric *a
 		currentStep += incrStep;
 	}
 	
-	array->setFloatValues(arrayValues);
+	array->setFloatValuesSlice(slice, arrayValues);
 }
 
-void RangeArray::update(Attribute *attribute){
+void RangeArray::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Numeric *start = _start->value();
 		Numeric *end = _end->value();
-		int steps = _steps->value()->intValueAt(0);
+		int steps = _steps->value()->intValueAtSlice(slice, 0);
 		if(steps < 0){
-			_steps->outValue()->setIntValueAt(0, 0);
+			_steps->outValue()->setIntValueAtSlice(slice, 0, 0);
 			steps = 0;
 		}
 		
 		Numeric *array = _array->outValue();
 		
-		(this->*_selectedOperation)(start, end, steps, array);
+		(this->*_selectedOperation)(start, end, steps, array, slice);
 	}
 }
 
@@ -1326,8 +1328,8 @@ void Matrix44Translation::updateSpecializationLink(Attribute *attributeA, Attrib
 	}
 }
 
-void Matrix44Translation::update(Attribute *attribute){
-	const std::vector<Imath::M44f> &matrix = _matrix->value()->matrix44Values();
+void Matrix44Translation::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::M44f> &matrix = _matrix->value()->matrix44ValuesSlice(slice);
 	int size = matrix.size();
 	std::vector<Imath::V3f> translationValues(size);
 	
@@ -1340,7 +1342,7 @@ void Matrix44Translation::update(Attribute *attribute){
 		translationValue.z = m[3][2];
 	}
 	
-	_translation->outValue()->setVec3Values(translationValues);
+	_translation->outValue()->setVec3ValuesSlice(slice, translationValues);
 }
 
 Matrix44RotationAxis::Matrix44RotationAxis(const std::string &name, Node* parent): Node(name, parent){	
@@ -1388,8 +1390,8 @@ void Matrix44RotationAxis::updateSpecializationLink(Attribute *attributeA, Attri
 	}
 }
 
-void Matrix44RotationAxis::update(Attribute *attribute){
-	const std::vector<Imath::M44f> &matrix = _matrix->value()->matrix44Values();
+void Matrix44RotationAxis::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::M44f> &matrix = _matrix->value()->matrix44ValuesSlice(slice);
 	int size = matrix.size();
 	std::vector<Imath::V3f> axisXValues(size);
 	std::vector<Imath::V3f> axisYValues(size);
@@ -1402,9 +1404,9 @@ void Matrix44RotationAxis::update(Attribute *attribute){
 		axisZValues[i] = Imath::V3f(mat[2][0], mat[2][1], mat[2][2]);
 	}
 	
-	_axisX->outValue()->setVec3Values(axisXValues);
-	_axisY->outValue()->setVec3Values(axisYValues);
-	_axisZ->outValue()->setVec3Values(axisZValues);
+	_axisX->outValue()->setVec3ValuesSlice(slice, axisXValues);
+	_axisY->outValue()->setVec3ValuesSlice(slice, axisYValues);
+	_axisZ->outValue()->setVec3ValuesSlice(slice, axisZValues);
 	
 	setAttributeIsClean(_axisX, true);
 	setAttributeIsClean(_axisY, true);
@@ -1466,7 +1468,7 @@ void Matrix44FromVectors::updateSpecializationLink(Attribute *attributeA, Attrib
 	}
 }
 
-void Matrix44FromVectors::update(Attribute *attribute){
+void Matrix44FromVectors::updateSlice(Attribute *attribute, unsigned int slice){
 	Numeric *translation = _translation->value();
 	Numeric *axisX = _axisX->value();
 	Numeric *axisY = _axisY->value();
@@ -1480,18 +1482,18 @@ void Matrix44FromVectors::update(Attribute *attribute){
 			_axisZ,
 			_scale};
 			
-	int minorSize = findMinorNumericSize(attrs, 5);
+	int minorSize = findMinorNumericSize(attrs, 5, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 		
 	std::vector<Imath::M44f> matrixValues(minorSize);
 	for(int i = 0; i < minorSize; ++i){
-		Imath::V3f translationValue = translation->vec3ValueAt(i);
-		Imath::V3f scaleValue = scale->vec3ValueAt(i);
+		Imath::V3f translationValue = translation->vec3ValueAtSlice(slice, i);
+		Imath::V3f scaleValue = scale->vec3ValueAtSlice(slice, i);
 		
-		Imath::V3f axisXValue = axisX->vec3ValueAt(i).normalized() * scaleValue.x;
-		Imath::V3f axisYValue = axisY->vec3ValueAt(i).normalized() * scaleValue.y;
-		Imath::V3f axisZValue = axisZ->vec3ValueAt(i).normalized() * scaleValue.z;
+		Imath::V3f axisXValue = axisX->vec3ValueAtSlice(slice, i).normalized() * scaleValue.x;
+		Imath::V3f axisYValue = axisY->vec3ValueAtSlice(slice, i).normalized() * scaleValue.y;
+		Imath::V3f axisZValue = axisZ->vec3ValueAtSlice(slice, i).normalized() * scaleValue.z;
 		
 		matrixValues[i] = Imath::M44f(
 			axisXValue.x, axisXValue.y, axisXValue.z, 0.0,
@@ -1500,7 +1502,7 @@ void Matrix44FromVectors::update(Attribute *attribute){
 			translationValue.x, translationValue.y, translationValue.z, 1.0);
 	}
 	
-	_matrix->outValue()->setMatrix44Values(matrixValues);
+	_matrix->outValue()->setMatrix44ValuesSlice(slice, matrixValues);
 }
 
 Matrix44EulerRotation::Matrix44EulerRotation(const std::string &name, Node* parent): Node(name, parent){	
@@ -1540,8 +1542,8 @@ void Matrix44EulerRotation::updateSpecializationLink(Attribute *attributeA, Attr
 	}
 }
 
-void Matrix44EulerRotation::update(Attribute *attribute){
-	const std::vector<Imath::M44f> &matrix = _matrix->value()->matrix44Values();
+void Matrix44EulerRotation::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::M44f> &matrix = _matrix->value()->matrix44ValuesSlice(slice);
 	int size = matrix.size();
 	
 	std::vector<Imath::V3f> eulerAngles(size);
@@ -1557,7 +1559,7 @@ void Matrix44EulerRotation::update(Attribute *attribute){
 		currentValue.z = euler.z * degree;
 	}
 	
-	_eulerAngles->outValue()->setVec3Values(eulerAngles);
+	_eulerAngles->outValue()->setVec3ValuesSlice(slice, eulerAngles);
 }
 
 RangeLoop::RangeLoop(const std::string &name, Node* parent): 
@@ -1593,59 +1595,59 @@ RangeLoop::RangeLoop(const std::string &name, Node* parent):
 	addAttributeSpecializationLink(_step, _valueInRange);
 }
 
-void RangeLoop::updateFloat(Numeric *start, Numeric *end, Numeric *step, Numeric *out){
-	float startVal = start->floatValueAt(0);
-	float endVal = end->floatValueAt(0);
-	float stepVal = step->floatValueAt(0);
+void RangeLoop::updateFloat(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice){
+	float startVal = start->floatValueAtSlice(slice, 0);
+	float endVal = end->floatValueAtSlice(slice, 0);
+	float stepVal = step->floatValueAtSlice(slice, 0);
 	
 	float outVal = fmod((stepVal + startVal), endVal);
-	out->setFloatValueAt(0, outVal);
+	out->setFloatValueAtSlice(slice, 0, outVal);
 }
 
-void RangeLoop::updateFloatArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out){
+void RangeLoop::updateFloatArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice){
 	NumericAttribute *attrs[] = {_start, _end, _step};
 			
-	int minorSize = findMinorNumericSize(attrs, 3);
+	int minorSize = findMinorNumericSize(attrs, 3, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 	
 	std::vector<float> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
-		float startVal = start->floatValueAt(i);
-		float endVal = end->floatValueAt(i);
-		float stepVal = step->floatValueAt(i);
+		float startVal = start->floatValueAtSlice(slice, i);
+		float endVal = end->floatValueAtSlice(slice, i);
+		float stepVal = step->floatValueAtSlice(slice, i);
 
 		outVals[i] = fmod((stepVal + startVal), endVal);
 	}
 	
-	out->setFloatValues(outVals);
+	out->setFloatValuesSlice(slice, outVals);
 }
 
-void RangeLoop::updateInt(Numeric *start, Numeric *end, Numeric *step, Numeric *out){
-	int startVal = start->intValueAt(0);
-	int endVal = end->intValueAt(0);
-	int stepVal = step->intValueAt(0);
+void RangeLoop::updateInt(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice){
+	int startVal = start->intValueAtSlice(slice, 0);
+	int endVal = end->intValueAtSlice(slice, 0);
+	int stepVal = step->intValueAtSlice(slice, 0);
 
 	int outVal = 0;
 	if(endVal > 0){
 		outVal = (stepVal + startVal) % endVal;
 	}
 
-	out->setIntValueAt(0, outVal);
+	out->setIntValueAtSlice(slice, 0, outVal);
 }
 
-void RangeLoop::updateIntArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out){
+void RangeLoop::updateIntArray(Numeric *start, Numeric *end, Numeric *step, Numeric *out, unsigned int slice){
 	NumericAttribute *attrs[] = {_start, _end, _step};
 			
-	int minorSize = findMinorNumericSize(attrs, 3);
+	int minorSize = findMinorNumericSize(attrs, 3, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 	
 	std::vector<int> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
-		int startVal = start->intValueAt(i);
-		int endVal = end->intValueAt(i);
-		int stepVal = step->intValueAt(i);
+		int startVal = start->intValueAtSlice(slice, i);
+		int endVal = end->intValueAtSlice(slice, i);
+		int stepVal = step->intValueAtSlice(slice, i);
 
 		int outVal = 0;
 		if(endVal > 0){
@@ -1655,7 +1657,7 @@ void RangeLoop::updateIntArray(Numeric *start, Numeric *end, Numeric *step, Nume
 		outVals[i] = outVal;
 	}
 	
-	out->setIntValues(outVals);
+	out->setIntValuesSlice(slice, outVals);
 }
 
 void RangeLoop::attributeSpecializationChanged(Attribute *attribute){
@@ -1680,14 +1682,14 @@ void RangeLoop::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void RangeLoop::update(Attribute *attribute){
+void RangeLoop::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Numeric *start = _start->value();
 		Numeric *end = _end->value();
 		Numeric *step = _step->value();
 		Numeric *out = _valueInRange->outValue();
 		
-		(this->*_selectedOperation)(start, end, step, out);
+		(this->*_selectedOperation)(start, end, step, out, slice);
 	}
 }
 
@@ -1746,181 +1748,79 @@ void RandomNumber::attributeSpecializationChanged(Attribute *attribute){
 	
 }
 
-void RandomNumber::updateFloat(Numeric *min, Numeric *max, Numeric *out){
-	float minVal = min->floatValueAt(0);
-	float maxVal = max->floatValueAt(0);
+void RandomNumber::updateFloat(Numeric *min, Numeric *max, Numeric *out, unsigned int slice){
+	float minVal = min->floatValueAtSlice(slice, 0);
+	float maxVal = max->floatValueAtSlice(slice, 0);
 
-	srand(_seed->value()->intValueAt(0));
+	srand(_seed->value()->intValueAtSlice(slice, 0));
 	for(float i = minVal; i < maxVal; ++i){
 		rand();
 	}
 	
 	float outVal = ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
 
-	out->setFloatValueAt(0, outVal);
+	out->setFloatValueAtSlice(slice, 0, outVal);
 }
 
-void RandomNumber::updateFloatArray(Numeric *min, Numeric *max, Numeric *out){
+void RandomNumber::updateFloatArray(Numeric *min, Numeric *max, Numeric *out, unsigned int slice){
 	NumericAttribute *attrs[] = {_min, _max};
 	
-	int minorSize = findMinorNumericSize(attrs, 2);
+	int minorSize = findMinorNumericSize(attrs, 2, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 	
-	srand(_seed->value()->intValueAt(0));
+	srand(_seed->value()->intValueAtSlice(slice, 0));
 	std::vector<float> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
-		float minVal = min->floatValueAt(i);
-		float maxVal = max->floatValueAt(i);
+		float minVal = min->floatValueAtSlice(slice, i);
+		float maxVal = max->floatValueAtSlice(slice, i);
 		
 		outVals[i] =  ((float(rand()) / float(RAND_MAX)) * (maxVal - minVal)) + minVal;
 	}
 	
-	out->setFloatValues(outVals);
+	out->setFloatValuesSlice(slice, outVals);
 }
 
-void RandomNumber::updateInt(Numeric *min, Numeric *max, Numeric *out){
-	int minVal = min->intValueAt(0);
-	int maxVal = max->intValueAt(0);
+void RandomNumber::updateInt(Numeric *min, Numeric *max, Numeric *out, unsigned int slice){
+	int minVal = min->intValueAtSlice(slice, 0);
+	int maxVal = max->intValueAtSlice(slice, 0);
 
-	srand(_seed->value()->intValueAt(0));
+	srand(_seed->value()->intValueAtSlice(slice, 0));
 	for(int i = minVal; i < maxVal; ++i){
 		rand();
 	}
 
 	int outVal = minVal + (int) (maxVal - minVal + 1)*(rand() / (RAND_MAX + 1.0));
 
-	out->setIntValueAt(0, outVal);
+	out->setIntValueAtSlice(slice, 0, outVal);
 }
 
-void RandomNumber::updateIntArray(Numeric *min, Numeric *max, Numeric *out){
+void RandomNumber::updateIntArray(Numeric *min, Numeric *max, Numeric *out, unsigned int slice){
 	NumericAttribute *attrs[] = {_min, _max};
 			
-	int minorSize = findMinorNumericSize(attrs, 2);
+	int minorSize = findMinorNumericSize(attrs, 2, slice);
 	if(minorSize < 1)
 		minorSize = 1;
 	
-	srand(_seed->value()->intValueAt(0));
+	srand(_seed->value()->intValueAtSlice(slice, 0));
 	std::vector<int> outVals(minorSize);
 	for(int i = 0; i < minorSize; ++i){
-		int minVal = min->intValueAt(i);
-		int maxVal = max->intValueAt(i);
+		int minVal = min->intValueAtSlice(slice, i);
+		int maxVal = max->intValueAtSlice(slice, i);
 		
 		outVals[i] = minVal + (int) (maxVal - minVal + 1)*(rand() / (RAND_MAX + 1.0));
 	}
 	
-	out->setIntValues(outVals);
+	out->setIntValuesSlice(slice, outVals);
 }
 
-void RandomNumber::update(Attribute *attribute){
+void RandomNumber::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Numeric *min = _min->value();
 		Numeric *max = _max->value();
 		Numeric *out = _out->outValue();
 		
-		(this->*_selectedOperation)(min, max, out);
-	}
-}
-
-NumericIterator::NumericIterator(const std::string &name, Node* parent): 
-LoopIteratorNode(name, parent),
-_selectedOperation(0){
-	_element = new NumericAttribute("element", this);
-	_array = new NumericAttribute("array", this);
-	
-	addInputAttribute(_element);
-	addOutputAttribute(_array);
-	
-	setAttributeAffect(index(), _array);
-	setAttributeAffect(_element, _array);
-	
-	std::vector<std::string> elementSpec;
-	elementSpec.push_back("Int");
-	elementSpec.push_back("Float");
-	elementSpec.push_back("Vec3");
-	elementSpec.push_back("Col4");
-	elementSpec.push_back("Matrix44");
-	setAttributeAllowedSpecializations(_element, elementSpec);
-	
-	std::vector<std::string> arraySpec;
-	arraySpec.push_back("IntArray");
-	arraySpec.push_back("FloatArray");
-	arraySpec.push_back("Vec3Array");
-	arraySpec.push_back("Col4Array");
-	arraySpec.push_back("Matrix44Array");
-	setAttributeAllowedSpecializations(_array, arraySpec);
-	
-	addAttributeSpecializationLink(_element, _array);
-}
-
-void NumericIterator::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
-	if(specializationA.size() < specializationB.size()){
-		specializationB.resize(specializationA.size());
-		for(int i = 0; i < specializationA.size(); ++i){
-			specializationB[i] = specializationA[i] + "Array";
-		}
-	}
-	else if(specializationB.size() < specializationA.size()){
-		specializationA.resize(specializationB.size());
-		for(int i = 0; i < specializationB.size(); ++i){
-			specializationA[i] = stringUtils::strip(specializationB[i], "Array");
-		}
-	}
-}
-
-void NumericIterator::attributeSpecializationChanged(Attribute *attribute){
-	if(attribute == _array){
-		Numeric::Type type = _array->outValue()->type();
-		if(type != Numeric::numericTypeAny){
-			if(type == Numeric::numericTypeIntArray){
-				_selectedOperation = &NumericIterator::stepInt;
-			}
-			else if(type == Numeric::numericTypeFloatArray){
-				_selectedOperation = &NumericIterator::stepFloat;
-			}
-			else if(type == Numeric::numericTypeVec3Array){
-				_selectedOperation = &NumericIterator::stepVec3;
-			}
-			else if(type == Numeric::numericTypeCol4Array){
-				_selectedOperation = &NumericIterator::stepCol4;
-			}
-			else if(type == Numeric::numericTypeMatrix44Array){
-				_selectedOperation = &NumericIterator::stepMatrix44;
-			}
-		}
-	}
-}
-
-void NumericIterator::loopStart(unsigned int loopRangeSize){
-	_array->outValue()->resize(loopRangeSize);
-}
-
-void NumericIterator::stepInt(unsigned int index, Numeric *element, Numeric *array){
-	array->setIntValueAt(index, element->intValueAt(0));
-}
-
-void NumericIterator::stepFloat(unsigned int index, Numeric *element, Numeric *array){
-	array->setFloatValueAt(index, element->floatValueAt(0));
-}
-
-void NumericIterator::stepVec3(unsigned int index, Numeric *element, Numeric *array){
-	array->setVec3ValueAt(index, element->vec3ValueAt(0));
-}
-
-void NumericIterator::stepCol4(unsigned int index, Numeric *element, Numeric *array){
-	array->setCol4ValueAt(index, element->col4ValueAt(0));
-}
-
-void NumericIterator::stepMatrix44(unsigned int index, Numeric *element, Numeric *array){
-	array->setMatrix44ValueAt(index, element->matrix44ValueAt(0));
-}
-
-void NumericIterator::loopStep(unsigned int index){
-	if(_selectedOperation){
-		Numeric *element = _element->value();
-		Numeric *array = _array->outValue();
-		
-		(this->*_selectedOperation)(index, element, array);
+		(this->*_selectedOperation)(min, max, out, slice);
 	}
 }
 
@@ -1944,15 +1844,15 @@ ArrayIndices::ArrayIndices(const std::string &name, Node* parent): Node(name, pa
 	setAttributeAllowedSpecialization(_indices, "IntArray");
 }
 
-void ArrayIndices::update(Attribute *attribute){
-	int arraySize = _array->value()->size();
+void ArrayIndices::updateSlice(Attribute *attribute, unsigned int slice){
+	int arraySize = _array->value()->sizeSlice(slice);
 	std::vector<int> indices(arraySize);
 	
 	for(int i = 0; i < arraySize; ++i){
 		indices[i] = i;
 	}
 	
-	_indices->outValue()->setIntValues(indices);
+	_indices->outValue()->setIntValuesSlice(slice, indices);
 }
 
 GetArrayElement::GetArrayElement(const std::string &name, Node *parent): 
@@ -2102,53 +2002,53 @@ void GetArrayElement::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void GetArrayElement::updateInt(Numeric *array, const std::vector<int> &index, Numeric *element){
+void GetArrayElement::updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, unsigned int slice){
 	int size = index.size();
 	element->resize(size);
 	for(int i = 0; i < size; ++i){
-		element->setIntValueAt(i, array->intValueAt(index[i]));
+		element->setIntValueAtSlice(slice, i, array->intValueAtSlice(slice, index[i]));
 	}
 }
 
-void GetArrayElement::updateFloat(Numeric *array,  const std::vector<int> &index, Numeric *element){
+void GetArrayElement::updateFloat(Numeric *array,  const std::vector<int> &index, Numeric *element, unsigned int slice){
 	int size = index.size();
 	element->resize(size);
 	for(int i = 0; i < size; ++i){
-		element->setFloatValueAt(i, array->floatValueAt(index[i]));
+		element->setFloatValueAtSlice(slice, i, array->floatValueAtSlice(slice, index[i]));
 	}
 }
 
-void GetArrayElement::updateVec3(Numeric *array,  const std::vector<int> &index, Numeric *element){
+void GetArrayElement::updateVec3(Numeric *array,  const std::vector<int> &index, Numeric *element, unsigned int slice){
 	int size = index.size();
 	element->resize(size);
 	for(int i = 0; i < size; ++i){
-		element->setVec3ValueAt(i, array->vec3ValueAt(index[i]));
+		element->setVec3ValueAtSlice(slice, i, array->vec3ValueAtSlice(slice, index[i]));
 	}
 }
 
-void GetArrayElement::updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element){
+void GetArrayElement::updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, unsigned int slice){
 	int size = index.size();
 	element->resize(size);
 	for(int i = 0; i < size; ++i){
-		element->setCol4ValueAt(i, array->col4ValueAt(index[i]));
+		element->setCol4ValueAtSlice(slice, i, array->col4ValueAtSlice(slice, index[i]));
 	}
 }
 
-void GetArrayElement::updateMatrix44(Numeric *array,  const std::vector<int> &index, Numeric *element){
+void GetArrayElement::updateMatrix44(Numeric *array,  const std::vector<int> &index, Numeric *element, unsigned int slice){
 	int size = index.size();
 	element->resize(size);
 	for(int i = 0; i < size; ++i){
-		element->setMatrix44ValueAt(i, array->matrix44ValueAt(index[i]));
+		element->setMatrix44ValueAtSlice(slice, i, array->matrix44ValueAtSlice(slice, index[i]));
 	}
 }
 
-void GetArrayElement::update(Attribute *attribute){
+void GetArrayElement::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Numeric *array = _array->value();
-		std::vector<int> index = _index->value()->intValues();
+		std::vector<int> index = _index->value()->intValuesSlice(slice);
 		Numeric *element = _element->outValue();
 		
-		(this->*_selectedOperation)(array, index, element);
+		(this->*_selectedOperation)(array, index, element, slice);
 	}
 }
 
@@ -2255,79 +2155,79 @@ void SetArrayElement::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void SetArrayElement::updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
-	std::vector<int> values = array->intValues();
-	int valuesSize = array->size();
+void SetArrayElement::updateInt(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice){
+	std::vector<int> values = array->intValuesSlice(slice);
+	int valuesSize = array->sizeSlice(slice);
 	for(int i = 0; i < index.size(); ++i){
 		int currentIndex = index[i];
 		if(currentIndex >= 0 && currentIndex < valuesSize){
-			values[currentIndex] = element->intValueAt(i);
+			values[currentIndex] = element->intValueAtSlice(slice, i);
 		}
 	}
 
-	outArray->setIntValues(values);
+	outArray->setIntValuesSlice(slice, values);
 }
 
-void SetArrayElement::updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
-	std::vector<float> values = array->floatValues();
-	int valuesSize = array->size();
+void SetArrayElement::updateFloat(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice){
+	std::vector<float> values = array->floatValuesSlice(slice);
+	int valuesSize = array->sizeSlice(slice);
 	for(int i = 0; i < index.size(); ++i){
 		int currentIndex = index[i];
 		if(currentIndex >= 0 && currentIndex < valuesSize){
-			values[currentIndex] = element->floatValueAt(i);
+			values[currentIndex] = element->floatValueAtSlice(slice, i);
 		}
 	}
 
-	outArray->setFloatValues(values);
+	outArray->setFloatValuesSlice(slice, values);
 }
 
-void SetArrayElement::updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
-	std::vector<Imath::V3f> values = array->vec3Values();
-	int valuesSize = array->size();
+void SetArrayElement::updateVec3(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice){
+	std::vector<Imath::V3f> values = array->vec3ValuesSlice(slice);
+	int valuesSize = array->sizeSlice(slice);
 	for(int i = 0; i < index.size(); ++i){
 		int currentIndex = index[i];
 		if(currentIndex >= 0 && currentIndex < valuesSize){
-			values[currentIndex] = element->vec3ValueAt(i);
+			values[currentIndex] = element->vec3ValueAtSlice(slice, i);
 		}
 	}
 
-	outArray->setVec3Values(values);
+	outArray->setVec3ValuesSlice(slice, values);
 }
 
-void SetArrayElement::updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
-	std::vector<Imath::Color4f> values = array->col4Values();
-	int valuesSize = array->size();
+void SetArrayElement::updateCol4(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice){
+	std::vector<Imath::Color4f> values = array->col4ValuesSlice(slice);
+	int valuesSize = array->sizeSlice(slice);
 	for(int i = 0; i < index.size(); ++i){
 		int currentIndex = index[i];
 		if(currentIndex >= 0 && currentIndex < valuesSize){
-			values[currentIndex] = element->col4ValueAt(i);
+			values[currentIndex] = element->col4ValueAtSlice(slice, i);
 		}
 	}
 
-	outArray->setCol4Values(values);
+	outArray->setCol4ValuesSlice(slice, values);
 }
 
-void SetArrayElement::updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray){
-	std::vector<Imath::M44f> values = array->matrix44Values();
-	int valuesSize = array->size();
+void SetArrayElement::updateMatrix44(Numeric *array, const std::vector<int> &index, Numeric *element, Numeric *outArray, unsigned int slice){
+	std::vector<Imath::M44f> values = array->matrix44ValuesSlice(slice);
+	int valuesSize = array->sizeSlice(slice);
 	for(int i = 0; i < index.size(); ++i){
 		int currentIndex = index[i];
 		if(currentIndex >= 0 && currentIndex < valuesSize){
-			values[currentIndex] = element->matrix44ValueAt(i);
+			values[currentIndex] = element->matrix44ValueAtSlice(slice, i);
 		}
 	}
 
-	outArray->setMatrix44Values(values);
+	outArray->setMatrix44ValuesSlice(slice, values);
 }
 
-void SetArrayElement::update(Attribute *attribute){
+void SetArrayElement::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Numeric *array = _array->value();
-		const std::vector<int> &index = _index->value()->intValues();
+		const std::vector<int> &index = _index->value()->intValuesSlice(slice);
 		Numeric *element = _element->value();
 		Numeric *outArray = _outArray->outValue();
 		
-		(this->*_selectedOperation)(array, index, element, outArray);
+		(this->*_selectedOperation)(array, index, element, outArray, slice);
 	}
 }
 
@@ -2346,7 +2246,7 @@ SetSimulationStep::SetSimulationStep(const std::string &name, Node *parent): Nod
 	addAttributeSpecializationLink(_data, _result);
 }
 
-void SetSimulationStep::update(Attribute *attribute){
+void SetSimulationStep::updateSlice(Attribute *attribute, unsigned int slice){
 	#ifdef CORAL_PARALLEL_TBB
 		tbb::mutex::scoped_lock lock(_globalMutex);
 	#endif
@@ -2380,7 +2280,7 @@ GetSimulationStep::GetSimulationStep(const std::string &name, Node *parent): Nod
 	addAttributeSpecializationLink(_source, _data);
 }
 
-void GetSimulationStep::update(Attribute *attribute){
+void GetSimulationStep::updateSlice(Attribute *attribute, unsigned int slice){
 	#ifdef CORAL_PARALLEL_TBB
 		tbb::mutex::scoped_lock lock(_globalMutex);
 	#endif
@@ -2389,7 +2289,7 @@ void GetSimulationStep::update(Attribute *attribute){
 	Numeric *source = _source->value();
 	Numeric *step = _step->value();
 	if(step->type() == Numeric::numericTypeFloat){
-		float step = _step->value()->floatValueAt(0);
+		float step = _step->value()->floatValueAtSlice(slice, 0);
 	
 		if(step == 0.0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
 			_globalNumericStorage[storageKey].copy(source);
@@ -2398,7 +2298,7 @@ void GetSimulationStep::update(Attribute *attribute){
 		_data->outValue()->copy(&_globalNumericStorage[storageKey]);
 	}
 	else if(step->type() == Numeric::numericTypeInt){
-		int step = _step->value()->intValueAt(0);
+		int step = _step->value()->intValueAtSlice(slice, 0);
 	
 		if(step == 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
 			_globalNumericStorage[storageKey].copy(source);
@@ -2469,9 +2369,9 @@ void QuatToAxisAngle::updateSpecializationLink(Attribute *attributeA, Attribute 
 	}
 }
 
-void QuatToAxisAngle::update(Attribute *attribute)
+void QuatToAxisAngle::updateSlice(Attribute *attribute, unsigned int slice)
 {
-	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValuesSlice(slice);
 	int size = quatValues.size();
 
 	std::vector<Imath::V3f> axisValues(size);
@@ -2483,8 +2383,8 @@ void QuatToAxisAngle::update(Attribute *attribute)
 		angleValues[i] =quat.angle();
 	}
 
-	_axis->outValue()->setVec3Values(axisValues);
-	_angle->outValue()->setFloatValues(angleValues);
+	_axis->outValue()->setVec3ValuesSlice(slice, axisValues);
+	_angle->outValue()->setFloatValuesSlice(slice, angleValues);
 
 	setAttributeIsClean(_axis, true);
 	setAttributeIsClean(_angle, true);
@@ -2539,9 +2439,9 @@ void QuatToEulerRotation::updateSpecializationLink(Attribute *attributeA, Attrib
 	}
 }
 
-void QuatToEulerRotation::update(Attribute *attribute)
+void QuatToEulerRotation::updateSlice(Attribute *attribute, unsigned int slice)
 {
-	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValuesSlice(slice);
 	int size = quatValues.size();
 
 	std::vector<Imath::V3f> eulerValues(size);
@@ -2561,7 +2461,7 @@ void QuatToEulerRotation::update(Attribute *attribute)
 		eulerValues[i].z = euler.z * degree;
 	}
 
-	_euler->outValue()->setVec3Values(eulerValues);
+	_euler->outValue()->setVec3ValuesSlice(slice, eulerValues);
 
 	setAttributeIsClean(_euler, true);
 }
@@ -2615,9 +2515,9 @@ void QuatToMatrix44::updateSpecializationLink(Attribute *attributeA, Attribute *
 	}
 }
 
-void QuatToMatrix44::update(Attribute *attribute)
+void QuatToMatrix44::updateSlice(Attribute *attribute, unsigned int slice)
 {
-	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValues();
+	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValuesSlice(slice);
 	int size = quatValues.size();
 
 	std::vector<Imath::M44f> matrixValues(size);
@@ -2628,7 +2528,7 @@ void QuatToMatrix44::update(Attribute *attribute)
 		matrixValues[i] = quat.toMatrix44();
 	}
 
-	_matrix->outValue()->setMatrix44Values(matrixValues);
+	_matrix->outValue()->setMatrix44ValuesSlice(slice, matrixValues);
 
 	setAttributeIsClean(_matrix, true);
 }
@@ -2682,9 +2582,9 @@ void Matrix44ToQuat::updateSpecializationLink(Attribute *attributeA, Attribute *
 	}
 }
 
-void Matrix44ToQuat::update(Attribute *attribute)
+void Matrix44ToQuat::updateSlice(Attribute *attribute, unsigned int slice)
 {
-	const std::vector<Imath::M44f> &mtxValues = _matrix->value()->matrix44Values();
+	const std::vector<Imath::M44f> &mtxValues = _matrix->value()->matrix44ValuesSlice(slice);
 	int size = mtxValues.size();
 
 	std::vector<Imath::Quatf> quatValues(size);
@@ -2727,7 +2627,7 @@ void Matrix44ToQuat::update(Attribute *attribute)
 		}
 	}
 
-	_quat->outValue()->setQuatValues(quatValues);
+	_quat->outValue()->setQuatValuesSlice(slice, quatValues);
 
 	setAttributeIsClean(_quat, true);
 }
@@ -2761,13 +2661,13 @@ StrandsNode::StrandsNode(const std::string &name, Node *parent): Node(name, pare
 	setAttributeAffect(_slice, _pointsPerStrand);
 }
 
-void StrandsNode::update(Attribute *attribute){
+void StrandsNode::updateSlice(Attribute *attribute, unsigned int slice){
 	const std::vector<Attribute*> &dynAttrs = dynamicAttributes();
 
 	int totalSlices = 2 + dynAttrs.size();
 	std::vector<const std::vector<Imath::V3f>* > slices(totalSlices);
-	slices[0] = &_root->value()->vec3Values();
-	slices[1] = &_slice->value()->vec3Values();
+	slices[0] = &_root->value()->vec3ValuesSlice(slice);
+	slices[1] = &_slice->value()->vec3ValuesSlice(slice);
 
 	int totalStrands = slices[0]->size();
 	if(slices[1]->size() < totalStrands){
@@ -2775,17 +2675,17 @@ void StrandsNode::update(Attribute *attribute){
 	}
 
 	for(int i = 0; i < dynAttrs.size(); ++i){
-		slices[i + 2] = &((Numeric*)dynAttrs[i]->value())->vec3Values(); 
+		slices[i + 2] = &((Numeric*)dynAttrs[i]->value())->vec3ValuesSlice(slice); 
 		int pointsInSlice = slices[i + 2]->size();
 		if(pointsInSlice < totalStrands){
 			totalStrands = pointsInSlice;
 		}
 	}
 
-	int subdivide = _subdivide->value()->intValueAt(0);
+	int subdivide = _subdivide->value()->intValueAtSlice(slice, 0);
 	if(subdivide < 0){
 		subdivide = 0;
-		_subdivide->outValue()->setIntValueAt(0, 0);
+		_subdivide->outValue()->setIntValueAtSlice(slice, 0, 0);
 	}
 
 	int pointsPerStrand = totalSlices + ((totalSlices - 1) * subdivide);
@@ -2819,7 +2719,7 @@ void StrandsNode::update(Attribute *attribute){
 		}
 	}
 
-	_strands->outValue()->setVec3Values(strands);
-	_pointsPerStrand->outValue()->setIntValueAt(0, pointsPerStrand);
+	_strands->outValue()->setVec3ValuesSlice(slice, strands);
+	_pointsPerStrand->outValue()->setIntValueAtSlice(slice, 0, pointsPerStrand);
 }
 

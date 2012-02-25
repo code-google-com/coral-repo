@@ -40,7 +40,7 @@ namespace coral{
 class GeoGrid: public Node{
 public:
 	GeoGrid(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_width;

@@ -39,7 +39,7 @@ class ProcessSimulationNode : public Node{
 public:
 	ProcessSimulationNode(const std::string &name, Node *parent);
 	void addInputData();
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	EnumAttribute *_getDataFrom;

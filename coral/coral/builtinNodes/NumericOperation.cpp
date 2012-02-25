@@ -31,35 +31,51 @@
 
 using namespace coral;
 
-Numeric::Type numeric_type_int = Numeric::numericTypeInt;
-Numeric::Type numeric_type_int_array = Numeric::numericTypeIntArray;
-Numeric::Type numeric_type_float = Numeric::numericTypeFloat;
-Numeric::Type numeric_type_float_array = Numeric::numericTypeFloatArray;
-Numeric::Type numeric_type_vec3 = Numeric::numericTypeVec3;
-Numeric::Type numeric_type_vec3_array = Numeric::numericTypeVec3Array;
-Numeric::Type numeric_type_col4 = Numeric::numericTypeCol4;
-Numeric::Type numeric_type_col4_array = Numeric::numericTypeCol4Array;
-Numeric::Type numeric_type_matrix44 = Numeric::numericTypeMatrix44;
-Numeric::Type numeric_type_matrix44_array = Numeric::numericTypeMatrix44Array;
+
+namespace{
+	Numeric::Type numeric_type_int = Numeric::numericTypeInt;
+	Numeric::Type numeric_type_int_array = Numeric::numericTypeIntArray;
+	Numeric::Type numeric_type_float = Numeric::numericTypeFloat;
+	Numeric::Type numeric_type_float_array = Numeric::numericTypeFloatArray;
+	Numeric::Type numeric_type_vec3 = Numeric::numericTypeVec3;
+	Numeric::Type numeric_type_vec3_array = Numeric::numericTypeVec3Array;
+	Numeric::Type numeric_type_col4 = Numeric::numericTypeCol4;
+	Numeric::Type numeric_type_col4_array = Numeric::numericTypeCol4Array;
+	Numeric::Type numeric_type_matrix44 = Numeric::numericTypeMatrix44;
+	Numeric::Type numeric_type_matrix44_array = Numeric::numericTypeMatrix44Array;
+
+	template<class type>
+	unsigned int getSliceInBounds(std::vector<std::vector<type> > &vec, unsigned int slice){
+		unsigned int size = vec.size();
+		if(slice >= size){
+			return size - 1;
+		}
+
+		return 0;
+	}
+}
 
 #define DEFINE_NUMERIC_OPERATION(operation, typeA, typeB) \
-	void NumericOperation::operation_##operation##_##typeA##_##typeB##_array_to_array(Numeric *operandA, Numeric *operandB, Numeric *result){ \
-		numericOperation_##operation##ArrayToArray<typeA, typeB>(operandA->_##typeA##Values, operandB->_##typeB##Values, result->_##typeA##Values); \
-		result->_size = result->_##typeA##Values.size(); \
+	void NumericOperation::operation_##operation##_##typeA##_##typeB##_array_to_array(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice){ \
+		unsigned int sliceA = getSliceInBounds<typeA>(operandA->_##typeA##ValuesSliced, slice); \
+		unsigned int sliceB = getSliceInBounds<typeB>(operandB->_##typeB##ValuesSliced, slice); \
+		numericOperation_##operation##ArrayToArray<typeA, typeB>(operandA->_##typeA##ValuesSliced[sliceA], operandB->_##typeB##ValuesSliced[sliceB], result->_##typeA##ValuesSliced[slice]); \
 	} \
-	void NumericOperation::operation_##operation##_##typeA##_##typeB##_single_to_array(Numeric *operandA, Numeric *operandB, Numeric *result){ \
-		numericOperation_##operation##SingleToArray<typeA, typeB>(operandA->_##typeA##Values, operandB->_##typeB##Values, result->_##typeA##Values); \
-		result->_size = result->_##typeA##Values.size(); \
+	void NumericOperation::operation_##operation##_##typeA##_##typeB##_single_to_array(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice){ \
+		unsigned int sliceA = getSliceInBounds<typeA>(operandA->_##typeA##ValuesSliced, slice); \
+		unsigned int sliceB = getSliceInBounds<typeB>(operandB->_##typeB##ValuesSliced, slice); \
+		numericOperation_##operation##SingleToArray<typeA, typeB>(operandA->_##typeA##ValuesSliced[sliceA], operandB->_##typeB##ValuesSliced[sliceB], result->_##typeA##ValuesSliced[slice]); \
 	} \
-	void NumericOperation::operation_##operation##_##typeA##_##typeB##_array_to_single(Numeric *operandA, Numeric *operandB, Numeric *result){ \
-		numericOperation_##operation##ArrayToSingle<typeA, typeB>(operandA->_##typeA##Values, operandB->_##typeB##Values, result->_##typeA##Values); \
-		result->_size = result->_##typeA##Values.size(); \
+	void NumericOperation::operation_##operation##_##typeA##_##typeB##_array_to_single(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice){ \
+		unsigned int sliceA = getSliceInBounds<typeA>(operandA->_##typeA##ValuesSliced, slice); \
+		unsigned int sliceB = getSliceInBounds<typeB>(operandB->_##typeB##ValuesSliced, slice); \
+		numericOperation_##operation##ArrayToSingle<typeA, typeB>(operandA->_##typeA##ValuesSliced[sliceA], operandB->_##typeB##ValuesSliced[sliceB], result->_##typeA##ValuesSliced[slice]); \
 	} \
 
 #define DEFINE_PASSTRHOUGH_OPERATION(type) \
-	void NumericOperation::operation_##type##_passThrough(Numeric *operandA, Numeric *operandB, Numeric *result){ \
-		numericOperation_passThrough<type>(operandA->_##type##Values, result->_##type##Values); \
-		result->_size = result->_##type##Values.size(); \
+	void NumericOperation::operation_##type##_passThrough(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice){ \
+		unsigned int sliceA = getSliceInBounds<type>(operandA->_##type##ValuesSliced, slice); \
+		numericOperation_passThrough<type>(operandA->_##type##ValuesSliced[sliceA], result->_##type##ValuesSliced[slice]); \
 	} \
 
 #define SELECT_NUMERIC_OPERATION(operation, typeNameA, typeNameB) \
@@ -191,9 +207,9 @@ void NumericOperation::selectOperands(Numeric::Type typeA, Numeric::Type typeB){
 	}
 }
 
-void NumericOperation::executeSelectedOperation(Numeric *operandA, Numeric *operandB, Numeric *out){
+void NumericOperation::executeSelectedOperation(Numeric *operandA, Numeric *operandB, Numeric *out, unsigned int slice){
 	if(_selectedOperation){
-		(this->*_selectedOperation)(operandA, operandB, out);
+		(this->*_selectedOperation)(operandA, operandB, out, slice);
 	}
 }
 

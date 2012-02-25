@@ -76,6 +76,9 @@ public:
 	bool allowDynamicAttributes();
 	void enableSpecializationPreset(const std::string &preset);
 	std::string enabledSpecializationPreset();
+
+	//! indicates if this node will be sliced for parallel execution when inside a loop node.
+	bool sliceable();
 	
 	//!returns all the available presets for this node.
 	std::vector<std::string> specializationPresets();
@@ -86,7 +89,7 @@ public:
 	//! Returns a python script to recreate all the nodes contained within this node.
 	//! This method will invoke the asScript() virtual method for each contained node, in order to recreate the content of this node.
 	std::string contentAsScript();
-	
+
 	//! The default implementation of this method will return the python code needed to create this node,
 	//! you should reimplement this if you need a more complex script to recreate this node.
 	virtual std::string asScript();
@@ -104,6 +107,7 @@ public:
 	virtual std::string debugInfo();
 	virtual void addDynamicAttribute(Attribute *attribute);
 	virtual void removeDynamicAttribute(Attribute *attribute);
+	virtual void updateSlice(Attribute *attribute, unsigned int slice);
 
 	static void(*_addNodeCallback)(Node *self, Node *node);
 	static void(*_removeNodeCallback)(Node *self, Node *node);
@@ -125,6 +129,18 @@ protected:
 	void updateAttributeSpecialization(Attribute *attribute);
 	void setSpecializationPreset(const std::string &presetName, Attribute *attribute, const std::string &specialization);
 	void catchAttributeDirtied(Attribute *attribute, bool value = true);
+	
+	//! Indicates if this node will be sliced for parallel execution when inside a loop node.
+	//! Nodes without input attributes should be set to non sliceable because their product doesn't change from one iteration to the other. 
+	void setSliceable(bool value);
+
+	//! Loop nodes such as the ForLoop node are marked as setIsSlicer(true) and they compute a slicing count for their children nodes by overriding the 
+	//! virtual method unsigned int computeSlices().
+	void setIsSlicer(bool value);
+
+	//! This method should be reimplemented by slicer nodes such as the ForLoop node, 
+	//! every node contained by a slicer node will ask its slicer parent node for the number of slices before to start computing.
+	virtual unsigned int computeSlices();
 
 private:
 	friend class NodeAccessor;
@@ -136,6 +152,7 @@ private:
 	void doUpdate(Attribute *attribute);
 	std::string attrsVectorToStr(const std::vector<Attribute*> &vec);
 	void _attributeConnectionChanged(Attribute *attribute);
+	Node *findParentSlicer();
 
 	std::vector<Attribute*> _outputAttributes;
 	std::vector<Attribute*> _inputAttributes;
@@ -151,6 +168,10 @@ private:
 	bool _allowDynamicAttributes;
 	bool _constructorDone;
 	std::string _specializationPreset;
+	unsigned int _slices;
+	bool _isSlicer;
+	Node *_slicer;
+	bool _sliceable;
 
 	Node();
 	Node(const Node &other);

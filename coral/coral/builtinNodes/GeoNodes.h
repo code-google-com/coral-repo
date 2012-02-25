@@ -43,7 +43,7 @@ namespace coral
 class GetGeoElements: public Node{
 public:
 	GetGeoElements(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	EnumAttribute *_context;
@@ -64,7 +64,7 @@ private:
 class GetGeoSubElements: public Node{
 public:
 	GetGeoSubElements(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	EnumAttribute *_context;
@@ -84,7 +84,7 @@ private:
 class GetGeoPoints: public Node{
 public:
 	GetGeoPoints(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	GeoAttribute *_geo;
@@ -94,7 +94,7 @@ private:
 class SetGeoPoints: public Node{
 public:
 	SetGeoPoints(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	GeoAttribute *_inGeo;
@@ -105,7 +105,7 @@ private:
 class GetGeoNormals: public Node{
 public:
 	GetGeoNormals(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	GeoAttribute *_geo;
@@ -115,7 +115,7 @@ private:
 class GeoNeighbourPoints: public Node{
 public:
 	GeoNeighbourPoints(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	GeoAttribute *_geo;

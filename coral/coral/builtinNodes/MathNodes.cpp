@@ -91,8 +91,8 @@ void Vec3Length::updateSpecializationLink(Attribute *attributeA, Attribute *attr
 	}
 }
 
-void Vec3Length::update(Attribute *attribute){
-	std::vector<Imath::V3f> vectorValues = _vector->value()->vec3Values();
+void Vec3Length::updateSlice(Attribute *attribute, unsigned int slice){
+	std::vector<Imath::V3f> vectorValues = _vector->value()->vec3ValuesSlice(slice);
 	unsigned int vectorValuesSize = vectorValues.size();
 	
 	std::vector<float> lengthValues(vectorValuesSize);
@@ -101,7 +101,7 @@ void Vec3Length::update(Attribute *attribute){
 		lengthValues[i] = vectorValues[i].length();
 	}
 	
-	_length->outValue()->setFloatValues(lengthValues);
+	_length->outValue()->setFloatValuesSlice(slice, lengthValues);
 }
 
 Matrix44Inverse::Matrix44Inverse(const std::string &name, Node *parent): Node(name, parent){	
@@ -123,15 +123,15 @@ Matrix44Inverse::Matrix44Inverse(const std::string &name, Node *parent): Node(na
 	addAttributeSpecializationLink(_inMatrix, _outMatrix);
 }
 
-void Matrix44Inverse::update(Attribute *attribute){
-	std::vector<Imath::M44f> inMatrixValues = _inMatrix->value()->matrix44Values();
+void Matrix44Inverse::updateSlice(Attribute *attribute, unsigned int slice){
+	std::vector<Imath::M44f> inMatrixValues = _inMatrix->value()->matrix44ValuesSlice(slice);
 	
 	std::vector<Imath::M44f> outMatrixValues(inMatrixValues.size());
 	for(int i = 0; i < inMatrixValues.size() ;++i){
 		outMatrixValues[i] = inMatrixValues[i].inverse();
 	}
 	
-	_outMatrix->outValue()->setMatrix44Values(outMatrixValues);
+	_outMatrix->outValue()->setMatrix44ValuesSlice(slice, outMatrixValues);
 }
 
 Abs::Abs(const std::string &name, Node *parent): 
@@ -171,31 +171,31 @@ void Abs::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void Abs::abs_int(Numeric *inNumber, Numeric *outNumber){
-	std::vector<int> inValues = inNumber->intValues();
+void Abs::abs_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<int> inValues = inNumber->intValuesSlice(slice);
 	std::vector<int> outValues(inValues.size());
 	
 	for(int i = 0; i < inValues.size(); ++i){
 		outValues[i] = abs(inValues[i]);
 	}
 	
-	outNumber->setIntValues(outValues);
+	outNumber->setIntValuesSlice(slice, outValues);
 }
 
-void Abs::abs_float(Numeric *inNumber, Numeric *outNumber){
-	std::vector<float> inValues = inNumber->floatValues();
+void Abs::abs_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<float> inValues = inNumber->floatValuesSlice(slice);
 	std::vector<float> outValues(inValues.size());
 	
 	for(int i = 0; i < inValues.size(); ++i){
 		outValues[i] = fabs(inValues[i]);
 	}
 	
-	outNumber->setFloatValues(outValues);
+	outNumber->setFloatValuesSlice(slice, outValues);
 }
 
-void Abs::update(Attribute *attribute){
+void Abs::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
-		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
+		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue(), slice);
 	}
 }
 
@@ -222,9 +222,9 @@ Vec3Cross::Vec3Cross(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_vector1, _crossProduct);
 }
 
-void Vec3Cross::update(Attribute *attribute){
-	const std::vector<Imath::V3f> &vector0 = _vector0->value()->vec3Values();
-	const std::vector<Imath::V3f> &vector1 = _vector1->value()->vec3Values();
+void Vec3Cross::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::V3f> &vector0 = _vector0->value()->vec3ValuesSlice(slice);
+	const std::vector<Imath::V3f> &vector1 = _vector1->value()->vec3ValuesSlice(slice);
 	
 	int size0 = vector0.size();
 	int size1 = vector1.size();
@@ -240,7 +240,7 @@ void Vec3Cross::update(Attribute *attribute){
 		crossedValues[i] = vector0[i].cross(vector1[i]);
 	}
 	
-	_crossProduct->outValue()->setVec3Values(crossedValues);
+	_crossProduct->outValue()->setVec3ValuesSlice(slice, crossedValues);
 }
 
 Vec3Dot::Vec3Dot(const std::string &name, Node *parent): Node(name, parent){
@@ -299,9 +299,9 @@ void Vec3Dot::updateSpecializationLink(Attribute *attributeA, Attribute *attribu
 	}
 }
 
-void Vec3Dot::update(Attribute *attribute){
-	const std::vector<Imath::V3f> &vector0 = _vector0->value()->vec3Values();
-	const std::vector<Imath::V3f> &vector1 = _vector1->value()->vec3Values();
+void Vec3Dot::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::V3f> &vector0 = _vector0->value()->vec3ValuesSlice(slice);
+	const std::vector<Imath::V3f> &vector1 = _vector1->value()->vec3ValuesSlice(slice);
 
 	int size0 = vector0.size();
 	int size1 = vector1.size();
@@ -317,7 +317,7 @@ void Vec3Dot::update(Attribute *attribute){
 		dotValues[i] = vector0[i].dot(vector1[i]);
 	}
 
-	_dotProduct->outValue()->setFloatValues(dotValues);
+	_dotProduct->outValue()->setFloatValuesSlice(slice, dotValues);
 }
 
 Vec3Normalize::Vec3Normalize(const std::string &name, Node *parent): Node(name, parent){
@@ -338,8 +338,8 @@ Vec3Normalize::Vec3Normalize(const std::string &name, Node *parent): Node(name, 
 	addAttributeSpecializationLink(_vector, _normalized);
 }
 
-void Vec3Normalize::update(Attribute *attribute){
-	const std::vector<Imath::V3f> &vector = _vector->value()->vec3Values();
+void Vec3Normalize::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::V3f> &vector = _vector->value()->vec3ValuesSlice(slice);
 	int size = vector.size();
 	
 	std::vector<Imath::V3f> normalizedValues(size);
@@ -347,7 +347,7 @@ void Vec3Normalize::update(Attribute *attribute){
 		normalizedValues[i] = vector[i].normalized();
 	}
 	
-	_normalized->outValue()->setVec3Values(normalizedValues);
+	_normalized->outValue()->setVec3ValuesSlice(slice, normalizedValues);
 }
 
 TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *parent):
@@ -388,8 +388,8 @@ TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *pa
 	func->addEntry(8, "tanh");
 }
 
-void TrigonometricFunctions::update(Attribute *attribute){
-	std::vector<float> inValues = _inNumber->value()->floatValues();
+void TrigonometricFunctions::updateSlice(Attribute *attribute, unsigned int slice){
+	std::vector<float> inValues = _inNumber->value()->floatValuesSlice(slice);
 	int inFunction = _function->value()->currentIndex();
 	std::vector<float> outValues(inValues.size());
 
@@ -426,7 +426,7 @@ void TrigonometricFunctions::update(Attribute *attribute){
 		}
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Radians::Radians(const std::string &name, Node *parent): Node(name, parent){
@@ -447,8 +447,8 @@ Radians::Radians(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Radians::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Radians::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -456,7 +456,7 @@ void Radians::update(Attribute *attribute){
 		outValues[i] = in[i]*M_PI/180.0f;
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Degrees::Degrees(const std::string &name, Node *parent): Node(name, parent){
@@ -477,8 +477,8 @@ Degrees::Degrees(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Degrees::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Degrees::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -486,7 +486,7 @@ void Degrees::update(Attribute *attribute){
 		outValues[i] = in[i]*180.0f/float(M_PI);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Floor::Floor(const std::string &name, Node *parent): Node(name, parent){
@@ -507,8 +507,8 @@ Floor::Floor(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Floor::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Floor::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -516,7 +516,7 @@ void Floor::update(Attribute *attribute){
 		outValues[i] = std::floor(in[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Ceil::Ceil(const std::string &name, Node *parent): Node(name, parent){
@@ -537,8 +537,8 @@ Ceil::Ceil(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Ceil::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Ceil::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -546,7 +546,7 @@ void Ceil::update(Attribute *attribute){
 		outValues[i] = std::ceil(in[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Round::Round(const std::string &name, Node *parent): Node(name, parent){
@@ -567,8 +567,8 @@ Round::Round(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Round::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Round::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -576,7 +576,7 @@ void Round::update(Attribute *attribute){
 		outValues[i] = std::floor(in[i]+0.5);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Exp::Exp(const std::string &name, Node *parent): Node(name, parent){
@@ -597,8 +597,8 @@ Exp::Exp(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Exp::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Exp::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -606,7 +606,7 @@ void Exp::update(Attribute *attribute){
 		outValues[i] = std::exp(in[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Log::Log(const std::string &name, Node *parent): Node(name, parent){
@@ -627,8 +627,8 @@ Log::Log(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Log::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Log::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -636,7 +636,7 @@ void Log::update(Attribute *attribute){
 		outValues[i] = std::log(in[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Log10::Log10(const std::string &name, Node *parent): Node(name, parent){
@@ -657,8 +657,8 @@ Log10::Log10(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Log10::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Log10::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -666,7 +666,7 @@ void Log10::update(Attribute *attribute){
 		outValues[i] = std::log(in[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Pow::Pow(const std::string &name, Node *parent): Node(name, parent){
@@ -692,9 +692,9 @@ Pow::Pow(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_exponent, _outNumber);
 }
 
-void Pow::update(Attribute *attribute){
-	const std::vector<float> &base = _base->value()->floatValues();
-	const std::vector<float> &exponent = _exponent->value()->floatValues();
+void Pow::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &base = _base->value()->floatValuesSlice(slice);
+	const std::vector<float> &exponent = _exponent->value()->floatValuesSlice(slice);
 	int size = base.size();
 
 	std::vector<float> outValues(size);
@@ -702,7 +702,7 @@ void Pow::update(Attribute *attribute){
 		outValues[i] = std::pow(base[i],exponent[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Sqrt::Sqrt(const std::string &name, Node *parent): Node(name, parent){
@@ -723,8 +723,8 @@ Sqrt::Sqrt(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumber, _outNumber);
 }
 
-void Sqrt::update(Attribute *attribute){
-	const std::vector<float> &in = _inNumber->value()->floatValues();
+void Sqrt::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
 	int size = in.size();
 
 	std::vector<float> outValues(size);
@@ -732,7 +732,7 @@ void Sqrt::update(Attribute *attribute){
 		outValues[i] = std::sqrt(in[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Atan2::Atan2(const std::string &name, Node *parent): Node(name, parent){
@@ -758,9 +758,9 @@ Atan2::Atan2(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_inNumberX, _outNumber);
 }
 
-void Atan2::update(Attribute *attribute){
-	const std::vector<float> &y = _inNumberY->value()->floatValues();
-	const std::vector<float> &x = _inNumberX->value()->floatValues();
+void Atan2::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<float> &y = _inNumberY->value()->floatValuesSlice(slice);
+	const std::vector<float> &x = _inNumberX->value()->floatValuesSlice(slice);
 	int size = y.size();
 
 	std::vector<float> outValues(size);
@@ -768,7 +768,7 @@ void Atan2::update(Attribute *attribute){
 		outValues[i] = std::atan2(y[i],x[i]);
 	}
 
-	_outNumber->outValue()->setFloatValues(outValues);
+	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
 Min::Min(const std::string &name, Node *parent):
@@ -810,8 +810,8 @@ void Min::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void Min::min_int(Numeric *inNumber, Numeric *outNumber){
-	std::vector<int> inValues = inNumber->intValues();
+void Min::min_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<int> inValues = inNumber->intValuesSlice(slice);
 	std::vector<int> outValues(1);
 
 	int min = std::numeric_limits<int>::max();
@@ -820,11 +820,11 @@ void Min::min_int(Numeric *inNumber, Numeric *outNumber){
 	}
 	outValues[0] = min;
 
-	outNumber->setIntValues(outValues);
+	outNumber->setIntValuesSlice(slice, outValues);
 }
 
-void Min::min_float(Numeric *inNumber, Numeric *outNumber){
-	std::vector<float> inValues = inNumber->floatValues();
+void Min::min_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<float> inValues = inNumber->floatValuesSlice(slice);
 	std::vector<float> outValue(1);
 
 	float min = std::numeric_limits<float>::max();
@@ -833,12 +833,12 @@ void Min::min_float(Numeric *inNumber, Numeric *outNumber){
 	}
 	outValue[0] = min;
 
-	outNumber->setFloatValues(outValue);
+	outNumber->setFloatValuesSlice(slice, outValue);
 }
 
-void Min::update(Attribute *attribute){
+void Min::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
-		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
+		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue(), slice);
 	}
 }
 
@@ -909,8 +909,8 @@ void Max::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void Max::max_int(Numeric *inNumber, Numeric *outNumber){
-	std::vector<int> inValues = inNumber->intValues();
+void Max::max_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<int> inValues = inNumber->intValuesSlice(slice);
 	std::vector<int> outValues(1);
 
 	int max = std::numeric_limits<int>::min();
@@ -919,11 +919,11 @@ void Max::max_int(Numeric *inNumber, Numeric *outNumber){
 	}
 	outValues[0] = max;
 
-	outNumber->setIntValues(outValues);
+	outNumber->setIntValuesSlice(slice, outValues);
 }
 
-void Max::max_float(Numeric *inNumber, Numeric *outNumber){
-	std::vector<float> inValues = inNumber->floatValues();
+void Max::max_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<float> inValues = inNumber->floatValuesSlice(slice);
 	std::vector<float> outValue(1);
 
 	float max = std::numeric_limits<float>::min();
@@ -932,12 +932,12 @@ void Max::max_float(Numeric *inNumber, Numeric *outNumber){
 	}
 	outValue[0] = max;
 
-	outNumber->setFloatValues(outValue);
+	outNumber->setFloatValuesSlice(slice, outValue);
 }
 
-void Max::update(Attribute *attribute){
+void Max::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
-		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
+		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue(), slice);
 	}
 }
 
@@ -1013,8 +1013,8 @@ void Average::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void Average::average_int(Numeric *inNumber, Numeric *outNumber){
-	std::vector<int> inValues = inNumber->intValues();
+void Average::average_int(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<int> inValues = inNumber->intValuesSlice(slice);
 	std::vector<int> outValues(1);
 
 	int av = 0;
@@ -1023,11 +1023,11 @@ void Average::average_int(Numeric *inNumber, Numeric *outNumber){
 	}
 	outValues[0] = int(av/inValues.size());
 
-	outNumber->setIntValues(outValues);
+	outNumber->setIntValuesSlice(slice, outValues);
 }
 
-void Average::average_float(Numeric *inNumber, Numeric *outNumber){
-	std::vector<float> inValues = inNumber->floatValues();
+void Average::average_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<float> inValues = inNumber->floatValuesSlice(slice);
 	std::vector<float> outValue(1);
 
 	float av = 0;
@@ -1036,11 +1036,11 @@ void Average::average_float(Numeric *inNumber, Numeric *outNumber){
 	}
 	outValue[0] = av/inValues.size();
 
-	outNumber->setFloatValues(outValue);
+	outNumber->setFloatValuesSlice(slice, outValue);
 }
 
-void Average::average_vec3(Numeric *inNumber, Numeric *outNumber){
-	std::vector<Imath::V3f> inValues = inNumber->vec3Values();
+void Average::average_vec3(Numeric *inNumber, Numeric *outNumber, unsigned int slice){
+	std::vector<Imath::V3f> inValues = inNumber->vec3ValuesSlice(slice);
 	std::vector<Imath::V3f> outValue(1);
 
 	Imath::V3f av(0.0,0.0,0.0);
@@ -1049,12 +1049,12 @@ void Average::average_vec3(Numeric *inNumber, Numeric *outNumber){
 	}
 	outValue[0] = av/float(inValues.size());
 
-	outNumber->setVec3Values(outValue);
+	outNumber->setVec3ValuesSlice(slice, outValue);
 }
 
-void Average::update(Attribute *attribute){
+void Average::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
-		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue());
+		(this->*_selectedOperation)(_inNumber->value(), _outNumber->outValue(), slice);
 	}
 }
 
@@ -1203,10 +1203,10 @@ void Slerp::updateSpecializationLink(Attribute *attributeA, Attribute *attribute
 	}
 }
 
-void Slerp::update(Attribute *attribute){
-	const std::vector<Imath::Quatf> &q1 = _inQuat1->value()->quatValues();
-	const std::vector<Imath::Quatf> &q2 = _inQuat2->value()->quatValues();
-	const std::vector<float> &t = _param->value()->floatValues();
+void Slerp::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::Quatf> &q1 = _inQuat1->value()->quatValuesSlice(slice);
+	const std::vector<Imath::Quatf> &q2 = _inQuat2->value()->quatValuesSlice(slice);
+	const std::vector<float> &t = _param->value()->floatValuesSlice(slice);
 	int size = q1.size();
 	size = (q2.size()<size)?q2.size():size;
 	size = (t.size()<size)?t.size():size;
@@ -1242,9 +1242,9 @@ QuatMultiply::QuatMultiply(const std::string &name, Node *parent): Node(name, pa
 	addAttributeSpecializationLink(_quat1, _outQuat);
 }
 
-void QuatMultiply::update(Attribute *attribute){
-	const std::vector<Imath::Quatf> &q0 = _quat0->value()->quatValues();
-	const std::vector<Imath::Quatf> &q1 = _quat1->value()->quatValues();
+void QuatMultiply::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::Quatf> &q0 = _quat0->value()->quatValuesSlice(slice);
+	const std::vector<Imath::Quatf> &q1 = _quat1->value()->quatValuesSlice(slice);
 
 	int size0 = q0.size();
 	int size1 = q1.size();
@@ -1281,8 +1281,8 @@ QuatNormalize::QuatNormalize(const std::string &name, Node *parent): Node(name, 
 	addAttributeSpecializationLink(_quat0, _normalized);
 }
 
-void QuatNormalize::update(Attribute *attribute){
-	const std::vector<Imath::Quatf> &q = _quat0->value()->quatValues();
+void QuatNormalize::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::Quatf> &q = _quat0->value()->quatValuesSlice(slice);
 	int size = q.size();
 
 	std::vector<Imath::Quatf> normalizedValues(size);

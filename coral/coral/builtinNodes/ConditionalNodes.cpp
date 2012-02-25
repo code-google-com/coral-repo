@@ -178,88 +178,88 @@ void IfGreaterThan::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void IfGreaterThan::intGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfGreaterThan::intGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_greaterThan_arrayToArray<int, int>(in0->intValues(), in1->intValues(), minorSize, out);
+	conditionalOperation_greaterThan_arrayToArray<int, int>(in0->intValuesSlice(slice), in1->intValuesSlice(slice), minorSize, out);
 }
 
-void IfGreaterThan::intGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfGreaterThan::intGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_greaterThan_arrayToArray<int, float>(in0->intValues(), in1->floatValues(), minorSize, out);
+	conditionalOperation_greaterThan_arrayToArray<int, float>(in0->intValuesSlice(slice), in1->floatValuesSlice(slice), minorSize, out);
 }
 
-void IfGreaterThan::floatGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfGreaterThan::floatGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_greaterThan_arrayToArray<float, float>(in0->floatValues(), in1->floatValues(), minorSize, out);
+	conditionalOperation_greaterThan_arrayToArray<float, float>(in0->floatValuesSlice(slice), in1->floatValuesSlice(slice), minorSize, out);
 }
 
-void IfGreaterThan::floatGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfGreaterThan::floatGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_greaterThan_arrayToArray<float, int>(in0->floatValues(), in1->intValues(), minorSize, out);
+	conditionalOperation_greaterThan_arrayToArray<float, int>(in0->floatValuesSlice(slice), in1->intValuesSlice(slice), minorSize, out);
 }
 
-void IfGreaterThan::intGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfGreaterThan::intGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_greaterThan_arrayToSingle<int, int>(in0->intValues(), in1->intValueAt(0), size, out);
+	conditionalOperation_greaterThan_arrayToSingle<int, int>(in0->intValuesSlice(slice), in1->intValueAtSlice(slice, 0), size, out);
 }
 
-void IfGreaterThan::intGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfGreaterThan::intGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_greaterThan_arrayToSingle<int, float>(in0->intValues(), in1->floatValueAt(0), size, out);
+	conditionalOperation_greaterThan_arrayToSingle<int, float>(in0->intValuesSlice(slice), in1->floatValueAtSlice(slice, 0), size, out);
 }
 
-void IfGreaterThan::floatGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfGreaterThan::floatGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_greaterThan_arrayToSingle<float, float>(in0->floatValues(), in1->floatValueAt(0), size, out);
+	conditionalOperation_greaterThan_arrayToSingle<float, float>(in0->floatValuesSlice(slice), in1->floatValueAtSlice(slice, 0), size, out);
 }
 
-void IfGreaterThan::floatGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfGreaterThan::floatGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_greaterThan_arrayToSingle<float, int>(in0->floatValues(), in1->intValueAt(0), size, out);
+	conditionalOperation_greaterThan_arrayToSingle<float, int>(in0->floatValuesSlice(slice), in1->intValueAtSlice(slice, 0), size, out);
 }
 
-void IfGreaterThan::intGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfGreaterThan::intGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_greaterThan_singleToArray<int, int>(in0->intValueAt(0), in1->intValues(), out);
+	conditionalOperation_greaterThan_singleToArray<int, int>(in0->intValueAtSlice(slice, 0), in1->intValuesSlice(slice), out);
 }
 
-void IfGreaterThan::intGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfGreaterThan::intGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_greaterThan_singleToArray<int, float>(in0->intValueAt(0), in1->floatValues(), out);
+	conditionalOperation_greaterThan_singleToArray<int, float>(in0->intValueAtSlice(slice, 0), in1->floatValuesSlice(slice), out);
 }
 
-void IfGreaterThan::floatGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfGreaterThan::floatGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_greaterThan_singleToArray<float, float>(in0->floatValueAt(0), in1->floatValues(), out);
+	conditionalOperation_greaterThan_singleToArray<float, float>(in0->floatValueAtSlice(slice, 0), in1->floatValuesSlice(slice), out);
 }
 
-void IfGreaterThan::floatGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfGreaterThan::floatGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_greaterThan_singleToArray<float, int>(in0->floatValueAt(0), in1->intValues(), out);
+	conditionalOperation_greaterThan_singleToArray<float, int>(in0->floatValueAtSlice(slice, 0), in1->intValuesSlice(slice), out);
 }
 
-void IfGreaterThan::update(Attribute *attribute){
+void IfGreaterThan::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Numeric *in0 = _in0->value();
 		Numeric *in1 = _in1->value();
 	
 		std::vector<bool> outValues;
 		
-		(this->*_selectedOperation)(in0, in1, outValues);
+		(this->*_selectedOperation)(in0, in1, outValues, slice);
 		
-		_out->outValue()->setBoolValues(outValues);
+		_out->outValue()->setBoolValuesSlice(slice, outValues);
 	}
 	else{
 		setAttributeIsClean(_out, false);
@@ -303,76 +303,76 @@ void IfLessThan::updateSpecializationLink(Attribute *attributeA, Attribute *attr
 	greaterOrLessUpdateSpecializationLink(attributeA, attributeB, specializationA, specializationB);
 }
 
-void IfLessThan::intLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfLessThan::intLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_lessThan_arrayToArray<int, int>(in0->intValues(), in1->intValues(), minorSize, out);
+	conditionalOperation_lessThan_arrayToArray<int, int>(in0->intValuesSlice(slice), in1->intValuesSlice(slice), minorSize, out);
 }
 
-void IfLessThan::intLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfLessThan::intLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_lessThan_arrayToArray<int, float>(in0->intValues(), in1->floatValues(), minorSize, out);
+	conditionalOperation_lessThan_arrayToArray<int, float>(in0->intValuesSlice(slice), in1->floatValuesSlice(slice), minorSize, out);
 }
 
-void IfLessThan::floatLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfLessThan::floatLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_lessThan_arrayToArray<float, float>(in0->floatValues(), in1->floatValues(), minorSize, out);
+	conditionalOperation_lessThan_arrayToArray<float, float>(in0->floatValuesSlice(slice), in1->floatValuesSlice(slice), minorSize, out);
 }
 
-void IfLessThan::floatLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int sizes[] = {in0->size(), in1->size()};
+void IfLessThan::floatLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int sizes[] = {in0->sizeSlice(slice), in1->sizeSlice(slice)};
 	int minorSize = mathUtils::findMinorInt(sizes, 2);
 	out.resize(minorSize);
-	conditionalOperation_lessThan_arrayToArray<float, int>(in0->floatValues(), in1->intValues(), minorSize, out);
+	conditionalOperation_lessThan_arrayToArray<float, int>(in0->floatValuesSlice(slice), in1->intValuesSlice(slice), minorSize, out);
 }
 
-void IfLessThan::intLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfLessThan::intLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_lessThan_arrayToSingle<int, int>(in0->intValues(), in1->intValueAt(0), size, out);
+	conditionalOperation_lessThan_arrayToSingle<int, int>(in0->intValuesSlice(slice), in1->intValueAtSlice(slice, 0), size, out);
 }
 
-void IfLessThan::intLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfLessThan::intLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_lessThan_arrayToSingle<int, float>(in0->intValues(), in1->floatValueAt(0), size, out);
+	conditionalOperation_lessThan_arrayToSingle<int, float>(in0->intValuesSlice(slice), in1->floatValueAtSlice(slice, 0), size, out);
 }
 
-void IfLessThan::floatLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfLessThan::floatLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_lessThan_arrayToSingle<float, float>(in0->floatValues(), in1->floatValueAt(0), size, out);
+	conditionalOperation_lessThan_arrayToSingle<float, float>(in0->floatValuesSlice(slice), in1->floatValueAtSlice(slice, 0), size, out);
 }
 
-void IfLessThan::floatLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out){
-	int size = in0->size();
+void IfLessThan::floatLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
+	int size = in0->sizeSlice(slice);
 	out.resize(size);
-	conditionalOperation_lessThan_arrayToSingle<float, int>(in0->floatValues(), in1->intValueAt(0), size, out);
+	conditionalOperation_lessThan_arrayToSingle<float, int>(in0->floatValuesSlice(slice), in1->intValueAtSlice(slice, 0), size, out);
 }
 
-void IfLessThan::intLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfLessThan::intLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_lessThan_singleToArray<int, int>(in0->intValueAt(0), in1->intValues(), out);
+	conditionalOperation_lessThan_singleToArray<int, int>(in0->intValueAtSlice(slice, 0), in1->intValuesSlice(slice), out);
 }
 
-void IfLessThan::intLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfLessThan::intLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_lessThan_singleToArray<int, float>(in0->intValueAt(0), in1->floatValues(), out);
+	conditionalOperation_lessThan_singleToArray<int, float>(in0->intValueAtSlice(slice, 0), in1->floatValuesSlice(slice), out);
 }
 
-void IfLessThan::floatLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfLessThan::floatLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_lessThan_singleToArray<float, float>(in0->floatValueAt(0), in1->floatValues(), out);
+	conditionalOperation_lessThan_singleToArray<float, float>(in0->floatValueAtSlice(slice, 0), in1->floatValuesSlice(slice), out);
 }
 
-void IfLessThan::floatLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out){
+void IfLessThan::floatLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice){
 	out.resize(1);
-	conditionalOperation_lessThan_singleToArray<float, int>(in0->floatValueAt(0), in1->intValues(), out);
+	conditionalOperation_lessThan_singleToArray<float, int>(in0->floatValueAtSlice(slice, 0), in1->intValuesSlice(slice), out);
 }
 
 void IfLessThan::attributeSpecializationChanged(Attribute *attribute){
@@ -428,16 +428,16 @@ void IfLessThan::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void IfLessThan::update(Attribute *attribute){
+void IfLessThan::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Numeric *in0 = _in0->value();
 		Numeric *in1 = _in1->value();
-	
+		
 		std::vector<bool> outValues;
 		
-		(this->*_selectedOperation)(in0, in1, outValues);
+		(this->*_selectedOperation)(in0, in1, outValues, slice);
 		
-		_out->outValue()->setBoolValues(outValues);
+		_out->outValue()->setBoolValuesSlice(slice, outValues);
 	}
 	else{
 		setAttributeIsClean(_out, false);
@@ -502,64 +502,64 @@ void ConditionalValue::updateSpecializationLink(Attribute *attributeA, Attribute
 	}
 }
 
-void ConditionalValue::transferValuesInt(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesInt(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<int> outValues;
-	conditionalValueTransfer<int>(condition->boolValueAt(0), ifTrue->intValues(), ifFalse->intValues(), outValues);
-	out->setIntValues(outValues);
+	conditionalValueTransfer<int>(condition->boolValueAtSlice(slice, 0), ifTrue->intValuesSlice(slice), ifFalse->intValuesSlice(slice), outValues);
+	out->setIntValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesFloat(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesFloat(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<float> outValues;
-	conditionalValueTransfer<float>(condition->boolValueAt(0), ifTrue->floatValues(), ifFalse->floatValues(), outValues);
-	out->setFloatValues(outValues);
+	conditionalValueTransfer<float>(condition->boolValueAtSlice(slice, 0), ifTrue->floatValuesSlice(slice), ifFalse->floatValuesSlice(slice), outValues);
+	out->setFloatValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesVec3(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesVec3(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<Imath::V3f> outValues;
-	conditionalValueTransfer<Imath::V3f>(condition->boolValueAt(0), ifTrue->vec3Values(), ifFalse->vec3Values(), outValues);
-	out->setVec3Values(outValues);
+	conditionalValueTransfer<Imath::V3f>(condition->boolValueAtSlice(slice, 0), ifTrue->vec3ValuesSlice(slice), ifFalse->vec3ValuesSlice(slice), outValues);
+	out->setVec3ValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesCol4(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesCol4(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<Imath::Color4f> outValues;
-	conditionalValueTransfer<Imath::Color4f>(condition->boolValueAt(0), ifTrue->col4Values(), ifFalse->col4Values(), outValues);
-	out->setCol4Values(outValues);
+	conditionalValueTransfer<Imath::Color4f>(condition->boolValueAtSlice(slice, 0), ifTrue->col4ValuesSlice(slice), ifFalse->col4ValuesSlice(slice), outValues);
+	out->setCol4ValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesMatrix44(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesMatrix44(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<Imath::M44f> outValues;
-	conditionalValueTransfer<Imath::M44f>(condition->boolValueAt(0), ifTrue->matrix44Values(), ifFalse->matrix44Values(), outValues);
-	out->setMatrix44Values(outValues);
+	conditionalValueTransfer<Imath::M44f>(condition->boolValueAtSlice(slice, 0), ifTrue->matrix44ValuesSlice(slice), ifFalse->matrix44ValuesSlice(slice), outValues);
+	out->setMatrix44ValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesIntBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesIntBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<int> outValues;
-	conditionalValueTransferBoolArray<int>(condition->boolValues(), ifTrue->intValues(), ifFalse->intValues(), outValues);
-	out->setIntValues(outValues);
+	conditionalValueTransferBoolArray<int>(condition->boolValuesSlice(slice), ifTrue->intValuesSlice(slice), ifFalse->intValuesSlice(slice), outValues);
+	out->setIntValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesFloatBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesFloatBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<float> outValues;
-	conditionalValueTransferBoolArray<float>(condition->boolValues(), ifTrue->floatValues(), ifFalse->floatValues(), outValues);
-	out->setFloatValues(outValues);
+	conditionalValueTransferBoolArray<float>(condition->boolValuesSlice(slice), ifTrue->floatValuesSlice(slice), ifFalse->floatValuesSlice(slice), outValues);
+	out->setFloatValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesVec3BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesVec3BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<Imath::V3f> outValues;
-	conditionalValueTransferBoolArray<Imath::V3f>(condition->boolValues(), ifTrue->vec3Values(), ifFalse->vec3Values(), outValues);
-	out->setVec3Values(outValues);
+	conditionalValueTransferBoolArray<Imath::V3f>(condition->boolValuesSlice(slice), ifTrue->vec3ValuesSlice(slice), ifFalse->vec3ValuesSlice(slice), outValues);
+	out->setVec3ValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesCol4BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesCol4BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<Imath::Color4f> outValues;
-	conditionalValueTransferBoolArray<Imath::Color4f>(condition->boolValues(), ifTrue->col4Values(), ifFalse->col4Values(), outValues);
-	out->setCol4Values(outValues);
+	conditionalValueTransferBoolArray<Imath::Color4f>(condition->boolValuesSlice(slice), ifTrue->col4ValuesSlice(slice), ifFalse->col4ValuesSlice(slice), outValues);
+	out->setCol4ValuesSlice(slice, outValues);
 }
 
-void ConditionalValue::transferValuesMatrix44BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out){
+void ConditionalValue::transferValuesMatrix44BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice){
 	std::vector<Imath::M44f> outValues;
-	conditionalValueTransferBoolArray<Imath::M44f>(condition->boolValues(), ifTrue->matrix44Values(), ifFalse->matrix44Values(), outValues);
-	out->setMatrix44Values(outValues);
+	conditionalValueTransferBoolArray<Imath::M44f>(condition->boolValuesSlice(slice), ifTrue->matrix44ValuesSlice(slice), ifFalse->matrix44ValuesSlice(slice), outValues);
+	out->setMatrix44ValuesSlice(slice, outValues);
 }
 
 void ConditionalValue::attributeSpecializationChanged(Attribute *attribute){
@@ -604,14 +604,14 @@ void ConditionalValue::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void ConditionalValue::update(Attribute *attribute){
+void ConditionalValue::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
 		Bool *condition = _condition->value();
 		Numeric *ifTrue = _ifTrue->value();
 		Numeric *ifFalse = _ifFalse->value();
 		Numeric *out = _out->outValue();
 	
-		(this->*_selectedOperation)(condition, ifTrue, ifFalse, out);
+		(this->*_selectedOperation)(condition, ifTrue, ifFalse, out, slice);
 	}
 	else{
 		setAttributeIsClean(_out, false);

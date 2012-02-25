@@ -62,7 +62,6 @@
 #include "loopNodesWrapper.h"
 #include "enumWrapper.h"
 #include "processSimulationNodeWrapper.h"
-#include "dagNodesWrapper.h"
 #include "deformerNodesWrapper.h"
 #include "../builtinNodes/KdNodes.h"
 
@@ -121,7 +120,6 @@ BOOST_PYTHON_MODULE(_coral)
 	coralIOWrapper();
 	enumWrapper();
 	processSimulationNodeWrapper();
-	dagNodesWrapper();
 	deformerNodesWrapper();
 	pythonWrapperUtils::pythonWrapper<FindPointsInRange, Node>("FindPointsInRange");
 	

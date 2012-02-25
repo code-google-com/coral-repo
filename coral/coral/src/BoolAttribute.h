@@ -50,10 +50,18 @@ public:
 	void resize(unsigned int size);
 	std::string asString();
 	void setFromString(const std::string &value);
-	
+
+	unsigned int sizeSlice(unsigned int slice);
+	void resizeSlices(unsigned int slices);
+	void setBoolValueAtSlice(unsigned int slice, unsigned int id, bool value);
+	bool boolValueAtSlice(unsigned int slice, unsigned int id);
+	void setBoolValuesSlice(unsigned int slice, const std::vector<bool> &values);
+	const std::vector<bool> &boolValuesSlice(unsigned int slice);
+
 private:
-	std::vector<bool> _boolValues;
+	std::vector<std::vector<bool> > _boolValuesSliced;
 	bool _isArray;
+	unsigned int _slices;
 };
 
 //! Wraps the Bool value in an attribute.

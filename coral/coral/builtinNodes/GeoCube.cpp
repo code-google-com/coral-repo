@@ -222,7 +222,7 @@ void GeoCube::buildDepthForHeightFaces(int widthSubdivisions, int depthSubdivisi
 	}
 }
 
-void GeoCube::update(Attribute *attribute){
+void GeoCube::updateSlice(Attribute *attribute, unsigned int slice){
 	float width = _width->value()->floatValueAt(0);
 	float height = _height->value()->floatValueAt(0);
 	float depth = _depth->value()->floatValueAt(0);

@@ -480,11 +480,8 @@ void Attribute::setInput(Attribute *attribute){
 			_input = attribute;
 			_inputValue = _value;
 
-			Node *sourceContainer = attribute->parent()->parent();
-			Node *destContainer = parent()->parent();
-
 			NetworkManager::addEdge(_input, this);
-			
+
 			resetInputValuesInChain();
 			
 			if(_input->_passThrough){
@@ -973,4 +970,3 @@ std::string Attribute::specializationOverride(){
 	
 	return override;
 }
-

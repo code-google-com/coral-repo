@@ -36,26 +36,31 @@ using namespace coral;
 Numeric::Numeric():
 	_type(numericTypeAny),
 	_isArray(false),
-	_size(1){
+	_slices(1){
 	
-	// giving first initial size of 1 to allow for default values to be there before the type is set.
-	_intValues.resize(1);
-	_intValues[0] = 0;
-	
-	_floatValues.resize(1);
-	_floatValues[0] = 0.0;
-	
-	_vec3Values.resize(1);
-	_vec3Values[0] = Imath::V3f(0.0, 0.0, 0.0);
-	
-	_quatValues.resize(1);
-	_quatValues[0] = Imath::Quatf(0.0, 0.0, 0.0, 1.0);
+	_intValuesSliced.resize(1);
+	_intValuesSliced[0].resize(1);
+	_intValuesSliced[0][0] = 0;
 
-	_matrix44Values.resize(1);
-	_matrix44Values[0] = Imath::identity44f;
+	_floatValuesSliced.resize(1);
+	_floatValuesSliced[0].resize(1);
+	_floatValuesSliced[0][0] = 0.0;
 
-	_col4Values.resize(1);
-	_col4Values[0] = Imath::Color4f(1.0, 1.0, 1.0, 1.0);
+	_vec3ValuesSliced.resize(1);
+	_vec3ValuesSliced[0].resize(1);
+	_vec3ValuesSliced[0][0] = Imath::V3f(0.0, 0.0, 0.0);
+
+	_quatValuesSliced.resize(1);
+	_quatValuesSliced[0].resize(1);
+	_quatValuesSliced[0][0] = Imath::Quatf(0.0, 0.0, 0.0, 1.0);
+
+	_matrix44ValuesSliced.resize(1);
+	_matrix44ValuesSliced[0].resize(1);
+	_matrix44ValuesSliced[0][0] = Imath::identity44f;
+
+	_col4ValuesSliced.resize(1);
+	_col4ValuesSliced[0].resize(1);
+	_col4ValuesSliced[0][0] = Imath::Color4f(1.0, 1.0, 1.0, 1.0);
 }
 
 void Numeric::copy(const Value *other){
@@ -64,13 +69,13 @@ void Numeric::copy(const Value *other){
 	if(otherNum){
 		_type = otherNum->_type;
 		_isArray = otherNum->_isArray;
-		_size = otherNum->_size;
-		_intValues = otherNum->_intValues;
-		_floatValues = otherNum->_floatValues;
-		_vec3Values = otherNum->_vec3Values;
-		_quatValues = otherNum->_quatValues;
-		_matrix44Values = otherNum->_matrix44Values;
-		_col4Values = otherNum->_col4Values;
+
+		_intValuesSliced = otherNum->_intValuesSliced;
+		_floatValuesSliced = otherNum->_floatValuesSliced;
+		_vec3ValuesSliced = otherNum->_vec3ValuesSliced;
+		_quatValuesSliced = otherNum->_quatValuesSliced;
+		_matrix44ValuesSliced = otherNum->_matrix44ValuesSliced;
+		_col4ValuesSliced = otherNum->_col4ValuesSliced;
 	}
 }
 
@@ -79,7 +84,37 @@ bool Numeric::isArray(){
 }
 
 unsigned int Numeric::size(){
-	return _size;
+	return sizeSlice(0);
+}
+
+unsigned int Numeric::sizeSlice(unsigned int slice){
+	if(slice >= _slices){
+		slice = _slices - 1;
+	}
+
+	if(_type == numericTypeAny){
+		return 0;
+	}
+	else if(_type == numericTypeIntArray){
+		return _intValuesSliced[slice].size();
+	}
+	else if(_type == numericTypeFloatArray){
+		return _floatValuesSliced[slice].size();
+	}
+	else if(_type == numericTypeVec3Array){
+		return _vec3ValuesSliced[slice].size();
+	}
+	else if(_type == numericTypeQuatArray){
+		return _quatValuesSliced[slice].size();
+	}
+	else if(_type == numericTypeMatrix44Array){
+		return _matrix44ValuesSliced[slice].size();
+	}
+	else if(_type == numericTypeCol4Array){
+		return _col4ValuesSliced[slice].size();
+	}
+
+	return 0;
 }
 
 Numeric::Type Numeric::type(){
@@ -88,86 +123,106 @@ Numeric::Type Numeric::type(){
 
 void Numeric::setType(Numeric::Type type){
 	_type = type;
-	_size = 0;
 	_isArray = false;
 	
 	if(type == numericTypeInt){
-		_intValues.resize(1);
-		_size = 1;
-		_isArray = false;
+		_intValuesSliced.resize(_slices);
+		for(int i = 0; i < _slices; ++i){
+			_intValuesSliced[i].resize(1);
+		}
 	}
 	else if(type == numericTypeIntArray){
-		_size = _intValues.size();
+		_intValuesSliced.resize(_slices);
 		_isArray = true;
 	}
 	else if(type == numericTypeFloat){
-		_floatValues.resize(1);
-		_size = 1;
-		_isArray = false;
+		_floatValuesSliced.resize(_slices);
+		for(int i = 0; i < _slices; ++i){
+			_floatValuesSliced[i].resize(1);
+		}
 	}
 	else if(type == numericTypeFloatArray){
-		_size = _floatValues.size();
+		_floatValuesSliced.resize(_slices);
 		_isArray = true;
 	}
 	else if(type == numericTypeVec3){
-		_vec3Values.resize(1);
-		_size = 1;
-		_isArray = false;
+		_vec3ValuesSliced.resize(_slices);
+		for(int i = 0; i < _slices; ++i){
+			_vec3ValuesSliced[i].resize(1);
+		}
 	}
 	else if(type == numericTypeVec3Array){
-		_size = _vec3Values.size();
+		_vec3ValuesSliced.resize(_slices);
 		_isArray = true;
 	}
 	else if(type == numericTypeQuat){
-			_quatValues.resize(1);
-			_size = 1;
-			_isArray = false;
+		_quatValuesSliced.resize(_slices);
+		for(int i = 0; i < _slices; ++i){
+			_quatValuesSliced[i].resize(1);
 		}
-		else if(type == numericTypeQuatArray){
-			_size = _quatValues.size();
-			_isArray = true;
-		}
+	}
+	else if(type == numericTypeQuatArray){
+		_quatValuesSliced.resize(_slices);
+		_isArray = true;
+	}
 	else if(type == numericTypeMatrix44){
-		_matrix44Values.resize(1);
-		_size = 1;
-		_isArray = false;
+		_matrix44ValuesSliced.resize(_slices);
+		for(int i = 0; i < _slices; ++i){
+			_matrix44ValuesSliced[i].resize(1);
+		}
 	}
 	else if(type == numericTypeMatrix44Array){
-		_size = _matrix44Values.size();
+		_matrix44ValuesSliced.resize(_slices);
 		_isArray = true;
 	}
 	else if(type == numericTypeCol4){
-		_col4Values.resize(1);
-		_size = 1;
-		_isArray = false;
+		_col4ValuesSliced.resize(_slices);
+		for(int i = 0; i < _slices; ++i){
+			_col4ValuesSliced[i].resize(1);
+		}
 	}
 	else if(type == numericTypeCol4Array){
-		_size = _col4Values.size();
+		_col4ValuesSliced.resize(_slices);
 		_isArray = true;
 	}
 }
 
 void Numeric::resize(unsigned int newSize){
+	resizeSlice(0, newSize);
+}
+
+void Numeric::resizeSlice(unsigned int slice, unsigned int newSize){
 	if(_type != numericTypeAny){
 		if(_type == numericTypeInt || _type == numericTypeIntArray){
-			_intValues.resize(newSize);
+			for(int i = 0; i < _intValuesSliced.size(); ++i){
+				_intValuesSliced[i].resize(newSize);
+			}
 		}
 		else if(_type == numericTypeFloat || _type == numericTypeFloatArray){
-			_floatValues.resize(newSize);
+			for(int i = 0; i < _floatValuesSliced.size(); ++i){
+				_floatValuesSliced[i].resize(newSize);
+			}
 		}
 		else if(_type == numericTypeVec3 || _type == numericTypeVec3Array){
-			_vec3Values.resize(newSize);
+			for(int i = 0; i < _vec3ValuesSliced.size(); ++i){
+				_vec3ValuesSliced[i].resize(newSize);
+			}
 		}
 		else if(_type == numericTypeQuat || _type == numericTypeQuatArray){
-			_quatValues.resize(newSize);
+			for(int i = 0; i < _quatValuesSliced.size(); ++i){
+				_quatValuesSliced[i].resize(newSize);
+			}
 		}
 		else if(_type == numericTypeMatrix44 || _type == numericTypeMatrix44Array){
-			_matrix44Values.resize(newSize);
+			for(int i = 0; i < _matrix44ValuesSliced.size(); ++i){
+				_matrix44ValuesSliced[i].resize(newSize);
+			}
 		}
 		else if(_type == numericTypeCol4 || _type == numericTypeCol4Array){
-			_col4Values.resize(newSize);
+			for(int i = 0; i < _col4ValuesSliced.size(); ++i){
+				_col4ValuesSliced[i].resize(newSize);
+			}
 		}
-		_size = newSize;
 	}
 }
 
@@ -189,172 +244,116 @@ bool Numeric::isArrayType(Numeric::Type type){
 }
 
 void Numeric::setIntValueAt(unsigned int id, int value){
-	if(id < _intValues.size())
-		_intValues[id] = value;
+	setIntValueAtSlice(0, id, value);
 }
 
 void Numeric::setFloatValueAt(unsigned int id, float value){
-	if(id < _floatValues.size())
-		_floatValues[id] = value;
+	setFloatValueAtSlice(0, id, value);
 }
 
 void Numeric::setVec3ValueAt(unsigned int id, const Imath::V3f &value){
-	if(id < _vec3Values.size())
-		_vec3Values[id] = value;
+	setVec3ValueAtSlice(0, id, value);
 }
 
 void Numeric::setCol4ValueAt(unsigned int id, const Imath::Color4f &value){
-	if(id < _col4Values.size())
-		_col4Values[id] = value;
+	setCol4ValueAtSlice(0, id, value);
 }
 
 void Numeric::setQuatValueAt(unsigned int id, const Imath::Quatf &value){
-	if(id < _quatValues.size())
-		_quatValues[id] = value;
+	setQuatValueAtSlice(0, id, value);
 }
 
 void Numeric::setMatrix44ValueAt(unsigned int id, const Imath::M44f &value){
-	if(id < _matrix44Values.size())
-		_matrix44Values[id] = value;
+	setMatrix44ValueAtSlice(0, id, value);
 }
 
 const std::vector<int> &Numeric::intValues(){
-	return _intValues;
+	return _intValuesSliced[0];
 }
 
 const std::vector<float> &Numeric::floatValues(){
-	return _floatValues;
+	return _floatValuesSliced[0];
 }
 
 const std::vector<Imath::V3f> &Numeric::vec3Values(){
-	return _vec3Values;
+	return _vec3ValuesSliced[0];
 }
 
 const std::vector<Imath::Color4f> &Numeric::col4Values(){
-	return _col4Values;
+	return _col4ValuesSliced[0];
 }
 
 const std::vector<Imath::Quatf> &Numeric::quatValues(){
-	return _quatValues;
+	return _quatValuesSliced[0];
 }
 
 const std::vector<Imath::M44f> &Numeric::matrix44Values(){
-	return _matrix44Values;
+	return _matrix44ValuesSliced[0];
 }
 
 int Numeric::intValueAt(unsigned int id){
-	int size = _intValues.size();
-	if(id < size){
-		return _intValues[id];
-	}
-	else if(size){
-		return _intValues[size - 1];
-	}
-	
-	return 0;
+	return intValueAtSlice(0, id);
 }
 
 float Numeric::floatValueAt(unsigned int id){
-	int size = _floatValues.size();
-	if(id < size){
-		return _floatValues[id];
-	}
-	else if(size){
-		return _floatValues[size - 1];
-	}
-	
-	return 0.0;
+	return floatValueAtSlice(0, id);
 }
 
 Imath::V3f Numeric::vec3ValueAt(unsigned int id){
-	int size = _vec3Values.size();
-	if(id < size){
-		return _vec3Values[id];
-	}
-	else if(size){
-		return _vec3Values[size - 1];
-	}
-	
-	return Imath::V3f(0.0, 0.0, 0.0);
+	return vec3ValueAtSlice(0, id);
 }
 
 Imath::Color4f Numeric::col4ValueAt(unsigned int id){
-	int size = _col4Values.size();
-	if(id < size){
-		return _col4Values[id];
-	}
-	else if(size){
-		return _col4Values[size - 1];
-	}
-
-	return Imath::Color4f(1.0, 1.0, 1.0, 1.0);
+	return col4ValueAtSlice(0, id);
 }
 
 Imath::Quatf Numeric::quatValueAt(unsigned int id){
-	int size = _quatValues.size();
-	if(id < size){
-		return _quatValues[id];
-	}
-	else if(size){
-		return _quatValues[size - 1];
-	}
-
-	return Imath::Quatf(0.0, 0.0, 0.0, 1.0);
+	return quatValueAtSlice(0, id);
 }
 
 Imath::M44f Numeric::matrix44ValueAt(unsigned int id){
-	int size = _matrix44Values.size();
-	if(id < size){
-		return _matrix44Values[id];
-	}
-	else if(size){
-		return _matrix44Values[size - 1];
-	}
-	
-	return Imath::identity44f;
+	return matrix44ValueAtSlice(0, id);
 }
 
 void Numeric::setIntValues(const std::vector<int> &values){
-	_intValues = values;
-	_size = _intValues.size();
+	setIntValuesSlice(0, values);
 }
 
 void Numeric::setFloatValues(const std::vector<float> &values){
-	_floatValues = values;
-	_size = _floatValues.size();
+	setFloatValuesSlice(0, values);
 }
 
 void Numeric::setVec3Values(const std::vector<Imath::V3f> &values){
-	_vec3Values = values;
-	_size = _vec3Values.size();
+	setVec3ValuesSlice(0, values);
 }
 
 void Numeric::setCol4Values(const std::vector<Imath::Color4f> &values){
-	_col4Values = values;
-	_size = _col4Values.size();
+	setCol4ValuesSlice(0, values);
 }
 
 void Numeric::setQuatValues(const std::vector<Imath::Quatf> &values){
-	_quatValues = values;
-	_size = _quatValues.size();
+	setQuatValuesSlice(0, values);
 }
 
 void Numeric::setMatrix44Values(const std::vector<Imath::M44f> &values){
-	_matrix44Values = values;
-	_size = _matrix44Values.size();
+	setMatrix44ValuesSlice(0, values);
 }
 
-std::string Numeric::asString(){
+std::string Numeric::sliceAsString(unsigned int slice){
 	std::string script;
-	
+
 	if(_type != numericTypeAny){
 		std::ostringstream stream;
 		
+		if(slice >= _slices){
+			slice = _slices - 1;
+		}
+
 		if(_type == numericTypeInt || _type == numericTypeIntArray){
-			for(int i = 0; i < _intValues.size(); ++i){
-				stream << _intValues[i];
+			for(int i = 0; i < _intValuesSliced[slice].size(); ++i){
+				stream << _intValuesSliced[slice][i];
 				
-				if(i < _intValues.size() - 1){
+				if(i < _intValuesSliced[slice].size() - 1){
 					stream << ",";
 				}
 				
@@ -363,10 +362,10 @@ std::string Numeric::asString(){
 			}
 		}
 		else if(_type == numericTypeFloat || _type == numericTypeFloatArray){
-			for(int i = 0; i < _floatValues.size(); ++i){
-				stream << _floatValues[i];
+			for(int i = 0; i < _floatValuesSliced[slice].size(); ++i){
+				stream << _floatValuesSliced[slice][i];
 				
-				if(i < _floatValues.size() - 1){
+				if(i < _floatValuesSliced[slice].size() - 1){
 					stream << ",";
 				}
 				
@@ -375,15 +374,15 @@ std::string Numeric::asString(){
 			}
 		}
 		else if(_type == numericTypeVec3 || _type == numericTypeVec3Array){
-			for(int i = 0; i < _vec3Values.size(); ++i){
+			for(int i = 0; i < _vec3ValuesSliced[slice].size(); ++i){
 				stream << "(";
-				Imath::V3f *vec = &_vec3Values[i];
+				Imath::V3f *vec = &_vec3ValuesSliced[slice][i];
 
 				stream << vec->x << ",";
 				stream << vec->y << ",";
 				stream << vec->z << ")";
 				
-				if(i < _vec3Values.size() - 1){
+				if(i < _vec3ValuesSliced[slice].size() - 1){
 					stream << ",";
 				}
 				
@@ -392,16 +391,16 @@ std::string Numeric::asString(){
 			}
 		}
 		else if(_type == numericTypeCol4 || _type == numericTypeCol4Array){
-			for(int i = 0; i < _col4Values.size(); ++i){
+			for(int i = 0; i < _col4ValuesSliced[slice].size(); ++i){
 				stream << "(";
-				Imath::Color4f *col = &_col4Values[i];
+				Imath::Color4f *col = &_col4ValuesSliced[slice][i];
 
 				stream << col->r << ",";
 				stream << col->g << ",";
 				stream << col->b << ",";
 				stream << col->a << ")";
 
-				if(i < _col4Values.size() - 1){
+				if(i < _col4ValuesSliced[slice].size() - 1){
 					stream << ",";
 				}
 
@@ -410,16 +409,16 @@ std::string Numeric::asString(){
 			}
 		}
 		else if(_type == numericTypeQuat || _type == numericTypeQuatArray){
-			for(int i = 0; i < _quatValues.size(); ++i){
+			for(int i = 0; i < _quatValuesSliced[slice].size(); ++i){
 				stream << "(";
-				Imath::Quatf *quat = &_quatValues[i];
+				Imath::Quatf *quat = &_quatValuesSliced[slice][i];
 
 				stream << quat->r << ",";
 				stream << quat->v.x << ",";
 				stream << quat->v.y << ",";
 				stream << quat->v.z << ")";
 
-				if(i < _quatValues.size() - 1){
+				if(i < _quatValuesSliced[slice].size() - 1){
 					stream << ",";
 				}
 
@@ -428,9 +427,9 @@ std::string Numeric::asString(){
 			}
 		}
 		else if(_type == numericTypeMatrix44 || _type == numericTypeMatrix44Array){
-			for(int i = 0; i < _matrix44Values.size(); ++i){
+			for(int i = 0; i < _matrix44ValuesSliced[slice].size(); ++i){
 				stream << "(";
-				Imath::M44f *mat = &_matrix44Values[i];
+				Imath::M44f *mat = &_matrix44ValuesSliced[slice][i];
 				
 				stream << mat->x[0][0] << ",";
 				stream << mat->x[0][1] << ",";
@@ -449,7 +448,7 @@ std::string Numeric::asString(){
 				stream << mat->x[3][2] << ",";
 				stream << mat->x[3][3] << ")";
 				
-				if(i < _vec3Values.size() - 1){
+				if(i < _matrix44ValuesSliced.size() - 1){
 					stream << ",";
 				}
 				
@@ -467,6 +466,10 @@ std::string Numeric::asString(){
 	return script;
 }
 
+std::string Numeric::asString(){
+	return sliceAsString(0);
+}
+
 void Numeric::setFromString(const std::string &value){
 	std::string tmp = stringUtils::replace(value, "\n", "");
 	std::vector<std::string> fields;
@@ -477,29 +480,30 @@ void Numeric::setFromString(const std::string &value){
 		Numeric::Type type = Numeric::Type(stringUtils::parseInt(fields[1]));
 		
 		if(type == Numeric::numericTypeInt || type == Numeric::numericTypeIntArray){
+			_intValuesSliced.resize(1);
+			_intValuesSliced[0].clear();
+
 			std::vector<std::string> values;
 			stringUtils::split(valuesStr, values, ",");
-			_intValues.clear();
 			for(int i = 0; i < values.size(); ++i){
 				int value = stringUtils::parseInt(values[i]);
-				_intValues.push_back(value);
+				_intValuesSliced[0].push_back(value);
 			}
-		
-			_size = _intValues.size();
 		}
 		else if(type == Numeric::numericTypeFloat || type == Numeric::numericTypeFloatArray){
+			_floatValuesSliced.resize(1);
+			_floatValuesSliced[0].clear();
+
 			std::vector<std::string> values;
 			stringUtils::split(valuesStr, values, ",");
-			_floatValues.clear();
 			for(int i = 0; i < values.size(); ++i){
 				float value = stringUtils::parseFloat(values[i]);
-				_floatValues.push_back(value);
+				_floatValuesSliced[0].push_back(value);
 			}
-			
-			_size = _floatValues.size();
 		}
 		else if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
-			_vec3Values.clear();
+			_vec3ValuesSliced.resize(1);
+			_vec3ValuesSliced[0].clear();
 			
 			std::vector<std::string> values;
 			stringUtils::split(valuesStr, values, "),(");
@@ -515,14 +519,13 @@ void Numeric::setFromString(const std::string &value){
 					float z = stringUtils::parseFloat(numericValues[2]);
 					
 					Imath::V3f vec(x, y, z);
-					_vec3Values.push_back(vec);
+					_vec3ValuesSliced[0].push_back(vec);
 				}
 			}
-		
-			_size = _vec3Values.size();
 		}
 		else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
-			_quatValues.clear();
+			_quatValuesSliced.resize(1);
+			_quatValuesSliced[0].clear();
 
 			std::vector<std::string> values;
 			stringUtils::split(valuesStr, values, "),(");
@@ -539,14 +542,13 @@ void Numeric::setFromString(const std::string &value){
 					float z = stringUtils::parseFloat(numericValues[3]);
 
 					Imath::Quatf vec(r, x, y, z);
-					_quatValues.push_back(vec);
+					_quatValuesSliced[0].push_back(vec);
 				}
 			}
-
-			_size = _quatValues.size();
 		}
 		else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
-			_matrix44Values.clear();
+			_matrix44ValuesSliced.resize(1);
+			_matrix44ValuesSliced[0].clear();
 			
 			std::vector<std::string> values;
 			stringUtils::split(valuesStr, values, "),(");
@@ -563,14 +565,13 @@ void Numeric::setFromString(const std::string &value){
 						stringUtils::parseFloat(numericValues[8]), stringUtils::parseFloat(numericValues[9]), stringUtils::parseFloat(numericValues[10]), stringUtils::parseFloat(numericValues[11]), 
 						stringUtils::parseFloat(numericValues[12]), stringUtils::parseFloat(numericValues[13]), stringUtils::parseFloat(numericValues[14]), stringUtils::parseFloat(numericValues[15]));
 					
-					_matrix44Values.push_back(matrix);
+					_matrix44ValuesSliced[0].push_back(matrix);
 				}
 			}
-			
-			_size = _matrix44Values.size();
 		}
 		else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeCol4Array){
-			_col4Values.clear();
+			_col4ValuesSliced.resize(1);
+			_col4ValuesSliced[0].clear();
 			
 			std::vector<std::string> values;
 			stringUtils::split(valuesStr, values, "),(");
@@ -587,11 +588,338 @@ void Numeric::setFromString(const std::string &value){
 					float a = stringUtils::parseFloat(numericValues[3]);
 					
 					Imath::Color4f col(r, g, b, a);
-					_col4Values.push_back(col);
+					_col4ValuesSliced[0].push_back(col);
 				}
 			}
-		
-			_size = _col4Values.size();
 		}
+	}
+}
+
+void Numeric::setIntValueAtSlice(unsigned int slice, unsigned int id, int value){
+	if(slice < _intValuesSliced.size()){
+		std::vector<int> &slicevec = _intValuesSliced[slice];
+		if(id < slicevec.size()){
+			slicevec[id] = value;
+		}
+	}
+}
+
+void Numeric::setFloatValueAtSlice(unsigned int slice, unsigned int id, float value){
+	if(slice < _floatValuesSliced.size()){
+		std::vector<float> &slicevec = _floatValuesSliced[slice];
+		if(id < slicevec.size()){
+			slicevec[id] = value;
+		}
+	}
+}
+
+void Numeric::setVec3ValueAtSlice(unsigned int slice, unsigned int id, const Imath::V3f &value){
+	if(slice < _vec3ValuesSliced.size()){
+		std::vector<Imath::V3f> &slicevec = _vec3ValuesSliced[slice];
+		if(id < slicevec.size()){
+			slicevec[id] = value;
+		}
+	}
+}
+
+void Numeric::setMatrix44ValueAtSlice(unsigned int slice, unsigned int id, const Imath::M44f &value){
+	if(slice < _matrix44ValuesSliced.size()){
+		std::vector<Imath::M44f> &slicevec = _matrix44ValuesSliced[slice];
+		if(id < slicevec.size()){
+			slicevec[id] = value;
+		}
+	}
+}
+
+void Numeric::setCol4ValueAtSlice(unsigned int slice, unsigned int id, const Imath::Color4f &value){
+	if(slice < _col4ValuesSliced.size()){
+		std::vector<Imath::Color4f> &slicevec = _col4ValuesSliced[slice];
+		if(id < slicevec.size()){
+			slicevec[id] = value;
+		}
+	}
+}
+
+void Numeric::setQuatValueAtSlice(unsigned int slice, unsigned int id, const Imath::Quatf &value){
+	if(slice < _quatValuesSliced.size()){
+		std::vector<Imath::Quatf> &slicevec = _quatValuesSliced[slice];
+		if(id < slicevec.size()){
+			slicevec[id] = value;
+		}
+	}
+}
+
+int Numeric::intValueAtSlice(unsigned int slice, unsigned int id){
+	if(slice >= _intValuesSliced.size()){
+		slice = _intValuesSliced.size() - 1;
+	}
+
+	std::vector<int> &slicevec = _intValuesSliced[slice];
+
+	int size = slicevec.size();
+	if(id < size){
+		return slicevec[id];
+	}
+	else if(size){
+		return slicevec[size - 1];
+	}
+	
+	return 0;
+}
+
+float Numeric::floatValueAtSlice(unsigned int slice, unsigned int id){
+	if(slice >= _floatValuesSliced.size()){
+		slice = _floatValuesSliced.size() - 1;
+	}
+
+	std::vector<float> &slicevec = _floatValuesSliced[slice];
+
+	int size = slicevec.size();
+	if(id < size){
+		return slicevec[id];
+	}
+	else if(size){
+		return slicevec[size - 1];
+	}
+	
+	return 0.0;
+}
+
+Imath::V3f Numeric::vec3ValueAtSlice(unsigned int slice, unsigned int id){
+	if(slice >= _vec3ValuesSliced.size()){
+		slice = _vec3ValuesSliced.size() - 1;
+	}
+
+	std::vector<Imath::V3f> &slicevec = _vec3ValuesSliced[slice];
+
+	int size = slicevec.size();
+	if(id < size){
+		return slicevec[id];
+	}
+	else if(size){
+		return slicevec[size - 1];
+	}
+	
+	return Imath::V3f(0.0, 0.0, 0.0);
+}
+
+Imath::Color4f Numeric::col4ValueAtSlice(unsigned int slice, unsigned int id){
+	if(slice >= _col4ValuesSliced.size()){
+		slice = _col4ValuesSliced.size() - 1;
+	}
+
+	std::vector<Imath::Color4f> &slicevec = _col4ValuesSliced[slice];
+
+	int size = slicevec.size();
+	if(id < size){
+		return slicevec[id];
+	}
+	else if(size){
+		return slicevec[size - 1];
+	}
+	
+	return Imath::Color4f(1.0, 1.0, 1.0, 1.0);
+}
+
+Imath::Quatf Numeric::quatValueAtSlice(unsigned int slice, unsigned int id){
+	if(slice >= _quatValuesSliced.size()){
+		slice = _quatValuesSliced.size() - 1;
+	}
+
+	std::vector<Imath::Quatf> &slicevec = _quatValuesSliced[slice];
+
+	int size = slicevec.size();
+	if(id < size){
+		return slicevec[id];
+	}
+	else if(size){
+		return slicevec[size - 1];
+	}
+	
+	return Imath::Quatf(0.0, 0.0, 0.0, 1.0);
+}
+
+Imath::M44f Numeric::matrix44ValueAtSlice(unsigned int slice, unsigned int id){
+	if(slice >= _matrix44ValuesSliced.size()){
+		slice = _matrix44ValuesSliced.size() - 1;
+	}
+
+	std::vector<Imath::M44f> &slicevec = _matrix44ValuesSliced[slice];
+
+	int size = slicevec.size();
+	if(id < size){
+		return slicevec[id];
+	}
+	else if(size){
+		return slicevec[size - 1];
+	}
+	
+	return Imath::identity44f;
+}
+
+void Numeric::setIntValuesSlice(unsigned int slice, const std::vector<int> &values){
+	if(slice < _intValuesSliced.size()){
+		_intValuesSliced[slice] = values;
+	}
+}
+
+void Numeric::setFloatValuesSlice(unsigned int slice, const std::vector<float> &values){
+	if(slice < _floatValuesSliced.size()){
+		_floatValuesSliced[slice] = values;
+	}
+}
+
+void Numeric::setVec3ValuesSlice(unsigned int slice, const std::vector<Imath::V3f> &values){
+	if(slice < _vec3ValuesSliced.size()){
+		_vec3ValuesSliced[slice] = values;
+	}
+}
+
+void Numeric::setQuatValuesSlice(unsigned int slice, const std::vector<Imath::Quatf> &values){
+	if(slice < _quatValuesSliced.size()){
+		_quatValuesSliced[slice] = values;
+	}
+}
+
+void Numeric::setCol4ValuesSlice(unsigned int slice, const std::vector<Imath::Color4f> &values){
+	if(slice < _col4ValuesSliced.size()){
+		_col4ValuesSliced[slice] = values;
+	}
+}
+
+void Numeric::setMatrix44ValuesSlice(unsigned int slice, const std::vector<Imath::M44f> &values){
+	if(slice < _matrix44ValuesSliced.size()){
+		_matrix44ValuesSliced[slice] = values;
+	}
+}
+
+const std::vector<int> &Numeric::intValuesSlice(unsigned int slice){
+	if(slice >= _intValuesSliced.size()){
+		slice = _intValuesSliced.size() - 1;
+	}
+
+	return _intValuesSliced[slice];
+}
+
+const std::vector<float> &Numeric::floatValuesSlice(unsigned int slice){
+	if(slice >= _floatValuesSliced.size()){
+		slice = _floatValuesSliced.size() - 1;
+	}
+
+	return _floatValuesSliced[slice];
+}
+
+const std::vector<Imath::V3f> &Numeric::vec3ValuesSlice(unsigned int slice){
+	if(slice >= _vec3ValuesSliced.size()){
+		slice = _vec3ValuesSliced.size() - 1;
+	}
+
+	return _vec3ValuesSliced[slice];
+}
+
+const std::vector<Imath::Color4f> &Numeric::col4ValuesSlice(unsigned int slice){
+	if(slice >= _col4ValuesSliced.size()){
+		slice = _col4ValuesSliced.size() - 1;
+	}
+
+	return _col4ValuesSliced[slice];
+}
+
+const std::vector<Imath::Quatf> &Numeric::quatValuesSlice(unsigned int slice){
+	if(slice >= _quatValuesSliced.size()){
+		slice = _quatValuesSliced.size() - 1;
+	}
+
+	return _quatValuesSliced[slice];
+}
+
+const std::vector<Imath::M44f> &Numeric::matrix44ValuesSlice(unsigned int slice){
+	if(slice >= _matrix44ValuesSliced.size()){
+		slice = _matrix44ValuesSliced.size() - 1;
+	}
+
+	return _matrix44ValuesSliced[slice];
+}
+
+void Numeric::resizeSlices(unsigned int slices){
+	if(slices == 0){
+		slices = 1;
+	}
+
+	if(slices != _slices && _type != numericTypeAny){
+		if(_type == numericTypeInt){
+			_intValuesSliced.resize(slices);
+			for(int i = 0; i < slices; ++i){
+				std::vector<int> &slicevec = _intValuesSliced[i];
+				if(!slicevec.size()){
+					slicevec.resize(1);
+				}
+			}
+		}
+		else if(_type == numericTypeIntArray){
+			_intValuesSliced.resize(slices);
+		}
+		else if(_type == numericTypeFloat){
+			_floatValuesSliced.resize(slices);
+			for(int i = 0; i < slices; ++i){
+				std::vector<float> &slicevec = _floatValuesSliced[i];
+				if(!slicevec.size()){
+					slicevec.resize(1);
+				}
+			}
+		}
+		else if(_type == numericTypeFloatArray){
+			_floatValuesSliced.resize(slices);
+		}
+		else if(_type == numericTypeVec3){
+			_vec3ValuesSliced.resize(slices);
+			for(int i = 0; i < slices; ++i){
+				std::vector<Imath::V3f> &slicevec = _vec3ValuesSliced[i];
+				if(!slicevec.size()){
+					slicevec.resize(1);
+				}
+			}
+		}
+		else if(_type == numericTypeVec3Array){
+			_vec3ValuesSliced.resize(slices);
+		}
+		else if(_type == numericTypeQuat){
+			_quatValuesSliced.resize(slices);
+			for(int i = 0; i < slices; ++i){
+				std::vector<Imath::Quatf> &slicevec = _quatValuesSliced[i];
+				if(!slicevec.size()){
+					slicevec.resize(1);
+				}
+			}
+		}
+		else if(_type == numericTypeQuatArray){
+			_quatValuesSliced.resize(slices);
+		}
+		else if(_type == numericTypeMatrix44){
+			_matrix44ValuesSliced.resize(slices);
+			for(int i = 0; i < slices; ++i){
+				std::vector<Imath::M44f> &slicevec = _matrix44ValuesSliced[i];
+				if(!slicevec.size()){
+					slicevec.resize(1);
+				}
+			}
+		}
+		else if(_type == numericTypeMatrix44Array){
+			_matrix44ValuesSliced.resize(slices);
+		}
+		else if(_type == numericTypeCol4){
+			_col4ValuesSliced.resize(slices);
+			for(int i = 0; i < slices; ++i){
+				std::vector<Imath::Color4f> &slicevec = _col4ValuesSliced[i];
+				if(!slicevec.size()){
+					slicevec.resize(1);
+				}
+			}
+		}
+		else if(_type == numericTypeCol4Array){
+			_col4ValuesSliced.resize(slices);
+		}
+
+		_slices = slices;
 	}
 }

@@ -114,9 +114,34 @@ Numeric::Type NumericAttribute::numericTypeFromString(const std::string &typeStr
 std::string NumericAttribute::debugInfo(){
 	std::string info = Attribute::debugInfo();
 	Numeric *val = value();
-	if(val->isArray()){
-		info += "array size: " + stringUtils::intToString(val->size()) + "\n";
+	int slices = val->slices();
+
+	info += "slices: " + stringUtils::intToString(slices) + "\n";
+	for(int i = 0; i < val->slices(); ++i){
+		info += "slice " + 	stringUtils::intToString(i);
+		if(val->isArray()){
+			info += ", size: " + stringUtils::intToString(val->sizeSlice(i));
+		}
+
+		std::string valStr = val->sliceAsString(i);
+		std::string trimmedValStr;
+		if(valStr.size() < 100){
+			trimmedValStr = valStr;
+		}
+		else{
+			for(int i = 0; i < 100; ++i){
+				trimmedValStr += valStr[i];
+			}
+			trimmedValStr += " ...]";
+		}
+		
+		info += ", " + trimmedValStr + "\n";
+
+		if(i > 3){
+			info += "...trimming remaining slices.\n";
+		}
 	}
 	
 	return info;
 }
+

@@ -227,7 +227,7 @@ namespace {
 
 }
 
-ImportCIOTransforms::ImportCIOTransforms(const std::string &name, Node *parent): Node(name, parent){	
+ImportCIOTransforms::ImportCIOTransforms(const std::string &name, Node *parent): Node(name, parent){
 	_file = new StringAttribute("file", this);
 	_time = new NumericAttribute("time", this);
 	_out = new NumericAttribute("out", this);
@@ -243,7 +243,7 @@ ImportCIOTransforms::ImportCIOTransforms(const std::string &name, Node *parent):
 	setAttributeAffect(_time, _out);
 }
 
-void ImportCIOTransforms::update(Attribute *attribute){
+void ImportCIOTransforms::updateSlice(Attribute *attribute, unsigned int slice){
 	std::string filename = _file->value()->stringValue();
 	filename = NetworkManager::resolveFilename(filename);
 
@@ -308,7 +308,7 @@ ImportCIOSkinWeights::ImportCIOSkinWeights(const std::string &name, Node *parent
 	setAttributeAffect(_file, _weights);
 }
 
-void ImportCIOSkinWeights::update(Attribute *attribute){
+void ImportCIOSkinWeights::updateSlice(Attribute *attribute, unsigned int slice){
 	std::string filename = _file->value()->stringValue();
 	filename = NetworkManager::resolveFilename(filename);
 

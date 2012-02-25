@@ -214,7 +214,6 @@ void numericNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Matrix44ToQuat, Node>("Matrix44ToQuat");
 	pythonWrapperUtils::pythonWrapper<RangeLoop, Node>("RangeLoop");
 	pythonWrapperUtils::pythonWrapper<RandomNumber, Node>("RandomNumber");
-	pythonWrapperUtils::pythonWrapper<NumericIterator, LoopIteratorNode>("NumericIterator");
 	pythonWrapperUtils::pythonWrapper<ArrayIndices, Node>("ArrayIndices");
 	pythonWrapperUtils::pythonWrapper<GetArrayElement, Node>("GetArrayElement");
 	pythonWrapperUtils::pythonWrapper<SetArrayElement, Node>("SetArrayElement");

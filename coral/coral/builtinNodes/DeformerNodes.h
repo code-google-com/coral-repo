@@ -9,7 +9,7 @@ namespace coral{
 class SkinWeightDeformer: public Node{
 public:
 	SkinWeightDeformer(const std::string &name, Node *parent);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
 	NumericAttribute *_skinWeightVertices;

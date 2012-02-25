@@ -33,12 +33,12 @@
 #include "../src/Numeric.h"
 
 #define DECLARE_NUMERIC_OPERATION(operation, typeA, typeB) \
-	void operation_##operation##_##typeA##_##typeB##_array_to_array(Numeric *operandA, Numeric *operandB, Numeric *result); \
-	void operation_##operation##_##typeA##_##typeB##_single_to_array(Numeric *operandA, Numeric *operandB, Numeric *result); \
-	void operation_##operation##_##typeA##_##typeB##_array_to_single(Numeric *operandA, Numeric *operandB, Numeric *result) \
+	void operation_##operation##_##typeA##_##typeB##_array_to_array(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice); \
+	void operation_##operation##_##typeA##_##typeB##_single_to_array(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice); \
+	void operation_##operation##_##typeA##_##typeB##_array_to_single(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice) \
 
 #define DECLARE_PASSTRHOUGH_OPERATION(type) \
-	void operation_##type##_passThrough(Numeric *operandA, Numeric *operandB, Numeric *result); \
+	void operation_##type##_passThrough(Numeric *operandA, Numeric *operandB, Numeric *result, unsigned int slice); \
 
 namespace coral{
 
@@ -53,7 +53,7 @@ public:
 	
 	NumericOperation();
 	void selectOperands(Numeric::Type typeA, Numeric::Type typeB);
-	void executeSelectedOperation(Numeric *operandA, Numeric *operandB, Numeric *out);
+	void executeSelectedOperation(Numeric *operandA, Numeric *operandB, Numeric *out, unsigned int slice);
 	
 	void clearSelectedOperation(){
 		_selectedOperation = 0;
@@ -79,7 +79,7 @@ public:
 	static bool allowOperation(Operation operation, Numeric::Type typeA, Numeric::Type typeB);
 	
 private:
-	void(NumericOperation::*_selectedOperation)(Numeric*, Numeric*, Numeric*);
+	void(NumericOperation::*_selectedOperation)(Numeric*, Numeric*, Numeric*, unsigned int);
 	Operation _operation;
 	
 	DECLARE_NUMERIC_OPERATION(add, int, int);

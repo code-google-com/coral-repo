@@ -64,13 +64,13 @@ SkinWeightDeformer::SkinWeightDeformer(const std::string &name, Node *parent): N
 
 }
 
-void SkinWeightDeformer::update(Attribute *attribute){
-	const std::vector<int> &skinWeightVertices = _skinWeightVertices->value()->intValues();
-	const std::vector<int> &skinWeightDeformers = _skinWeightDeformers->value()->intValues();
-	const std::vector<float> &skinWeightValues = _skinWeightValues->value()->floatValues();
-	const std::vector<Imath::V3f> &points = _points->value()->vec3Values();
-	const std::vector<Imath::M44f> &deformers = _deformers->value()->matrix44Values();
-	const std::vector<Imath::M44f> &bindPoseDeformers = _bindPoseDeformers->value()->matrix44Values();
+void SkinWeightDeformer::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<int> &skinWeightVertices = _skinWeightVertices->value()->intValuesSlice(slice);
+	const std::vector<int> &skinWeightDeformers = _skinWeightDeformers->value()->intValuesSlice(slice);
+	const std::vector<float> &skinWeightValues = _skinWeightValues->value()->floatValuesSlice(slice);
+	const std::vector<Imath::V3f> &points = _points->value()->vec3ValuesSlice(slice);
+	const std::vector<Imath::M44f> &deformers = _deformers->value()->matrix44ValuesSlice(slice);
+	const std::vector<Imath::M44f> &bindPoseDeformers = _bindPoseDeformers->value()->matrix44ValuesSlice(slice);
 
 	NumericAttribute *attrs[] = {_skinWeightVertices, _skinWeightDeformers, _skinWeightValues};
 	int minorSize = findMinorNumericSize(attrs, 3);
@@ -109,5 +109,5 @@ void SkinWeightDeformer::update(Attribute *attribute){
 		}
 	}
 
-	_outPoints->outValue()->setVec3Values(outPoints);
+	_outPoints->outValue()->setVec3ValuesSlice(slice, outPoints);
 }

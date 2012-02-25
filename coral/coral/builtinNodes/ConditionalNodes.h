@@ -41,29 +41,29 @@ public:
 	IfGreaterThan(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_in0;
 	NumericAttribute *_in1;
 	BoolAttribute *_out;
 	
-	void(IfGreaterThan::*_selectedOperation)(Numeric*, Numeric*, std::vector<bool> &);
+	void(IfGreaterThan::*_selectedOperation)(Numeric*, Numeric*, std::vector<bool> &, unsigned int);
 	
-	void intGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void intGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
+	void intGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void intGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatGreaterThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatGreaterThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
 	
-	void intGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void intGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
+	void intGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void intGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatGreaterThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatGreaterThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
 	
-	void intGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void intGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
+	void intGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void intGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatGreaterThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatGreaterThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
 };
 
 class IfLessThan: public Node{
@@ -71,29 +71,29 @@ public:
 	IfLessThan(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	NumericAttribute *_in0;
 	NumericAttribute *_in1;
 	BoolAttribute *_out;
 	
-	void(IfLessThan::*_selectedOperation)(Numeric*, Numeric*, std::vector<bool> &);
+	void(IfLessThan::*_selectedOperation)(Numeric*, Numeric*, std::vector<bool> &, unsigned int);
 	
-	void intLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void intLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
+	void intLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void intLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatLessThanFloat_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatLessThanInt_arrayToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
 	
-	void intLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void intLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out);
+	void intLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void intLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatLessThanFloat_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatLessThanInt_arrayToSingle(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
 	
-	void intLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void intLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
-	void floatLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out);
+	void intLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void intLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatLessThanFloat_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
+	void floatLessThanInt_singleToArray(Numeric *in0, Numeric *in1, std::vector<bool> &out, unsigned int slice);
 };
 
 class ConditionalValue: public Node{
@@ -101,7 +101,7 @@ public:
 	ConditionalValue(const std::string &name, Node *parent);
 	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
-	void update(Attribute *attribute);
+	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
 	BoolAttribute *_condition;
@@ -109,19 +109,19 @@ private:
 	NumericAttribute *_ifFalse;
 	NumericAttribute *_out;
 	
-	void(ConditionalValue::*_selectedOperation)(Bool *, Numeric *, Numeric *, Numeric *);
+	void(ConditionalValue::*_selectedOperation)(Bool *, Numeric *, Numeric *, Numeric *, unsigned int);
 	
-	void transferValuesInt(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesFloat(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesVec3(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesCol4(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesMatrix44(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
+	void transferValuesInt(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesFloat(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesVec3(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesCol4(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesMatrix44(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
 	
-	void transferValuesIntBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesFloatBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesVec3BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesCol4BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
-	void transferValuesMatrix44BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out);
+	void transferValuesIntBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesFloatBoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesVec3BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesCol4BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
+	void transferValuesMatrix44BoolArray(Bool *condition, Numeric *ifTrue, Numeric *ifFalse, Numeric *out, unsigned int slice);
 };
 
 // greater than function

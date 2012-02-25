@@ -37,9 +37,9 @@
 using namespace coral;
 
 void loopNodesWrapper(){
-	pythonWrapperUtils::pythonWrapper<LoopIteratorNode, Node>("LoopIteratorNode");
+	pythonWrapperUtils::pythonWrapper<LoopInputNode, Node>("LoopInputNode");
+	pythonWrapperUtils::pythonWrapper<LoopOutputNode, Node>("LoopOutputNode");
 	pythonWrapperUtils::pythonWrapper<ForLoopNode, Node>("ForLoopNode");
-	
 }
 
 #endif

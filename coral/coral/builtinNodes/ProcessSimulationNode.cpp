@@ -68,7 +68,7 @@ void ProcessSimulationNode::addInputData(){
 	_getDataFrom->outValue()->addEntry(newId, attr->name());
 }
 
-void ProcessSimulationNode::update(Attribute *attribute){
+void ProcessSimulationNode::updateSlice(Attribute *attribute, unsigned int slice){
 	int attrToTransfer = _getDataFrom->value()->currentIndex() + 1;
 
 	std::vector<Attribute*> attrs = inputAttributes();

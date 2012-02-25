@@ -100,18 +100,48 @@ public:
 	std::string asString();
 	void setFromString(const std::string &value);
 
+	unsigned int sizeSlice(unsigned int slice);
+	void resizeSlice(unsigned int slices, unsigned int newSize);
+	void resizeSlices(unsigned int slices);
+	unsigned int slices(){return _slices;}
+	void setIntValueAtSlice(unsigned int slice, unsigned int id, int value);
+	void setFloatValueAtSlice(unsigned int slice, unsigned int id, float value);
+	void setVec3ValueAtSlice(unsigned int slice, unsigned int id, const Imath::V3f &value);
+	void setMatrix44ValueAtSlice(unsigned int slice, unsigned int id, const Imath::M44f &value);
+	void setCol4ValueAtSlice(unsigned int slice, unsigned int id, const Imath::Color4f &value);
+	void setQuatValueAtSlice(unsigned int slice, unsigned int id, const Imath::Quatf &value);
+	int intValueAtSlice(unsigned int slice, unsigned int id);
+	float floatValueAtSlice(unsigned int slice, unsigned int id);
+	Imath::V3f vec3ValueAtSlice(unsigned int slice, unsigned int id);
+	Imath::M44f matrix44ValueAtSlice(unsigned int slice, unsigned int id);
+	Imath::Quatf quatValueAtSlice(unsigned int slice, unsigned int id);
+	Imath::Color4f col4ValueAtSlice(unsigned int slice, unsigned int id);
+	void setIntValuesSlice(unsigned int slice, const std::vector<int> &values);
+	void setFloatValuesSlice(unsigned int slice, const std::vector<float> &values);
+	void setVec3ValuesSlice(unsigned int slice, const std::vector<Imath::V3f> &values);
+	void setMatrix44ValuesSlice(unsigned int slice, const std::vector<Imath::M44f> &values);
+	void setCol4ValuesSlice(unsigned int slice, const std::vector<Imath::Color4f> &values);
+	void setQuatValuesSlice(unsigned int slice, const std::vector<Imath::Quatf> &values);
+	const std::vector<int> &intValuesSlice(unsigned int slice);
+	const std::vector<float> &floatValuesSlice(unsigned int slice);
+	const std::vector<Imath::V3f> &vec3ValuesSlice(unsigned int slice);
+	const std::vector<Imath::M44f> &matrix44ValuesSlice(unsigned int slice);
+	const std::vector<Imath::Quatf> &quatValuesSlice(unsigned int slice);
+	const std::vector<Imath::Color4f> &col4ValuesSlice(unsigned int slice);
+	std::string sliceAsString(unsigned int slice);
+
 private:
 	friend class NumericOperation;
 	
-	std::vector<int> _intValues;
-	std::vector<float> _floatValues;
-	std::vector<Imath::V3f > _vec3Values;
-	std::vector<Imath::Color4f > _col4Values;
-	std::vector<Imath::Quatf > _quatValues;
-	std::vector<Imath::M44f > _matrix44Values;
+	std::vector<std::vector<int> > _intValuesSliced;
+	std::vector<std::vector<float> > _floatValuesSliced;
+	std::vector<std::vector<Imath::V3f> > _vec3ValuesSliced;
+	std::vector<std::vector<Imath::Color4f> > _col4ValuesSliced;
+	std::vector<std::vector<Imath::M44f> > _matrix44ValuesSliced;
+	std::vector<std::vector<Imath::Quatf> > _quatValuesSliced;
 	bool _isArray;
 	Type _type;	
-	unsigned int _size;
+	unsigned int _slices;
 };
 
 }

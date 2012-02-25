@@ -7,52 +7,19 @@
 
 using namespace coral;
 
-LoopIteratorNode::LoopIteratorNode(const std::string &name, Node *parent): 
-Node(name, parent){
-	_index = new NumericAttribute("index", this);
-	
-	addInputAttribute(_index);
-	
-	setAttributeAllowedSpecialization(_index, "Int");
-}
-
-NumericAttribute *LoopIteratorNode::index(){
-	return _index;
-}
-
-void LoopIteratorNode::loopStart(unsigned int loopRangeSize){
-}
-
-void LoopIteratorNode::loopStep(unsigned int index){
-}
-
-void LoopIteratorNode::loopEnd(){
-}
-
-void LoopIteratorNode::update(Attribute *attribute){
-	int currentElement = _index->value()->intValueAt(0);
-	loopStep(currentElement);
-}
-
-ForLoopNode::ForLoopNode(const std::string &name, Node *parent): 
+LoopInputNode::LoopInputNode(const std::string &name, Node *parent):
 Node(name, parent),
 _selectedOperation(0){
-	setClassName("ForLoop");
-	setAllowDynamicAttributes(true);
-	
-	_array = new NumericAttribute("array", this);
-	_currentElement = new NumericAttribute("_currentElement", this);
-	_currentIndex = new NumericAttribute("_currentIndex", this);
-	_out = new PassThroughAttribute("out", this);
-	
-	addInputAttribute(_array);
-	addInputAttribute(_currentElement);
-	addInputAttribute(_currentIndex);
-	addOutputAttribute(_out);
-	
-	setAttributeAffect(_array, _out);
+	_globalArray = new NumericAttribute("globalArray", this);
+	_localElement = new NumericAttribute("localElement", this);
+	_localIndex = new NumericAttribute("localIndex", this);
 
-	setAttributeAllowedSpecialization(_currentIndex, "Int");
+	addInputAttribute(_globalArray);
+	addOutputAttribute(_localIndex);
+	addOutputAttribute(_localElement);
+
+	setAttributeAffect(_globalArray, _localIndex);
+	setAttributeAffect(_globalArray, _localElement);
 
 	std::vector<std::string> arraySpec;
 	arraySpec.push_back("IntArray");
@@ -60,8 +27,7 @@ _selectedOperation(0){
 	arraySpec.push_back("Vec3Array");
 	arraySpec.push_back("Col4Array");
 	arraySpec.push_back("Matrix44Array");
-
-	setAttributeAllowedSpecializations(_array, arraySpec);
+	setAttributeAllowedSpecializations(_globalArray, arraySpec);
 
 	std::vector<std::string> elementSpec;
 	elementSpec.push_back("Int");
@@ -69,13 +35,98 @@ _selectedOperation(0){
 	elementSpec.push_back("Vec3");
 	elementSpec.push_back("Col4");
 	elementSpec.push_back("Matrix44");
+	setAttributeAllowedSpecializations(_localElement, elementSpec);
 
-	setAttributeAllowedSpecializations(_currentElement, elementSpec);
+	setAttributeAllowedSpecialization(_localIndex, "Int");
 
-	addAttributeSpecializationLink(_currentElement, _array);
+	addAttributeSpecializationLink(_globalArray, _localElement);
 }
 
-void ForLoopNode::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+void LoopInputNode::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	if(specializationA.size() < specializationB.size()){
+		specializationB.resize(specializationA.size());
+		for(int i = 0; i < specializationA.size(); ++i){
+			specializationB[i] = stringUtils::strip(specializationA[i], "Array");
+		}
+	}
+	else if(specializationB.size() < specializationA.size()){
+		specializationA.resize(specializationB.size());
+		for(int i = 0; i < specializationB.size(); ++i){
+			specializationA[i] = specializationB[i] + "Array";
+		}
+	}
+}
+
+void LoopInputNode::attributeSpecializationChanged(Attribute *attribute){
+	if(attribute == _globalArray){
+		Numeric::Type type = _globalArray->outValue()->type();
+		if(type != Numeric::numericTypeAny){
+			if(type == Numeric::numericTypeIntArray){
+				_selectedOperation = &LoopInputNode::updateInt;
+			}
+			// else if(type == Numeric::numericTypeFloatArray){
+			// 	_selectedOperation = &LoopInputNode::updateFloat;
+			// }
+			// else if(type == Numeric::numericTypeVec3Array){
+			// 	_selectedOperation = &LoopInputNode::updateVec3;
+			// }
+			// else if(type == Numeric::numericTypeCol4Array){
+			// 	_selectedOperation = &LoopInputNode::updateCol4;
+			// }
+			// else if(type == Numeric::numericTypeMatrix44Array){
+			// 	_selectedOperation = &LoopInputNode::updateMatrix44;
+			// }
+		}
+	}
+}
+
+void LoopInputNode::updateInt(unsigned int slice, Numeric *globalArray, Numeric *localElement){
+	localElement->setIntValueAtSlice(slice, 0, globalArray->intValueAtSlice(0, slice));
+}
+
+void LoopInputNode::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		Numeric *globalArray = _globalArray->value();
+		Numeric *localElement = _localElement->outValue();
+		Numeric *localIndex = _localIndex->outValue();
+
+		localIndex->setIntValueAtSlice(slice, 0, slice);
+
+		(this->*_selectedOperation)(slice, globalArray, localElement);
+	}
+}
+
+LoopOutputNode::LoopOutputNode(const std::string &name, Node* parent): 
+Node(name, parent),
+_selectedOperation(0){
+	_localElement = new NumericAttribute("localElement", this);
+	_globalArray = new NumericAttribute("globalArray", this);
+	
+	addInputAttribute(_localElement);
+	addOutputAttribute(_globalArray);
+	
+	setAttributeAffect(_localElement, _globalArray);
+	
+	std::vector<std::string> elementSpec;
+	elementSpec.push_back("Int");
+	elementSpec.push_back("Float");
+	elementSpec.push_back("Vec3");
+	elementSpec.push_back("Col4");
+	elementSpec.push_back("Matrix44");
+	setAttributeAllowedSpecializations(_localElement, elementSpec);
+	
+	std::vector<std::string> arraySpec;
+	arraySpec.push_back("IntArray");
+	arraySpec.push_back("FloatArray");
+	arraySpec.push_back("Vec3Array");
+	arraySpec.push_back("Col4Array");
+	arraySpec.push_back("Matrix44Array");
+	setAttributeAllowedSpecializations(_globalArray, arraySpec);
+	
+	addAttributeSpecializationLink(_localElement, _globalArray);
+}
+
+void LoopOutputNode::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
 	if(specializationA.size() < specializationB.size()){
 		specializationB.resize(specializationA.size());
 		for(int i = 0; i < specializationA.size(); ++i){
@@ -90,161 +141,91 @@ void ForLoopNode::updateSpecializationLink(Attribute *attributeA, Attribute *att
 	}
 }
 
-void ForLoopNode::attributeSpecializationChanged(Attribute *attribute){
-	if(attribute == _array){
-		Numeric::Type type = _array->outValue()->type();
+void LoopOutputNode::attributeSpecializationChanged(Attribute *attribute){
+	if(attribute == _globalArray){
+		Numeric::Type type = _globalArray->outValue()->type();
 		if(type != Numeric::numericTypeAny){
 			if(type == Numeric::numericTypeIntArray){
-				_selectedOperation = &ForLoopNode::updateInt;
+				_selectedOperation = &LoopOutputNode::updateInt;
 			}
 			else if(type == Numeric::numericTypeFloatArray){
-				_selectedOperation = &ForLoopNode::updateFloat;
+				_selectedOperation = &LoopOutputNode::updateFloat;
 			}
 			else if(type == Numeric::numericTypeVec3Array){
-				_selectedOperation = &ForLoopNode::updateVec3;
+				_selectedOperation = &LoopOutputNode::updateVec3;
 			}
 			else if(type == Numeric::numericTypeCol4Array){
-				_selectedOperation = &ForLoopNode::updateCol4;
+				_selectedOperation = &LoopOutputNode::updateCol4;
 			}
 			else if(type == Numeric::numericTypeMatrix44Array){
-				_selectedOperation = &ForLoopNode::updateMatrix44;
+				_selectedOperation = &LoopOutputNode::updateMatrix44;
 			}
 		}
 	}
 }
 
-void ForLoopNode::addDynamicAttribute(Attribute *attribute){
-	Node::addDynamicAttribute(attribute);
-	
-	if(attribute->isOutput()){
-		setAttributeAffect(_array, attribute);
-	}
+void LoopOutputNode::updateInt(unsigned int slice, Numeric *element, Numeric *array){
+	array->setIntValueAt(slice, element->intValueAtSlice(slice, 0));
 }
 
-void ForLoopNode::collectLoopOperators(std::vector<LoopIteratorNode*> &loopOperators){
-	std::vector<Node*> childrenNodes = nodes();
-	for(int i = 0; i < childrenNodes.size(); ++i){
-		Node *childNode = childrenNodes[i];
-		
-		LoopIteratorNode *loopOperator = dynamic_cast<LoopIteratorNode*>(childNode);
-		if(loopOperator){
-			loopOperators.push_back(loopOperator);
-		}
-	}
+void LoopOutputNode::updateFloat(unsigned int slice, Numeric *element, Numeric *array){
+	// array->setFloatValueAtSlice(index, element->floatValueAtSlice(slice, 0));
 }
 
-void ForLoopNode::getSubCleanChain(Attribute *attribute, std::map<int, std::vector<Attribute*> > &subCleanChain){
-	std::vector<Attribute*> attributes;
-	if(attribute->input()){
-		NetworkManager::getUpstreamChain(attribute->input(), attributes);
-	}
-	
-	int n = 0;
-	for(int i = 0; i < attributes.size(); ++i){
-		Attribute *attr = attributes[i];
-		if(attr->isOutput()){
-			Node *parentNode = attr->parent();
-			if(parentNode){
-				if(parentNode->parent() == this){
-					subCleanChain[n].push_back(attr);
-
-					n++;
-				}
-				
-				// if(parentNode->isChildOf(this)){
-				// 	subCleanChain[n].push_back(attr);
-				// 	n++;
-				// }
-			}
-		}
-	}
+void LoopOutputNode::updateVec3(unsigned int slice, Numeric *element, Numeric *array){
+	// array->setVec3ValueAtSlice(index, element->vec3ValueAtSlice(slice, 0));
 }
 
-void ForLoopNode::subClean(std::map<int, std::vector<Attribute*> > &subCleanChain){
-	for(std::map<int, std::vector<Attribute*> >::iterator i = subCleanChain.begin(); i != subCleanChain.end(); ++i){
-		std::vector<Attribute*> &slice = i->second;
-		for(int j = 0; j < slice.size(); ++j){
-			Attribute *attr = slice[j];
-			attr->parent()->update(attr);
-		}
-	}
+void LoopOutputNode::updateCol4(unsigned int slice, Numeric *element, Numeric *array){
+	// array->setCol4ValueAtSlice(index, element->col4ValueAtSlice(slice, 0));
 }
 
-void ForLoopNode::updateInt(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain){
-	const std::vector<int> &arrayValues = array->intValues();
-	for(int i = 0; i < arrayValues.size(); ++i){
-		currentElement->setIntValueAt(0, arrayValues[i]);
-		currentIndex->setIntValueAt(0, i);
-
-		subClean(subCleanChain);
-	}
+void LoopOutputNode::updateMatrix44(unsigned int slice, Numeric *element, Numeric *array){
+	// array->setMatrix44ValueAtSlice(index, element->matrix44ValueAt(slice, 0));
 }
 
-void ForLoopNode::updateFloat(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain){
-	const std::vector<float> &arrayValues = array->floatValues();
-	for(int i = 0; i < arrayValues.size(); ++i){
-		currentElement->setFloatValueAt(0, arrayValues[i]);
-		currentIndex->setIntValueAt(0, i);
-
-		subClean(subCleanChain);
-	}
-}
-
-void ForLoopNode::updateVec3(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain){
-	const std::vector<Imath::V3f> &arrayValues = array->vec3Values();
-	for(int i = 0; i < arrayValues.size(); ++i){
-		currentElement->setVec3ValueAt(0, arrayValues[i]);
-		currentIndex->setIntValueAt(0, i);
-
-		subClean(subCleanChain);
-	}
-}
-
-void ForLoopNode::updateCol4(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain){
-	const std::vector<Imath::Color4f> &arrayValues = array->col4Values();
-	for(int i = 0; i < arrayValues.size(); ++i){
-		currentElement->setCol4ValueAt(0, arrayValues[i]);
-		currentIndex->setIntValueAt(0, i);
-
-		subClean(subCleanChain);
-	}
-}
-
-void ForLoopNode::updateMatrix44(Numeric *array, Numeric *currentElement, Numeric *currentIndex, std::map<int, std::vector<Attribute*> > &subCleanChain){
-	const std::vector<Imath::M44f> &arrayValues = array->matrix44Values();
-	for(int i = 0; i < arrayValues.size(); ++i){
-		currentElement->setMatrix44ValueAt(0, arrayValues[i]);
-		currentIndex->setIntValueAt(0, i);
-
-		subClean(subCleanChain);
-	}
-}
-
-void ForLoopNode::update(Attribute *attribute){
+void LoopOutputNode::updateSlice(Attribute *attribute, unsigned int slice){
 	if(_selectedOperation){
-		Numeric *currentElement = _currentElement->outValue();
-		Numeric *currentIndex = _currentIndex->outValue();
-		Numeric *array = _array->value();
+		Numeric *element = _localElement->value();
+		Numeric *array = _globalArray->outValue();
+		
+		array->resize(element->slices());
 
-		int loopRangeSize = array->size();
-		
-		std::map<int, std::vector<Attribute*> > subCleanChain;
-		getSubCleanChain(attribute, subCleanChain);
-		
-		std::vector<LoopIteratorNode*> loopOperators;
-		collectLoopOperators(loopOperators);
-		int loopOperatorsSize = loopOperators.size();
-		
-		for(int i = 0; i < loopOperatorsSize; ++i){
-			loopOperators[i]->loopStart(loopRangeSize);
-		}
-		
-		(this->*_selectedOperation)(array, currentElement, currentIndex, subCleanChain);
-		
-		for(int i = 0; i < loopOperatorsSize; ++i){
-			loopOperators[i]->loopEnd();
-		}
+		(this->*_selectedOperation)(slice, element, array);
 	}
 }
 
+ForLoopNode::ForLoopNode(const std::string &name, Node *parent): 
+Node(name, parent){
+	setAllowDynamicAttributes(true);
+	setIsSlicer(true);
+	setUpdateEnabled(false);
 
+	_globalArray = new NumericAttribute("globalArray", this);
+	_out = new PassThroughAttribute("out", this);
+	
+	addInputAttribute(_globalArray);
+	addOutputAttribute(_out);
+	
+	setAttributeAffect(_globalArray, _out);
+
+	std::vector<std::string> arraySpec;
+	arraySpec.push_back("IntArray");
+	arraySpec.push_back("FloatArray");
+	arraySpec.push_back("Vec3Array");
+	arraySpec.push_back("Col4Array");
+	arraySpec.push_back("Matrix44Array");
+	setAttributeAllowedSpecializations(_globalArray, arraySpec);
+}
+
+// void ForLoopNode::addDynamicAttribute(Attribute *attribute){
+// 	Node::addDynamicAttribute(attribute);
+	
+// 	if(attribute->isOutput()){
+// 		setAttributeAffect(_globalArray, attribute);
+// 	}
+// }
+
+unsigned int ForLoopNode::computeSlices(){
+	return _globalArray->value()->sizeSlice(0);
+}
