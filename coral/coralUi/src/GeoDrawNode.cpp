@@ -36,14 +36,14 @@ using namespace coral;
 using namespace coralUi;
 
 GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent)
-  : DrawNode(name, parent)
-  , _shouldUpdateGeoVBO(true)
-  , _shouldUpdateColorVBO(true)
-  , _shouldUpdateTexture(false)
-  , _vtxCount(0)
-  , _nrmCount(0)
-  , _uvCount(0)
-  , _idxCount(0)
+  : DrawNode(name, parent), 
+  _shouldUpdateGeoVBO(true), 
+  _shouldUpdateColorVBO(true), 
+  _shouldUpdateTexture(false), 
+  _vtxCount(0), 
+  _nrmCount(0), 
+  _uvCount(0), 
+  _idxCount(0)
 {	
 	_geo = new GeoAttribute("geo", this);
 	_smooth = new BoolAttribute("smooth", this);
@@ -552,8 +552,6 @@ void GeoDrawNode::drawNormals(Geo *geo, bool shouldDrawFlat){
 
 
 void GeoDrawNode::draw(){
-	DrawNode::draw();
-
 	bool shouldDrawSmooth = _smooth->value()->boolValueAt(0);
 	bool shouldDrawFlat = _flat->value()->boolValueAt(0);
 	bool shouldDrawWireframe = _wireframe->value()->boolValueAt(0);
@@ -566,20 +564,20 @@ void GeoDrawNode::draw(){
 	if(geo->pointsCount() == 0)
 		return;
 
-	if(_shouldUpdateGeoVBO){
+	//if(_shouldUpdateGeoVBO){
 		updateGeoVBO();
-		_shouldUpdateGeoVBO = false;
-	}
+		//_shouldUpdateGeoVBO = false;
+	//}
 	
-	if(_shouldUpdateColorVBO){
+	//if(_shouldUpdateColorVBO){
 		updateColorVBO();
-		_shouldUpdateColorVBO = false;
-	}
+		//_shouldUpdateColorVBO = false;
+	//}
 
-	if(_shouldUpdateTexture){
-		updateTexture();
-		_shouldUpdateTexture = false;
-	}
+	// if(_shouldUpdateTexture){
+	// 	updateTexture();
+	// 	_shouldUpdateTexture = false;
+	// }
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_POINT_BIT);
 
@@ -614,10 +612,6 @@ void GeoDrawNode::draw(){
 			}
 		}
 	}
-	
-	// if(shouldDrawIds){
-	// 	drawPointIds(geo);
-	// }
 	
 	glPopAttrib();
 }

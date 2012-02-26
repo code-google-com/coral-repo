@@ -44,12 +44,13 @@ namespace {
 	#ifdef CORAL_PARALLEL_TBB
 		tbb::mutex _globalMutex;
 	#endif
+
+	std::vector<DrawNode*> _drawNodes;
+	bool _renderScheduled = false;
+	bool _initialized = false;
 }
 
-std::vector<DrawNode*> _drawNodes;
 void(*MainDrawRoutine::_viewportRefreshCallback)(void) = 0;
-bool _renderScheduled = false;
-bool _initialized = false;
 
 void MainDrawRoutine::init(){
 	if(!_initialized){
