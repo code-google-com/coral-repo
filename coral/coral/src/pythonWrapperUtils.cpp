@@ -26,18 +26,7 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#include "pythonWrapperUtils.h"
 
-// #ifndef VIEWPORTOUTPUTATTRIBUTEWRAPPER_H
-// #define VIEWPORTOUTPUTATTRIBUTEWRAPPER_H
-
-// #include <coral/src/pythonWrapperUtils.h>
-
-// #include "ViewportOutputAttribute.h"
-
-// using namespace coralUi;
-
-// void viewportOutputAttributeWrapper(){
-// 	coral::pythonWrapperUtils::pythonWrapper<ViewportOutputAttribute, coral::Attribute>("ViewportOutputAttribute");
-// }
-
-// #endif
+//CORAL_EXPORT
+bool coral::pythonWrapperUtils::pyGILEnsured = false;

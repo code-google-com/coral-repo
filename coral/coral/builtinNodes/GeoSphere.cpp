@@ -58,7 +58,7 @@ void GeoSphere::updateSlice(Attribute *attribute, unsigned int slice){
 	float radius = _radius->value()->floatValueAt(0);
 	int rings = _rings->value()->intValueAt(0);
 	int sectors = _sectors->value()->intValueAt(0);
-	
+
 	if(rings < 2){
 		rings = 2;
 		_rings->outValue()->setIntValueAt(0, 2);
@@ -67,51 +67,84 @@ void GeoSphere::updateSlice(Attribute *attribute, unsigned int slice){
 		sectors = 3;
 		_sectors->outValue()->setIntValueAt(0, 3);
 	}
-	
-	int totalFaces = rings * sectors;
-	int totalPoints = totalFaces + rings + sectors + 1;
+
+	int totalFaces = (rings - 2) * sectors;
 	
 	float ringStep = 1.0 / rings;
 	float sectorStep = 1.0 / sectors;
 	
 	int i = 0;
-	std::vector<Imath::V3f> points(totalPoints);
+	std::vector<Imath::V3f> points;
 	
-	for(int ring = 0; ring <= rings; ring++){
-		float closingOffset = - sin(-M_PI_2 + M_PI * ring * ringStep) * 0.001; // prevents intersection artifacts at both ends of the sphere
-		
-		for(int sector = 0; sector <= sectors; sector++){
-			float y = sin( -M_PI_2 + M_PI * (float(ring) + closingOffset) * ringStep) * radius;
-			float x = cos(2*M_PI * (float(sector) + closingOffset) * sectorStep) * sin( M_PI * (float(ring) + closingOffset) * ringStep ) * radius;
-			float z = sin(2*M_PI * (float(sector) + closingOffset) * sectorStep) * sin( M_PI * (float(ring) + closingOffset) * ringStep ) * radius;
+	points.push_back(Imath::V3f(0.0, -radius, 0.0));
+
+	for(int ring = 1; ring < rings; ring++){
+		for(int sector = 0; sector < sectors; sector++){
+			float y = sin( -M_PI_2 + M_PI * (float(ring)) * ringStep) * radius;
+			float x = cos(2*M_PI * (float(sector)) * sectorStep) * sin( M_PI * (float(ring)) * ringStep ) * radius;
+			float z = sin(2*M_PI * (float(sector)) * sectorStep) * sin( M_PI * (float(ring)) * ringStep ) * radius;
 			
-			points[i] = Imath::V3f(x, y, z);
+			points.push_back(Imath::V3f(x, y, z));
 			i++;
 		}
 	}
+
+	points.push_back(Imath::V3f(0.0, radius, 0.0));
+
+	std::vector<std::vector<int> > faces;
+	std::vector<int> faceVertices(3);
 	
-	std::vector<std::vector<int> > faces(totalFaces);
-	std::vector<int> faceVertices(4);
-	
-	for(int faceId = 0; faceId < totalFaces; ++faceId){
-		int row = (faceId / sectors);
-		
-		faceVertices[3] = (faceId + row);
-		faceVertices[2] = (faceId + row + 1);
-		faceVertices[1] = (faceId + row + sectors + 2);
-		faceVertices[0] = (faceId + row + sectors + 1);
-		
-		// welding end vertices
-		if(faceVertices[2] == ((sectors * (row + 1)) + row)){
-			faceVertices[2] = (sectors * row) + row;
+	for(int i = 0; i < sectors; ++i){
+		faceVertices[0] = 0;
+		faceVertices[1] = i + 1;
+		faceVertices[2] = i + 2;
+
+		if(i == sectors - 1){
+			faceVertices[2] = 1;
 		}
-		
-		if(faceVertices[1] == (sectors * (row + 2)) + row + 1){
-			faceVertices[1] = (sectors * (row + 1)) + row + 1;
-		}
-		
-		faces[faceId] = faceVertices;
+
+		faces.push_back(faceVertices);
 	}
 
-	_out->outValue()->build(points, faces);
+	faceVertices.resize(4);
+	for(int i = 1; i < rings - 1; ++i){
+		for(int j = 0; j < sectors; ++j){
+			faceVertices[0] = ((sectors * i) - sectors) + j + 1;
+			faceVertices[1] = (sectors * i) + j + 1;
+			faceVertices[2] = (sectors * i) + j + 2;
+			faceVertices[3] = ((sectors * i) - sectors) + j + 2;
+
+			if(j == sectors - 1){
+				faceVertices[2] -= sectors;
+				faceVertices[3] -= sectors;
+			}
+
+			faces.push_back(faceVertices);
+		}
+	}
+
+	int lastPoint = points.size() - 1;
+
+	faceVertices.resize(3);
+	for(int i = 0; i < sectors; ++i){
+		faceVertices[0] = lastPoint;
+		faceVertices[2] = ((sectors * (rings - 1)) - sectors) + i + 1;
+		faceVertices[1] = ((sectors * (rings - 1)) - sectors) + i + 2;
+
+		if(i == sectors - 1){
+			faceVertices[1] -= sectors;
+		}
+
+		faces.push_back(faceVertices);
+	}
+
+	std::vector<Imath::V2f> uvs;
+	
+	for(int ring = 0; ring < rings; ring++){
+		for(int sector = 0; sector < sectors; sector++){
+			uvs.push_back(Imath::V2f(ringStep * ring, sectorStep * sector));
+		}
+	}
+	
+	_out->outValue()->build(points, faces, uvs);
 }

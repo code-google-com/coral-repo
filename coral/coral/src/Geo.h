@@ -197,6 +197,7 @@ public:
 	int facesCount() const;
 	const std::vector<Imath::V3f> &faceNormals();
 	const std::vector<Imath::V3f> &verticesNormals();
+	void setVerticesNormals(const std::vector<Imath::V3f> &normals);
 	void setPoints(const std::vector<Imath::V3f> &points);
 	void displacePoints(const std::vector<Imath::V3f> &displacedPoints);
 	bool hasSameTopology(const std::vector<std::vector<int> > &faces) const;
@@ -215,6 +216,7 @@ private:
 	bool _faceNormalsDirty;
 	bool _verticesNormalsDirty;
 	bool _alignmentDataDirty;
+	bool _overrideVerticesNormals;
 
 	std::vector<std::vector<int> > _rawFaces;
 	std::vector<Face> _faces;

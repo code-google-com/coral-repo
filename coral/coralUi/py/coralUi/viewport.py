@@ -62,9 +62,14 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
     pan = 2
     timedRefresh = 0
     immediateRefresh = 1
+    _sharedWidget = None
         
     def __init__(self, parent = None):
-        QtOpenGL.QGLWidget.__init__(self, QtOpenGL.QGLFormat(QtOpenGL.QGL.SampleBuffers), parent)
+        if ViewportGlWidget._sharedWidget:
+            QtOpenGL.QGLWidget.__init__(self, parent, ViewportGlWidget._sharedWidget)
+        else:
+            ViewportGlWidget._sharedWidget = self
+            QtOpenGL.QGLWidget.__init__(self, QtOpenGL.QGLFormat(QtOpenGL.QGL.SampleBuffers), parent)
         
         self.makeCurrent()
         self._viewport = _coralUi.Viewport()
@@ -79,7 +84,7 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
         ViewportData._viewports.append(weakref.ref(self._viewport))
 
         self._timer = -1
-    
+
     def _changeRefreshMode(self, mode):
         if mode == ViewportGlWidget.timedRefresh:
             if self._timer == -1:
@@ -90,14 +95,30 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
                 self._timer = -1
         
     def timerEvent(self, event):
+        self.makeCurrent()
         self.updateGL()
-    
-    def __del__(self):
+
+    def closeEvent(self, event):
+        self._viewport = None
+
+        self._removeGlobally()
+
+        QtCore.QObject.disconnect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportUpdateGL"), self, QtCore.SLOT("updateGL()"))
+        QtCore.QObject.disconnect(mainWindow.MainWindow.globalInstance(), QtCore.SIGNAL("coralViewportRefreshMode(int)"), self._changeRefreshMode)
+
+        if self._timer:
+            self.killTimer(self._timer)
+            self._timer = -1
+
+    def _removeGlobally(self):
         for viewportRef in ViewportData._viewports:
             viewport = viewportRef()
             if viewport is self._viewport:
                 del ViewportData._viewports[ViewportData._viewports.index(viewportRef)]
                 break
+    
+    def __del__(self):
+        self._removeGlobally()
     
     def minimumSizeHint(self):
         return QtCore.QSize(100, 100)
@@ -106,16 +127,19 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
         return QtCore.QSize(500, 500)
     
     def initializeGL(self):
+        self.makeCurrent()
         self._viewport.initializeGL()
 
         self._dirtyCameraNodes()
 
     def resizeGL(self, w, h):
+        self.makeCurrent()
         self._viewport.resizeGL(w, h)
 
         self._dirtyCameraNodes()
 
     def paintGL(self):
+        self.makeCurrent()
         self._viewport.draw()
 
     def keyPressEvent(self, qKeyEvent):
@@ -137,12 +161,14 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
             self._mode = ViewportGlWidget.pan
         
     def mouseReleaseEvent(self, qMouseEvent):
+        self.makeCurrent()
         self._pressed = False
         self._mode = 0
 
         self._dirtyCameraNodes()
         
     def mouseMoveEvent(self, qMouseEvent):
+        self.makeCurrent()
         if self._pressed:
             pos = qMouseEvent.pos()
             deltaPos = pos - self._oldPos
@@ -157,6 +183,7 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
             self.updateGL()
             
     def wheelEvent(self, qWheelEvent):
+        self.makeCurrent()
         if qWheelEvent.orientation() == QtCore.Qt.Vertical:
             self._viewport.dolly(int(qWheelEvent.delta() * -0.1))
             
@@ -165,6 +192,7 @@ class ViewportGlWidget(QtOpenGL.QGLWidget):
             self._dirtyCameraNodes()
     
     def _dirtyCameraNodes(self):
+        self.makeCurrent()
         for cameraNodeRef in ViewportData._cameraNodes:
             cameraNode = cameraNodeRef()
             cameraNode.cameraChanged()
@@ -224,4 +252,13 @@ class ViewportWidget(QtGui.QWidget):
         if not ViewportWidget._initialized:
             coralApp.addNetworkLoadedObserver(ViewportWidget._networkLoadedObserver, ViewportWidget.refreshViewports)
             ViewportWidget._initialized = True
+
+    def closeEvent(self, event):
+        if self._viewportGlWidget:
+            self._viewportGlWidget.close()
+
+            if self._viewportGlWidget is not ViewportGlWidget._sharedWidget:
+                # we will leave ViewportGlWidget._sharedWidget alive to guarantee the first context created doesn't get destroyed
+                self._viewportGlWidget = None
+                self.destroy()
 

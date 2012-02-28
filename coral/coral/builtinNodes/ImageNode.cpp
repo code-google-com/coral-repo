@@ -52,6 +52,7 @@ void ImageNode::updateSlice(Attribute *attribute, unsigned int slice){
 	filename = NetworkManager::resolveFilename(filename);
 
 	if(!filename.empty()){
+
 		_image->outValue()->load(filename.c_str());
 	}
 }

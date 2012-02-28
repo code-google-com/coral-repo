@@ -35,10 +35,16 @@
 using namespace coral;
 using namespace coralUi;
 
-GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent): 
-DrawNode(name, parent),
-_shouldUpdateGeoVBO(true),
-_shouldUpdateColorVBO(true){	
+GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent)
+  : DrawNode(name, parent), 
+  _shouldUpdateGeoVBO(true), 
+  _shouldUpdateColorVBO(true), 
+  _shouldUpdateTexture(false), 
+  _vtxCount(0), 
+  _nrmCount(0), 
+  _uvCount(0), 
+  _idxCount(0)
+{	
 	_geo = new GeoAttribute("geo", this);
 	_smooth = new BoolAttribute("smooth", this);
 	_flat = new BoolAttribute("flat", this);
@@ -546,8 +552,6 @@ void GeoDrawNode::drawNormals(Geo *geo, bool shouldDrawFlat){
 
 
 void GeoDrawNode::draw(){
-	DrawNode::draw();
-
 	bool shouldDrawSmooth = _smooth->value()->boolValueAt(0);
 	bool shouldDrawFlat = _flat->value()->boolValueAt(0);
 	bool shouldDrawWireframe = _wireframe->value()->boolValueAt(0);
@@ -608,10 +612,6 @@ void GeoDrawNode::draw(){
 			}
 		}
 	}
-	
-	// if(shouldDrawIds){
-	// 	drawPointIds(geo);
-	// }
 	
 	glPopAttrib();
 }

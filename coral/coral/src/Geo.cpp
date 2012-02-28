@@ -39,7 +39,8 @@ Geo::Geo():
 _faceNormalsDirty(true),
 _verticesNormalsDirty(true),
 _topologyStructuresDirty(true),
-_alignmentDataDirty(true){
+_alignmentDataDirty(true),
+_overrideVerticesNormals(false){
 }
 
 void Geo::copy(const Geo *other){
@@ -47,8 +48,16 @@ void Geo::copy(const Geo *other){
 	
 	_points = other->_points;
 	_rawFaces = other->_rawFaces;
+	if(other->_overrideVerticesNormals){
+		_verticesNormals = other->_verticesNormals;
+		_overrideVerticesNormals = true;
+	}
 }
 
+void Geo::setVerticesNormals(const std::vector<Imath::V3f> &normals){
+	_verticesNormals = normals;
+	_overrideVerticesNormals = true;
+}
 
 const std::vector<Imath::V3f> &Geo::points(){
 	return _points;
@@ -106,6 +115,7 @@ void Geo::setPoints(const std::vector<Imath::V3f> &points){
 
 		_faceNormalsDirty = true;
 		_verticesNormalsDirty = true;
+		_overrideVerticesNormals = false;
 	}
 }
 
@@ -128,6 +138,7 @@ void Geo::displacePoints(const std::vector<Imath::V3f> &displacedPoints){
 
 	_faceNormalsDirty = true;
 	_verticesNormalsDirty = true;
+	_overrideVerticesNormals = false;
 }
 
 void Geo::clear(){
@@ -238,38 +249,40 @@ const std::vector<Imath::V3f> &Geo::faceNormals(){
 }
 
 const std::vector<Imath::V3f> &Geo::verticesNormals(){
-	#ifdef CORAL_PARALLEL_TBB
-		tbb::mutex::scoped_lock lock(_localMutex);
-	#endif
-	
-	if(_verticesNormalsDirty){
-		if(_faceNormalsDirty){
-			cacheFaceNormals();
-		}
+	if(_overrideVerticesNormals){
+		return _verticesNormals;
+	}
+	else{
+		#ifdef CORAL_PARALLEL_TBB
+			tbb::mutex::scoped_lock lock(_localMutex);
+		#endif
 		
-		int verticesCount = (int)_points.size();
-		_verticesNormals.resize(verticesCount);
+		if(_verticesNormalsDirty){
+			if(_faceNormalsDirty){
+				cacheFaceNormals();
+			}
+			
+			int verticesCount = (int)_points.size();
+			_verticesNormals.resize(verticesCount);
 
-		for(int vertexID = 0; vertexID < verticesCount; ++vertexID){
-			std::vector<int> &faces = _vertexFaces[vertexID];
+			for(int vertexID = 0; vertexID < verticesCount; ++vertexID){
+				std::vector<int> &faces = _vertexFaces[vertexID];
 
-			Imath::V3f vertexNormal(0.f, 0.f, 0.f);
+				Imath::V3f vertexNormal(0.f, 0.f, 0.f);
+				for(unsigned int index = 0; index < faces.size(); ++index){
+					int faceID = faces[index];
 
-			for(unsigned int index = 0; index < faces.size(); ++index){
-				int faceID = faces[index];
+					vertexNormal += _faceNormals[faceID];
+				}
 
-				vertexNormal += _faceNormals[faceID];
+				vertexNormal.normalize();
+
+				_verticesNormals[vertexID].setValue(vertexNormal);
 			}
 
-			vertexNormal /= faces.size();
-			vertexNormal.normalize();
-
-			_verticesNormals[vertexID].setValue(vertexNormal);
+			_verticesNormalsDirty = false;
 		}
-
-		_verticesNormalsDirty = false;
 	}
-	
 	return _verticesNormals;
 }
 

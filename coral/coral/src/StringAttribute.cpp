@@ -26,16 +26,60 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-// #include "ViewportOutputAttribute.h"
-// #include "MainDrawRoutine.h"
+#include "StringAttribute.h"
 
-// using namespace coral;
-// using namespace coralUi;
+using namespace coral;
 
-// ViewportOutputAttribute::ViewportOutputAttribute(const std::string &name, Node *parent): Attribute(name, parent){
-// 	setClassName("ViewportOutputAttribute");
-// }
+void String::setStringValue(std::string value)
+{
+	_value = value;
+}
 
-// void ViewportOutputAttribute::onDirtied(){
-// 	MainDrawRoutine::scheduleRender();
-// }
+const std::string& String::stringValue()
+{
+	return _value;
+}
+
+std::string String::asString()
+{
+	std::string val = stringUtils::replace(_value, "\n", "\\n");
+	return val;
+}
+
+void String::setFromString(const std::string &value)
+{
+	_value = value;
+}
+
+StringAttribute::StringAttribute(const std::string &name, Node *parent)
+	: Attribute(name, parent)
+	, _longString(false)
+{
+	setClassName("StringAttribute");
+	String *ptr = new String();
+	setValuePtr(ptr);
+	
+	std::vector<std::string> allowedSpecialization;
+	allowedSpecialization.push_back("String");
+	setAllowedSpecialization(allowedSpecialization);
+}
+
+String* StringAttribute::value()
+{
+	return (String*)Attribute::value();
+}
+
+String* StringAttribute::outValue()
+{
+	return (String*)Attribute::outValue();
+}
+
+void StringAttribute::setLongString(bool value)
+{
+	_longString = value;
+}
+
+bool StringAttribute::longString()
+{
+	return _longString;
+}

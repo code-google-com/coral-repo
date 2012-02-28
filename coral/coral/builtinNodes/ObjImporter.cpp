@@ -137,7 +137,7 @@ bool readLine(std::istream& stream, std::vector<Imath::V3f> &vertices, std::vect
 			stream.clear();
 			skipLine(stream);
 		}
-		// normals.push_back(Imath::V3f(x, y, z));
+		normals.push_back(Imath::V3f(x, y, z));
 	}
 
 	else if(s == "f"){
@@ -232,4 +232,7 @@ void ObjImporter::updateSlice(Attribute *attribute, unsigned int slice){
 	stream.close();
 	
 	_geo->outValue()->build(vertices, faces, uvs);
+	if(normals.size()){
+		_geo->outValue()->setVerticesNormals(normals);
+	}
 }

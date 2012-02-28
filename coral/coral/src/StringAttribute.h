@@ -36,63 +36,38 @@
 
 namespace coral{
 
-//! Wraps an std::string, used by StringAttribute.
-class CORAL_EXPORT String : public Value{
-public:
-	void setStringValue(std::string value){
-		_value = value;
-	}
+	//! Wraps an std::string, used by StringAttribute.
+	class CORAL_EXPORT String : public Value{
+	public:
+		void setStringValue(std::string value);
 
-	const std::string &stringValue(){
-		return _value;
-	}
+		const std::string &stringValue();
 	
-	std::string asString(){
-		std::string val = stringUtils::replace(_value, "\n", "\\n");
-		return val;
-	}
+		std::string asString();
 	
-	void setFromString(const std::string &value){
-		_value = value;
-	}
+		void setFromString(const std::string &value);
 
-private:
-	std::string _value;
-};
+	private:
+		std::string _value;
+	};
 
-//! Stores a String value and allows for strings to be manipulated by a Node.	
-class CORAL_EXPORT StringAttribute: public Attribute{
-public:
-	StringAttribute(const std::string &name, Node *parent) : 
-		Attribute(name, parent),
-		_longString(false){
-		setClassName("StringAttribute");
-		setValuePtr(new String());
-		
-		std::vector<std::string> allowedSpecialization;
-		allowedSpecialization.push_back("String");
-		setAllowedSpecialization(allowedSpecialization);
-	}
+	//! Stores a String value and allows for strings to be manipulated by a Node.	
+	class CORAL_EXPORT StringAttribute: public Attribute{
+	public:
+		StringAttribute(const std::string &name, Node *parent);
 
-	String *value(){
-		return (String*)Attribute::value();
-	}
-	String *outValue(){
-		return (String*)Attribute::outValue();
-	}
+		String *value();
 
-	/*! Will display this attribute in the NodeInspector as an aditable text box, rather then the usual one-line field.*/
-	void setLongString(bool value){
-		_longString = value;
-	}
+		String *outValue();
 
-	bool longString(){
-		return _longString;
-	}
+		/*! Will display this attribute in the NodeInspector as an aditable text box, rather then the usual one-line field.*/
+		void setLongString(bool value);
 
-private:
-	bool _longString;
-};
+		bool longString();
+
+	private:
+		bool _longString;
+	};
 
 }
 

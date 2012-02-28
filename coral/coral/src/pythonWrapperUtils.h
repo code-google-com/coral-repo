@@ -38,7 +38,7 @@
 namespace coral{
 
 namespace pythonWrapperUtils{
-	bool pyGILEnsured = false;
+	extern bool pyGILEnsured;
 
 	template <class T>
 	struct stdVectorToPythonList

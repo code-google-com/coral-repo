@@ -87,3 +87,4 @@ void DrawNode::attributeDirtied(Attribute *attribute){
 void DrawNode::attributeConnectionChanged(Attribute *attribute){
 	MainDrawRoutine::_viewportRefreshCallback();
 }
+
