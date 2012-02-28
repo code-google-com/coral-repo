@@ -73,8 +73,6 @@ std::map<std::string, Numeric> _globalNumericStorage;
 
 
 IntNode::IntNode(const std::string &name, Node* parent): Node(name, parent){
-	setSliceable(false);
-	
 	_out = new NumericAttribute("out", this);
 	addOutputAttribute(_out);
 	

@@ -34,7 +34,6 @@
 #include "mainDrawRoutineWrapper.h"
 #include "drawNodeWrapper.h"
 #include "geoDrawNodeWrapper.h"
-#include "numericDrawNodeWrapper.h"
 #include "DrawPointNode.h"
 #include "DrawLineNode.h"
 #include "DrawMatrixNode.h"
@@ -47,7 +46,6 @@ BOOST_PYTHON_MODULE(_coralUi){
 	// viewportOutputAttributeWrapper();
 	drawNodeWrapper();
 	geoDrawNodeWrapper();	// TODO put every function that have only have one line here
-	numericDrawNodeWrapper();
 	mainDrawRoutineWrapper();
 	viewportWrapper();
 

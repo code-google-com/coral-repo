@@ -53,12 +53,9 @@ public:
 	virtual void initGL();
 	virtual void attributeDirtied(coral::Attribute *attribute);
 	virtual void attributeConnectionChanged(coral::Attribute *attribute);
-
-	//ViewportOutputAttribute *viewportOutputAttribute();
+	virtual void drawSlice(unsigned int slice);
+	
 	bool glContextExists();
-
-private:
-	//ViewportOutputAttribute *_viewportOutput;
 };
 
 }

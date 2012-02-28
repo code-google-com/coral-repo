@@ -77,9 +77,11 @@ public:
 	void enableSpecializationPreset(const std::string &preset);
 	std::string enabledSpecializationPreset();
 
-	//! indicates if this node will be sliced for parallel execution when inside a loop node.
-	bool sliceable();
-	
+	unsigned int slices();
+
+	//! returns the parent node in charge of imposing the number of slices such as a ForLoop node, if there's no slicer this value is NULL.
+	Node *slicer();
+
 	//!returns all the available presets for this node.
 	std::vector<std::string> specializationPresets();
 
@@ -109,6 +111,14 @@ public:
 	virtual void removeDynamicAttribute(Attribute *attribute);
 	virtual void updateSlice(Attribute *attribute, unsigned int slice);
 
+	//! This method is invoked before updateSlice if there is a change in the number of slices imposed by the slicer.
+	//! Overriding this method is often handy when a node has some internal data that needs to be sliced accordingly. 
+	virtual void resizedSlices(unsigned int slices);
+
+	//! This method should be reimplemented by slicer nodes such as the ForLoop node, 
+	//! every node contained in a slicer node will ask its slicer node for the number of slices before to start computing.
+	virtual unsigned int computeSlices();
+
 	static void(*_addNodeCallback)(Node *self, Node *node);
 	static void(*_removeNodeCallback)(Node *self, Node *node);
 	static void(*_addInputAttributeCallback)(Node *self, Attribute *attribute);
@@ -130,17 +140,9 @@ protected:
 	void setSpecializationPreset(const std::string &presetName, Attribute *attribute, const std::string &specialization);
 	void catchAttributeDirtied(Attribute *attribute, bool value = true);
 	
-	//! Indicates if this node will be sliced for parallel execution when inside a loop node.
-	//! Nodes without input attributes should be set to non sliceable because their product doesn't change from one iteration to the other. 
-	void setSliceable(bool value);
-
 	//! Loop nodes such as the ForLoop node are marked as setIsSlicer(true) and they compute a slicing count for their children nodes by overriding the 
 	//! virtual method unsigned int computeSlices().
 	void setIsSlicer(bool value);
-
-	//! This method should be reimplemented by slicer nodes such as the ForLoop node, 
-	//! every node contained by a slicer node will ask its slicer parent node for the number of slices before to start computing.
-	virtual unsigned int computeSlices();
 
 private:
 	friend class NodeAccessor;
@@ -171,7 +173,6 @@ private:
 	unsigned int _slices;
 	bool _isSlicer;
 	Node *_slicer;
-	bool _sliceable;
 
 	Node();
 	Node(const Node &other);

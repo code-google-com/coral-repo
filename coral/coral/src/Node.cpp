@@ -73,8 +73,7 @@ Node::Node(const std::string &name, Node *parent):
 	_constructorDone(false),
 	_specializationPreset("none"),
 	_slices(1),
-	_isSlicer(false),
-	_sliceable(true){
+	_isSlicer(false){
 	
 	_slicer = findParentSlicer();
 }
@@ -84,14 +83,6 @@ Node::~Node(){
 		setIsDeleted(true);
 		deleteIt();
 	}
-}
-
-void Node::setSliceable(bool value){
-	_sliceable = value;
-}
-
-bool Node::sliceable(){
-	return _sliceable;
 }
 
 Node *Node::findParentSlicer(){
@@ -206,19 +197,26 @@ void Node::addOutputAttribute(Attribute *attribute){
 	}
 }
 
+unsigned int Node::slices(){
+	return _slices;
+}
+
+void Node::resizedSlices(unsigned int slices){
+}
+
 void Node::doUpdate(Attribute *attribute){
 	boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
 	
 	if(_slicer){ // this node is nested in a slicer node such as the ForLoop node and this node is supposed to be sliced
-
 		// here we resize the slices for the output attributes so that the node can put values in each slice.
 		unsigned int slices = _slicer->computeSlices();
-		if(slices != _slices){
+		if(slices != _slices && _inputAttributes.size()){
 			for(int i = 0; i < _outputAttributes.size(); ++i){
 				_outputAttributes[i]->outValue()->resizeSlices(slices);
 			}
 
 			_slices = slices;
+			resizedSlices(slices);
 		}
 
 		// update in parallel each slice
@@ -253,6 +251,7 @@ void Node::setParent(Node *parent){
 	setParentObject(parent);
 
 	_slicer = findParentSlicer();
+	_slices = 1;
 }
 
 void Node::addNode(Node *node){
@@ -739,4 +738,8 @@ void Node::setIsSlicer(bool value){
 
 unsigned int Node::computeSlices(){
 	return 1;
+}
+
+Node *Node::slicer(){
+	return _slicer;
 }

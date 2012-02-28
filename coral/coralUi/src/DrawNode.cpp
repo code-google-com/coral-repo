@@ -52,9 +52,26 @@ void DrawNode::deleteIt(){
 	MainDrawRoutine::_viewportRefreshCallback();
 }
 
-void DrawNode::draw(){	
+void DrawNode::draw(){
+	Node *slicer_ = slicer();
+	if(slicer_){
+		unsigned int slices_ = slicer_->computeSlices();
+
+		if(slices_ != slices()){
+			resizedSlices(slices_);
+		}
+
+		for(int i = 0; i < slices_; ++i){
+			drawSlice(i);
+		}
+	}
+	else{
+		drawSlice(0);
+	}
 }
 
+void DrawNode::drawSlice(unsigned int slice){
+}
 
 bool DrawNode::glContextExists(){
 	return MainDrawRoutine::initialized();

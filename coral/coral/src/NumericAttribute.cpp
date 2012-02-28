@@ -139,6 +139,7 @@ std::string NumericAttribute::debugInfo(){
 
 		if(i > 3){
 			info += "...trimming remaining slices.\n";
+			break;
 		}
 	}
 	

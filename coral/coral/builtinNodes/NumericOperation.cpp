@@ -51,7 +51,7 @@ namespace{
 			return size - 1;
 		}
 
-		return 0;
+		return slice;
 	}
 }
 

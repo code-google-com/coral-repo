@@ -46,39 +46,30 @@ public:
 	DrawLineNode(const std::string &name, coral::Node *parent);
 	~DrawLineNode();
 	void attributeDirtied(coral::Attribute *attribute);
-	void draw();
+	void drawSlice(unsigned int slice);
 	void initGL();
 	void initShader();
+	void resizedSlices(unsigned int slices);
 
 private:
 	coral::NumericAttribute *_points;
 	coral::NumericAttribute *_thickness;
 	coral::NumericAttribute *_colors;
-	coral::NumericAttribute *_pointsPerStrand;
 
 	bool _shouldUpdatePointValues;
 	bool _shouldUpdateColorValues;
-	bool _shouldUpdateStrands;
 
-	void updatePointValues();
-	void updateColorValues();
-	void updateStrands();
-	void drawLines();
-
-	bool _useSingleColor;	// define if we use the color array store in VBO or the single color for everyone
-	Imath::Color4f _singleColor;	// will only be used if _useSingleColor is true
+	void updatePointValues(unsigned int slice);
+	void updateColorValues(unsigned int slice);
+	void drawLines(unsigned int slice);
 
 	// OpenGL
-	GLuint _pointBuffer;		// buffer of vertices: {0.35, 0.76, 0.48, 0.56, 0.37, etc...}
-	GLuint _colorBuffer;		// buffer of color4: {0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 1.0, etc...}
-	GLsizei _pointCount;
+	std::vector<GLuint> _pointBuffer;
+	std::vector<GLuint> _colorBuffer;
 
-	GLuint _shaderProgram;	// the main shader program (only a vertex shader actually
-	GLuint _pointIndexAttr;	// uniform indices
+	GLuint _shaderProgram;
+	GLuint _pointIndexAttr;
 	GLuint _colorIndexAttr;
-	std::vector<int> _strandsFirstPoint;
-	std::vector<int> _strandsPointCount;
-	int _strandsCount;
 };
 
 }

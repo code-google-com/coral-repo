@@ -36,7 +36,6 @@ def loadPlugin():
     import viewportCameraNode
 
     plugin.registerNode("DrawGeo", _coralUi.GeoDrawNode, tags = ["draw"])
-    plugin.registerNode("DrawNumeric", _coralUi.NumericDrawNode, tags = ["draw"])
     plugin.registerNode("DrawPoint", _coralUi.DrawPointNode, tags = ["draw"])
     plugin.registerNode("DrawLine", _coralUi.DrawLineNode, tags = ["draw"])
     plugin.registerNode("DrawMatrix", _coralUi.DrawMatrixNode, tags = ["draw"])

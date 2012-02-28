@@ -160,11 +160,12 @@ class NodeInspectorWidget(QtGui.QWidget):
             if preset != "none":
                 for attr in coralNode.attributes():
                     presetSpecialization = coralNode.attributeSpecializationPreset(preset, attr)
-                    currentSpecialization = attr.specialization()
-                    if presetSpecialization not in currentSpecialization:
-                        presetAllowed = False
-                        break
-            
+                    if presetSpecialization:
+                        currentSpecialization = attr.specialization()
+                        if presetSpecialization not in currentSpecialization:
+                            presetAllowed = False
+                            break
+                
             if presetAllowed:
                 combo.addItem(preset)
             else:

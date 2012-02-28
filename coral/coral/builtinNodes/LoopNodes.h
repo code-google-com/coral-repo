@@ -21,6 +21,10 @@ private:
 	void(LoopInputNode::*_selectedOperation)(unsigned int, Numeric *, Numeric *);
 
 	void updateInt(unsigned int slice, Numeric *globalArray, Numeric *localElement);
+	void updateFloat(unsigned int slice, Numeric *globalArray, Numeric *localElement);
+	void updateVec3(unsigned int slice, Numeric *globalArray, Numeric *localElement);
+	void updateCol4(unsigned int slice, Numeric *globalArray, Numeric *localElement);
+	void updateMatrix44(unsigned int slice, Numeric *globalArray, Numeric *localElement);
 };
 
 class LoopOutputNode: public Node{

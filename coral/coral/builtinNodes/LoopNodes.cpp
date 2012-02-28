@@ -64,24 +64,40 @@ void LoopInputNode::attributeSpecializationChanged(Attribute *attribute){
 			if(type == Numeric::numericTypeIntArray){
 				_selectedOperation = &LoopInputNode::updateInt;
 			}
-			// else if(type == Numeric::numericTypeFloatArray){
-			// 	_selectedOperation = &LoopInputNode::updateFloat;
-			// }
-			// else if(type == Numeric::numericTypeVec3Array){
-			// 	_selectedOperation = &LoopInputNode::updateVec3;
-			// }
-			// else if(type == Numeric::numericTypeCol4Array){
-			// 	_selectedOperation = &LoopInputNode::updateCol4;
-			// }
-			// else if(type == Numeric::numericTypeMatrix44Array){
-			// 	_selectedOperation = &LoopInputNode::updateMatrix44;
-			// }
+			else if(type == Numeric::numericTypeFloatArray){
+				_selectedOperation = &LoopInputNode::updateFloat;
+			}
+			else if(type == Numeric::numericTypeVec3Array){
+				_selectedOperation = &LoopInputNode::updateVec3;
+			}
+			else if(type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &LoopInputNode::updateCol4;
+			}
+			else if(type == Numeric::numericTypeMatrix44Array){
+				_selectedOperation = &LoopInputNode::updateMatrix44;
+			}
 		}
 	}
 }
 
 void LoopInputNode::updateInt(unsigned int slice, Numeric *globalArray, Numeric *localElement){
 	localElement->setIntValueAtSlice(slice, 0, globalArray->intValueAtSlice(0, slice));
+}
+
+void LoopInputNode::updateFloat(unsigned int slice, Numeric *globalArray, Numeric *localElement){
+	localElement->setFloatValueAtSlice(slice, 0, globalArray->floatValueAtSlice(0, slice));
+}
+
+void LoopInputNode::updateVec3(unsigned int slice, Numeric *globalArray, Numeric *localElement){
+	localElement->setVec3ValueAtSlice(slice, 0, globalArray->vec3ValueAtSlice(0, slice));
+}
+
+void LoopInputNode::updateCol4(unsigned int slice, Numeric *globalArray, Numeric *localElement){
+	localElement->setCol4ValueAtSlice(slice, 0, globalArray->col4ValueAtSlice(0, slice));
+}
+
+void LoopInputNode::updateMatrix44(unsigned int slice, Numeric *globalArray, Numeric *localElement){
+	localElement->setMatrix44ValueAtSlice(slice, 0, globalArray->matrix44ValueAtSlice(0, slice));
 }
 
 void LoopInputNode::updateSlice(Attribute *attribute, unsigned int slice){
@@ -165,23 +181,23 @@ void LoopOutputNode::attributeSpecializationChanged(Attribute *attribute){
 }
 
 void LoopOutputNode::updateInt(unsigned int slice, Numeric *element, Numeric *array){
-	array->setIntValueAt(slice, element->intValueAtSlice(slice, 0));
+	array->setIntValueAtSlice(0, slice, element->intValueAtSlice(slice, 0));
 }
 
 void LoopOutputNode::updateFloat(unsigned int slice, Numeric *element, Numeric *array){
-	// array->setFloatValueAtSlice(index, element->floatValueAtSlice(slice, 0));
+	array->setFloatValueAtSlice(0, slice, element->floatValueAtSlice(slice, 0));
 }
 
 void LoopOutputNode::updateVec3(unsigned int slice, Numeric *element, Numeric *array){
-	// array->setVec3ValueAtSlice(index, element->vec3ValueAtSlice(slice, 0));
+	array->setVec3ValueAtSlice(0, slice, element->vec3ValueAtSlice(slice, 0));
 }
 
 void LoopOutputNode::updateCol4(unsigned int slice, Numeric *element, Numeric *array){
-	// array->setCol4ValueAtSlice(index, element->col4ValueAtSlice(slice, 0));
+	array->setCol4ValueAtSlice(0, slice, element->col4ValueAtSlice(slice, 0));
 }
 
 void LoopOutputNode::updateMatrix44(unsigned int slice, Numeric *element, Numeric *array){
-	// array->setMatrix44ValueAtSlice(index, element->matrix44ValueAt(slice, 0));
+	array->setMatrix44ValueAtSlice(0, slice, element->matrix44ValueAtSlice(slice, 0));
 }
 
 void LoopOutputNode::updateSlice(Attribute *attribute, unsigned int slice){

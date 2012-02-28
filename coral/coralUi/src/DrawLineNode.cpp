@@ -39,20 +39,15 @@ DrawLineNode::DrawLineNode(const std::string &name, Node *parent):
 DrawNode(name, parent),
 _shouldUpdatePointValues(true),
 _shouldUpdateColorValues(true),
-_shouldUpdateStrands(true),
 _pointIndexAttr(0),
-_colorIndexAttr(1),
-_pointCount(0),
-_strandsCount(0){
+_colorIndexAttr(1){
 	_points = new NumericAttribute("points", this);
 	_thickness = new NumericAttribute("thickness", this);
 	_colors = new NumericAttribute("colors", this);
-	_pointsPerStrand = new NumericAttribute("pointsPerStrand", this);
 
 	addInputAttribute(_points);
 	addInputAttribute(_thickness);
 	addInputAttribute(_colors);
-	addInputAttribute(_pointsPerStrand);
 
 	std::vector<std::string> pointSpecializations;
 	pointSpecializations.push_back("Vec3");
@@ -66,9 +61,14 @@ _strandsCount(0){
 	colorSpecializations.push_back("Col4Array");
 	setAttributeAllowedSpecializations(_colors, colorSpecializations);
 
-	setAttributeAllowedSpecialization(_pointsPerStrand, "Int");
-
 	_thickness->outValue()->setFloatValueAt(0, 1.0);
+
+	setSpecializationPreset("single", _colors, "Col4");
+	setSpecializationPreset("array", _colors, "Col4Array");
+	enableSpecializationPreset("single");
+
+	_pointBuffer.resize(1);
+	_colorBuffer.resize(1);
 
 	if(glContextExists()){
 		initGL();
@@ -79,19 +79,23 @@ void DrawLineNode::initGL(){
 	catchAttributeDirtied(_points);
 	catchAttributeDirtied(_thickness);
 	catchAttributeDirtied(_colors);
-	catchAttributeDirtied(_pointsPerStrand);
 
 	// generate OpenGL buffers
-	glGenBuffers(1, &_pointBuffer);
-	glGenBuffers(1, &_colorBuffer);
+	glGenBuffers(1, &_pointBuffer[0]);
+	glGenBuffers(1, &_colorBuffer[0]);
 
 	initShader();
 }
 
 DrawLineNode::~DrawLineNode(){
 	if(glContextExists()){
-		glDeleteBuffers(1, &_pointBuffer);
-		glDeleteBuffers(1, &_colorBuffer);
+		for(int i = 0; i < _pointBuffer.size(); ++i){
+			glDeleteBuffers(1, &_pointBuffer[i]);
+		}
+
+		for(int i = 0; i < _colorBuffer.size(); ++i){
+			glDeleteBuffers(1, &_colorBuffer[i]);
+		}
 	}
 }
 
@@ -100,13 +104,37 @@ void DrawLineNode::attributeDirtied(Attribute *attribute){
 
 	if(attribute == _points){
 		_shouldUpdatePointValues = true;
-		_shouldUpdateStrands = true;
 	}
 	else if(attribute == _colors){
 		_shouldUpdateColorValues = true;
 	}
-	else if(attribute == _pointsPerStrand){
-		_shouldUpdateStrands = true;
+}
+
+void DrawLineNode::resizedSlices(unsigned int slices){
+	if(glContextExists()){
+		// delete old buffers
+		for(int i = 0; i < _pointBuffer.size(); ++i){
+			glDeleteBuffers(1, &_pointBuffer[i]);
+		}
+
+		for(int i = 0; i < _colorBuffer.size(); ++i){
+			glDeleteBuffers(1, &_colorBuffer[i]);
+		}
+
+		// generate new buffers
+		_pointBuffer.resize(slices);
+		_colorBuffer.resize(slices);
+
+		for(int i = 0; i < _pointBuffer.size(); ++i){
+			glGenBuffers(1, &_pointBuffer[i]);
+		}
+
+		for(int i = 0; i < _colorBuffer.size(); ++i){
+			glGenBuffers(1, &_colorBuffer[i]);
+		}
+
+		_shouldUpdatePointValues = true;
+		_shouldUpdateColorValues = true;
 	}
 }
 
@@ -175,50 +203,31 @@ void DrawLineNode::initShader(){
 	}
 }
 
-void DrawLineNode::updatePointValues(){
-
+void DrawLineNode::updatePointValues(unsigned int slice){
 	Numeric *vec3Numeric = _points->value();
-	const std::vector<Imath::V3f> &vec3Values = vec3Numeric->vec3Values();
-
-	// search if a new allocation for points is needed (if the number of point have changed)
-	bool newPointAlloc = true;
-	if(_pointCount == vec3Values.size()){
-		newPointAlloc = false;
-	}
-
-	_pointCount = vec3Values.size();
+	const std::vector<Imath::V3f> &vec3Values = vec3Numeric->vec3ValuesSlice(slice);
 
 	// vertex buffer
-	glBindBuffer(GL_ARRAY_BUFFER, _pointBuffer);
-	if(newPointAlloc){
-		glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*_pointCount, (GLvoid*)&vec3Values[0].x, GL_STATIC_DRAW);
-	}
-	else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 3*sizeof(GLfloat)*_pointCount, (GLvoid*)&vec3Values[0].x);
-	}
-
-
+	glBindBuffer(GL_ARRAY_BUFFER, _pointBuffer[slice]);
+	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*vec3Values.size(), (GLvoid*)&vec3Values[0].x, GL_STATIC_DRAW);
+	
 	// clean OpenGL states
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void DrawLineNode::updateColorValues(){
+void DrawLineNode::updateColorValues(unsigned int slice){
 	Numeric *col4Numeric = _colors->value();
-	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
+	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4ValuesSlice(slice);
 
 	// color buffer
-	if((col4Numeric->isArray()) && (col4Numeric->size() > 0)){
-
-		// we will not use default color
-		_useSingleColor = false;
-
+	if(col4Numeric->isArray() && col4Values.size() > 0){
 		// avoid empty color (and maybe crashs)
 		Numeric *vec3Numeric = _points->value();
-		const std::vector<Imath::V3f> &vec3Values = vec3Numeric->vec3Values();
+		const std::vector<Imath::V3f> &vec3Values = vec3Numeric->vec3ValuesSlice(slice);
 		int pointCount = (int)vec3Values.size();
 		int colorCount = (int)col4Values.size();
 
-		glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer[slice]);
 		glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*pointCount, (GLvoid*)&col4Values[0].r, GL_STATIC_DRAW);
 
 		if(colorCount < pointCount){
@@ -237,53 +246,25 @@ void DrawLineNode::updateColorValues(){
 		// clean OpenGL state
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-	else {
-		// color is not an array so we use a single one color
-		_useSingleColor = true;
-
-		// one col4? use it! No color? use default green
-		if(col4Numeric->size() == 1){
-			_singleColor = col4Values[0];
-		}
-		else {
-			_singleColor = Imath::Color4f(1.0, 1.0, 1.0, 1.0);
-		}
-	}
 }
 
-void DrawLineNode::updateStrands(){
-	int pointsPerStrand = _pointsPerStrand->value()->intValueAt(0);
-
-	if(pointsPerStrand <= 1 || pointsPerStrand >= _pointCount){
-		_strandsCount = 0;
-	}
-	else{
-		_strandsCount = _pointCount / pointsPerStrand;
-
-		_strandsFirstPoint.resize(_strandsCount);
-		_strandsPointCount.resize(_strandsCount);
-
-		for(int i = 0; i < _strandsCount; ++i){
-			_strandsFirstPoint[i] = pointsPerStrand * i;
-			_strandsPointCount[i] = pointsPerStrand;
-		}
-	}
-}
-
-void DrawLineNode::drawLines(){
+void DrawLineNode::drawLines(unsigned int slice){
 	glDisable(GL_LINE_SMOOTH);
 
 	// get line size
 	Numeric *thicknessNumeric = _thickness->value();
 	GLfloat lineWith = 1.0;
 	if(thicknessNumeric->type() == Numeric::numericTypeInt){
-		const std::vector<int> &intValues = thicknessNumeric->intValues();
+		const std::vector<int> &intValues = thicknessNumeric->intValuesSlice(slice);
 		lineWith = (GLfloat) intValues[0];
 	}
 	else if (thicknessNumeric->type() == Numeric::numericTypeFloat){
-		const std::vector<float> &floatValues = thicknessNumeric->floatValues();
+		const std::vector<float> &floatValues = thicknessNumeric->floatValuesSlice(slice);
 		lineWith = (GLfloat) floatValues[0];
 	}
+
+	Numeric *colors = _colors->value();
+	bool useSingleColor = !colors->isArray();
 
 	// set line size
 	glLineWidth(lineWith);
@@ -292,19 +273,21 @@ void DrawLineNode::drawLines(){
 
 	// set uniform values (can only be done after glUseProgram)
 	GLint locUseSingleColor = glGetUniformLocation(_shaderProgram, "un_useSingleColor");
-	glUniform1i(locUseSingleColor, _useSingleColor);
-
-	GLint locSingleColor = glGetUniformLocation(_shaderProgram, "un_singleColor");
-	glUniform4f(locSingleColor, _singleColor.r, _singleColor.g, _singleColor.b, _singleColor.a);
+	glUniform1i(locUseSingleColor, useSingleColor);
 
 	// set VBOs
-	glBindBuffer(GL_ARRAY_BUFFER, _pointBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, _pointBuffer[slice]);
 	glVertexAttribPointer(_pointIndexAttr, 3, GL_FLOAT, 0, 0, NULL);
 	glEnableVertexAttribArray(_pointIndexAttr);
 
 	// do not set pointer if it use a single value. The value is already send via VBO
-	if(!_useSingleColor){
-		glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
+	if(useSingleColor){
+		const Imath::Color4f &color = colors->col4ValuesSlice(slice)[0];
+		GLint locSingleColor = glGetUniformLocation(_shaderProgram, "un_singleColor");
+		glUniform4f(locSingleColor, color.r, color.g, color.b, color.a);
+	}
+	else{
+		glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer[slice]);
 		glVertexAttribPointer(_colorIndexAttr, 4, GL_FLOAT, 0, 0, NULL);
 		glEnableVertexAttribArray(_colorIndexAttr);
 	}
@@ -312,13 +295,9 @@ void DrawLineNode::drawLines(){
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	// render
-	if(_strandsCount){
-		glMultiDrawArrays(GL_LINE_STRIP, &_strandsFirstPoint[0], &_strandsPointCount[0], _strandsCount);
-	}
-	else{
-		glDrawArrays(GL_LINE_STRIP, 0, _pointCount);
-	}
-
+	const std::vector<Imath::V3f> &points = _points->value()->vec3ValuesSlice(slice);
+	glDrawArrays(GL_LINE_STRIP, 0, points.size());
+	
 	// clean OpenGL statement
 	glDisableVertexAttribArray(_pointIndexAttr);
 	glDisableVertexAttribArray(_colorIndexAttr);
@@ -329,28 +308,15 @@ void DrawLineNode::drawLines(){
 	glUseProgram(0);
 }
 
-void DrawLineNode::draw(){
-	Numeric *vec3Numeric = _points->value();
-	const std::vector<Imath::V3f> &vec3Values = vec3Numeric->vec3Values();
+void DrawLineNode::drawSlice(unsigned int slice){
+	Numeric *points = _points->value();
+	const std::vector<Imath::V3f> &vec3Values = points->vec3ValuesSlice(slice);
 
 	if(vec3Values.size() == 0)
 		return;
 	
-	if(_shouldUpdatePointValues){
-		updatePointValues();
-
-		_shouldUpdatePointValues = false;
-	}
-
-	if(_shouldUpdateColorValues){
-		updateColorValues();
-		_shouldUpdateColorValues = false;
-	}
-
-	if(_shouldUpdateStrands){
-		updateStrands();
-		_shouldUpdateStrands = false;
-	}
-
-	drawLines();
+	updatePointValues(slice);
+	updateColorValues(slice);
+	
+	drawLines(slice);
 }
