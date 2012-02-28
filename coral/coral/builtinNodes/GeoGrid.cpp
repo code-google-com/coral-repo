@@ -80,7 +80,7 @@ void GeoGrid::update(Attribute *attribute){
 	
 	std::vector<Imath::V3f> points(totalPoints);
 	std::vector<std::vector<int> > faces(totalFaces);
-	std::vector<Imath::V2f> uvs(totalUvs);
+	std::vector<Imath::V2f> uvs;
 	std::vector<int> faceVertices(4);
 	
 	float widthStep = width / widthSubdivisions;
@@ -113,14 +113,12 @@ void GeoGrid::update(Attribute *attribute){
 	float uvWidthStep = 1.0 / widthSubdivisions;
 	float uvHeightStep = - (1.0 / heightSubdivisions);
 
-	i = 0;
 	for(int row = 0; row <= heightSubdivisions; ++row){
 		for(int col = 0; col <= widthSubdivisions; ++col){
 			float currentWidth = uvWidthStep * col;
 			float currentHeight = uvHeightStep * row;
 
-			uvs[i] = Imath::V2f(currentWidth, currentHeight);
-			i++;
+			uvs.push_back(Imath::V2f(currentWidth, currentHeight));
 		}
 	}
 

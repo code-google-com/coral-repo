@@ -564,20 +564,20 @@ void GeoDrawNode::draw(){
 	if(geo->pointsCount() == 0)
 		return;
 
-	//if(_shouldUpdateGeoVBO){
+	if(_shouldUpdateGeoVBO){
 		updateGeoVBO();
-		//_shouldUpdateGeoVBO = false;
-	//}
+		_shouldUpdateGeoVBO = false;
+	}
 	
-	//if(_shouldUpdateColorVBO){
+	if(_shouldUpdateColorVBO){
 		updateColorVBO();
-		//_shouldUpdateColorVBO = false;
-	//}
+		_shouldUpdateColorVBO = false;
+	}
 
-	// if(_shouldUpdateTexture){
-	// 	updateTexture();
-	// 	_shouldUpdateTexture = false;
-	// }
+	if(_shouldUpdateTexture){
+		updateTexture();
+		_shouldUpdateTexture = false;
+	}
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_POINT_BIT);
 

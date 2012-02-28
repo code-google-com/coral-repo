@@ -53,11 +53,10 @@ void String::setFromString(const std::string &value)
 
 StringAttribute::StringAttribute(const std::string &name, Node *parent)
 	: Attribute(name, parent)
-	, _longString(true)
+	, _longString(false)
 {
 	setClassName("StringAttribute");
 	String *ptr = new String();
-	ptr->setStringValue(name);
 	setValuePtr(ptr);
 	
 	std::vector<std::string> allowedSpecialization;

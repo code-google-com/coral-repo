@@ -52,6 +52,7 @@ void ImageNode::update(Attribute *attribute){
 	filename = NetworkManager::resolveFilename(filename);
 
 	if(!filename.empty()){
+
 		_image->outValue()->load(filename.c_str());
 	}
 }
