@@ -145,8 +145,6 @@ def apply():
     from coral.coralUi.viewport import ViewportWidget
     from coral.coralUi.visualDebugger import VisualDebugger
     
-    coralUi.application().setApplicationName("coral")
-    
     mainWin = MainWindow.globalInstance()
     mainWin.setWindowTitle("coral standalone")
     
@@ -206,3 +204,5 @@ def apply():
     
     from coral import coralApp
     coralApp.logInfo("running " + mainWin.windowTitle())
+
+

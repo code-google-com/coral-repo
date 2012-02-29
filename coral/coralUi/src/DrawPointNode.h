@@ -45,8 +45,7 @@ class CORALUI_EXPORT DrawPointNode : public DrawNode{
 public:
 	DrawPointNode(const std::string &name, coral::Node *parent);
 	~DrawPointNode();
-	void attributeDirtied(coral::Attribute *attribute);
-	void draw();
+	void drawSlice(unsigned int slice);
 	void initGL();
 	void initShader();
 
@@ -55,25 +54,18 @@ private:
 	coral::NumericAttribute *_sizes;
 	coral::NumericAttribute *_colors;
 
-	bool _shouldUpdatePointValues;
-	bool _shouldUpdateSizeValues;
-	bool _shouldUpdateColorValues;
-	
-	void updatePointValues();
-	void updateSizeValues();
-	void updateColorValues();
-	void drawPoints();
+	void updatePointValues(unsigned int slice, const std::vector<Imath::V3f> &points);
+	void updateSizeValues(unsigned int slice, const std::vector<Imath::V3f> &points, const std::vector<float> &sizes);
+	void updateColorValues(unsigned int slice, const std::vector<Imath::V3f> &points, const std::vector<Imath::Color4f> &colors);
+	void drawPoints(unsigned int slice, const std::vector<Imath::V3f> &points);
 
 	// OpenGL
 	GLuint _pointBuffer;	// buffer of vertices: {0.35, 0.76, 0.48, 0.56, 0.37, etc...}
 	GLuint _sizeBuffer;		// buffer of sizes: {0.35, 0.76, 0.48, 0.56, 0.37, etc...}
 	GLuint _colorBuffer;	// buffer of color4: {0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 1.0, etc...}
 
-	bool _newPointCount;	// used for optimization to avoid to use glBufferData (new allocation) if _pointCount doesn't change (use glBufferSubData instead, no new allocation).
-	GLsizei _pointCount;
-
-	GLuint _shaderProgram;	// the main shader program (only a vertex shader actually
-	GLint _pointIndexAttr;	// attribute indices
+	GLuint _shaderProgram;
+	GLint _pointIndexAttr;
 	GLint _sizeIndexAttr;
 	GLint _colorIndexAttr;
 };

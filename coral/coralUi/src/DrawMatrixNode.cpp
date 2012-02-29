@@ -38,12 +38,8 @@ using namespace coralUi;
 
 DrawMatrixNode::DrawMatrixNode(const std::string &name, Node *parent):
 DrawNode(name, parent),
-_shouldUpdateMat44Values(true),
-_shouldUpdateMatrixGizmo(true),
 _gizmoBuffer(0),
-_firstGizmoSendData(true),
 _matrixBuffer(0),
-_matrixCount(0),
 _shaderProgram(0),
 _pointAttrLoc(-1),
 _colorAttrLoc(-1),
@@ -53,9 +49,6 @@ _matrixAttrLoc(-1){
 
 	addInputAttribute(_matrix);
 	addInputAttribute(_size);
-
-	// setAttributeAffect(_matrix, (Attribute*)viewportOutputAttribute());
-	// setAttributeAffect(_thickness, (Attribute*)viewportOutputAttribute());
 
 	std::vector<std::string> pointSpecializations;
 	pointSpecializations.push_back("Matrix44");
@@ -71,17 +64,6 @@ _matrixAttrLoc(-1){
 	}
 }
 
-void DrawMatrixNode::initGL(){
-	catchAttributeDirtied(_matrix);
-	catchAttributeDirtied(_size);
-
-	// generate OpenGL buffers
-	glGenBuffers(1, &_gizmoBuffer);
-	glGenBuffers(1, &_matrixBuffer);
-
-	initShader();
-}
-
 DrawMatrixNode::~DrawMatrixNode(){
 	if(glContextExists()){
 		glDeleteBuffers(1, &_gizmoBuffer);
@@ -89,15 +71,13 @@ DrawMatrixNode::~DrawMatrixNode(){
 	}
 }
 
-void DrawMatrixNode::attributeDirtied(Attribute *attribute){
-	DrawNode::attributeDirtied(attribute);
+void DrawMatrixNode::initGL(){
+	DrawNode::initGL();
 	
-	if(attribute == _matrix){
-		_shouldUpdateMat44Values = true;
-	}
-	if(attribute == _size){
-		_shouldUpdateMatrixGizmo = true;
-	}
+	glGenBuffers(1, &_gizmoBuffer);
+	glGenBuffers(1, &_matrixBuffer);
+
+	initShader();
 }
 
 void DrawMatrixNode::initShader(){
@@ -159,35 +139,13 @@ void DrawMatrixNode::initShader(){
 	_matrixAttrLoc = glGetAttribLocation(_shaderProgram, "gizmoMatrixAttr");
 }
 
-void DrawMatrixNode::updateMat44Values(){
-
-	Numeric *mat44Numeric = _matrix->value();
-	const std::vector<Imath::M44f> &mat44Values = mat44Numeric->matrix44Values();
-
-	// search if a new allocation for matrix is needed (if the number of matrix have changed)
-	bool newMatrixAlloc = true;
-	if(_matrixCount == mat44Values.size()){
-		newMatrixAlloc = false;
-	}
-
-	_matrixCount = mat44Values.size();
-
-	// store the given matrix (one or an array)
+void DrawMatrixNode::updateMat44Values(unsigned int slice, const std::vector<Imath::M44f> &matrix){
 	glBindBuffer(GL_ARRAY_BUFFER, _matrixBuffer);
-	if(newMatrixAlloc){
-		glBufferData(GL_ARRAY_BUFFER, 16*sizeof(GLfloat)*_matrixCount, (GLvoid*)&mat44Values[0].x, GL_STATIC_DRAW);
-	}
-	else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 16*sizeof(GLfloat)*_matrixCount, (GLvoid*)&mat44Values[0].x);
-	}
+	glBufferData(GL_ARRAY_BUFFER, 16*sizeof(GLfloat)*matrix.size(), (GLvoid*)&matrix[0].x, GL_STATIC_DRAW);
 }
 
-void DrawMatrixNode::updateMatrixGizmo(){
-
-	// get and set matrix gizmo size
-	Numeric *sizeNumeric = _size->value();
-	const std::vector<float> &floatValues = sizeNumeric->floatValues();
-	GLfloat size = (GLfloat) floatValues[0];
+void DrawMatrixNode::updateMatrixGizmo(unsigned int slice){
+	GLfloat size = _size->value()->floatValueAtSlice(slice, 0);
 
 	// generate and store the main gizmo array (which will be multiplied by user matrix in the shader, later)
 	GLfloat gizmoArray[36] = {0.0, 0.0, 0.0,	1.0, 0.0, 0.0,	// position*3, color*3
@@ -198,18 +156,10 @@ void DrawMatrixNode::updateMatrixGizmo(){
 					0.0, 0.0, size,	0.0, 0.0, 1.0 };
 
 	glBindBuffer(GL_ARRAY_BUFFER, _gizmoBuffer);
-	if(_firstGizmoSendData){
-		glBufferData(GL_ARRAY_BUFFER, sizeof(gizmoArray), (GLvoid*)&gizmoArray, GL_STATIC_DRAW);
-		_firstGizmoSendData = false;
-	}
-	else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(gizmoArray), (GLvoid*)&gizmoArray);
-	}
-
+	glBufferData(GL_ARRAY_BUFFER, sizeof(gizmoArray), (GLvoid*)&gizmoArray, GL_STATIC_DRAW);
 }
 
-void DrawMatrixNode::drawMatrix(){
-
+void DrawMatrixNode::drawMatrix(unsigned int slice, const std::vector<Imath::M44f> &matrix){
 	glLineWidth(2.0);
 
 	glUseProgram(_shaderProgram);
@@ -240,7 +190,7 @@ void DrawMatrixNode::drawMatrix(){
 	glEnableVertexAttribArray(_colorAttrLoc);
 
 	// render
-	glDrawArraysInstancedARB(GL_LINES, 0, 6, _matrixCount);
+	glDrawArraysInstancedARB(GL_LINES, 0, 6, matrix.size());
 
 	// clean OpenGL state
 	glDisableVertexAttribArray(_matrixAttrLoc);
@@ -264,25 +214,14 @@ void DrawMatrixNode::drawMatrix(){
 	glLineWidth(1.0);
 }
 
-void DrawMatrixNode::draw(){
-	DrawNode::draw();
+void DrawMatrixNode::drawSlice(unsigned int slice){
+	const std::vector<Imath::M44f> &matrix = _matrix->value()->matrix44ValuesSlice(slice);
 
-	Numeric *mat44Numeric = _matrix->value();
-
-	// if there is no matrices in input, there is no reason to draw anything...
-	if(mat44Numeric->size() == 0 ){
+	if(matrix.size() == 0){
 		return;
 	}
 
-	if(_shouldUpdateMatrixGizmo){
-		updateMatrixGizmo();
-		_shouldUpdateMatrixGizmo = false;
-	}
-
-	if(_shouldUpdateMat44Values){
-		updateMat44Values();
-		_shouldUpdateMat44Values = false;
-	}
-
-	drawMatrix();
+	updateMatrixGizmo(slice);
+	updateMat44Values(slice, matrix);
+	drawMatrix(slice, matrix);
 }

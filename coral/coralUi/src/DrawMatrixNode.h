@@ -45,8 +45,7 @@ class CORALUI_EXPORT DrawMatrixNode : public DrawNode{
 public:
 	DrawMatrixNode(const std::string &name, coral::Node *parent);
 	~DrawMatrixNode();
-	void attributeDirtied(coral::Attribute *attribute);
-	void draw();
+	void drawSlice(unsigned int slice);
 	void initGL();
 	void initShader();
 
@@ -54,18 +53,13 @@ private:
 	coral::NumericAttribute *_matrix;
 	coral::NumericAttribute *_size;
 
-	bool _shouldUpdateMat44Values;
-	bool _shouldUpdateMatrixGizmo;
-
-	void updateMat44Values();
-	void updateMatrixGizmo();
-	void drawMatrix();
+	void updateMat44Values(unsigned int slice, const std::vector<Imath::M44f> &matrix);
+	void updateMatrixGizmo(unsigned int slice);
+	void drawMatrix(unsigned int slice, const std::vector<Imath::M44f> &matrix);
 
 	// OpenGL
 	GLuint _gizmoBuffer;	// the gizmo geometry + color
-	bool _firstGizmoSendData;	// first time the gizmo is sent to the GPU?
 	GLuint _matrixBuffer;	// the matrix buffer
-	GLsizei _matrixCount;	// the number of matrix element (used for allocation optimisation
 
 	GLuint _shaderProgram;	// the main shader program (only a vertex shader actually
 	GLint _pointAttrLoc;	// point and color attribut location

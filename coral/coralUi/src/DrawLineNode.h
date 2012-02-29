@@ -45,27 +45,22 @@ class CORALUI_EXPORT DrawLineNode : public DrawNode{
 public:
 	DrawLineNode(const std::string &name, coral::Node *parent);
 	~DrawLineNode();
-	void attributeDirtied(coral::Attribute *attribute);
 	void drawSlice(unsigned int slice);
 	void initGL();
 	void initShader();
-	void resizedSlices(unsigned int slices);
 
 private:
 	coral::NumericAttribute *_points;
 	coral::NumericAttribute *_thickness;
 	coral::NumericAttribute *_colors;
 
-	bool _shouldUpdatePointValues;
-	bool _shouldUpdateColorValues;
-
 	void updatePointValues(unsigned int slice);
 	void updateColorValues(unsigned int slice);
 	void drawLines(unsigned int slice);
 
 	// OpenGL
-	std::vector<GLuint> _pointBuffer;
-	std::vector<GLuint> _colorBuffer;
+	GLuint _pointBuffer;
+	GLuint _colorBuffer;
 
 	GLuint _shaderProgram;
 	GLuint _pointIndexAttr;

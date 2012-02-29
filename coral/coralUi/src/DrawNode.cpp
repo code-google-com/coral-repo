@@ -34,15 +34,9 @@ using namespace coral;
 using namespace coralUi;
 
 DrawNode::DrawNode(const std::string &name, Node *parent) : Node(name, parent){	
-	//_viewportOutput = new ViewportOutputAttribute("_viewportOutput", this);
-	
-	//addOutputAttribute(_viewportOutput);
-	
 	setUpdateEnabled(false);
 	
 	MainDrawRoutine::addDrawNode(this);
-
-	//MainDrawRoutine::_viewportRefreshCallback();
 }
 
 void DrawNode::deleteIt(){
@@ -78,6 +72,10 @@ bool DrawNode::glContextExists(){
 }
 
 void DrawNode::initGL(){
+	const std::vector<Attribute*> inputs = inputAttributes();
+	for(int i = 0; i < inputs.size(); ++i){
+		catchAttributeDirtied(inputs[i]);
+	}
 }
 
 void DrawNode::attributeDirtied(Attribute *attribute){

@@ -37,13 +37,9 @@ using namespace coralUi;
 
 DrawPointNode::DrawPointNode(const std::string &name, Node *parent):
 DrawNode(name, parent),
-_shouldUpdatePointValues(true),
-_shouldUpdateSizeValues(true),
-_shouldUpdateColorValues(true),
 _pointIndexAttr(-1),
 _colorIndexAttr(-1),
-_sizeIndexAttr(-1),
-_pointCount(0){
+_sizeIndexAttr(-1){
 	_points = new NumericAttribute("points", this);
 	_sizes = new NumericAttribute("sizes", this);
 	_colors = new NumericAttribute("colors", this);
@@ -80,9 +76,7 @@ _pointCount(0){
 }
 
 void DrawPointNode::initGL(){
-	catchAttributeDirtied(_points);
-	catchAttributeDirtied(_sizes);
-	catchAttributeDirtied(_colors);
+	DrawNode::initGL();
 
 	// generate OpenGL buffers
 	glGenBuffers(1, &_pointBuffer);
@@ -97,22 +91,6 @@ DrawPointNode::~DrawPointNode(){
 		glDeleteBuffers(1, &_pointBuffer);
 		glDeleteBuffers(1, &_sizeBuffer);
 		glDeleteBuffers(1, &_colorBuffer);
-	}
-}
-
-void DrawPointNode::attributeDirtied(Attribute *attribute){
-	DrawNode::attributeDirtied(attribute);
-
-	if(attribute == _points){
-		_shouldUpdatePointValues = true;
-		_shouldUpdateSizeValues = true;	// if the number of point as changed, we need to update the number of elements in buffer too
-		_shouldUpdateColorValues = true;
-	}
-	else if(attribute == _sizes){
-		_shouldUpdateSizeValues = true;
-	}
-	else if(attribute == _colors){
-		_shouldUpdateColorValues = true;
 	}
 }
 
@@ -181,57 +159,27 @@ void DrawPointNode::initShader(){
 	_colorIndexAttr = glGetAttribLocation(_shaderProgram, "in_Color");
 }
 
-void DrawPointNode::updatePointValues(){
-
-	Numeric *vec3Numeric = _points->value();
-	const std::vector<Imath::V3f> &vec3Values = vec3Numeric->vec3Values();
-
-	// search if a new allocation for points is needed (if the number of point have changed)
-	_newPointCount = true;
-	if(_pointCount == vec3Values.size()){
-		_newPointCount = false;
-	}
-
-	_pointCount = vec3Values.size();
-
-	// vertex buffer
+void DrawPointNode::updatePointValues(unsigned int slice, const std::vector<Imath::V3f> &points){
 	glBindBuffer(GL_ARRAY_BUFFER, _pointBuffer);
-	if(_newPointCount){
-		glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*_pointCount, (GLvoid*)&vec3Values[0].x, GL_STATIC_DRAW);
-	}
-	else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 3*sizeof(GLfloat)*_pointCount, (GLvoid*)&vec3Values[0].x);
-	}
-
-
-	// clean OpenGL states
+	glBufferData(GL_ARRAY_BUFFER, 3*sizeof(GLfloat)*points.size(), (GLvoid*)&points[0].x, GL_STATIC_DRAW);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void DrawPointNode::updateSizeValues(){
-
-	Numeric *sizeNumeric = _sizes->value();
-	const std::vector<float> &sizeValues = sizeNumeric->floatValues();
-
-	// create the default size value.
-	GLfloat defaultSize = 5.0;
-	if(sizeNumeric->size() == 1){
-		// if only one float is connected, we use it as default size
-		defaultSize = sizeValues[0];
-	}
-
-	int sizeCount = (int)sizeNumeric->size();
+void DrawPointNode::updateSizeValues(unsigned int slice, const std::vector<Imath::V3f> &points, const std::vector<float> &sizes){
+	int sizeCount = sizes.size();
+	int pointCount = points.size();
 
 	glBindBuffer(GL_ARRAY_BUFFER, _sizeBuffer);
-	if(_newPointCount){
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*_pointCount, (GLvoid*)&sizeValues[0], GL_STATIC_DRAW);
-	}
-	else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(GLfloat)*_pointCount, (GLvoid*)&sizeValues[0]);
-	}
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*pointCount, (GLvoid*)&sizes[0], GL_STATIC_DRAW);
 
-	if(sizeCount < _pointCount){
-		int emptySizeCount = _pointCount - sizeCount;	// get the number of empty color to create in the buffer to match the number of vertex
+	if(sizeCount < pointCount){
+		GLfloat defaultSize = 3.0;
+		if(sizeCount > 0){
+			defaultSize = sizes[sizeCount - 1];
+		}
+
+		int emptySizeCount = pointCount - sizeCount;	// get the number of empty color to create in the buffer to match the number of vertex
 
 		// create an array to feed
 		std::vector<GLfloat> emptySizeArray;
@@ -246,29 +194,20 @@ void DrawPointNode::updateSizeValues(){
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void DrawPointNode::updateColorValues(){
-	Numeric *col4Numeric = _colors->value();
-	const std::vector<Imath::Color4f> &col4Values = col4Numeric->col4Values();
-
-	// create the default color.
-	Imath::Color4f defaultColor = Imath::Color4f(1.0, 1.0, 1.0, 1.0);
-	if(col4Numeric->size() == 1){
-		// if only one col4 is connected, we use it as default color
-		defaultColor = col4Values[0];
-	}
-
-	int colorCount = (int)col4Numeric->size();
+void DrawPointNode::updateColorValues(unsigned int slice, const std::vector<Imath::V3f> &points, const std::vector<Imath::Color4f> &colors){
+	int colorCount = colors.size();
+	int pointCount = points.size();
 
 	glBindBuffer(GL_ARRAY_BUFFER, _colorBuffer);
-	if(_newPointCount){
-		glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*_pointCount, (GLvoid*)&col4Values[0].r, GL_STATIC_DRAW);
-	}
-	else {
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 4*sizeof(GLfloat)*_pointCount, (GLvoid*)&col4Values[0].r);
-	}
+	glBufferData(GL_ARRAY_BUFFER, 4*sizeof(GLfloat)*pointCount, (GLvoid*)&colors[0].r, GL_STATIC_DRAW);
+	
+	if(colorCount < pointCount){
+		Imath::Color4f defaultColor(1.0, 1.0, 1.0, 1.0);
+		if(colorCount > 0){
+			defaultColor = colors[colorCount - 1];
+		}
 
-	if(colorCount < _pointCount){
-		int emptyColCount = _pointCount - colorCount;	// get the number of empty color to create in the buffer to match the number of vertex
+		int emptyColCount = pointCount - colorCount;	// get the number of empty color to create in the buffer to match the number of vertex
 
 		// create an array and feed it with default color
 		std::vector<Imath::Color4f> emptyColArray;
@@ -277,21 +216,14 @@ void DrawPointNode::updateColorValues(){
 		GLintptr offset = 4*sizeof(GLfloat)*colorCount;
 		GLsizeiptr size = 4*sizeof(GLfloat)*emptyColCount;
 		glBufferSubData(GL_ARRAY_BUFFER, offset, size, (GLvoid*)&emptyColArray[0].r);
-
 	}
 
 	// clean OpenGL state
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void DrawPointNode::drawPoints(){
-
-	// prepare OpenGL rendering
-	/*glDisable(GL_LIGHTING);
-	glShadeModel(GL_FLAT);
-
-	glPointSize(5.f);
-	glColor3f(1.f, 1.f, 0.f);*/
+void DrawPointNode::drawPoints(unsigned int slice, const std::vector<Imath::V3f> &points){
+	int pointCount = points.size();
 
 	glUseProgram(_shaderProgram);
 
@@ -309,7 +241,7 @@ void DrawPointNode::drawPoints(){
 	glEnableVertexAttribArray(_colorIndexAttr);
 
 	// render
-	glDrawArrays(GL_POINTS, 0, _pointCount);
+	glDrawArrays(GL_POINTS, 0, pointCount);
 
 	// clean OpenGL statement
 	glDisableVertexAttribArray(_pointIndexAttr);
@@ -321,31 +253,17 @@ void DrawPointNode::drawPoints(){
 	glUseProgram(0);
 }
 
-void DrawPointNode::draw(){
-	DrawNode::draw();
-	
-	// no input connection for points, no need to render
-	Numeric *vec3Numeric = _points->value();
-	if(vec3Numeric->size() == 0)
+void DrawPointNode::drawSlice(unsigned int slice){
+	const std::vector<Imath::V3f> &points = _points->value()->vec3ValuesSlice(slice);
+	unsigned int pointsCount = points.size();
+	if(pointsCount == 0)
 		return;
 
-	if(_shouldUpdatePointValues){
-		updatePointValues();
-		_shouldUpdatePointValues = false;
-	}
-	
-	if(_shouldUpdateSizeValues){
-		updateSizeValues();
-		_shouldUpdateSizeValues = false;
-	}
+	const std::vector<Imath::Color4f> &colors = _colors->value()->col4ValuesSlice(slice);
+	const std::vector<float> &sizes = _sizes->value()->floatValuesSlice(slice);
 
-	if(_shouldUpdateColorValues){
-		updateColorValues();
-		_shouldUpdateColorValues = false;
-	}
-	
-	// Once every update is supposed to be done, we consider the number of point is not new
-	_newPointCount = false;
-
-	drawPoints();
+	updatePointValues(slice, points);
+	updateSizeValues(slice, points, sizes);
+	updateColorValues(slice, points, colors);
+	drawPoints(slice, points);
 }
