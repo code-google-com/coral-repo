@@ -47,7 +47,7 @@ class VerboseLevel:
     logDebugs = 3
 
 class CoralAppData:
-    version = 0.1
+    version = 0.3
     nodeClasses = {}
     classNameTags = {}
     attributeClasses = {}
@@ -82,13 +82,13 @@ class CoralAppData:
     nameChangedObservers = ObserverCollector()
     connectedInputObservers = ObserverCollector()
     removedAttributeObservers = ObserverCollector()
-    # attributeValueChangedObservers = ValueChangedObserverCollector()
     initializedNewNetworkObservers = ObserverCollector()
     initializingNewNetworkObservers = ObserverCollector()
     generatingSaveScriptObservers = ObserverCollector()
     networkLoadedObservers = ObserverCollector()
     nodeConnectionChangedObservers = ObserverCollector()
     networkLoadingObservers = ObserverCollector()
+    messageLoggedObservers = ObserverCollector()
 
 def registeredNodeDescription(className):
     description = ""
@@ -132,6 +132,16 @@ def scanAutoLoadPaths():
 
 def version():
     return str(CoralAppData.version)
+
+def _notifyMessageLogged(message, verboseLevel):
+    for observer in CoralAppData.messageLoggedObservers.observers():
+        observer.setData("message", message)
+        observer.setData("verboseLevel", verboseLevel)
+        observer.notify()
+
+def addMessageLoggedObserver(observer, callback):
+    CoralAppData.messageLoggedObservers.add(observer)
+    observer.setNotificationCallback(callback)
 
 def addNetworkLoadedObserver(observer, callback):
     CoralAppData.networkLoadedObservers.add(observer)
@@ -339,12 +349,14 @@ def logError(message):
     exc = Exception("# error: " + str(message))
     if(CoralAppData.verboseLevel >= VerboseLevel.logErrors):
         print exc
+        _notifyMessageLogged(message, VerboseLevel.logErrors)
     
     return exc
 
 def logInfo(message):
     if(CoralAppData.verboseLevel >= VerboseLevel.logInfos):
         print "# info: " + (message)
+        _notifyMessageLogged(message, VerboseLevel.logInfos)
 
 def logDebug(message):
     if(CoralAppData.verboseLevel >= VerboseLevel.logDebugs):
@@ -363,6 +375,11 @@ def _instantiateNode(className, name, parent):
         logError("failed to create node " + className + ".\n" + coralNode.invalidityMessage())
         return None
     
+    slicer = coralNode.slicer()
+    if not coralNode.sliceable() and slicer:
+        logError("This node can't be nested under a slicer node like " + slicer.className() + ", sorry : (")
+        return None
+
     if coralNode.className() != className:
         coralNode.setClassName(className)
 
@@ -792,7 +809,7 @@ def _loadNetworkScript(networkScript, topNode = ""):
     _notifyNetworkLoadingObservers()
 
     networkScriptData = _parseNetworkScript(networkScript)
-    if networkScriptData["version"] != CoralAppData.version:
+    if networkScriptData["version"] > CoralAppData.version:
         logError("version mismatch")
         return;
     

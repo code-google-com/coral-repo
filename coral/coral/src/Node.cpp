@@ -73,7 +73,8 @@ Node::Node(const std::string &name, Node *parent):
 	_constructorDone(false),
 	_specializationPreset("none"),
 	_slices(1),
-	_isSlicer(false){
+	_isSlicer(false),
+	_sliceable(false){
 	
 	_slicer = findParentSlicer();
 }
@@ -207,6 +208,20 @@ void Node::resizedSlices(unsigned int slices){
 void Node::doUpdate(Attribute *attribute){
 	boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
 	
+	update(attribute);
+	
+	boost::posix_time::ptime endTime = boost::posix_time::microsec_clock::universal_time();
+	boost::posix_time::time_period enlapsed(startTime, endTime);
+	
+	_computeTimeSeconds = enlapsed.length().total_seconds();
+	_computeTimeMilliseconds = enlapsed.length().total_milliseconds() % 1000;
+	_computeTimeTicks = enlapsed.length().ticks();
+}
+
+void Node::updateSlice(Attribute *attribute, unsigned int slice){
+}
+
+void Node::update(Attribute *attribute){
 	if(_slicer){ // this node is nested in a slicer node such as the ForLoop node and this node is supposed to be sliced
 		// here we resize the slices for the output attributes so that the node can put values in each slice.
 		unsigned int slices = _slicer->computeSlices();
@@ -227,19 +242,6 @@ void Node::doUpdate(Attribute *attribute){
 	else{
 		updateSlice(attribute, 0);
 	}
-	
-	boost::posix_time::ptime endTime = boost::posix_time::microsec_clock::universal_time();
-	boost::posix_time::time_period enlapsed(startTime, endTime);
-	
-	_computeTimeSeconds = enlapsed.length().total_seconds();
-	_computeTimeMilliseconds = enlapsed.length().total_milliseconds() % 1000;
-	_computeTimeTicks = enlapsed.length().ticks();
-}
-
-void Node::updateSlice(Attribute *attribute, unsigned int slice){
-}
-
-void Node::update(Attribute *attribute){
 }
 
 Node *Node::parent(){
@@ -618,10 +620,25 @@ void Node::setAttributeAllowedSpecialization(Attribute *attribute, const std::st
 	attribute->setAllowedSpecialization(specializations);
 }
 
-std::string Node::debugInfo(){
+std::string Node::shortDebugInfo(){
 	std::string info;
-	
+
 	info += "node: " + fullName() + "\n";
+	info += "className: " + className() + "\n";
+	
+	if(_sliceable){
+		info += "slices: " + stringUtils::intToString(_slices);
+	}
+	else{
+		info += "sliceable: False (this node can't be nested in a loop node)";
+	}
+
+	return info;
+}
+
+std::string Node::debugInfo(){
+	std::string info = shortDebugInfo() + "\n";
+	
 	info += "last update took: secs:" + stringUtils::intToString(_computeTimeSeconds) + ", millisecs: " + stringUtils::intToString(_computeTimeMilliseconds) + "\n";
 	info += "attributes:\n";
 	
@@ -742,4 +759,12 @@ unsigned int Node::computeSlices(){
 
 Node *Node::slicer(){
 	return _slicer;
+}
+
+void Node::setSliceable(bool value){
+	_sliceable = value;
+}
+
+bool Node::sliceable(){
+	return _sliceable;
 }

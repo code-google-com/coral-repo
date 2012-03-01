@@ -66,7 +66,6 @@ def loadPlugin():
     plugin.registerNode("GetSimulationStep", _coral.GetSimulationStep, tags = ["numeric", "simulation"], description = "Get the values stored by SetSimulationStep and reuse them in the simulation step.\nWhen the step attribute is set to 0 the simulation is reset and the data is taken from the source.")
     plugin.registerNode("SetSimulationStep", _coral.SetSimulationStep, tags = ["numeric", "simulation"], description = "Set some numeric values and make them available to a GetSimulationStep node connected to the same source.\n")
     plugin.registerNode("FindPointsInRange", _coral.FindPointsInRange, tags = ["numeric"])
-    plugin.registerNode("Strands", _coral.StrandsNode, tags = ["numeric", "fur"])
 
     plugin.registerNode("Add", _coral.AddNode, tags = ["math"])
     plugin.registerNode("Sub", _coral.SubNode, tags = ["math"])
@@ -78,7 +77,6 @@ def loadPlugin():
     plugin.registerNode("Pow", _coral.Pow, tags = ["math"])
     plugin.registerNode("Exp", _coral.Exp, tags = ["math"])
     plugin.registerNode("Log", _coral.Log, tags = ["math"])
-    plugin.registerNode("Log10", _coral.Log10, tags = ["math"])
     plugin.registerNode("Ceil", _coral.Ceil, tags = ["math"])
     plugin.registerNode("Floor", _coral.Floor, tags = ["math"])
     plugin.registerNode("Round", _coral.Round, tags = ["math"])

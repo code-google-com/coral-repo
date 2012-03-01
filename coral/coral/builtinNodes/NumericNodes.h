@@ -367,24 +367,44 @@ private:
 class SetSimulationStep: public Node{
 public:
 	SetSimulationStep(const std::string &name, Node *parent);
+	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSlice(Attribute *attribute, unsigned int slice);
+	void resizedSlices(unsigned int slices);
+
 	
 private:
 	StringAttribute *_storageKey;
 	NumericAttribute *_data;
 	NumericAttribute *_result;
+	void(SetSimulationStep::*_selectedOperation)(const std::string &, Numeric *, Numeric *, unsigned int );
+
+	void updateInt(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice);
+	void updateFloat(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice);
+	void updateVec3(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice);
+	void updateCol4(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice);
+	void updateMatrix44(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice);
+	void updateQuat(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice);
 };
 
 class GetSimulationStep: public Node{
 public:
 	GetSimulationStep(const std::string &name, Node *parent);
 	void updateSlice(Attribute *attribute, unsigned int slice);
+	void attributeSpecializationChanged(Attribute *attribute);
 	
 private:
 	StringAttribute *_storageKey;
 	NumericAttribute *_source;
 	NumericAttribute *_step;
 	NumericAttribute *_data;
+	void(GetSimulationStep::*_selectedOperation)(const std::string &, int, Numeric *, Numeric *, unsigned int);
+
+	void updateInt(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice);
+	void updateFloat(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice);
+	void updateVec3(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice);
+	void updateCol4(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice);
+	void updateMatrix44(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice);
+	void updateQuat(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice);
 };
 
 class QuatToAxisAngle: public Node
@@ -434,19 +454,6 @@ public:
 private:
 	NumericAttribute *_quat;
 	NumericAttribute *_matrix;
-};
-
-class StrandsNode: public Node{
-public:
-	StrandsNode(const std::string &name, Node *parent);
-	void updateSlice(Attribute *attribute, unsigned int slice);
-
-private:
-	NumericAttribute *_subdivide;
-	NumericAttribute *_root;
-	NumericAttribute *_slice;
-	NumericAttribute *_strands;
-	NumericAttribute *_pointsPerStrand;
 };
 
 }

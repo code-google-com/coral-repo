@@ -32,7 +32,9 @@
 #include "Node.h"
 
 namespace coral{
-	
+
+// The NodeAccessor is used to give core classes access to Node's private and protected members,
+// this class should never go in the public SDK as it's for core use only.
 class NodeAccessor{
 public:
 	static void _setAttributeAffect(Node &self, Attribute *source, Attribute *destination){
@@ -73,6 +75,10 @@ public:
 
 	static void _catchAttributeDirtied(Node &self, Attribute *attribute, bool value){
 		self.catchAttributeDirtied(attribute, value);
+	}
+
+	static void _setSliceable(Node &self, bool value){
+		self.setSliceable(value);
 	}
 };
 

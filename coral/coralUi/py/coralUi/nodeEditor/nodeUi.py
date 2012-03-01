@@ -182,16 +182,9 @@ class NodeUi(QtGui.QGraphicsWidget):
         
     def updateToolTip(self):
         self.setToolTip(self.toolTip())
-        
-    '''
-    Override this method to update the toolTip with more info.
-    '''
+    
     def toolTip(self):
-        coralNode = self.coralNode()
-        toolTip = "node: " + coralNode.fullName() + "\n"
-        toolTip += "className: " + coralNode.className()
-        
-        return toolTip
+        return self.coralNode().shortDebugInfo()
     
     def addRightClickMenuItem(self, label, callback):
         self._rightClickMenuItems.append({label: callback})

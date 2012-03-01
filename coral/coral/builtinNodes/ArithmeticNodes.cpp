@@ -33,6 +33,8 @@
 using namespace coral;
 
 ArithmeticNode::ArithmeticNode(const std::string &name, Node *parent) : Node(name, parent){
+	setSliceable(true);
+
 	_in0 = new NumericAttribute("in0", this);
 	_in1 = new NumericAttribute("in1", this);
 	_out = new NumericAttribute("out", this);

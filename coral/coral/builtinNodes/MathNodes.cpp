@@ -40,6 +40,8 @@
 using namespace coral;
 
 Vec3Length::Vec3Length(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_vector = new NumericAttribute("vector", this);
 	_length = new NumericAttribute("length", this);
 	
@@ -105,6 +107,8 @@ void Vec3Length::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Matrix44Inverse::Matrix44Inverse(const std::string &name, Node *parent): Node(name, parent){	
+	setSliceable(true);
+
 	_inMatrix = new NumericAttribute("inMatrix", this);
 	_outMatrix = new NumericAttribute("outMatrix", this);
 	
@@ -137,6 +141,7 @@ void Matrix44Inverse::updateSlice(Attribute *attribute, unsigned int slice){
 Abs::Abs(const std::string &name, Node *parent): 
 	Node(name, parent),
 	_selectedOperation(0){
+	setSliceable(true);
 	
 	_inNumber = new NumericAttribute("inNumber", this);
 	_outNumber = new NumericAttribute("ouNumber", this);
@@ -199,7 +204,9 @@ void Abs::updateSlice(Attribute *attribute, unsigned int slice){
 	}
 }
 
-Vec3Cross::Vec3Cross(const std::string &name, Node *parent): Node(name, parent){	
+Vec3Cross::Vec3Cross(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_vector0 = new NumericAttribute("vector0", this);
 	_vector1 = new NumericAttribute("vector1", this);
 	_crossProduct = new NumericAttribute("crossProduct", this);
@@ -244,6 +251,8 @@ void Vec3Cross::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Vec3Dot::Vec3Dot(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_vector0 = new NumericAttribute("vector0", this);
 	_vector1 = new NumericAttribute("vector1", this);
 	_dotProduct = new NumericAttribute("dotProduct", this);
@@ -321,6 +330,8 @@ void Vec3Dot::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Vec3Normalize::Vec3Normalize(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_vector = new NumericAttribute("vector", this);
 	_normalized = new NumericAttribute("normalized", this);
 	
@@ -350,9 +361,9 @@ void Vec3Normalize::updateSlice(Attribute *attribute, unsigned int slice){
 	_normalized->outValue()->setVec3ValuesSlice(slice, normalizedValues);
 }
 
-TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *parent):
-	Node(name, parent)
-{
+TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("inNumber", this);
 	_outNumber = new NumericAttribute("outNumber", this);
 	_function = new EnumAttribute("func", this);
@@ -430,6 +441,8 @@ void TrigonometricFunctions::updateSlice(Attribute *attribute, unsigned int slic
 }
 
 Radians::Radians(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -460,6 +473,8 @@ void Radians::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Degrees::Degrees(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -490,6 +505,8 @@ void Degrees::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Floor::Floor(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -520,6 +537,8 @@ void Floor::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Ceil::Ceil(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -550,6 +569,8 @@ void Ceil::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Round::Round(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -580,6 +601,8 @@ void Round::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Exp::Exp(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -610,6 +633,8 @@ void Exp::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Log::Log(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -639,37 +664,9 @@ void Log::updateSlice(Attribute *attribute, unsigned int slice){
 	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
 }
 
-Log10::Log10(const std::string &name, Node *parent): Node(name, parent){
-	_inNumber = new NumericAttribute("in", this);
-	_outNumber = new NumericAttribute("out", this);
-
-	addInputAttribute(_inNumber);
-	addOutputAttribute(_outNumber);
-
-	setAttributeAffect(_inNumber, _outNumber);
-
-	std::vector<std::string> specialization;
-	specialization.push_back("Float");
-	specialization.push_back("FloatArray");
-	setAttributeAllowedSpecializations(_inNumber, specialization);
-	setAttributeAllowedSpecializations(_outNumber, specialization);
-
-	addAttributeSpecializationLink(_inNumber, _outNumber);
-}
-
-void Log10::updateSlice(Attribute *attribute, unsigned int slice){
-	const std::vector<float> &in = _inNumber->value()->floatValuesSlice(slice);
-	int size = in.size();
-
-	std::vector<float> outValues(size);
-	for(int i = 0; i < size; ++i){
-		outValues[i] = std::log(in[i]);
-	}
-
-	_outNumber->outValue()->setFloatValuesSlice(slice, outValues);
-}
-
 Pow::Pow(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_base = new NumericAttribute("base", this);
 	_exponent = new NumericAttribute("exponent", this);
 	_outNumber = new NumericAttribute("out", this);
@@ -706,6 +703,8 @@ void Pow::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Sqrt::Sqrt(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
 
@@ -736,6 +735,8 @@ void Sqrt::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Atan2::Atan2(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inNumberY = new NumericAttribute("y", this);
 	_inNumberX = new NumericAttribute("x", this);
 	_outNumber = new NumericAttribute("out", this);
@@ -774,6 +775,7 @@ void Atan2::updateSlice(Attribute *attribute, unsigned int slice){
 Min::Min(const std::string &name, Node *parent):
 	Node(name, parent),
 	_selectedOperation(0){
+	setSliceable(true);
 
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
@@ -873,6 +875,7 @@ void Min::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB,
 Max::Max(const std::string &name, Node *parent):
 	Node(name, parent),
 	_selectedOperation(0){
+	setSliceable(true);
 
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
@@ -972,6 +975,7 @@ void Max::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB,
 Average::Average(const std::string &name, Node *parent):
 	Node(name, parent),
 	_selectedOperation(0){
+	setSliceable(true);
 
 	_inNumber = new NumericAttribute("in", this);
 	_outNumber = new NumericAttribute("out", this);
@@ -1093,6 +1097,8 @@ void Average::updateSpecializationLink(Attribute *attributeA, Attribute *attribu
 }
 
 Slerp::Slerp(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_inQuat1 = new NumericAttribute("q1", this);
 	_inQuat2 = new NumericAttribute("q2", this);
 	_param = new NumericAttribute("t", this);
@@ -1220,6 +1226,8 @@ void Slerp::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 QuatMultiply::QuatMultiply(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_quat0 = new NumericAttribute("q0", this);
 	_quat1 = new NumericAttribute("q1", this);
 	_outQuat = new NumericAttribute("out", this);
@@ -1264,6 +1272,8 @@ void QuatMultiply::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 QuatNormalize::QuatNormalize(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+	
 	_quat0 = new NumericAttribute("q", this);
 	_normalized = new NumericAttribute("out", this);
 

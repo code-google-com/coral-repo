@@ -227,6 +227,7 @@ void attributeWrapper(){
 		.def("specializationOverride", &Attribute::specializationOverride)
 		.def("forceDirty", &Attribute::forceDirty)
 		.def("connectedNonPassThrough", &attribute_connectedNonPassThrough)
+		.def("shortDebugInfo", &Attribute::shortDebugInfo)
 		;
 	
 	Attribute::_connectToCallback = attribute_connectToCallback;

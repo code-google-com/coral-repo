@@ -77,15 +77,19 @@ public:
 	void enableSpecializationPreset(const std::string &preset);
 	std::string enabledSpecializationPreset();
 
+	//! Indicates if this node can be nested under a slicer node such as a ForLoop node, this value is false by default.
+	bool sliceable();
+
+	//! The number of slices is 1 by default, this value can change before any update if this node is nested under a slicer node such as a ForLoop node. 
 	unsigned int slices();
 
-	//! returns the parent node in charge of imposing the number of slices such as a ForLoop node, if there's no slicer this value is NULL.
+	//! Returns the parent node in charge of imposing the number of slices such as a ForLoop node, if there's no slicer this value is NULL.
 	Node *slicer();
 
-	//!returns all the available presets for this node.
+	//! Returns all the available presets for this node.
 	std::vector<std::string> specializationPresets();
 
-	//!returns the specialization for attribute should this node be set on preset.
+	//! Returns the specialization for attribute should this node be set on preset.
 	std::string attributeSpecializationPreset(const std::string &preset, Attribute *attribute);	
 
 	//! Returns a python script to recreate all the nodes contained within this node.
@@ -107,6 +111,7 @@ public:
 	virtual void attributeConnectionChanged(Attribute *attribute);
 	virtual void attributeSpecializationChanged(Attribute *attribute);
 	virtual std::string debugInfo();
+	virtual std::string shortDebugInfo();
 	virtual void addDynamicAttribute(Attribute *attribute);
 	virtual void removeDynamicAttribute(Attribute *attribute);
 	virtual void updateSlice(Attribute *attribute, unsigned int slice);
@@ -139,6 +144,10 @@ protected:
 	void updateAttributeSpecialization(Attribute *attribute);
 	void setSpecializationPreset(const std::string &presetName, Attribute *attribute, const std::string &specialization);
 	void catchAttributeDirtied(Attribute *attribute, bool value = true);
+
+	//! In order for this node to be nested under a slicer node, such as a ForLoop node, it has to be declared as sliceable(true).
+	//! Once a node is declared as sliceable the updateSlice(attribute, slice) method needs to be overridden instead of the usual update(attribute) method.
+	void setSliceable(bool value);
 	
 	//! Loop nodes such as the ForLoop node are marked as setIsSlicer(true) and they compute a slicing count for their children nodes by overriding the 
 	//! virtual method unsigned int computeSlices().
@@ -173,6 +182,7 @@ private:
 	unsigned int _slices;
 	bool _isSlicer;
 	Node *_slicer;
+	bool _sliceable;
 
 	Node();
 	Node(const Node &other);

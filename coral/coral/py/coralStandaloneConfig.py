@@ -27,6 +27,7 @@
 # </license>
 
 
+import random
 from PyQt4 import QtGui, QtCore
 
 def _aboutClicked():
@@ -199,10 +200,11 @@ def apply():
         "H": _toggleGrid}
     
     mainWin.setShortcutsMap(shprtcutsMap)
-    
-    mainWin.restoreSettings()
-    
-    from coral import coralApp
-    coralApp.logInfo("running " + mainWin.windowTitle())
 
+    mainWin.restoreSettings()
+
+    mainWin.show()
+
+    from coral import coralApp
+    coralApp.logInfo("coral v" + coralApp.version())
 

@@ -53,7 +53,6 @@ void mathNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Exp, Node>("Exp");
 	pythonWrapperUtils::pythonWrapper<Pow, Node>("Pow");
 	pythonWrapperUtils::pythonWrapper<Log, Node>("Log");
-	pythonWrapperUtils::pythonWrapper<Log10, Node>("Log10");
 	pythonWrapperUtils::pythonWrapper<Min, Node>("Min");
 	pythonWrapperUtils::pythonWrapper<Max, Node>("Max");
 	pythonWrapperUtils::pythonWrapper<Average, Node>("Average");

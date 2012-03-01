@@ -46,8 +46,8 @@ public:
 	Numeric *outValue();
 
 	void onSettingSpecialization(const std::vector<std::string> &specialization);
-	std::string debugInfo();
 	static Numeric::Type numericTypeFromString(const std::string &typeStr);
+	std::string shortDebugInfo();
 };
 
 }

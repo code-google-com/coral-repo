@@ -200,16 +200,6 @@ private:
 	NumericAttribute *_outNumber;
 };
 
-class Log10: public Node{
-public:
-	Log10(const std::string &name, Node *parent);
-	void updateSlice(Attribute *attribute, unsigned int slice);
-
-private:
-	NumericAttribute *_inNumber;
-	NumericAttribute *_outNumber;
-};
-
 class Sqrt: public Node{
 public:
 	Sqrt(const std::string &name, Node *parent);

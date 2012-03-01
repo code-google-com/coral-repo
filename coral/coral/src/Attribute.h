@@ -109,6 +109,7 @@ public:
 	virtual void deleteIt();
 	virtual void onDirtied();
 	virtual void onSettingSpecialization(const std::vector<std::string> &specialization);
+	virtual std::string shortDebugInfo();
 	virtual std::string debugInfo();
 	
 	/*! This method returns a pointer to a clean Value, this Value will come from the first input connected in the chain, 

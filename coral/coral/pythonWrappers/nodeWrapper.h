@@ -186,15 +186,37 @@ public:
 	void addDynamicAttribute_default(Attribute *attribute){
 		Node::addDynamicAttribute(attribute);
 	}
+
+	std::string shortDebugInfo(){
+		boost::python::object self = PythonDataCollector::findPyObject(id());
+		
+		return boost::python::call_method<std::string>(self.ptr(), "shortDebugInfo");
+	}
+	
+	std::string shortDebugInfo_default(){
+		return Node::shortDebugInfo();
+	}
 };
 
 boost::python::object node_parent(Node &self){
 	boost::python::object node;
 	
-	if(self.parent()){
-		node = PythonDataCollector::findPyObject(self.parent()->id());
+	Node *parent = self.parent();
+	if(parent){
+		node = PythonDataCollector::findPyObject(parent->id());
 	}
 	
+	return node;
+}
+
+boost::python::object node_slicer(Node &self){
+	boost::python::object node;
+
+	Node *slicer = self.slicer();
+	if(slicer){
+		node = PythonDataCollector::findPyObject(slicer->id());
+	}
+
 	return node;
 }
 
@@ -343,6 +365,10 @@ void node_catchAttributeDirtied(Node &self, Attribute *attribute, bool value){
 	NodeAccessor::_catchAttributeDirtied(self, attribute, value);
 }
 
+void node_setSliceable(Node &self, bool value){
+	NodeAccessor::_setSliceable(self, value);
+}
+
 std::vector<Attribute*> node_dynamicAttributes(Node &self){
 	return self.dynamicAttributes();
 }
@@ -431,6 +457,10 @@ void nodeWrapper(){
 		.def("_catchAttributeDirtied", node_catchAttributeDirtied)
 		.def("attributeDirtied", &Node::attributeDirtied, &NodeWrapper::attributeDirtied_default)
 		.def("attributeSpecializationPreset", &Node::attributeSpecializationPreset)
+		.def("sliceable", &Node::sliceable)
+		.def("_setSliceable", node_setSliceable)
+		.def("slicer", &node_slicer)
+		.def("shortDebugInfo", &Node::shortDebugInfo, &NodeWrapper::shortDebugInfo_default)
 	;
 	
 	Node::_addNodeCallback = node_addNodeCallback;

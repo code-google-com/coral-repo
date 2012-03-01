@@ -153,7 +153,7 @@ class NodeBox(QtGui.QWidget):
         
     def __init__(self, parent):
         QtGui.QWidget.__init__(self, parent)
-        
+
         self._mainLayout = QtGui.QVBoxLayout(self)
         self._header = QtGui.QWidget(self)
         self._headerLayout = QtGui.QHBoxLayout(self._header)

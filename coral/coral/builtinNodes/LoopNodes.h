@@ -32,18 +32,18 @@ public:
 	LoopOutputNode(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
 	void attributeSpecializationChanged(Attribute *attribute);
-	void updateSlice(Attribute *attribute, unsigned int slice);
+	void update(Attribute *attribute);
 
 private:
 	NumericAttribute *_localElement;
 	NumericAttribute *_globalArray;
 	void(LoopOutputNode::*_selectedOperation)(unsigned int, Numeric *, Numeric *);
 	
-	void updateInt(unsigned int slice, Numeric *element, Numeric *array);
-	void updateFloat(unsigned int slice, Numeric *element, Numeric *array);
-	void updateVec3(unsigned int slice, Numeric *element, Numeric *array);
-	void updateCol4(unsigned int slice, Numeric *element, Numeric *array);
-	void updateMatrix44(unsigned int slice, Numeric *element, Numeric *array);
+	void updateInt(unsigned int slices, Numeric *element, Numeric *array);
+	void updateFloat(unsigned int slices, Numeric *element, Numeric *array);
+	void updateVec3(unsigned int slices, Numeric *element, Numeric *array);
+	void updateCol4(unsigned int slices, Numeric *element, Numeric *array);
+	void updateMatrix44(unsigned int slices, Numeric *element, Numeric *array);
 };
 
 class ForLoopNode: public Node{

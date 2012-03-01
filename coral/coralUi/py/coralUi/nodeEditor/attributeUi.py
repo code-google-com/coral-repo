@@ -105,23 +105,7 @@ class AttributeUi(QtGui.QGraphicsWidget):
     Override this method to return a more detailed toolTip.
     '''
     def toolTip(self):
-        coralAttr = self.coralAttribute()
-        toolTip = "attribute: " + coralAttr.fullName() + "\n"
-        toolTip += "className: " + coralAttr.className() + "\n"
-        
-        allowedSpecialization = coralAttr.allowedSpecialization()
-        if len(allowedSpecialization):
-            toolTip += "\nallowed specialization: " + str(coralAttr.allowedSpecialization())
-        else:
-            toolTip += "\nallowed specialization: any"
-            
-        specialization = coralAttr.specialization()
-        if len(specialization):
-            toolTip += "\nactive pecialization:" + str(specialization)
-        else:
-            toolTip += "\nactive specialization: empty"
-        
-        return toolTip
+        return self.coralAttribute().shortDebugInfo()
     
     def _disconnected(self):
         if self._inputHook:

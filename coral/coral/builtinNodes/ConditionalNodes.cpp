@@ -89,7 +89,9 @@ void greaterOrLessUpdateSpecializationLink(Attribute *attributeA, Attribute *att
 
 }
 
-IfGreaterThan::IfGreaterThan(const std::string &name, Node *parent): Node(name, parent){	
+IfGreaterThan::IfGreaterThan(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_selectedOperation = 0;
 	
 	_in0 = new NumericAttribute("in0", this);
@@ -267,7 +269,9 @@ void IfGreaterThan::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 // less than node
-IfLessThan::IfLessThan(const std::string &name, Node *parent): Node(name, parent){	
+IfLessThan::IfLessThan(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_selectedOperation = 0;
 	
 	_in0 = new NumericAttribute("in0", this);
@@ -446,7 +450,9 @@ void IfLessThan::updateSlice(Attribute *attribute, unsigned int slice){
 
 // conditional value node
 
-ConditionalValue::ConditionalValue(const std::string &name, Node *parent): Node(name, parent){	
+ConditionalValue::ConditionalValue(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+	
 	_selectedOperation = 0;
 	
 	_condition = new BoolAttribute("condition", this);

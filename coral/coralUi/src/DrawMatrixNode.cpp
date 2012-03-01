@@ -44,6 +44,8 @@ _shaderProgram(0),
 _pointAttrLoc(-1),
 _colorAttrLoc(-1),
 _matrixAttrLoc(-1){
+	setSliceable(true);
+	
 	_matrix = new NumericAttribute("matrix", this);
 	_size = new NumericAttribute("size mult", this);
 

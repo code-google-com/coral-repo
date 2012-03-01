@@ -10,6 +10,8 @@ using namespace coral;
 LoopInputNode::LoopInputNode(const std::string &name, Node *parent):
 Node(name, parent),
 _selectedOperation(0){
+	setSliceable(true);
+
 	_globalArray = new NumericAttribute("globalArray", this);
 	_localElement = new NumericAttribute("localElement", this);
 	_localIndex = new NumericAttribute("localIndex", this);
@@ -115,6 +117,8 @@ void LoopInputNode::updateSlice(Attribute *attribute, unsigned int slice){
 LoopOutputNode::LoopOutputNode(const std::string &name, Node* parent): 
 Node(name, parent),
 _selectedOperation(0){
+	setSliceable(true);
+	
 	_localElement = new NumericAttribute("localElement", this);
 	_globalArray = new NumericAttribute("globalArray", this);
 	
@@ -180,34 +184,44 @@ void LoopOutputNode::attributeSpecializationChanged(Attribute *attribute){
 	}
 }
 
-void LoopOutputNode::updateInt(unsigned int slice, Numeric *element, Numeric *array){
-	array->setIntValueAtSlice(0, slice, element->intValueAtSlice(slice, 0));
+void LoopOutputNode::updateInt(unsigned int slices, Numeric *element, Numeric *array){
+	for(int i = 0; i < slices; ++i){
+		array->setIntValueAtSlice(0, i, element->intValueAtSlice(i, 0));
+	}
 }
 
-void LoopOutputNode::updateFloat(unsigned int slice, Numeric *element, Numeric *array){
-	array->setFloatValueAtSlice(0, slice, element->floatValueAtSlice(slice, 0));
+void LoopOutputNode::updateFloat(unsigned int slices, Numeric *element, Numeric *array){
+	for(int i = 0; i < slices; ++i){
+		array->setFloatValueAtSlice(0, i, element->floatValueAtSlice(i, 0));
+	}
 }
 
-void LoopOutputNode::updateVec3(unsigned int slice, Numeric *element, Numeric *array){
-	array->setVec3ValueAtSlice(0, slice, element->vec3ValueAtSlice(slice, 0));
+void LoopOutputNode::updateVec3(unsigned int slices, Numeric *element, Numeric *array){
+	for(int i = 0; i < slices; ++i){
+		array->setVec3ValueAtSlice(0, i, element->vec3ValueAtSlice(i, 0));
+	}
 }
 
-void LoopOutputNode::updateCol4(unsigned int slice, Numeric *element, Numeric *array){
-	array->setCol4ValueAtSlice(0, slice, element->col4ValueAtSlice(slice, 0));
+void LoopOutputNode::updateCol4(unsigned int slices, Numeric *element, Numeric *array){
+	for(int i = 0; i < slices; ++i){
+		array->setCol4ValueAtSlice(0, i, element->col4ValueAtSlice(i, 0));
+	}
 }
 
-void LoopOutputNode::updateMatrix44(unsigned int slice, Numeric *element, Numeric *array){
-	array->setMatrix44ValueAtSlice(0, slice, element->matrix44ValueAtSlice(slice, 0));
+void LoopOutputNode::updateMatrix44(unsigned int slices, Numeric *element, Numeric *array){
+	for(int i = 0; i < slices; ++i){
+		array->setMatrix44ValueAtSlice(0, i, element->matrix44ValueAtSlice(i, 0));
+	}
 }
 
-void LoopOutputNode::updateSlice(Attribute *attribute, unsigned int slice){
+void LoopOutputNode::update(Attribute *attribute){
 	if(_selectedOperation){
 		Numeric *element = _localElement->value();
 		Numeric *array = _globalArray->outValue();
-		
-		array->resize(element->slices());
 
-		(this->*_selectedOperation)(slice, element, array);
+		unsigned int slices = element->slices();
+		array->resizeSlice(0, slices);
+		(this->*_selectedOperation)(slices, element, array);
 	}
 }
 
@@ -233,14 +247,6 @@ Node(name, parent){
 	arraySpec.push_back("Matrix44Array");
 	setAttributeAllowedSpecializations(_globalArray, arraySpec);
 }
-
-// void ForLoopNode::addDynamicAttribute(Attribute *attribute){
-// 	Node::addDynamicAttribute(attribute);
-	
-// 	if(attribute->isOutput()){
-// 		setAttributeAffect(_globalArray, attribute);
-// 	}
-// }
 
 unsigned int ForLoopNode::computeSlices(){
 	return _globalArray->value()->sizeSlice(0);

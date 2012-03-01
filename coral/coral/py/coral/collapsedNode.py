@@ -36,6 +36,7 @@ class CollapsedNode(_coral.Node):
         _coral.Node.__init__(self, name, parent)
         self.setClassName("CollapsedNode")
         
+        self._setSliceable(True)
         self._setUpdateEnabled(False)
         self._setAllowDynamicAttributes(True)
 

@@ -4,6 +4,8 @@
 using namespace coral;
 
 FindPointsInRange::FindPointsInRange(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+	
 	_point = new NumericAttribute("point", this);
 	_range = new NumericAttribute("range", this);
 	_points = new NumericAttribute("points", this);

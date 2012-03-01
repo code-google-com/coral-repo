@@ -844,11 +844,21 @@ void Attribute::removeSpecializationLink(SpecializationLink *specializationLink)
 	delete specializationLink;
 }
 
-std::string Attribute::debugInfo(){
+std::string Attribute::shortDebugInfo(){
 	std::string info;
-	
+
 	info += "attribute: " + fullName() + "\n";
+	info += "className: " + className() + "\n";
 	info += "isClean: " + stringUtils::boolToString(_isClean) + "\n";
+	info += "allowedSpecialization: " + stringUtils::vectorToString<std::string>(_allowedSpecialization) + "\n";
+	info += "specialization: " + stringUtils::vectorToString<std::string>(_specialization);
+
+	return info;
+}
+
+std::string Attribute::debugInfo(){
+	std::string info = shortDebugInfo() + "\n";
+	
 	info += "last cleaning took: secs:" + stringUtils::intToString(_computeTimeSeconds) + ", millisecs: " + stringUtils::intToString(_computeTimeMilliseconds) + "\n";
 	
 	info += "dirty chain: [";

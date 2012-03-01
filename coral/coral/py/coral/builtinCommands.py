@@ -60,7 +60,7 @@ class CreateNode(Command):
                 self.setResultString(newNode.fullName())
                 
         if newNode is None:
-            coralApp.logError("CreateNode Command: failed to create new node.")
+            coralApp.logDebug("CreateNode Command: failed to create new node.")
 
 class CreateAttribute(Command):
     def __init__(self):
@@ -93,7 +93,7 @@ class CreateAttribute(Command):
                 self.setResultString(newAttr.fullName())
         
         if newAttr is None:
-            coralApp.logError("CreateAttribute Command: failed to create new attribute.")
+            coralApp.logDebug("CreateAttribute Command: failed to create new attribute.")
 
 class SetupDynamicAttribute(Command):
     def __init__(self):
@@ -200,7 +200,7 @@ class ConnectAttributes(Command):
                 if error.message():
                     errorMessage += "extended info: " + error.message()
                 
-                coralApp.logError(errorMessage)
+                coralApp.logDebug(errorMessage)
             
 class DisconnectInput(Command):
     def __init__(self):
@@ -247,7 +247,7 @@ class ExplodeCollapsedNode(Command):
             if collapsedNode.__class__ is CollapsedNode:
                 coralApp.explodeCollapsedNode(collapsedNode)
             else:
-                coralApp.logError("ExplodeCollapsedNode Command: input node must be of type CollapsedNode")
+                coralApp.logDebug("ExplodeCollapsedNode Command: input node must be of type CollapsedNode")
 
 class SetAttributeValue(Command):
     def __init__(self):

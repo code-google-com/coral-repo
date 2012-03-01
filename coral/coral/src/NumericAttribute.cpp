@@ -111,19 +111,26 @@ Numeric::Type NumericAttribute::numericTypeFromString(const std::string &typeStr
 	return type;
 }
 
-std::string NumericAttribute::debugInfo(){
-	std::string info = Attribute::debugInfo();
+std::string NumericAttribute::shortDebugInfo(){
+	std::string info = Attribute::shortDebugInfo() + "\n";
+
 	Numeric *val = value();
 	int slices = val->slices();
 
+	bool isArray = val->isArray();
+
 	info += "slices: " + stringUtils::intToString(slices) + "\n";
 	for(int i = 0; i < val->slices(); ++i){
-		info += "slice " + 	stringUtils::intToString(i);
-		if(val->isArray()){
-			info += ", size: " + stringUtils::intToString(val->sizeSlice(i));
+		info += "slice: " + 	stringUtils::intToString(i) + ", ";
+		if(isArray){
+			info += "size: " + stringUtils::intToString(val->sizeSlice(i)) + ", ";
 		}
 
 		std::string valStr = val->sliceAsString(i);
+		std::vector<std::string> split;
+		stringUtils::split(valStr, split, " ");
+		valStr = split[0];
+
 		std::string trimmedValStr;
 		if(valStr.size() < 100){
 			trimmedValStr = valStr;
@@ -135,14 +142,13 @@ std::string NumericAttribute::debugInfo(){
 			trimmedValStr += " ...]";
 		}
 		
-		info += ", " + trimmedValStr + "\n";
+		info += trimmedValStr + "\n";
 
 		if(i > 3){
-			info += "...trimming remaining slices.\n";
+			info += "(trimming remaining slices)\n";
 			break;
 		}
 	}
-	
+
 	return info;
 }
-

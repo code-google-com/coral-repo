@@ -40,6 +40,8 @@ DrawNode(name, parent),
 _pointIndexAttr(-1),
 _colorIndexAttr(-1),
 _sizeIndexAttr(-1){
+	setSliceable(true);
+	
 	_points = new NumericAttribute("points", this);
 	_sizes = new NumericAttribute("sizes", this);
 	_colors = new NumericAttribute("colors", this);

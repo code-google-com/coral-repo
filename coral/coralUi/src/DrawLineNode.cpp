@@ -39,6 +39,8 @@ DrawLineNode::DrawLineNode(const std::string &name, Node *parent):
 DrawNode(name, parent),
 _pointIndexAttr(0),
 _colorIndexAttr(1){
+	setSliceable(true);
+	
 	_points = new NumericAttribute("points", this);
 	_thickness = new NumericAttribute("thickness", this);
 	_colors = new NumericAttribute("colors", this);

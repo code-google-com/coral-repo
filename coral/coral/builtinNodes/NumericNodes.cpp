@@ -73,6 +73,8 @@ std::map<std::string, Numeric> _globalNumericStorage;
 
 
 IntNode::IntNode(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_out = new NumericAttribute("out", this);
 	addOutputAttribute(_out);
 	
@@ -83,6 +85,8 @@ IntNode::IntNode(const std::string &name, Node* parent): Node(name, parent){
 }
 
 FloatNode::FloatNode(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_out = new NumericAttribute("out", this);
 	addOutputAttribute(_out);
 	
@@ -93,6 +97,8 @@ FloatNode::FloatNode(const std::string &name, Node* parent): Node(name, parent){
 }
 
 Vec3Node::Vec3Node(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_x = new NumericAttribute("x", this);
 	_y = new NumericAttribute("y", this);
 	_z = new NumericAttribute("z", this);
@@ -189,7 +195,9 @@ void Vec3Node::updateSlice(Attribute *attribute, unsigned int slice){
 	_vector->outValue()->setVec3ValuesSlice(slice, outArray);
 }
 
-Vec3ToFloats::Vec3ToFloats(const std::string &name, Node* parent): Node(name, parent){	
+Vec3ToFloats::Vec3ToFloats(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_vector = new NumericAttribute("vector", this);
 	_x = new NumericAttribute("x", this);
 	_y = new NumericAttribute("y", this);
@@ -273,6 +281,8 @@ void Vec3ToFloats::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Col4Node::Col4Node(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_r = new NumericAttribute("r", this);
 	_g = new NumericAttribute("g", this);
 	_b = new NumericAttribute("b", this);
@@ -383,6 +393,8 @@ void Col4Node::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Col4ToFloats::Col4ToFloats(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_color = new NumericAttribute("color", this);
 	_r = new NumericAttribute("r", this);
 	_g = new NumericAttribute("g", this);
@@ -480,6 +492,8 @@ void Col4ToFloats::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Col4Reverse::Col4Reverse(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_inColor = new NumericAttribute("in", this);
 	_outColor = new NumericAttribute("out", this);
 
@@ -549,8 +563,9 @@ void Col4Reverse::updateSlice(Attribute *attribute, unsigned int slice){
 	setAttributeIsClean(_outColor, true);
 }
 
-QuatNode::QuatNode(const std::string &name, Node* parent): Node(name, parent)
-{
+QuatNode::QuatNode(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_r = new NumericAttribute("r", this);
 	_x = new NumericAttribute("x", this);
 	_y = new NumericAttribute("y", this);
@@ -645,6 +660,8 @@ void QuatNode::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 QuatToFloats::QuatToFloats(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_quat = new NumericAttribute("quaternion", this);
 	_r = new NumericAttribute("r", this);
 	_x = new NumericAttribute("x", this);
@@ -744,7 +761,9 @@ void QuatToFloats::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 
-Matrix44Node::Matrix44Node(const std::string &name, Node* parent): Node(name, parent){	
+Matrix44Node::Matrix44Node(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_translateX = new NumericAttribute("translateX", this);
 	_translateY = new NumericAttribute("translateY", this);
 	_translateZ = new NumericAttribute("translateZ", this);
@@ -903,7 +922,9 @@ void Matrix44Node::updateSlice(Attribute *attribute, unsigned int slice){
 	_matrix->outValue()->setMatrix44ValuesSlice(slice, newMatrixValues);
 }
 
-ConstantArray::ConstantArray(const std::string &name, Node *parent): Node(name, parent){	
+ConstantArray::ConstantArray(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_size = new NumericAttribute("size", this);
 	_constant = new NumericAttribute("constant", this);
 	_array = new NumericAttribute("array", this);
@@ -1013,7 +1034,9 @@ void ConstantArray::updateSlice(Attribute *attribute, unsigned int slice){
 	}
 }
 
-ArraySize::ArraySize(const std::string &name, Node *parent): Node(name, parent){	
+ArraySize::ArraySize(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_array = new NumericAttribute("array", this);
 	_size = new NumericAttribute("size", this);
 	
@@ -1047,6 +1070,8 @@ void ArraySize::updateSlice(Attribute *attribute, unsigned int slice){
 BuildArray::BuildArray(const std::string &name, Node *parent): 
 	Node(name, parent),
 	_selectedOperation(0){
+	setSliceable(true);
+
 	setAllowDynamicAttributes(true);
 	
 	_array = new NumericAttribute("array", this);
@@ -1178,6 +1203,8 @@ void BuildArray::updateSlice(Attribute *attribute, unsigned int slice){
 RangeArray::RangeArray(const std::string &name, Node* parent):
 Node(name, parent),
 _selectedOperation(0){	
+	setSliceable(true);
+
 	_start = new NumericAttribute("start", this);
 	_end = new NumericAttribute("end", this);
 	_steps = new NumericAttribute("steps", this);
@@ -1292,6 +1319,8 @@ void RangeArray::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Matrix44Translation::Matrix44Translation(const std::string &name, Node* parent): Node(name, parent){	
+	setSliceable(true);
+
 	_matrix = new NumericAttribute("matrix", this);
 	_translation = new NumericAttribute("translation", this);
 	
@@ -1344,6 +1373,8 @@ void Matrix44Translation::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Matrix44RotationAxis::Matrix44RotationAxis(const std::string &name, Node* parent): Node(name, parent){	
+	setSliceable(true);
+
 	_matrix = new NumericAttribute("matrix", this);
 	_axisX = new NumericAttribute("axisX", this);
 	_axisY = new NumericAttribute("axisY", this);
@@ -1412,6 +1443,8 @@ void Matrix44RotationAxis::updateSlice(Attribute *attribute, unsigned int slice)
 }
 
 Matrix44FromVectors::Matrix44FromVectors(const std::string &name, Node* parent): Node(name, parent){	
+	setSliceable(true);
+
 	_translation = new NumericAttribute("translation", this);
 	_axisX = new NumericAttribute("axisX", this);
 	_axisY = new NumericAttribute("axisY", this);
@@ -1504,6 +1537,8 @@ void Matrix44FromVectors::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 Matrix44EulerRotation::Matrix44EulerRotation(const std::string &name, Node* parent): Node(name, parent){	
+	setSliceable(true);
+
 	_matrix = new NumericAttribute("matrix", this);
 	_eulerAngles = new NumericAttribute("eulerAngles", this);
 	
@@ -1563,6 +1598,8 @@ void Matrix44EulerRotation::updateSlice(Attribute *attribute, unsigned int slice
 RangeLoop::RangeLoop(const std::string &name, Node* parent): 
 	Node(name, parent),
 	_selectedOperation(0){	
+	setSliceable(true);
+
 	_start = new NumericAttribute("start", this);
 	_end = new NumericAttribute("end", this);
 	_step = new NumericAttribute("step", this);
@@ -1694,6 +1731,8 @@ void RangeLoop::updateSlice(Attribute *attribute, unsigned int slice){
 RandomNumber::RandomNumber(const std::string &name, Node* parent): 
 	Node(name, parent),
 	_selectedOperation(0){	
+	setSliceable(true);
+
 	_min = new NumericAttribute("min", this);
 	_max = new NumericAttribute("max", this);
 	_seed = new NumericAttribute("seed", this);
@@ -1823,6 +1862,8 @@ void RandomNumber::updateSlice(Attribute *attribute, unsigned int slice){
 }
 
 ArrayIndices::ArrayIndices(const std::string &name, Node* parent): Node(name, parent){
+	setSliceable(true);
+
 	_array = new NumericAttribute("array", this);
 	_indices = new NumericAttribute("indices", this);
 	
@@ -1856,6 +1897,8 @@ void ArrayIndices::updateSlice(Attribute *attribute, unsigned int slice){
 GetArrayElement::GetArrayElement(const std::string &name, Node *parent): 
 	Node(name, parent),
 	_selectedOperation(0){
+	setSliceable(true);
+
 	_array = new NumericAttribute("array", this);
 	_index = new NumericAttribute("index", this);
 	_element = new NumericAttribute("element", this);
@@ -2053,6 +2096,8 @@ void GetArrayElement::updateSlice(Attribute *attribute, unsigned int slice){
 SetArrayElement::SetArrayElement(const std::string &name, Node *parent):
 Node(name, parent),
 _selectedOperation(0){
+	setSliceable(true);
+
 	_array = new NumericAttribute("array", this);
 	_index = new NumericAttribute("index", this);
 	_element = new NumericAttribute("element", this);
@@ -2229,7 +2274,11 @@ void SetArrayElement::updateSlice(Attribute *attribute, unsigned int slice){
 	}
 }
 
-SetSimulationStep::SetSimulationStep(const std::string &name, Node *parent): Node(name, parent){	
+SetSimulationStep::SetSimulationStep(const std::string &name, Node *parent): 
+Node(name, parent),
+_selectedOperation(0){
+	setSliceable(true);
+
 	_storageKey = new StringAttribute("storageKey", this);
 	_data = new NumericAttribute("data", this);
 	_result = new NumericAttribute("result", this);
@@ -2244,18 +2293,83 @@ SetSimulationStep::SetSimulationStep(const std::string &name, Node *parent): Nod
 	addAttributeSpecializationLink(_data, _result);
 }
 
-void SetSimulationStep::updateSlice(Attribute *attribute, unsigned int slice){
-	#ifdef CORAL_PARALLEL_TBB
-		tbb::mutex::scoped_lock lock(_globalMutex);
-	#endif
-
-	Numeric *data = _data->value();
-	
-	_globalNumericStorage[_storageKey->value()->stringValue()].copy(data);
-	_result->outValue()->copy(data);
+void SetSimulationStep::attributeSpecializationChanged(Attribute *attribute){
+	if(attribute == _data){
+		_selectedOperation = 0;
+		
+		Numeric::Type type = _data->outValue()->type();
+		if(type != Numeric::numericTypeAny){
+			if(type == Numeric::numericTypeInt || type == Numeric::numericTypeIntArray){
+				_selectedOperation = &SetSimulationStep::updateInt;
+			}
+			else if(type == Numeric::numericTypeFloat || type == Numeric::numericTypeFloatArray){
+				_selectedOperation = &SetSimulationStep::updateFloat;
+			}
+			else if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
+				_selectedOperation = &SetSimulationStep::updateVec3;
+			}
+			else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &SetSimulationStep::updateCol4;
+			}
+			else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
+				_selectedOperation = &SetSimulationStep::updateMatrix44;
+			}
+			else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
+				_selectedOperation = &SetSimulationStep::updateQuat;
+			}
+		}
+	}
 }
 
-GetSimulationStep::GetSimulationStep(const std::string &name, Node *parent): Node(name, parent){	
+void SetSimulationStep::updateInt(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice){
+	_globalNumericStorage[storageKey].setIntValuesSlice(slice, data->intValuesSlice(slice));
+	result->setIntValuesSlice(slice, data->intValuesSlice(slice));
+}
+
+void SetSimulationStep::updateFloat(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice){
+	_globalNumericStorage[storageKey].setFloatValuesSlice(slice, data->floatValuesSlice(slice));
+	result->setFloatValuesSlice(slice, data->floatValuesSlice(slice));
+}
+
+void SetSimulationStep::updateVec3(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice){
+	_globalNumericStorage[storageKey].setVec3ValuesSlice(slice, data->vec3ValuesSlice(slice));
+	result->setVec3ValuesSlice(slice, data->vec3ValuesSlice(slice));
+}
+
+void SetSimulationStep::updateCol4(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice){
+	_globalNumericStorage[storageKey].setCol4ValuesSlice(slice, data->col4ValuesSlice(slice));
+	result->setCol4ValuesSlice(slice, data->col4ValuesSlice(slice));
+}
+
+void SetSimulationStep::updateMatrix44(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice){
+	_globalNumericStorage[storageKey].setMatrix44ValuesSlice(slice, data->matrix44ValuesSlice(slice));
+	result->setMatrix44ValuesSlice(slice, data->matrix44ValuesSlice(slice));
+}
+
+void SetSimulationStep::updateQuat(const std::string &storageKey, Numeric *data, Numeric *result, unsigned int slice){
+	_globalNumericStorage[storageKey].setQuatValuesSlice(slice, data->quatValuesSlice(slice));
+	result->setQuatValuesSlice(slice, data->quatValuesSlice(slice));
+}
+
+void SetSimulationStep::resizedSlices(unsigned int slices){
+	_globalNumericStorage[_storageKey->value()->stringValue()].resizeSlices(slices);
+}
+
+void SetSimulationStep::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		#ifdef CORAL_PARALLEL_TBB
+			tbb::mutex::scoped_lock lock(_globalMutex); // block setting _globalNumericStorage from two different threads
+		#endif
+
+		(this->*_selectedOperation)(_storageKey->value()->stringValue(), _data->value(), _result->outValue(), slice);
+	}
+}
+
+GetSimulationStep::GetSimulationStep(const std::string &name, Node *parent): 
+Node(name, parent),
+_selectedOperation(0){
+	setSliceable(true);
+
 	_storageKey = new StringAttribute("storageKey", this);
 	_source = new NumericAttribute("source", this);
 	_step = new NumericAttribute("step", this);
@@ -2278,39 +2392,107 @@ GetSimulationStep::GetSimulationStep(const std::string &name, Node *parent): Nod
 	addAttributeSpecializationLink(_source, _data);
 }
 
-void GetSimulationStep::updateSlice(Attribute *attribute, unsigned int slice){
-	#ifdef CORAL_PARALLEL_TBB
-		tbb::mutex::scoped_lock lock(_globalMutex);
-	#endif
-
-	std::string storageKey = _storageKey->value()->stringValue();
-	Numeric *source = _source->value();
-	Numeric *step = _step->value();
-	if(step->type() == Numeric::numericTypeFloat){
-		float step = _step->value()->floatValueAtSlice(slice, 0);
-	
-		if(step == 0.0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
-			_globalNumericStorage[storageKey].copy(source);
-		}
-	
-		_data->outValue()->copy(&_globalNumericStorage[storageKey]);
-	}
-	else if(step->type() == Numeric::numericTypeInt){
-		int step = _step->value()->intValueAtSlice(slice, 0);
-	
-		if(step == 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
-			_globalNumericStorage[storageKey].copy(source);
-		}
-	
-		_data->outValue()->copy(&_globalNumericStorage[storageKey]);
+void GetSimulationStep::attributeSpecializationChanged(Attribute *attribute){
+	if(attribute == _source){
+		_selectedOperation = 0;
 		
+		Numeric::Type type = _source->outValue()->type();
+		if(type != Numeric::numericTypeAny){
+			if(type == Numeric::numericTypeInt || type == Numeric::numericTypeIntArray){
+				_selectedOperation = &GetSimulationStep::updateInt;
+			}
+			else if(type == Numeric::numericTypeFloat || type == Numeric::numericTypeFloatArray){
+				_selectedOperation = &GetSimulationStep::updateFloat;
+			}
+			else if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
+				_selectedOperation = &GetSimulationStep::updateVec3;
+			}
+			else if(type == Numeric::numericTypeCol4 || type == Numeric::numericTypeCol4Array){
+				_selectedOperation = &GetSimulationStep::updateCol4;
+			}
+			else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
+				_selectedOperation = &GetSimulationStep::updateMatrix44;
+			}
+			else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
+				_selectedOperation = &GetSimulationStep::updateQuat;
+			}
+		}
 	}
 }
 
+void GetSimulationStep::updateInt(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice){
+	if(step <= 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+		data->setIntValuesSlice(slice, source->intValuesSlice(slice));
+	}
+	else{
+		data->setIntValuesSlice(slice, _globalNumericStorage[storageKey].intValuesSlice(slice));
+	}
+}
 
+void GetSimulationStep::updateFloat(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice){
+	if(step <= 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+		data->setFloatValuesSlice(slice, source->floatValuesSlice(slice));
+	}
+	else{
+		data->setFloatValuesSlice(slice, _globalNumericStorage[storageKey].floatValuesSlice(slice));
+	}
+}
 
-QuatToAxisAngle::QuatToAxisAngle(const std::string &name, Node *parent): Node(name, parent)
-{
+void GetSimulationStep::updateVec3(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice){
+	if(step <= 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+		data->setVec3ValuesSlice(slice, source->vec3ValuesSlice(slice));
+	}
+	else{
+		data->setVec3ValuesSlice(slice, _globalNumericStorage[storageKey].vec3ValuesSlice(slice));
+	}
+}
+
+void GetSimulationStep::updateCol4(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice){
+	if(step <= 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+		data->setCol4ValuesSlice(slice, source->col4ValuesSlice(slice));
+	}
+	else{
+		data->setCol4ValuesSlice(slice, _globalNumericStorage[storageKey].col4ValuesSlice(slice));
+	}
+}
+
+void GetSimulationStep::updateMatrix44(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice){
+	if(step <= 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+		data->setMatrix44ValuesSlice(slice, source->matrix44ValuesSlice(slice));
+	}
+	else{
+		data->setMatrix44ValuesSlice(slice, _globalNumericStorage[storageKey].matrix44ValuesSlice(slice));
+	}
+}
+
+void GetSimulationStep::updateQuat(const std::string &storageKey, int step, Numeric *source, Numeric *data, unsigned int slice){
+	if(step <= 0 || _globalNumericStorage.find(storageKey) == _globalNumericStorage.end()){
+		data->setQuatValuesSlice(slice, source->quatValuesSlice(slice));
+	}
+	else{
+		data->setQuatValuesSlice(slice, _globalNumericStorage[storageKey].quatValuesSlice(slice));
+	}
+}
+
+void GetSimulationStep::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		Numeric *step = _step->value();
+
+		int stepVal;
+		if(step->type() == Numeric::numericTypeFloat){
+			stepVal = int(step->floatValueAtSlice(slice, 0));
+		}
+		else if(step->type() == Numeric::numericTypeInt){
+			stepVal = step->intValueAtSlice(slice, 0);
+		}
+
+		(this->*_selectedOperation)(_storageKey->value()->stringValue(), stepVal, _source->value(), _data->outValue(), slice);
+	}
+}
+
+QuatToAxisAngle::QuatToAxisAngle(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_quat = new NumericAttribute("quat",this);
 	_axis = new NumericAttribute("axis",this);
 	_angle = new NumericAttribute("angle",this);
@@ -2388,8 +2570,9 @@ void QuatToAxisAngle::updateSlice(Attribute *attribute, unsigned int slice)
 	setAttributeIsClean(_angle, true);
 }
 
-QuatToEulerRotation::QuatToEulerRotation(const std::string &name, Node *parent): Node(name, parent)
-{
+QuatToEulerRotation::QuatToEulerRotation(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_quat = new NumericAttribute("quat",this);
 	_euler = new NumericAttribute("euler",this);
 
@@ -2464,8 +2647,9 @@ void QuatToEulerRotation::updateSlice(Attribute *attribute, unsigned int slice)
 	setAttributeIsClean(_euler, true);
 }
 
-QuatToMatrix44::QuatToMatrix44(const std::string &name, Node *parent): Node(name, parent)
-{
+QuatToMatrix44::QuatToMatrix44(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_quat = new NumericAttribute("quat",this);
 	_matrix = new NumericAttribute("matrix",this);
 
@@ -2488,8 +2672,7 @@ QuatToMatrix44::QuatToMatrix44(const std::string &name, Node *parent): Node(name
 	addAttributeSpecializationLink(_quat, _matrix);
 }
 
-void QuatToMatrix44::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
-{
+void QuatToMatrix44::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
 	if(specializationA.size() < specializationB.size()){
 		std::string specB = specializationB[0];
 		specializationB.resize(1);
@@ -2513,8 +2696,7 @@ void QuatToMatrix44::updateSpecializationLink(Attribute *attributeA, Attribute *
 	}
 }
 
-void QuatToMatrix44::updateSlice(Attribute *attribute, unsigned int slice)
-{
+void QuatToMatrix44::updateSlice(Attribute *attribute, unsigned int slice){
 	const std::vector<Imath::Quatf> &quatValues = _quat->value()->quatValuesSlice(slice);
 	int size = quatValues.size();
 
@@ -2531,8 +2713,9 @@ void QuatToMatrix44::updateSlice(Attribute *attribute, unsigned int slice)
 	setAttributeIsClean(_matrix, true);
 }
 
-Matrix44ToQuat::Matrix44ToQuat(const std::string &name, Node *parent): Node(name, parent)
-{
+Matrix44ToQuat::Matrix44ToQuat(const std::string &name, Node *parent): Node(name, parent){
+	setSliceable(true);
+
 	_quat = new NumericAttribute("quat",this);
 	_matrix = new NumericAttribute("matrix",this);
 
@@ -2555,8 +2738,7 @@ Matrix44ToQuat::Matrix44ToQuat(const std::string &name, Node *parent): Node(name
 	addAttributeSpecializationLink(_matrix,_quat);
 }
 
-void Matrix44ToQuat::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB)
-{
+void Matrix44ToQuat::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
 	if(specializationA.size() < specializationB.size()){
 		std::string specB = specializationB[0];
 		specializationB.resize(1);
@@ -2580,8 +2762,7 @@ void Matrix44ToQuat::updateSpecializationLink(Attribute *attributeA, Attribute *
 	}
 }
 
-void Matrix44ToQuat::updateSlice(Attribute *attribute, unsigned int slice)
-{
+void Matrix44ToQuat::updateSlice(Attribute *attribute, unsigned int slice){
 	const std::vector<Imath::M44f> &mtxValues = _matrix->value()->matrix44ValuesSlice(slice);
 	int size = mtxValues.size();
 
@@ -2628,96 +2809,5 @@ void Matrix44ToQuat::updateSlice(Attribute *attribute, unsigned int slice)
 	_quat->outValue()->setQuatValuesSlice(slice, quatValues);
 
 	setAttributeIsClean(_quat, true);
-}
-
-StrandsNode::StrandsNode(const std::string &name, Node *parent): Node(name, parent){
-	_subdivide = new NumericAttribute("subdivide", this);
-	_root = new NumericAttribute("root", this);
-	_slice = new NumericAttribute("slice", this);
-	_strands = new NumericAttribute("strands", this);
-	_pointsPerStrand = new NumericAttribute("pointsPerStrand", this);
-
-	addInputAttribute(_subdivide);
-	addInputAttribute(_root);
-	addInputAttribute(_slice);
-	addOutputAttribute(_strands);
-	addOutputAttribute(_pointsPerStrand);
-
-	setAttributeAllowedSpecialization(_subdivide, "Int");
-	setAttributeAllowedSpecialization(_root, "Vec3Array");
-	setAttributeAllowedSpecialization(_slice, "Vec3Array");
-	setAttributeAllowedSpecialization(_strands, "Vec3Array");
-	setAttributeAllowedSpecialization(_pointsPerStrand, "Int");
-
-	setAttributeAffect(_subdivide, _strands);
-	setAttributeAffect(_subdivide, _pointsPerStrand);
-	setAttributeAffect(_root, _strands);
-	setAttributeAffect(_root, _pointsPerStrand);
-	setAttributeAffect(_slice, _strands);
-	setAttributeAffect(_slice, _pointsPerStrand);
-	setAttributeAffect(_slice, _strands);
-	setAttributeAffect(_slice, _pointsPerStrand);
-}
-
-void StrandsNode::updateSlice(Attribute *attribute, unsigned int slice){
-	const std::vector<Attribute*> &dynAttrs = dynamicAttributes();
-
-	int totalSlices = 2 + dynAttrs.size();
-	std::vector<const std::vector<Imath::V3f>* > slices(totalSlices);
-	slices[0] = &_root->value()->vec3ValuesSlice(slice);
-	slices[1] = &_slice->value()->vec3ValuesSlice(slice);
-
-	int totalStrands = slices[0]->size();
-	if(slices[1]->size() < totalStrands){
-		totalStrands = slices[1]->size();
-	}
-
-	for(int i = 0; i < dynAttrs.size(); ++i){
-		slices[i + 2] = &((Numeric*)dynAttrs[i]->value())->vec3ValuesSlice(slice); 
-		int pointsInSlice = slices[i + 2]->size();
-		if(pointsInSlice < totalStrands){
-			totalStrands = pointsInSlice;
-		}
-	}
-
-	int subdivide = _subdivide->value()->intValueAtSlice(slice, 0);
-	if(subdivide < 0){
-		subdivide = 0;
-		_subdivide->outValue()->setIntValueAtSlice(slice, 0, 0);
-	}
-
-	int pointsPerStrand = totalSlices + ((totalSlices - 1) * subdivide);
-	std::vector<Imath::V3f> strands(pointsPerStrand * totalStrands);
-	
-	float subdivStep = 1.0 / (subdivide + 1.0);
-		
-	int pointId = 0;
-	for(int strandId = 0; strandId < totalStrands; ++strandId){
-		for(int sliceId = 0; sliceId < totalSlices; ++sliceId){
-			const std::vector<Imath::V3f> slice = *slices[sliceId];
-
-			const Imath::V3f &pointA = slice[strandId];
-			strands[pointId] = pointA;
-			pointId += 1;
-			
-			if(subdivide){
-				if(sliceId < totalSlices - 1){
-					// populate subdivisions between slice and nextSlice
-					const std::vector<Imath::V3f> nextSlice = *slices[sliceId + 1];
-					const Imath::V3f &pointB = nextSlice[strandId];
-
-					Imath::V3f ab = pointB - pointA;
-
-					for(int subdiv = 0; subdiv < subdivide; ++subdiv){
-						strands[pointId] = pointA + (ab * (subdivStep * (subdiv + 1)));
-						pointId += 1;
-					}
-				}
-			}
-		}
-	}
-
-	_strands->outValue()->setVec3ValuesSlice(slice, strands);
-	_pointsPerStrand->outValue()->setIntValueAtSlice(slice, 0, pointsPerStrand);
 }
 
