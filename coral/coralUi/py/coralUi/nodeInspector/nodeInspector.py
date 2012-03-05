@@ -249,7 +249,7 @@ class ProxyAttributeInspectorWidget(QtGui.QWidget):
         self._mainLayout = QtGui.QVBoxLayout(self)
         self._coralAttribute = weakref.ref(coralAttribute)
         self._nameField = None
-        self._specializationCombo = SpecializationCombo(self)
+        self._specializationCombo = None
         
         self.setLayout(self._mainLayout)
         self._mainLayout.setContentsMargins(0, 0, 0, 0)
@@ -283,21 +283,27 @@ class ProxyAttributeInspectorWidget(QtGui.QWidget):
     
     def build(self):
         coralAttribute = self._coralAttribute()
-        
-        self._nameField = fields.NameField(coralAttribute, self)
-        self.layout().addWidget(self._specializationCombo)
-        self.layout().addWidget(self._nameField)
-        
-        self._specializationCombo._combo.setShowPopupCallback(self._populateSpecializationCombo)
-        self._specializationCombo._combo.setCurrentItemChangedCallback(self._specializationComboChanged)
-        
-        spec = coralAttribute.specialization()
-        if len(spec) == 1:
-            self._specializationCombo._combo.addItem(spec[0])
-            self._specializationCombo._combo.setCurrentIndex(0)
+        parentNode = coralAttribute.parent()
+
+        if coralAttribute in parentNode.dynamicAttributes():
+            self._nameField = fields.NameField(coralAttribute, self)
+            self._specializationCombo = SpecializationCombo(self)
+            self.layout().addWidget(self._specializationCombo)
+            self.layout().addWidget(self._nameField)
+            
+            self._specializationCombo._combo.setShowPopupCallback(self._populateSpecializationCombo)
+            self._specializationCombo._combo.setCurrentItemChangedCallback(self._specializationComboChanged)
+            
+            spec = coralAttribute.specialization()
+            if len(spec) == 1:
+                self._specializationCombo._combo.addItem(spec[0])
+                self._specializationCombo._combo.setCurrentIndex(0)
+            else:
+                self._specializationCombo._combo.addItem("none")
+                self._specializationCombo._combo.setCurrentIndex(0)
         else:
-            self._specializationCombo._combo.addItem("none")
-            self._specializationCombo._combo.setCurrentIndex(0)
+            label = QtGui.QLabel("name: " + coralAttribute.name(), self)
+            self.layout().addWidget(label)
     
 class AttributeInspectorWidget(QtGui.QWidget):
     def __init__(self, coralAttribute, parent):
@@ -419,6 +425,7 @@ class NodeInspector(QtGui.QWidget):
             self._inspectorWidget = ProxyAttributeInspectorWidget(attribute, self)
             self._inspectorWidget.build()
             self._contentLayout.addWidget(self._inspectorWidget)
+            self._header._classNameLabel.setText(attribute.className())
             
             coralApp.addNodeConnectionChangedObserver(self._nodeConnectionChangedObserver, attribute.parent(), self.refresh)
                 

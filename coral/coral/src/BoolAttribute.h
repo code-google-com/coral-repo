@@ -50,6 +50,7 @@ public:
 	void resize(unsigned int size);
 	std::string asString();
 	void setFromString(const std::string &value);
+	unsigned int slices();
 
 	unsigned int sizeSlice(unsigned int slice);
 	void resizeSlices(unsigned int slices);
@@ -57,6 +58,7 @@ public:
 	bool boolValueAtSlice(unsigned int slice, unsigned int id);
 	void setBoolValuesSlice(unsigned int slice, const std::vector<bool> &values);
 	const std::vector<bool> &boolValuesSlice(unsigned int slice);
+	std::string sliceAsString(unsigned int slice);
 
 private:
 	std::vector<std::vector<bool> > _boolValuesSliced;
@@ -71,6 +73,7 @@ public:
 	Bool *value();
 	Bool *outValue();
 	void onSettingSpecialization(const std::vector<std::string> &specialization);
+	std::string shortDebugInfo();
 };
 
 }

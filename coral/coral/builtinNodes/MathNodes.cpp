@@ -39,22 +39,26 @@
 
 using namespace coral;
 
-Vec3Length::Vec3Length(const std::string &name, Node *parent): Node(name, parent){
+Length::Length(const std::string &name, Node *parent): 
+Node(name, parent),
+_selectedOperation(0){
 	setSliceable(true);
 
-	_vector = new NumericAttribute("vector", this);
+	_element = new NumericAttribute("element", this);
 	_length = new NumericAttribute("length", this);
 	
-	addInputAttribute(_vector);
+	addInputAttribute(_element);
 	addOutputAttribute(_length);
 	
-	setAttributeAffect(_vector, _length);
+	setAttributeAffect(_element, _length);
 	
 	std::vector<std::string> vectorSpecializations;
 	vectorSpecializations.push_back("Vec3");
 	vectorSpecializations.push_back("Vec3Array");
+	vectorSpecializations.push_back("Quat");
+	vectorSpecializations.push_back("QuatArray");
 	
-	setAttributeAllowedSpecializations(_vector, vectorSpecializations);
+	setAttributeAllowedSpecializations(_element, vectorSpecializations);
 	
 	std::vector<std::string> lengthSpecializations;
 	lengthSpecializations.push_back("Float");
@@ -62,80 +66,142 @@ Vec3Length::Vec3Length(const std::string &name, Node *parent): Node(name, parent
 	
 	setAttributeAllowedSpecializations(_length, lengthSpecializations);
 	
-	addAttributeSpecializationLink(_vector, _length);
+	addAttributeSpecializationLink(_element, _length);
 }
 
-void Vec3Length::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
-	if(attributeA == _vector && attributeB == _length){
-		std::vector<std::string> vectorSpecializations = _vector->allowedSpecialization();
-		std::vector<std::string> lengthSpecializations = _length->allowedSpecialization();
-	
-		if(specializationA.size() == 1){
-			specializationB.clear();
-			
-			if(specializationA[0] == "Vec3"){
-				specializationB.push_back(lengthSpecializations[0]);
-			}
-			else if(specializationA[0] == "Vec3Array"){
-				specializationB.push_back(lengthSpecializations[1]);
-			}
-		}
-		else if(specializationB.size() == 1){
-			specializationA.clear();
-			
-			if(specializationB[0] == "Float"){
-				specializationA.push_back(vectorSpecializations[0]);
-			}
-			else if(specializationB[0] == "FloatArray"){
-				specializationA.push_back(vectorSpecializations[1]);
+void Length::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	std::vector<std::string> newSpecA;
+	std::vector<std::string> newSpecB;
+	for(int i = 0; i < specializationA.size(); ++i){
+		bool isArrayA = stringUtils::endswith(specializationA[i], "Array");
+		bool isArrayB = false;
+		for(int j = 0; j < specializationB.size(); ++j){
+			bool isArrayB = stringUtils::endswith(specializationB[j], "Array");
+			if(isArrayA == isArrayB){
+				newSpecA.push_back(specializationA[i]);
+				if(!containerUtils::elementInContainer(specializationB[j], newSpecB)){
+					newSpecB.push_back(specializationB[j]);
+				}
+				break;
 			}
 		}
 	}
+
+	specializationA = newSpecA;
+	specializationB = newSpecB;
 }
 
-void Vec3Length::updateSlice(Attribute *attribute, unsigned int slice){
-	std::vector<Imath::V3f> vectorValues = _vector->value()->vec3ValuesSlice(slice);
-	unsigned int vectorValuesSize = vectorValues.size();
+void Length::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
 	
-	std::vector<float> lengthValues(vectorValuesSize);
+	Numeric::Type type = _element->outValue()->type();
 	
-	for(int i = 0; i < vectorValuesSize; ++i){
-		lengthValues[i] = vectorValues[i].length();
+	if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
+		_selectedOperation = &Length::updateVec3;
 	}
-	
-	_length->outValue()->setFloatValuesSlice(slice, lengthValues);
+	else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
+		_selectedOperation = &Length::updateQuat;
+	}
 }
 
-Matrix44Inverse::Matrix44Inverse(const std::string &name, Node *parent): Node(name, parent){	
+void Length::updateVec3(Numeric *element, Numeric *length, unsigned int slice){
+	const std::vector<Imath::V3f> &elementValues = element->vec3ValuesSlice(slice);
+	unsigned int size = elementValues.size();
+
+	std::vector<float> lengthValues(size);
+	for(int i = 0; i < size; ++i){
+		float lengthValue = elementValues[i].length();
+		lengthValues[i] = lengthValue;
+	}
+
+	length->setFloatValuesSlice(slice, lengthValues);
+}
+
+void Length::updateQuat(Numeric *element, Numeric *length, unsigned int slice){
+	const std::vector<Imath::Quatf> &elementValues = element->quatValuesSlice(slice);
+	unsigned int size = elementValues.size();
+
+	std::vector<float> lengthValues(size);
+	for(int i = 0; i < size; ++i){
+		float lengthValue = elementValues[i].length();
+		lengthValues[i] = lengthValue;
+	}
+
+	length->setFloatValuesSlice(slice, lengthValues);
+}
+
+void Length::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_element->value(), _length->outValue(), slice);
+	}
+}
+
+Inverse::Inverse(const std::string &name, Node *parent): 
+Node(name, parent),
+_selectedOperation(0){	
 	setSliceable(true);
 
-	_inMatrix = new NumericAttribute("inMatrix", this);
-	_outMatrix = new NumericAttribute("outMatrix", this);
+	_element = new NumericAttribute("element", this);
+	_inverse = new NumericAttribute("inverse", this);
 	
-	addInputAttribute(_inMatrix);
-	addOutputAttribute(_outMatrix);
+	addInputAttribute(_element);
+	addOutputAttribute(_inverse);
 	
-	setAttributeAffect(_inMatrix, _outMatrix);
+	setAttributeAffect(_element, _inverse);
 	
 	std::vector<std::string> specialization;
 	specialization.push_back("Matrix44");
 	specialization.push_back("Matrix44Array");
+	specialization.push_back("Quat");
+	specialization.push_back("QuatArray");
 	
-	setAttributeAllowedSpecializations(_inMatrix, specialization);
-	setAttributeAllowedSpecializations(_outMatrix, specialization);
+	setAttributeAllowedSpecializations(_element, specialization);
+	setAttributeAllowedSpecializations(_inverse, specialization);
 	
-	addAttributeSpecializationLink(_inMatrix, _outMatrix);
+	addAttributeSpecializationLink(_element, _inverse);
 }
 
-void Matrix44Inverse::updateSlice(Attribute *attribute, unsigned int slice){
-	std::vector<Imath::M44f> inMatrixValues = _inMatrix->value()->matrix44ValuesSlice(slice);
+void Inverse::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
 	
-	std::vector<Imath::M44f> outMatrixValues(inMatrixValues.size());
-	for(int i = 0; i < inMatrixValues.size() ;++i){
-		outMatrixValues[i] = inMatrixValues[i].inverse();
+	Numeric::Type type = _element->outValue()->type();
+	
+	if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
+		_selectedOperation = &Inverse::updateMatrix44;
+	}
+	else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
+		_selectedOperation = &Inverse::updateQuat;
+	}
+}
+
+void Inverse::updateMatrix44(Numeric *element, Numeric *inverse, unsigned int slice){
+	std::vector<Imath::M44f> elementValues = element->matrix44ValuesSlice(slice);
+
+	unsigned int size = elementValues.size();
+	std::vector<Imath::M44f> inverseValues(size);
+	for(int i = 0; i < size ;++i){
+		inverseValues[i] = elementValues[i].inverse();
 	}
 	
-	_outMatrix->outValue()->setMatrix44ValuesSlice(slice, outMatrixValues);
+	inverse->setMatrix44ValuesSlice(slice, inverseValues);
+}
+
+void Inverse::updateQuat(Numeric *element, Numeric *inverse, unsigned int slice){
+	std::vector<Imath::Quatf> elementValues = element->quatValuesSlice(slice);
+	
+	unsigned int size = elementValues.size();
+	std::vector<Imath::Quatf> inverseValues(size);
+	for(int i = 0; i < size ;++i){
+		inverseValues[i] = elementValues[i].inverse();
+	}
+	
+	inverse->setQuatValuesSlice(slice, inverseValues);
+}
+
+void Inverse::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_element->value(), _inverse->outValue(), slice);
+	}
 }
 
 Abs::Abs(const std::string &name, Node *parent): 
@@ -204,7 +270,8 @@ void Abs::updateSlice(Attribute *attribute, unsigned int slice){
 	}
 }
 
-Vec3Cross::Vec3Cross(const std::string &name, Node *parent): Node(name, parent){
+CrossProduct::CrossProduct(const std::string &name, Node *parent): 
+Node(name, parent){
 	setSliceable(true);
 
 	_vector0 = new NumericAttribute("vector0", this);
@@ -229,12 +296,12 @@ Vec3Cross::Vec3Cross(const std::string &name, Node *parent): Node(name, parent){
 	addAttributeSpecializationLink(_vector1, _crossProduct);
 }
 
-void Vec3Cross::updateSlice(Attribute *attribute, unsigned int slice){
-	const std::vector<Imath::V3f> &vector0 = _vector0->value()->vec3ValuesSlice(slice);
-	const std::vector<Imath::V3f> &vector1 = _vector1->value()->vec3ValuesSlice(slice);
+void CrossProduct::updateSlice(Attribute *attribute, unsigned int slice){
+	const std::vector<Imath::V3f> &vectorValues0 = _vector0->value()->vec3ValuesSlice(slice);
+	const std::vector<Imath::V3f> &vectorValues1 = _vector1->value()->vec3ValuesSlice(slice);
 	
-	int size0 = vector0.size();
-	int size1 = vector1.size();
+	int size0 = vectorValues0.size();
+	int size1 = vectorValues1.size();
 	
 	int minSize = size0;
 	if(size0 < size1){
@@ -244,76 +311,65 @@ void Vec3Cross::updateSlice(Attribute *attribute, unsigned int slice){
 	std::vector<Imath::V3f> crossedValues(minSize);
 	
 	for(int i = 0; i < minSize; ++i){
-		crossedValues[i] = vector0[i].cross(vector1[i]);
+		crossedValues[i] = vectorValues0[i].cross(vectorValues1[i]);
 	}
 	
 	_crossProduct->outValue()->setVec3ValuesSlice(slice, crossedValues);
 }
 
-Vec3Dot::Vec3Dot(const std::string &name, Node *parent): Node(name, parent){
+DotProduct::DotProduct(const std::string &name, Node *parent): 
+Node(name, parent),
+_selectedOperation(0){
 	setSliceable(true);
 
-	_vector0 = new NumericAttribute("vector0", this);
-	_vector1 = new NumericAttribute("vector1", this);
+	_element0 = new NumericAttribute("element0", this);
+	_element1 = new NumericAttribute("element1", this);
 	_dotProduct = new NumericAttribute("dotProduct", this);
 
-	addInputAttribute(_vector0);
-	addInputAttribute(_vector1);
+	addInputAttribute(_element0);
+	addInputAttribute(_element1);
 	addOutputAttribute(_dotProduct);
 
-	setAttributeAffect(_vector0, _dotProduct);
-	setAttributeAffect(_vector1, _dotProduct);
+	setAttributeAffect(_element0, _dotProduct);
+	setAttributeAffect(_element1, _dotProduct);
 
 	std::vector<std::string> specialization;
 	specialization.push_back("Vec3");
 	specialization.push_back("Vec3Array");
+	specialization.push_back("Quat");
+	specialization.push_back("QuatArray");
 
 	std::vector<std::string> outSpecialization;
 	outSpecialization.push_back("Float");
 	outSpecialization.push_back("FloatArray");
 
-	setAttributeAllowedSpecializations(_vector0, specialization);
-	setAttributeAllowedSpecializations(_vector1, specialization);
+	setAttributeAllowedSpecializations(_element0, specialization);
+	setAttributeAllowedSpecializations(_element1, specialization);
 	setAttributeAllowedSpecializations(_dotProduct, outSpecialization);
 
-	addAttributeSpecializationLink(_vector0, _dotProduct);
-	addAttributeSpecializationLink(_vector1, _dotProduct);
+	addAttributeSpecializationLink(_element0, _dotProduct);
+	addAttributeSpecializationLink(_element1, _dotProduct);
 }
 
-void Vec3Dot::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
-	if(attributeA == _vector0 && attributeB == _dotProduct){
-		std::vector<std::string> vectorSpecializations = _vector0->allowedSpecialization();
-		std::vector<std::string> dotSpecializations = _dotProduct->allowedSpecialization();
+void DotProduct::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
 
-		if(specializationA.size() == 1){
-			specializationB.clear();
-
-			if(specializationA[0] == "Vec3"){
-				specializationB.push_back(dotSpecializations[0]);
-			}
-			else if(specializationA[0] == "Vec3Array"){
-				specializationB.push_back(dotSpecializations[1]);
-			}
-		}
-		else if(specializationB.size() == 1){
-			specializationA.clear();
-
-			if(specializationB[0] == "Float"){
-				specializationA.push_back(vectorSpecializations[0]);
-			}
-			else if(specializationB[0] == "FloatArray"){
-				specializationA.push_back(vectorSpecializations[1]);
-			}
-		}
+	Numeric::Type type = _dotProduct->outValue()->type();
+	
+	if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
+		_selectedOperation = &DotProduct::updateVec3;
+	}
+	else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
+		_selectedOperation = &DotProduct::updateQuat;
 	}
 }
 
-void Vec3Dot::updateSlice(Attribute *attribute, unsigned int slice){
-	const std::vector<Imath::V3f> &vector0 = _vector0->value()->vec3ValuesSlice(slice);
-	const std::vector<Imath::V3f> &vector1 = _vector1->value()->vec3ValuesSlice(slice);
+void DotProduct::updateVec3(Numeric *element0, Numeric *element1, Numeric *dotProduct, unsigned int slice){
+	const std::vector<Imath::V3f> &elementValues0 = element0->vec3ValuesSlice(slice);
+	const std::vector<Imath::V3f> &elementValues1 = element1->vec3ValuesSlice(slice);
 
-	int size0 = vector0.size();
-	int size1 = vector1.size();
+	int size0 = elementValues0.size();
+	int size1 = elementValues1.size();
 
 	int minSize = size0;
 	if(size0 < size1){
@@ -323,42 +379,122 @@ void Vec3Dot::updateSlice(Attribute *attribute, unsigned int slice){
 	std::vector<float> dotValues(minSize);
 
 	for(int i = 0; i < minSize; ++i){
-		dotValues[i] = vector0[i].dot(vector1[i]);
+		dotValues[i] = elementValues0[i].dot(elementValues1[i]);
 	}
 
-	_dotProduct->outValue()->setFloatValuesSlice(slice, dotValues);
+	dotProduct->setFloatValuesSlice(slice, dotValues);
 }
 
-Vec3Normalize::Vec3Normalize(const std::string &name, Node *parent): Node(name, parent){
+void DotProduct::updateQuat(Numeric *element0, Numeric *element1, Numeric *dotProduct, unsigned int slice){
+	const std::vector<Imath::Quatf> &elementValues0 = element0->quatValuesSlice(slice);
+	const std::vector<Imath::Quatf> &elementValues1 = element1->quatValuesSlice(slice);
+
+	int size0 = elementValues0.size();
+	int size1 = elementValues1.size();
+
+	int minSize = size0;
+	if(size0 < size1){
+		minSize = size1;
+	}
+
+	std::vector<float> dotValues(minSize);
+
+	for(int i = 0; i < minSize; ++i){
+		dotValues[i] = elementValues0[i] ^ elementValues1[i];
+	}
+
+	dotProduct->setFloatValuesSlice(slice, dotValues);
+}
+
+void DotProduct::updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB){
+	std::vector<std::string> newSpecA;
+	std::vector<std::string> newSpecB;
+	for(int i = 0; i < specializationA.size(); ++i){
+		bool isArrayA = stringUtils::endswith(specializationA[i], "Array");
+		bool isArrayB = false;
+		for(int j = 0; j < specializationB.size(); ++j){
+			bool isArrayB = stringUtils::endswith(specializationB[j], "Array");
+			if(isArrayA == isArrayB){
+				newSpecA.push_back(specializationA[i]);
+				if(!containerUtils::elementInContainer(specializationB[j], newSpecB)){
+					newSpecB.push_back(specializationB[j]);
+				}
+				break;
+			}
+		}
+	}
+}
+
+void DotProduct::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_element0->value(), _element1->value(), _dotProduct->outValue(), slice);
+	}
+}
+
+Normalize::Normalize(const std::string &name, Node *parent): 
+Node(name, parent),
+_selectedOperation(0){
 	setSliceable(true);
 
-	_vector = new NumericAttribute("vector", this);
+	_element = new NumericAttribute("element", this);
 	_normalized = new NumericAttribute("normalized", this);
 	
-	addInputAttribute(_vector);
+	addInputAttribute(_element);
 	addOutputAttribute(_normalized);
 	
-	setAttributeAffect(_vector, _normalized);
+	setAttributeAffect(_element, _normalized);
 	
 	std::vector<std::string> specialization;
 	specialization.push_back("Vec3");
 	specialization.push_back("Vec3Array");
-	setAttributeAllowedSpecializations(_vector, specialization);
+	specialization.push_back("Quat");
+	specialization.push_back("QuatArray");
+	setAttributeAllowedSpecializations(_element, specialization);
 	setAttributeAllowedSpecializations(_normalized, specialization);
 	
-	addAttributeSpecializationLink(_vector, _normalized);
+	addAttributeSpecializationLink(_element, _normalized);
 }
 
-void Vec3Normalize::updateSlice(Attribute *attribute, unsigned int slice){
-	const std::vector<Imath::V3f> &vector = _vector->value()->vec3ValuesSlice(slice);
-	int size = vector.size();
+void Normalize::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
+
+	Numeric::Type type = _element->outValue()->type();
+	if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
+		_selectedOperation = &Normalize::updateVec3;
+	}
+	else if(type == Numeric::numericTypeQuat || type == Numeric::numericTypeQuatArray){
+		_selectedOperation = &Normalize::updateQuat;
+	}
+}
+
+void Normalize::updateVec3(Numeric *element, Numeric *normalized, unsigned int slice){
+	const std::vector<Imath::V3f> &elementValues = element->vec3ValuesSlice(slice);
+	int size = elementValues.size();
 	
 	std::vector<Imath::V3f> normalizedValues(size);
 	for(int i = 0; i < size; ++i){
-		normalizedValues[i] = vector[i].normalized();
+		normalizedValues[i] = elementValues[i].normalized();
 	}
 	
-	_normalized->outValue()->setVec3ValuesSlice(slice, normalizedValues);
+	normalized->setVec3ValuesSlice(slice, normalizedValues);
+}
+
+void Normalize::updateQuat(Numeric *element, Numeric *normalized, unsigned int slice){
+	const std::vector<Imath::Quatf> &elementValues = element->quatValuesSlice(slice);
+	int size = elementValues.size();
+	
+	std::vector<Imath::Quatf> normalizedValues(size);
+	for(int i = 0; i < size; ++i){
+		normalizedValues[i] = elementValues[i].normalized();
+	}
+	
+	normalized->setQuatValuesSlice(slice, normalizedValues);
+}
+
+void Normalize::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_element->value(), _normalized->outValue(), slice);
+	}
 }
 
 TrigonometricFunctions::TrigonometricFunctions(const std::string &name, Node *parent): Node(name, parent){
@@ -1271,39 +1407,70 @@ void QuatMultiply::updateSlice(Attribute *attribute, unsigned int slice){
 	_outQuat->outValue()->setQuatValues(outValues);
 }
 
-QuatNormalize::QuatNormalize(const std::string &name, Node *parent): Node(name, parent){
+Negate::Negate(const std::string &name, Node *parent): 
+Node(name, parent),
+_selectedOperation(0){	
 	setSliceable(true);
+
+	_element = new NumericAttribute("element", this);
+	_negated = new NumericAttribute("negated", this);
 	
-	_quat0 = new NumericAttribute("q", this);
-	_normalized = new NumericAttribute("out", this);
-
-	addInputAttribute(_quat0);
-	addOutputAttribute(_normalized);
-
-	setAttributeAffect(_quat0, _normalized);
-
+	addInputAttribute(_element);
+	addOutputAttribute(_negated);
+	
+	setAttributeAffect(_element, _negated);
+	
 	std::vector<std::string> specialization;
-	specialization.push_back("Quat");
-	specialization.push_back("QuatArray");
-	setAttributeAllowedSpecializations(_quat0, specialization);
-	setAttributeAllowedSpecializations(_normalized, specialization);
-
-	addAttributeSpecializationLink(_quat0, _normalized);
+	specialization.push_back("Vec3");
+	specialization.push_back("Vec3Array");
+	specialization.push_back("Matrix44");
+	specialization.push_back("Matrix44Array");
+	
+	setAttributeAllowedSpecializations(_element, specialization);
+	setAttributeAllowedSpecializations(_negated, specialization);
+	
+	addAttributeSpecializationLink(_element, _negated);
 }
 
-void QuatNormalize::updateSlice(Attribute *attribute, unsigned int slice){
-	const std::vector<Imath::Quatf> &q = _quat0->value()->quatValuesSlice(slice);
-	int size = q.size();
-
-	std::vector<Imath::Quatf> normalizedValues(size);
-	for(int i = 0; i < size; ++i){
-		normalizedValues[i] = q[i].normalized();
+void Negate::attributeSpecializationChanged(Attribute *attribute){
+	_selectedOperation = 0;
+	
+	Numeric::Type type = _element->outValue()->type();
+	
+	if(type == Numeric::numericTypeVec3 || type == Numeric::numericTypeVec3Array){
+		_selectedOperation = &Negate::updateVec3;
 	}
-
-	_normalized->outValue()->setQuatValues(normalizedValues);
+	else if(type == Numeric::numericTypeMatrix44 || type == Numeric::numericTypeMatrix44Array){
+		_selectedOperation = &Negate::updateMatrix44;
+	}
 }
 
+void Negate::updateVec3(Numeric *element, Numeric *negated, unsigned int slice){
+	std::vector<Imath::V3f> elementValues = element->vec3ValuesSlice(slice);
 
+	unsigned int size = elementValues.size();
+	std::vector<Imath::V3f> negatedValues(size);
+	for(int i = 0; i < size ;++i){
+		negatedValues[i] = elementValues[i].negate();
+	}
+	
+	negated->setVec3ValuesSlice(slice, negatedValues);
+}
 
+void Negate::updateMatrix44(Numeric *element, Numeric *negated, unsigned int slice){
+	std::vector<Imath::M44f> elementValues = element->matrix44ValuesSlice(slice);
 
+	unsigned int size = elementValues.size();
+	std::vector<Imath::M44f> negatedValues(size);
+	for(int i = 0; i < size ;++i){
+		negatedValues[i] = elementValues[i].negate();
+	}
+	
+	negated->setMatrix44ValuesSlice(slice, negatedValues);
+}
 
+void Negate::updateSlice(Attribute *attribute, unsigned int slice){
+	if(_selectedOperation){
+		(this->*_selectedOperation)(_element->value(), _negated->outValue(), slice);
+	}
+}

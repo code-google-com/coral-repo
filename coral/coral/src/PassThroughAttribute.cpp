@@ -35,3 +35,16 @@ PassThroughAttribute::PassThroughAttribute(const std::string &name, Node *parent
 	setPassThrough(true);
 	setClassName("PassThroughAttribute");
 }
+
+std::string PassThroughAttribute::shortDebugInfo(){
+	std::string info = Attribute::shortDebugInfo();
+
+	Attribute *source = connectedNonPassThrough();
+	if(source){
+		info += "\nsource info:\n";
+		info += source->shortDebugInfo();
+	}
+	
+	return info;
+}
+

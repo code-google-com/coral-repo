@@ -88,18 +88,18 @@ class NodeUi(QtGui.QGraphicsWidget):
         coralApp.addNameChangedObserver(self._nameChangedObserver, self.coralNode(), self._coralNodeNameChanged)
     
     def _magnifyAnimStep(self, frame):
-            step = frame / nodeView.NodeView._animSteps
-            invStep = 1.0 - step
-            
-            self.setScale((self.scale() * invStep) + ((1.0 * self._currentMagnifyFactor) * step))
-            
-            for attr in self._attributeUis:
-                if attr._inputHook:
-                    attr._inputHook.updateWorldPos()
-                if attr._outputHook:
-                    attr._outputHook.updateWorldPos()
-                    
-            self.scene().update()
+        step = frame / nodeView.NodeView._animSteps
+        invStep = 1.0 - step
+        
+        self.setScale((self.scale() * invStep) + ((1.0 * self._currentMagnifyFactor) * step))
+        
+        for attr in self._attributeUis:
+            if attr._inputHook:
+                attr._inputHook.updateWorldPos()
+            if attr._outputHook:
+                attr._outputHook.updateWorldPos()
+                
+        self.scene().update()
         
     def _magnify(self, factor):
         self._currentMagnifyFactor = factor

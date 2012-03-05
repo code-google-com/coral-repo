@@ -232,13 +232,9 @@ Node(name, parent){
 	setUpdateEnabled(false);
 
 	_globalArray = new NumericAttribute("globalArray", this);
-	_out = new PassThroughAttribute("out", this);
 	
 	addInputAttribute(_globalArray);
-	addOutputAttribute(_out);
 	
-	setAttributeAffect(_globalArray, _out);
-
 	std::vector<std::string> arraySpec;
 	arraySpec.push_back("IntArray");
 	arraySpec.push_back("FloatArray");

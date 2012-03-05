@@ -36,12 +36,12 @@
 using namespace coral;
 
 void mathNodesWrapper(){
-	pythonWrapperUtils::pythonWrapper<Vec3Length, Node>("Vec3Length");
-	pythonWrapperUtils::pythonWrapper<Matrix44Inverse, Node>("Matrix44Inverse");
+	pythonWrapperUtils::pythonWrapper<Length, Node>("Length");
+	pythonWrapperUtils::pythonWrapper<Inverse, Node>("Inverse");
 	pythonWrapperUtils::pythonWrapper<Abs, Node>("Abs");
-	pythonWrapperUtils::pythonWrapper<Vec3Cross, Node>("Vec3Cross");
-	pythonWrapperUtils::pythonWrapper<Vec3Dot, Node>("Vec3Dot");
-	pythonWrapperUtils::pythonWrapper<Vec3Normalize, Node>("Vec3Normalize");
+	pythonWrapperUtils::pythonWrapper<CrossProduct, Node>("CrossProduct");
+	pythonWrapperUtils::pythonWrapper<DotProduct, Node>("DotProduct");
+	pythonWrapperUtils::pythonWrapper<Normalize, Node>("Normalize");
 	pythonWrapperUtils::pythonWrapper<TrigonometricFunctions, Node>("TrigonometricFunc");
 	pythonWrapperUtils::pythonWrapper<Radians, Node>("Radians");
 	pythonWrapperUtils::pythonWrapper<Degrees, Node>("Degrees");
@@ -58,7 +58,7 @@ void mathNodesWrapper(){
 	pythonWrapperUtils::pythonWrapper<Average, Node>("Average");
 	pythonWrapperUtils::pythonWrapper<Slerp, Node>("Slerp");
 	pythonWrapperUtils::pythonWrapper<QuatMultiply, Node>("QuatMultiply");
-	pythonWrapperUtils::pythonWrapper<QuatNormalize, Node>("QuatNormalize");
+	pythonWrapperUtils::pythonWrapper<Negate, Node>("Negate");
 }
 
 #endif

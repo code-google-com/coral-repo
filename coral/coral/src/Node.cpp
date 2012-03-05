@@ -224,16 +224,16 @@ void Node::updateSlice(Attribute *attribute, unsigned int slice){
 void Node::update(Attribute *attribute){
 	if(_slicer){ // this node is nested in a slicer node such as the ForLoop node and this node is supposed to be sliced
 		// here we resize the slices for the output attributes so that the node can put values in each slice.
+
 		unsigned int slices = _slicer->computeSlices();
-		if(slices != _slices && _inputAttributes.size()){
+		if(_inputAttributes.size()){
 			for(int i = 0; i < _outputAttributes.size(); ++i){
 				_outputAttributes[i]->outValue()->resizeSlices(slices);
 			}
-
+			
 			_slices = slices;
 			resizedSlices(slices);
 		}
-
 		// update in parallel each slice
 		for(int i = 0; i < _slices; ++i){
 			updateSlice(attribute, i);

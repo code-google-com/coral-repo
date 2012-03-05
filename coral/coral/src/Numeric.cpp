@@ -95,22 +95,22 @@ unsigned int Numeric::sizeSlice(unsigned int slice){
 	if(_type == numericTypeAny){
 		return 0;
 	}
-	else if(_type == numericTypeIntArray){
+	else if(_type == numericTypeIntArray || _type == numericTypeInt){
 		return _intValuesSliced[slice].size();
 	}
-	else if(_type == numericTypeFloatArray){
+	else if(_type == numericTypeFloatArray || _type == numericTypeFloat){
 		return _floatValuesSliced[slice].size();
 	}
-	else if(_type == numericTypeVec3Array){
+	else if(_type == numericTypeVec3Array || _type == numericTypeVec3){
 		return _vec3ValuesSliced[slice].size();
 	}
-	else if(_type == numericTypeQuatArray){
+	else if(_type == numericTypeQuatArray || _type == numericTypeQuat){
 		return _quatValuesSliced[slice].size();
 	}
-	else if(_type == numericTypeMatrix44Array){
+	else if(_type == numericTypeMatrix44Array || _type == numericTypeMatrix44){
 		return _matrix44ValuesSliced[slice].size();
 	}
-	else if(_type == numericTypeCol4Array){
+	else if(_type == numericTypeCol4Array || _type == numericTypeCol4){
 		return _col4ValuesSliced[slice].size();
 	}
 

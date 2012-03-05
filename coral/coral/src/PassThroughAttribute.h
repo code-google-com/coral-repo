@@ -41,6 +41,7 @@ class Node;
 class CORAL_EXPORT PassThroughAttribute: public Attribute{
 public:
 	PassThroughAttribute(const std::string &name, Node *parent);
+	std::string shortDebugInfo();
 };
 }
 #endif

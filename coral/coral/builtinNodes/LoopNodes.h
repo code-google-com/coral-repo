@@ -49,14 +49,12 @@ private:
 class ForLoopNode: public Node{
 public:
 	ForLoopNode(const std::string &name, Node *parent);
-	//void addDynamicAttribute(Attribute *attribute);
 
 protected:
 	unsigned int computeSlices();
 
 private:
 	NumericAttribute *_globalArray;
-	PassThroughAttribute *_out;
 };
 
 }

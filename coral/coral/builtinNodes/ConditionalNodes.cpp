@@ -443,9 +443,6 @@ void IfLessThan::updateSlice(Attribute *attribute, unsigned int slice){
 		
 		_out->outValue()->setBoolValuesSlice(slice, outValues);
 	}
-	else{
-		setAttributeIsClean(_out, false);
-	}
 }
 
 // conditional value node

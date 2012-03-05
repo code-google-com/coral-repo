@@ -182,11 +182,14 @@ class ConnectAttributes(Command):
         self.setArgString("destinationAttribute", "")
         
     def doIt(self):
-        sourceAttribute = self.argAsString("sourceAttribute")
-        destinationAttribute = self.argAsString("destinationAttribute")
+        success = False
+        error = None
         
-        sourceAttribute = coralApp.findAttribute(sourceAttribute)
-        destinationAttribute = coralApp.findAttribute(destinationAttribute)
+        sourceAttributeName = self.argAsString("sourceAttribute")
+        destinationAttributeName = self.argAsString("destinationAttribute")
+        
+        sourceAttribute = coralApp.findAttribute(sourceAttributeName)
+        destinationAttribute = coralApp.findAttribute(destinationAttributeName)
         
         if sourceAttribute and destinationAttribute:
             if destinationAttribute.input() is not None:
@@ -195,12 +198,13 @@ class ConnectAttributes(Command):
             error = ErrorObject()
             success = NetworkManager.connect(sourceAttribute, destinationAttribute, error)
             
-            if not success:
-                errorMessage = "error during connection between " + sourceAttribute.fullName() + " and " + destinationAttribute.fullName() + "\n"
+        if not success:
+            errorMessage = "error during connection between " + sourceAttributeName + " and " + destinationAttributeName + "\n"
+            if error:
                 if error.message():
                     errorMessage += "extended info: " + error.message()
                 
-                coralApp.logDebug(errorMessage)
+            coralApp.logDebug(errorMessage)
             
 class DisconnectInput(Command):
     def __init__(self):

@@ -127,7 +127,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateAttribute', name = '1:startPoint', className = 'PassThroughAttribute', parentNode = topNode + '.verletSim.constraintToLength', input = True, specializationOverride = 'Vec3')
     executeCommand('CreateAttribute', name = '0:length', className = 'PassThroughAttribute', parentNode = topNode + '.verletSim.constraintToLength', input = True, specializationOverride = 'Float')
     
-    executeCommand('CreateNode', className = 'Vec3Normalize', name = 'Vec3Normalize', specializationPreset = 'none', parentNode = topNode + '.verletSim.constraintToLength')
+    executeCommand('CreateNode', className = 'Normalize', name = 'Normalize', specializationPreset = 'none', parentNode = topNode + '.verletSim.constraintToLength')
     
     executeCommand('CreateNode', className = 'Add', name = 'Add1', specializationPreset = 'none', parentNode = topNode + '.verletSim.constraintToLength')
     
@@ -136,13 +136,13 @@ def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'Mul', name = 'Mul', specializationPreset = 'none', parentNode = topNode + '.verletSim.constraintToLength')
     executeCommand('SetAttributeValue', attribute = topNode + '.verletSim.constraintToLength.Mul.in1', value = '[10] 3')
     
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.Sub.out', destinationAttribute = topNode + '.verletSim.constraintToLength.Vec3Normalize.vector')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.Sub.out', destinationAttribute = topNode + '.verletSim.constraintToLength.Normalize.element')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.Mul.out', destinationAttribute = topNode + '.verletSim.constraintToLength.Add1.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.1:startPoint', destinationAttribute = topNode + '.verletSim.constraintToLength.Add1.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.Add1.out', destinationAttribute = topNode + '.verletSim.constraintToLength.output')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.2:endPoint', destinationAttribute = topNode + '.verletSim.constraintToLength.Sub.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.1:startPoint', destinationAttribute = topNode + '.verletSim.constraintToLength.Sub.in1')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.Vec3Normalize.normalized', destinationAttribute = topNode + '.verletSim.constraintToLength.Mul.in0')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.Normalize.normalized', destinationAttribute = topNode + '.verletSim.constraintToLength.Mul.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.verletSim.constraintToLength.0:length', destinationAttribute = topNode + '.verletSim.constraintToLength.Mul.in1')
     executeCommand('CreateNode', className = 'Add', name = 'Add', specializationPreset = 'none', parentNode = topNode + '.verletSim')
     
@@ -215,7 +215,7 @@ def runScript(topNode = 'root'):
     executeCommand('SetNodeUiData', node = topNode + '.verletSim.getCurrentStep', data = {'pos': [-421.00000000000017, 653.3333333333336]})
     executeCommand('SetNodeUiData', node = topNode + '.verletSim.ProcessSimulation', data = {'pos': [872.38095238095275, 801.90476190476204]})
     executeCommand('SetNodeUiData', node = topNode + '.verletSim.constraintToLength', data = {'attributes': [{'name': '0:length', 'pos': [-611.0, 610.0]}, {'name': '1:startPoint', 'pos': [-673.23214285714334, 272.85714285714278]}, {'name': '2:endPoint', 'pos': [-654.7901785714289, 457.71428571428601]}, {'name': 'output', 'pos': [141.62053571428561, 624.57142857142912]}], 'pos': [410.99894993422481, 608.58591614783586]})
-    executeCommand('SetNodeUiData', node = topNode + '.verletSim.constraintToLength.Vec3Normalize', data = {'pos': [-361.42857142857179, 405.71428571428555]})
+    executeCommand('SetNodeUiData', node = topNode + '.verletSim.constraintToLength.Normalize', data = {'pos': [-361.42857142857179, 405.71428571428555]})
     executeCommand('SetNodeUiData', node = topNode + '.verletSim.constraintToLength.Add1', data = {'pos': [-33.285714285714391, 576.57142857142912]})
     executeCommand('SetNodeUiData', node = topNode + '.verletSim.constraintToLength.Sub', data = {'pos': [-486.85714285714334, 324.85714285714278]})
     executeCommand('SetNodeUiData', node = topNode + '.verletSim.constraintToLength.Mul', data = {'pos': [-165.71428571428612, 502.85714285714289]})

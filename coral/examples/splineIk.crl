@@ -40,7 +40,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'RangeArray', name = 'RangeArray1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.RangeArray1.end', value = '[1] 3')
     
-    executeCommand('CreateNode', className = 'Vec3Cross', name = 'zAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'CrossProduct', name = 'zAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
     executeCommand('CreateNode', className = 'SplinePoint', name = 'SplinePoint1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
@@ -58,7 +58,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'Float', name = 'Float', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Float.out', value = '[1] 3')
     
-    executeCommand('CreateNode', className = 'Vec3Cross', name = 'yAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'CrossProduct', name = 'yAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
     executeCommand('CreateNode', className = 'SplinePoint', name = 'SplinePoint', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
@@ -119,7 +119,7 @@ def runScript(topNode = 'root'):
     executeCommand('CreateNode', className = 'ConstantArray', name = 'ConstantArray2', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.ConstantArray2.size', value = '[10] 1')
     
-    executeCommand('CreateNode', className = 'Vec3Normalize', name = 'tempZAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
+    executeCommand('CreateNode', className = 'Normalize', name = 'tempZAxis', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     
     executeCommand('CreateNode', className = 'Int', name = 'Int1', specializationPreset = 'none', parentNode = topNode + '.SplineIk')
     executeCommand('SetAttributeValue', attribute = topNode + '.SplineIk.Int1.out', value = '[2] 1')
@@ -186,7 +186,7 @@ def runScript(topNode = 'root'):
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.nJoints', destinationAttribute = topNode + '.SplineIk.Div.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.nJoints', destinationAttribute = topNode + '.SplineIk.ConstantArray2.size')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Sub2.out', destinationAttribute = topNode + '.SplineIk.ConstantArray2.constant')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Add.out', destinationAttribute = topNode + '.SplineIk.tempZAxis.vector')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Add.out', destinationAttribute = topNode + '.SplineIk.tempZAxis.element')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Matrix44RotationAxis1.axisZ', destinationAttribute = topNode + '.SplineIk.Sub2.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.Matrix44RotationAxis.axisZ', destinationAttribute = topNode + '.SplineIk.Sub2.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.SplineIk.SplinePoint1.pointsOnCurve', destinationAttribute = topNode + '.SplineIk.xAxis.in0')

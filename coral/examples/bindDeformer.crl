@@ -78,7 +78,7 @@ def runScript(topNode = 'root'):
     
     executeCommand('CreateNode', className = 'Mul', name = 'Mul1', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
     
-    executeCommand('CreateNode', className = 'Matrix44Inverse', name = 'Matrix44Inverse', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
+    executeCommand('CreateNode', className = 'Inverse', name = 'Inverse', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
     
     executeCommand('CreateNode', className = 'ConditionalValue', name = 'ConditionalValue', specializationPreset = 'none', parentNode = topNode + '.BindDeformer.Transform')
     
@@ -98,10 +98,10 @@ def runScript(topNode = 'root'):
     
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.matrix', destinationAttribute = topNode + '.BindDeformer.Transform.globalMatrix.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.parentMatrix', destinationAttribute = topNode + '.BindDeformer.Transform.globalMatrix.in1')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.Matrix44Inverse.outMatrix', destinationAttribute = topNode + '.BindDeformer.Transform.Mul1.in0')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.Inverse.inverse', destinationAttribute = topNode + '.BindDeformer.Transform.Mul1.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.globalMatrix.out', destinationAttribute = topNode + '.BindDeformer.Transform.Mul1.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.Mul1.out', destinationAttribute = topNode + '.BindDeformer.Transform.outGlobalMatrix')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.parentMatrix', destinationAttribute = topNode + '.BindDeformer.Transform.Matrix44Inverse.inMatrix')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.parentMatrix', destinationAttribute = topNode + '.BindDeformer.Transform.Inverse.element')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.draw', destinationAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.condition')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.globalMatrix.out', destinationAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.ifTrue')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.nullMatrix.matrix', destinationAttribute = topNode + '.BindDeformer.Transform.ConditionalValue.ifFalse')
@@ -112,7 +112,7 @@ def runScript(topNode = 'root'):
     
     executeCommand('CreateNode', className = 'IfLessThan', name = 'IfLessThan', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
-    executeCommand('CreateNode', className = 'Vec3Length', name = 'Vec3Length', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
+    executeCommand('CreateNode', className = 'Length', name = 'Length', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
     executeCommand('CreateNode', className = 'Mul', name = 'Mul1', specializationPreset = 'none', parentNode = topNode + '.BindDeformer')
     
@@ -146,12 +146,12 @@ def runScript(topNode = 'root'):
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.ParentSpace.matrix', destinationAttribute = topNode + '.BindDeformer.Transform.parentMatrix')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Bool.bool', destinationAttribute = topNode + '.BindDeformer.Transform.draw')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Transform.Mul1.out', destinationAttribute = topNode + '.BindDeformer.Transform.outGlobalMatrix')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Vec3Length.length', destinationAttribute = topNode + '.BindDeformer.Div.in0')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Length.length', destinationAttribute = topNode + '.BindDeformer.Div.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.radius.out', destinationAttribute = topNode + '.BindDeformer.Div.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Sub2.out', destinationAttribute = topNode + '.BindDeformer.Abs.inNumber')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Vec3Length.length', destinationAttribute = topNode + '.BindDeformer.IfLessThan.in0')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Length.length', destinationAttribute = topNode + '.BindDeformer.IfLessThan.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.radius.out', destinationAttribute = topNode + '.BindDeformer.IfLessThan.in1')
-    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Sub.out', destinationAttribute = topNode + '.BindDeformer.Vec3Length.vector')
+    executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Sub.out', destinationAttribute = topNode + '.BindDeformer.Length.element')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Sub1.out', destinationAttribute = topNode + '.BindDeformer.Mul1.in0')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Abs.ouNumber', destinationAttribute = topNode + '.BindDeformer.Mul1.in1')
     executeCommand('ConnectAttributes', sourceAttribute = topNode + '.BindDeformer.Mul.out', destinationAttribute = topNode + '.BindDeformer.Sub1.in0')
@@ -189,14 +189,14 @@ def runScript(topNode = 'root'):
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform', data = {'attributes': [{'name': 'draw', 'pos': [-346.0, 115.0]}, {'name': 'matrix', 'pos': [-348.0, 52.0]}, {'name': 'parentMatrix', 'pos': [-353.0, -42.0]}, {'name': 'outGlobalMatrix', 'pos': [277.0, -7.0]}], 'pos': [-139.59371357808857, 182.06963869463868]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.globalMatrix', data = {'pos': [-53.0, 1.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.Mul1', data = {'pos': [152.0, -108.0]})
-    executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.Matrix44Inverse', data = {'pos': [-154.0, -108.0]})
+    executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.Inverse', data = {'pos': [-154.0, -108.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.ConditionalValue', data = {'pos': [78.0, 146.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.nullMatrix', data = {'pos': [-103.0, 270.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Transform.DrawMatrix', data = {'pos': [256.0, 216.0]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Div', data = {'pos': [174.54545454545467, 567.27272727272748]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Abs', data = {'pos': [510.00000000000017, 821.42857142857167]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.IfLessThan', data = {'pos': [495.64705882352962, -240.23529411764702]})
-    executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Vec3Length', data = {'pos': [360.58823529411768, -393.52941176470597]})
+    executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Length', data = {'pos': [360.58823529411768, -393.52941176470597]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Mul1', data = {'pos': [638.18181818181858, 529.09090909090946]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Sub1', data = {'pos': [495.81818181818221, 322.75000000000045]})
     executeCommand('SetNodeUiData', node = topNode + '.BindDeformer.Sub2', data = {'pos': [390.90909090909116, 638.18181818181858]})

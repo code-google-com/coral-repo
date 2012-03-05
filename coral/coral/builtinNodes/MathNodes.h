@@ -38,25 +38,36 @@
 
 namespace coral{
 
-class Vec3Length: public Node{
+class Length: public Node{
 public:
-	Vec3Length(const std::string &name, Node *parent);
+	Length(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
-	NumericAttribute *_vector;
+	NumericAttribute *_element;
 	NumericAttribute *_length;
+	void(Length::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
+
+	void updateVec3(Numeric *element, Numeric *length, unsigned int slice);
+	void updateQuat(Numeric *element, Numeric *length, unsigned int slice);
+
 };
 
-class Matrix44Inverse: public Node{
+class Inverse: public Node{
 public:
-	Matrix44Inverse(const std::string &name, Node *parent);
+	Inverse(const std::string &name, Node *parent);
+	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
-	NumericAttribute *_inMatrix;
-	NumericAttribute *_outMatrix;
+	NumericAttribute *_element;
+	NumericAttribute *_inverse;
+	void(Inverse::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
+
+	void updateMatrix44(Numeric *element, Numeric *inverse, unsigned int slice);
+	void updateQuat(Numeric *element, Numeric *inverse, unsigned int slice);
 };
 
 class Abs: public Node{
@@ -74,9 +85,9 @@ private:
 	void abs_float(Numeric *inNumber, Numeric *outNumber, unsigned int slice);
 };
 
-class Vec3Cross: public Node{
+class CrossProduct: public Node{
 public:
-	Vec3Cross(const std::string &name, Node *parent);
+	CrossProduct(const std::string &name, Node *parent);
 	void updateSlice(Attribute *attribute, unsigned int slice);
 	
 private:
@@ -85,31 +96,40 @@ private:
 	NumericAttribute *_crossProduct;
 };
 
-class Vec3Dot: public Node{
+class DotProduct: public Node{
 public:
-	Vec3Dot(const std::string &name, Node *parent);
+	DotProduct(const std::string &name, Node *parent);
 	void updateSpecializationLink(Attribute *attributeA, Attribute *attributeB, std::vector<std::string> &specializationA, std::vector<std::string> &specializationB);
+	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
-	NumericAttribute *_vector0;
-	NumericAttribute *_vector1;
+	NumericAttribute *_element0;
+	NumericAttribute *_element1;
 	NumericAttribute *_dotProduct;
+	void(DotProduct::*_selectedOperation)(Numeric*, Numeric*,  Numeric*, unsigned int);
+
+	void updateVec3(Numeric *element0, Numeric *element1, Numeric *dotProduct, unsigned int slice);
+	void updateQuat(Numeric *element0, Numeric *element1, Numeric *dotProduct, unsigned int slice);
 };
 
-class Vec3Normalize: public Node{
+class Normalize: public Node{
 public:
-	Vec3Normalize(const std::string &name, Node *parent);
+	Normalize(const std::string &name, Node *parent);
+	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSlice(Attribute *attribute, unsigned int slice);
 
 private:
-	NumericAttribute *_vector;
+	NumericAttribute *_element;
 	NumericAttribute *_normalized;
+	void(Normalize::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
+
+	void updateVec3(Numeric *element, Numeric *normalized, unsigned int slice);
+	void updateQuat(Numeric *element, Numeric *normalized, unsigned int slice);
 };
 
 class TrigonometricFunctions: public Node{
 public:
-
 	TrigonometricFunctions(const std::string &name, Node *parent);
 	void updateSlice(Attribute *attribute, unsigned int slice);
 
@@ -293,17 +313,20 @@ private:
 	NumericAttribute *_outQuat;
 };
 
-class QuatNormalize: public Node{
+class Negate: public Node{
 public:
-	QuatNormalize(const std::string &name, Node *parent);
+	Negate(const std::string &name, Node *parent);
+	void attributeSpecializationChanged(Attribute *attribute);
 	void updateSlice(Attribute *attribute, unsigned int slice);
-
+	
 private:
-	NumericAttribute *_quat0;
-	NumericAttribute *_normalized;
+	NumericAttribute *_element;
+	NumericAttribute *_negated;
+	void(Negate::*_selectedOperation)(Numeric*, Numeric*, unsigned int);
+
+	void updateVec3(Numeric *element, Numeric *negated, unsigned int slice);
+	void updateMatrix44(Numeric *element, Numeric *negated, unsigned int slice);
 };
-
-
 
 }
 

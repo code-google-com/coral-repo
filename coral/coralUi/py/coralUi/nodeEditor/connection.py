@@ -129,7 +129,7 @@ class Connection(QtGui.QGraphicsItem):
         path.cubicTo(startTangent, endTangent, endPos)
         
         strokeWidth = self._pen.widthF()
-        rect = path.boundingRect().adjusted(- strokeWidth, strokeWidth, -strokeWidth, strokeWidth)
+        rect = path.boundingRect().adjusted(-strokeWidth, -strokeWidth, strokeWidth, strokeWidth)
         
         self._path = path
         self._rect = rect

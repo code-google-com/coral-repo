@@ -152,6 +152,7 @@ class ConnectionHook(QtGui.QGraphicsItem):
     def mousePressEvent(self, event):
         if self._isOutput:
             self._draggingConnection = connection.Connection(self)
+            self._draggingConnection._pen.setWidth(2)
             ConnectionHook._outstandingDraggingConnection = weakref.ref(self._draggingConnection)
         elif self._connections:
             inputConnection = self._connections[0]

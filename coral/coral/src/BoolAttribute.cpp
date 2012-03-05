@@ -38,6 +38,10 @@ _slices(1){
 	_boolValuesSliced[0][0] = false;
 }
 
+unsigned int Bool::slices(){
+	return _slices;
+}
+
 unsigned int Bool::sizeSlice(unsigned int slice){
 	if(slice >= _slices){
 		slice = _slices - 1;
@@ -57,14 +61,10 @@ void Bool::resizeSlices(unsigned int slices){
 
 	if(slices != _slices){
 		_boolValuesSliced.resize(slices);
-
-		if(_isArray){
-			for(int i = 0; i < slices; ++i){
-				_boolValuesSliced.resize(slices);
-				std::vector<bool> &slicevec = _boolValuesSliced[i];
-				if(!slicevec.size()){
-					slicevec.resize(1);
-				}
+		for(int i = 0; i < slices; ++i){
+			std::vector<bool> &slicevec = _boolValuesSliced[i];
+			if(!slicevec.size()){
+				slicevec.resize(1);
 			}
 		}
 		
@@ -148,13 +148,17 @@ void Bool::resize(unsigned int size){
 	_boolValuesSliced[0].resize(size);
 }
 
-std::string Bool::asString(){
+std::string Bool::sliceAsString(unsigned int slice){
+	if(slice >= _slices){
+		slice = _slices - 1;
+	}
+
 	std::string script;
 	if(_isArray){
 		script = "[";
-		for(int i = 0; i < _boolValuesSliced[0].size(); ++i){
+		for(int i = 0; i < _boolValuesSliced[slice].size(); ++i){
 			std::string value = "False";
-			if(_boolValuesSliced[0][i]){
+			if(_boolValuesSliced[slice][i]){
 				value = "True";
 			}
 		
@@ -167,7 +171,7 @@ std::string Bool::asString(){
 		script += "]";
 	}
 	else{
-		bool value = boolValueAt(0);
+		bool value = _boolValuesSliced[slice][0];
 		if(value){
 			script = "True";
 		}
@@ -177,6 +181,10 @@ std::string Bool::asString(){
 	}
 	
 	return script;
+}
+
+std::string Bool::asString(){
+	return sliceAsString(0);
 }
 
 void Bool::setFromString(const std::string &value){
@@ -241,4 +249,46 @@ void BoolAttribute::onSettingSpecialization(const std::vector<std::string> &spec
 			boolVal->setIsArray(true);
 		}
 	}
+}
+
+std::string BoolAttribute::shortDebugInfo(){
+	std::string info = Attribute::shortDebugInfo() + "\n";
+
+	Bool *val = value();
+	int slices = val->slices();
+
+	bool isArray = val->isArray();
+
+	info += "slices: " + stringUtils::intToString(slices) + "\n";
+	for(int i = 0; i < val->slices(); ++i){
+		info += "slice: " + 	stringUtils::intToString(i) + ", ";
+		if(isArray){
+			info += "size: " + stringUtils::intToString(val->sizeSlice(i)) + ", ";
+		}
+
+		std::string valStr = val->sliceAsString(i);
+		std::vector<std::string> split;
+		stringUtils::split(valStr, split, " ");
+		valStr = split[0];
+
+		std::string trimmedValStr;
+		if(valStr.size() < 100){
+			trimmedValStr = valStr;
+		}
+		else{
+			for(int i = 0; i < 100; ++i){
+				trimmedValStr += valStr[i];
+			}
+			trimmedValStr += " ...]";
+		}
+		
+		info += trimmedValStr + "\n";
+
+		if(i > 3){
+			info += "(trimming remaining slices)\n";
+			break;
+		}
+	}
+
+	return info;
 }

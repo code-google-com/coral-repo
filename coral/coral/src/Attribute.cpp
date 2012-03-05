@@ -60,17 +60,6 @@ std::vector<void(*)(Attribute *)> _dirtyingDoneCallbackQueue;
 bool _cleaningLocked = false;
 
 namespace {
-	bool parentNodeNotInParallelSlice(Attribute *attribute, const std::vector<Attribute*> &parallelSlice){
-		Node *parentNode = attribute->parent();
-		for(int i = 0; i < parallelSlice.size(); ++i){
-			if(parallelSlice[i]->parent() == parentNode){
-				return false;
-			}
-		}
-	
-		return true;
-	}
-
 	std::vector<std::string> intersectedSpecialization(const std::vector<std::string> &specialization1, const std::vector<std::string> &specialization2){
 		std::vector<std::string> newSpecialization;
 	
@@ -83,22 +72,6 @@ namespace {
 		return newSpecialization;
 	}
 
-	bool sameSpecialization(const std::vector<std::string> &specialization1, const std::vector<std::string> &specialization2){
-		for(int i = 0; i < specialization1.size(); ++i){
-			if(!containerUtils::elementInContainer(specialization1[i], specialization2)){
-				return false;
-			}
-		}
-	
-		for(int i = 0; i < specialization2.size(); ++i){
-			if(!containerUtils::elementInContainer(specialization2[i], specialization1)){
-				return false;
-			}
-		}
-	
-		return true;
-	}
-	
 	#ifdef CORAL_PARALLEL_TBB
 		tbb::mutex _globalMutex;
 	#endif
