@@ -26,6 +26,11 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
+#ifdef CORAL_PARALLEL_TBB
+	#include <tbb/parallel_for.h>
+	#include "coreParallelAlgos.h"
+#endif
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include "Node.h"
@@ -234,10 +239,14 @@ void Node::update(Attribute *attribute){
 			_slices = slices;
 			resizedSlices(slices);
 		}
-		// update in parallel each slice
-		for(int i = 0; i < _slices; ++i){
-			updateSlice(attribute, i);
-		}
+
+		#ifdef CORAL_PARALLEL_TBB
+			tbb::parallel_for(tbb::blocked_range<size_t>(0, _slices), node_parallelUpdate(this, attribute));
+		#else
+			for(int i = 0; i < _slices; ++i){
+				updateSlice(attribute, i);
+			}
+		#endif
 	}
 	else{
 		updateSlice(attribute, 0);

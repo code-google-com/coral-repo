@@ -26,12 +26,15 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // </license>
 
-#ifndef CORAL_ATTRIBUTEPARALLELALGOS_H
-#define CORAL_ATTRIBUTEPARALLELALGOS_H
+#ifndef CORAL_COREPARALLELALGOS_H
+#define CORAL_COREPARALLELALGOS_H
 
 #ifdef CORAL_PARALLEL_TBB
 
 #include <tbb/blocked_range.h>
+#include <vector>
+#include "Attribute.h"
+#include "Node.h"
 
 namespace coral{
 	
@@ -40,13 +43,30 @@ public:
 	attribute_parallelClean(std::vector<Attribute*> *cleanChain): _cleanChain(cleanChain){ 
 	}
 	
-	void operator() (const tbb::blocked_range<size_t> &r) const {
+	void operator() (const tbb::blocked_range<size_t> &r) const{
 		for(size_t i = r.begin(); i != r.end(); ++i){
 			_cleanChain->at(i)->cleanSelf();
 		}
 	}
-	
+
+private:
 	std::vector<Attribute*> *_cleanChain;
+};
+
+class node_parallelUpdate{
+public:
+	node_parallelUpdate(Node *node, Attribute* attribute): _node(node), _attribute(attribute){ 
+	}
+	
+	void operator() (const tbb::blocked_range<size_t> &r) const{
+		for(size_t i = r.begin(); i != r.end(); ++i){
+			_node->updateSlice(_attribute, i);
+		}
+	}
+
+private:
+	Node *_node;
+	Attribute *_attribute;
 };
 
 }

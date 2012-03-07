@@ -193,7 +193,6 @@ def apply():
     # shortcuts
     shprtcutsMap = {
         "Shift+G": _explodeClicked,
-        "G": _collapseClicked,
         "Ctrl+S": _saveNetworkClicked,
         "Ctrl+O": _openNetworkClicked,
         "Shift+Tab": _nodeBoxSearch,

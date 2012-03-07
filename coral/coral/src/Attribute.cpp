@@ -28,8 +28,8 @@
 
 #ifdef CORAL_PARALLEL_TBB
 	#include <tbb/parallel_for.h>
-	#include <tbb/task_scheduler_init.h>
 	#include <tbb/mutex.h>
+	#include "coreParallelAlgos.h"
 #endif
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -46,7 +46,6 @@
 #include "Command.h"
 #include "ErrorObject.h"
 #include "stringUtils.h"
-#include "attributeParallelAlgos.h"
 
 using namespace coral;
 
@@ -100,10 +99,6 @@ Attribute::~Attribute(){
 		deleteIt();
 	}
 }
-
-// void Attribute::setValueObserved(bool value){
-// 	_valueObserved = value;
-// }
 
 void Attribute::setPassThrough(bool value){
 	_passThrough = value;
@@ -310,11 +305,6 @@ void Attribute::clean(){
 				_isClean = true;
 			}
 
-			#ifdef CORAL_PARALLEL_TBB
-				tbb::task_scheduler_init tbbinit(tbb::task_scheduler_init::deferred);
-				tbbinit.initialize();
-			#endif
-
 			_cleaningLocked = true;
 			
 			boost::posix_time::ptime startTime = boost::posix_time::microsec_clock::universal_time();
@@ -336,10 +326,6 @@ void Attribute::clean(){
 			_computeTimeMilliseconds = boost::posix_time::time_period(startTime, endTime).length().total_milliseconds() % 1000;
 			
 			_cleaningLocked = false;
-
-			#ifdef CORAL_PARALLEL_TBB
-				tbbinit.terminate();
-			#endif
 		}
 	}
 }

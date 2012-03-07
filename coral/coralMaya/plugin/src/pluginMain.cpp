@@ -34,6 +34,16 @@
 #include "CoralMayaCmd.h"
 #include "CoralDrawNode.h"
 
+#ifdef CORAL_PARALLEL_TBB
+	#include <tbb/task_scheduler_init.h>
+#endif
+
+namespace{
+	#ifdef CORAL_PARALLEL_TBB
+		tbb::task_scheduler_init _tbbinit;
+	#endif
+}
+
 MStatus initializePlugin(MObject obj)
 {
 	MFnPlugin plugin(obj);
@@ -41,6 +51,12 @@ MStatus initializePlugin(MObject obj)
 	plugin.registerCommand("coralMayaCmd", CoralMayaCmd::creator);
     plugin.registerNode("coralNetworkNode", CoralNetworkNode::id, CoralNetworkNode::creator, CoralNetworkNode::initialize);
 	plugin.registerNode("coralDrawNode", CoralDrawNode::id, CoralDrawNode::creator, CoralDrawNode::initialize, MPxNode::kLocatorNode);
+
+	// tbb init is only required for old tbb versions, maya still needs it.
+	#ifdef CORAL_PARALLEL_TBB
+		_tbbinit = tbb::task_scheduler_init::deferred;
+		_tbbinit.initialize();
+	#endif
    	
 	return MS::kSuccess;
 }
@@ -53,6 +69,10 @@ MStatus uninitializePlugin(MObject obj)
 	plugin.deregisterCommand("coralMayaCmd");
     plugin.deregisterNode(CoralNetworkNode::id);
 	plugin.deregisterNode(CoralDrawNode::id);
+
+	#ifdef CORAL_PARALLEL_TBB
+		_tbbinit.terminate();
+	#endif
     
 	return MS::kSuccess;
 }

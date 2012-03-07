@@ -40,6 +40,7 @@ namespace coral{
 class Attribute;
 class NodeAccessor;
 class SpecializationLink;
+class node_parallelUpdate;
 
 
 //! The base class to all nodes.
@@ -157,6 +158,7 @@ private:
 	friend class NodeAccessor;
 	friend class NetworkManager;
 	friend class Attribute;
+	friend class node_parallelUpdate;
 	
 	std::string saveContentRecursive(bool thisIsRoot);
 	std::string saveNodeConnectionsScript(Node *node);
