@@ -95,9 +95,6 @@ def loadPlugin():
     plugin.registerNode("QuatMultiply", _coral.QuatMultiply, tags = ["math"])
     plugin.registerNode("Negate", _coral.Negate, tags = ["math"])
     
-    plugin.registerAttribute("ImageAttribute", _coral.ImageAttribute)
-    plugin.registerNode("Image", _coral.ImageNode, tags = ["image"])
-    
     plugin.registerAttribute("GeoAttribute", _coral.GeoAttribute)
     plugin.registerAttribute("GeoInstanceArrayAttribute", _coral.GeoInstanceArrayAttribute)
     plugin.registerNode("SetGeoPoints", _coral.SetGeoPoints, tags = ["geometry"])

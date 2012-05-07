@@ -40,3 +40,6 @@ Thumbs.db
 *RELEASE*
 coral/build*
 *.sublime*
+*.pyc
+*.pyo
+*launch_coral*

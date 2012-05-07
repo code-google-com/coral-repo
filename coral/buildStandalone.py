@@ -183,7 +183,9 @@ def buildOsXApp(coralLib, coralUiLib, imathLib):
     shutil.rmtree(buildDir, ignore_errors = True)
     
     # make dirs
+    print 'about to do it'
     os.mkdir(buildDir)
+    print 'done it?'
     
     appBundle = os.path.join(buildDir, "CoralStandalone.app")
     os.mkdir(appBundle)
@@ -212,25 +214,34 @@ def buildOsXApp(coralLib, coralUiLib, imathLib):
         if envName.startswith("CORAL_Qt"):
             qtLib = os.environ[envName]
             shutil.copy(qtLib, macOsDir)
+
+    # in case of symbolic link it will copy the original file
+    def safeCopy(src, dst):
+        if os.path.islink(src):
+            src = os.readlink(src)
+        shutils.copy(src, dst)
     
-    shutil.copy("/usr/local/lib/libboost_filesystem.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libboost_regex.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libboost_system.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libboost_thread.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libHalf.6.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libIex.6.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libImath.6.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libIlmThread.6.dylib", macOsDir)
-    shutil.copy("/usr/X11/lib/libpng15.15.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libtiff.5.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libjpeg.8.dylib", macOsDir)
-    shutil.copy("/usr/local/lib/libIlmImf.6.dylib", macOsDir)
+    boostLibRoot = os.environ["CORAL_BOOST_LIBS_PATH"]
+    safeCopy(boostLibRoot, "libboost_filesystem.dylib", macOsDir)
+    safeCopy(boostLibRoot, "libboost_regex.dylib", macOsDir)
+    safeCopy(boostLibRoot, "libboost_system.dylib", macOsDir)
+    safeCopy(boostLibRoot, "libboost_thread.dylib", macOsDir)
+
+    openExrRoot = os.environ["CORAL_IMATH_LIBS_PATH"]
+    safeCopy(openExrRoot, "/usr/local/lib/libHalf.6.dylib", macOsDir)
+    safeCopy(openExrRoot, "/usr/local/lib/libIex.6.dylib", macOsDir)
+    safeCopy(openExrRoot, "/usr/local/lib/libImath.6.dylib", macOsDir)
+    safeCopy(openExrRoot, "/usr/local/lib/libIlmThread.6.dylib", macOsDir)
+
+    # and pray that thiese are in the usal location...
+    safeCopy("/usr/X11/lib/", "libpng15.15.dylib", macOsDir)
+    safeCopy("/usr/local/lib/", "libtiff.5.dylib", macOsDir)
+    safeCopy("/usr/local/lib/", "libjpeg.8.dylib", macOsDir)
+    safeCopy("/usr/local/lib/", "libIlmImf.6.dylib", macOsDir)
+
 
     glewLib = os.path.join(sconsUtils.getEnvVar("CORAL_GLEW_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_GLEW_LIB") + ".dylib")
     shutil.copy(glewLib, macOsDir)
-
-    openImageIoLib = os.path.join(sconsUtils.getEnvVar("CORAL_OIIO_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_OIIO_LIB") + ".dylib")
-    shutil.copy(openImageIoLib, macOsDir)
 
     tbbLib = os.path.join(sconsUtils.getEnvVar("CORAL_TBB_LIBS_PATH"), "lib" + sconsUtils.getEnvVar("CORAL_TBB_LIB") + ".dylib")
     shutil.copy(tbbLib, macOsDir)
@@ -269,10 +280,10 @@ def postBuildAction(target, source, env):
     coralUiLib = str(source[1])
     imathLib = str(source[2])
     
-    if buildMode == "RELEASE":
-        buildApp(coralLib, coralUiLib, imathLib)
-    else:
-        buildDevTree(coralLib, coralUiLib, imathLib)
+    # if buildMode == "RELEASE":
+    #     buildApp(coralLib, coralUiLib, imathLib)
+    # else:
+    buildDevTree(coralLib, coralUiLib, imathLib)
 
 postBuildTarget = Command("postBuildTarget", [coralLib[0], coralUiLib[0], imathLib[0]], postBuildAction)
 Default(postBuildTarget)

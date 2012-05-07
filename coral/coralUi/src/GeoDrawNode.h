@@ -35,7 +35,6 @@
 #include <coral/src/Node.h>
 #include <coral/src/Geo.h>
 #include <coral/src/GeoAttribute.h>
-#include <coral/src/ImageAttribute.h>
 #include <coral/src/BoolAttribute.h>
 #include <coral/src/NumericAttribute.h>
 #include "DrawNode.h"
@@ -62,7 +61,6 @@ private:
 	coral::BoolAttribute *_normals;
 	// coral::BoolAttribute *_ids;
 	coral::NumericAttribute *_colors;
-	coral::ImageAttribute *_image;
 
 	bool _shouldUpdateGeoVBO;
 	bool _shouldUpdateColorVBO;
@@ -70,7 +68,6 @@ private:
 	
 	void updateGeoVBO();
 	void updateColorVBO();
-	void updateTexture();
 	void updateVBOWireframeIndex(coral::Geo *geo);
 	void updateShaders(coral::Geo *geo);
 	void drawNormals(coral::Geo *geo, bool shouldDrawFlat);

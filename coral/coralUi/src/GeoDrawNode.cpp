@@ -39,7 +39,6 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent)
   : DrawNode(name, parent), 
   _shouldUpdateGeoVBO(true), 
   _shouldUpdateColorVBO(true), 
-  _shouldUpdateTexture(false), 
   _vtxCount(0), 
   _nrmCount(0), 
   _uvCount(0), 
@@ -53,7 +52,6 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent)
 	_normals = new BoolAttribute("normals", this);
 	// _ids = new BoolAttribute("ids", this);
 	_colors = new NumericAttribute("colors", this);
-	_image = new ImageAttribute("image", this);
 	
 	addInputAttribute(_geo);
 	addInputAttribute(_smooth);
@@ -62,7 +60,6 @@ GeoDrawNode::GeoDrawNode(const std::string &name, Node *parent)
 	addInputAttribute(_points);
 	addInputAttribute(_normals);
 	addInputAttribute(_colors);
-	addInputAttribute(_image);
 	
 	std::vector<std::string> colorSpecializations;
 	colorSpecializations.push_back("Col4");
@@ -84,7 +81,6 @@ void GeoDrawNode::initGL(){
 	catchAttributeDirtied(_points);
 	catchAttributeDirtied(_normals);
 	catchAttributeDirtied(_colors);
-	catchAttributeDirtied(_image);
 	
 	// generate OpenGL buffers
 	glGenBuffers(1, &_vtxBuffer);
@@ -114,9 +110,6 @@ void GeoDrawNode::attributeDirtied(Attribute *attribute){
 	}
 	else if(attribute == _colors){
 		_shouldUpdateColorVBO = true;
-	}
-	else if(attribute == _image){
-		_shouldUpdateTexture = true;
 	}
 }
 
@@ -277,24 +270,6 @@ void GeoDrawNode::updateColorVBO(){
 		// clean OpenGL state
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-}
-
-void GeoDrawNode::updateTexture(){
-	Image *image = _image->value();
-
-	glBindTexture(GL_TEXTURE_2D, _texture);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	//glPixelStoref(GL_UNPACK_ALIGNMENT, 1);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGB, image->width(), image->height(), 0, GL_RGB, GL_FLOAT, image->pixels());
-	//glBindTexture(GL_TEXTURE_2D, 0);
-	OPENGL_CHECK_ERRORS
-
 }
 
 void GeoDrawNode::drawPoints(Geo *geo){
@@ -572,11 +547,6 @@ void GeoDrawNode::draw(){
 	if(_shouldUpdateColorVBO){
 		updateColorVBO();
 		_shouldUpdateColorVBO = false;
-	}
-
-	if(_shouldUpdateTexture){
-		updateTexture();
-		_shouldUpdateTexture = false;
 	}
 
 	glPushAttrib(GL_POLYGON_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT | GL_POINT_BIT);

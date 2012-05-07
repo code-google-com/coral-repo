@@ -45,7 +45,6 @@
 #include "numericNodesWrapper.h"
 #include "passThroughAttributeWrapper.h"
 #include "valueWrapper.h"
-#include "imageNodeWrapper.h"
 #include "geoWrapper.h"
 #include "commandWrapper.h"
 #include "objImporterNodeWrapper.h"
@@ -105,7 +104,6 @@ BOOST_PYTHON_MODULE(_coral)
 	numericNodesWrapper();
 	mathNodesWrapper();
 	passThroughAttributeWrapper();
-	imageNodeWrapper();
 	geoWrapper();
 	commandWrapper();
 	objImporterNodeWrapper();
