@@ -95,25 +95,9 @@ def loadPlugin():
     plugin.registerNode("QuatMultiply", _coral.QuatMultiply, tags = ["math"])
     plugin.registerNode("Negate", _coral.Negate, tags = ["math"])
     
-    plugin.registerAttribute("GeoAttribute", _coral.GeoAttribute)
-    plugin.registerAttribute("GeoInstanceArrayAttribute", _coral.GeoInstanceArrayAttribute)
-    plugin.registerNode("SetGeoPoints", _coral.SetGeoPoints, tags = ["geometry"])
-    plugin.registerNode("GetGeoPoints", _coral.GetGeoPoints, tags = ["geometry"])
-    plugin.registerNode("GetGeoNormals", _coral.GetGeoNormals, tags = ["geometry"], description = "Get one normal vector per vertex.")
-    plugin.registerNode("ObjImporter", _coral.ObjImporter, tags = ["geometry"])
-    plugin.registerNode("GeoGrid", _coral.GeoGrid, tags = ["geometry"])
-    plugin.registerNode("GeoSphere", _coral.GeoSphere, tags = ["geometry"])
-    plugin.registerNode("GeoCube", _coral.GeoCube, tags = ["geometry"])
-    plugin.registerNode("GeoNeighbourPoints", _coral.GeoNeighbourPoints, tags = ["geometry"])
-    plugin.registerNode("GetGeoElements", _coral.GetGeoElements, tags = ["geometry"])
-    plugin.registerNode("GetGeoSubElements", _coral.GetGeoSubElements, tags = ["geometry"])
-    plugin.registerNode("GeoInstanceGenerator", _coral.GeoInstanceGenerator, tags = ["geometry"])
-    
     plugin.registerAttribute("StringAttribute", _coral.StringAttribute)
     plugin.registerNode("String", _coral.StringNode, tags = ["generic"])
     plugin.registerNode("Time", timeNode.TimeNode, tags = ["generic"])
-    plugin.registerNode("ImportCIOTransforms", _coral.ImportCIOTransforms, tags = ["generic"])
-    plugin.registerNode("ImportCIOSkinWeights", _coral.ImportCIOSkinWeights, tags = ["generic"])
     
     plugin.registerNode("LoopInput", _coral.LoopInputNode, tags = ["loop"])
     plugin.registerNode("LoopOutput", _coral.LoopOutputNode, tags = ["loop"])
@@ -128,7 +112,5 @@ def loadPlugin():
     plugin.registerNode("ConditionalValue", _coral.ConditionalValue, tags = ["conditional"])
     
     plugin.registerNode("SplinePoint", _coral.SplinePoint, tags = ["curve"])
-    
-    plugin.registerNode("SkinWeightDeformer", _coral.SkinWeightDeformer, tags = ["deformers"])
     
     return plugin

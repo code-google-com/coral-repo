@@ -45,13 +45,8 @@
 #include "numericNodesWrapper.h"
 #include "passThroughAttributeWrapper.h"
 #include "valueWrapper.h"
-#include "geoWrapper.h"
 #include "commandWrapper.h"
-#include "objImporterNodeWrapper.h"
 #include "stringWrapper.h"
-#include "geoGridNodeWrapper.h"
-#include "geoSphereNodeWrapper.h"
-#include "geoCubeNodeWrapper.h"
 #include "errorObjectWrapper.h"
 #include "boolWrapper.h"
 #include "conditionalNodesWrapper.h"
@@ -61,7 +56,6 @@
 #include "loopNodesWrapper.h"
 #include "enumWrapper.h"
 #include "processSimulationNodeWrapper.h"
-#include "deformerNodesWrapper.h"
 #include "../builtinNodes/KdNodes.h"
 
 using namespace coral;
@@ -104,13 +98,8 @@ BOOST_PYTHON_MODULE(_coral)
 	numericNodesWrapper();
 	mathNodesWrapper();
 	passThroughAttributeWrapper();
-	geoWrapper();
 	commandWrapper();
-	objImporterNodeWrapper();
 	stringWrapper();
-	geoGridNodeWrapper();
-	geoSphereNodeWrapper();
-	geoCubeNodeWrapper();
 	errorObjectWrapper();
 	boolWrapper();
 	conditionalNodesWrapper();
@@ -118,7 +107,6 @@ BOOST_PYTHON_MODULE(_coral)
 	coralIOWrapper();
 	enumWrapper();
 	processSimulationNodeWrapper();
-	deformerNodesWrapper();
 	pythonWrapperUtils::pythonWrapper<FindPointsInRange, Node>("FindPointsInRange");
 	
 	boost::python::to_python_converter<std::vector<std::string>, pythonWrapperUtils::stdVectorToPythonList<std::string> >();
